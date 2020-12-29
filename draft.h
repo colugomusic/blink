@@ -268,7 +268,7 @@ typedef struct
 
     void* proc_data;
 
-    // Returned buffer remains valid until the next call to blkhd_get_error_string or
+    // Returned buffer remains valid until the next call to get_error_string or
     // until the generator is destroyed
     blkhdgen_Generator_GetErrorString get_error_string;
 
