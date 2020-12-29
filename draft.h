@@ -245,6 +245,10 @@ typedef struct
     const char* name;
 } blkhdgen_Group;
 
+typedef blkhdgen_Group* (*blkhdgen_Generator_GetGroup)(blkhdgen_Index index);
+typedef blkhdgen_Group* (*blkhdgen_Generator_GetGroupByID)(blkhdgen_ID id);
+typedef blkhdgen_Parameter* (*blkhdgen_Generator_GetParameter)(blkhdgen_Index index);
+typedef blkhdgen_Parameter* (*blkhdgen_Generator_GetParameterByID)(blkhdgen_ID id);
 typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* user, blkhdgen_GetSampleInfoCB cb);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* user, blkhdgen_GetSampleDataCB cb);
@@ -264,6 +268,11 @@ typedef struct
     blkhdgen_ChannelCount num_channels;
 
     void* proc_data;
+
+    blkhdgen_Generator_GetGroup get_group;
+    blkhdgen_Generator_GetGroupByID get_group_by_id;
+    blkhdgen_Generator_GetParameter get_parameter;
+    blkhdgen_Generator_GetParameterByID get_parameter_by_id;
 
     // Returned buffer remains valid until the next call to get_error_string or
     // until the generator is destroyed
