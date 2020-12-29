@@ -32,6 +32,8 @@ enum blkhdgen_StdParam
     blkhdgen_StdParam_Pitch = -3,
     blkhdgen_StdParam_Speed = -4,
     blkhdgen_StdParam_Formant = -5,
+    blkhdgen_StdParam_NoiseAmount = -6,
+    blkhdgen_StdParam_NoiseColor = -7,
 };
 
 typedef struct
@@ -71,8 +73,8 @@ typedef struct
     blkhdgen_EnvelopeAttribute max;
 } blkhdgen_EnvelopeRange;
 
-typedef float (*blkhdgen_NormalizePoint)(void* proc_data, float value);
-typedef float (*blkhdgen_InverseNormalizePoint)(void* proc_data, float value);
+typedef float (*blkhdgen_Normalize)(void* proc_data, float value);
+typedef float (*blkhdgen_InverseNormalize)(void* proc_data, float value);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
 
 typedef struct 
@@ -121,10 +123,10 @@ typedef struct
     blkhdgen_Envelope_GetRange get_range;
     
     // Transform an envelope value [min..max] to a normalized value [0..1]
-    blkhdgen_NormalizePoint normalize;
+    blkhdgen_Normalize normalize;
     
     // Transform a normalized value [0..1] to an envelope value [min..max]
-    blkhdgen_InverseNormalizePoint inverse_normalize;
+    blkhdgen_InverseNormalize inverse_normalize;
 
     // Convert a non-normalized value to a display string
     // e.g. "50" -> "50%"
@@ -211,8 +213,8 @@ typedef struct
 
     void* proc_data;
     
-    blkhdgen_NormalizePoint normalize;
-    blkhdgen_InverseNormalizePoint inverse_normalize;
+    blkhdgen_Normalize normalize;
+    blkhdgen_InverseNormalize inverse_normalize;
     blkhdgen_DisplayValue display_value;
     blkhdgen_Slider_Set set;
 } blkhdgen_Slider;
