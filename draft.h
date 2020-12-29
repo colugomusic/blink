@@ -83,9 +83,6 @@ typedef struct
     blkhdgen_BitDepth bit_depth;
 } blkhdgen_SampleInfo;
 
-typedef void (*blkhdgen_GetSampleInfoCB)(void* user, blkhdgen_SampleInfo* info);
-typedef void (*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
-
 enum blkhdgen_ParameterType
 {
     blkhdgen_ParameterType_Chord,
