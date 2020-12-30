@@ -7,7 +7,6 @@ struct Range
 {
 	T min;
 	T max;
-	T step_size;
 };
 
 }

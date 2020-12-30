@@ -23,21 +23,6 @@ typedef int8_t blkhdgen_Bool;
 // any errors but this might be useful for future proofing
 typedef int blkhdgen_Error;
 
-// UUIDs of standard Blockhead parameters.
-// Generators can share parameter IDs to allow the user to switch back and forth
-// between different generators without losing modulation data (for example the
-// "Amp", "Pan" and "Pitch" envelopes are shared between Classic and Fudge
-// generators.)
-//
-// New generators are not required to use these
-#define BLKHDGEN_STDPARAM_AMP "273e7c30-404b-4db6-ba97-20f33d49fe51";
-#define BLKHDGEN_STDPARAM_PAN "9c312a2c-a1b4-4a8d-ab68-07ea157c4574";
-#define BLKHDGEN_STDPARAM_PITCH "ca2529db-e7bd-4019-9a07-22aee24526d1";
-#define BLKHDGEN_STDPARAM_SPEED "02f68738-f54a-4f35-947b-c30e73896aa4";
-#define BLKHDGEN_STDPARAM_FORMANT "7b72dbef-e36d-4dce-958b-b0fa498ae41e";
-#define BLKHDGEN_STDPARAM_NOISE_AMOUNT "29d5ecb5-cb5d-4f19-afd3-835dd805682a";
-#define BLKHDGEN_STDPARAM_NOISE_COLOR "30100123-7343-4386-9ed2-f913b9e1e571";
-
 typedef struct
 {
     float min;
@@ -232,6 +217,10 @@ union blkhdgen_ParameterObject
 
 typedef struct
 {
+	// Generators can share parameter UUIDs to allow the user to switch back and forth
+	// between different generators without losing modulation data (for example the
+	// "Amp", "Pan" and "Pitch" envelopes are shared between Classic and Fudge
+	// generators.)
     blkhdgen_UUID uuid;
 
     // Zero if the parameter does not belong to a group

@@ -6,15 +6,14 @@
 
 namespace blkhdgen {
 
-struct EnvelopeSpec
+struct SliderSpec
 {
 	blkhdgen_UUID uuid;
 	const char* name;
 	std::function<float(float)> transform;
 	std::function<float(float)> inverse_transform;
 	std::function<std::string(float)> display_value;
-	RangeSpec<float> range;
-	RangeValue<float> step_size;
+	RangeValue<float> range;
 };
 
 }

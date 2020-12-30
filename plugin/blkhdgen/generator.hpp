@@ -40,7 +40,8 @@ public:
 
 protected:
 
-	void add_envelope(EnvelopeSpec spec);
+	void add_parameter(EnvelopeSpec spec);
+	void add_parameter(SliderSpec spec);
 
 };
 

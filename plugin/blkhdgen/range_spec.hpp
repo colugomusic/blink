@@ -1,18 +1,14 @@
 #pragma once
 
-#include "range.hpp"
+#include "range_value.hpp"
 
 namespace blkhdgen {
 
 template <class T>
 struct RangeSpec
 {
-	Range<T> min_range;
-	Range<T> max_range;
-
-	T min_default_value;
-	T max_default_value;
-	T step_size;
+	RangeValue<T> min_range;
+	RangeValue<T> max_range;
 };
 
 }
