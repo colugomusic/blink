@@ -14,7 +14,7 @@ public:
 	const char* display_value(float value) const;
 	blkhdgen_Error set(float value);
 
-	const Range<float>& range();
+	const RangeValue<float>& range();
 };
 
 }

@@ -3,6 +3,7 @@
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "parameter.hpp"
+#include "slider_spec.hpp"
 
 namespace blkhdgen {
 

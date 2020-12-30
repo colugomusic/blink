@@ -27,15 +27,21 @@ typedef struct
 {
 	float min;
 	float max;
-	float step_size;
 } blkhdgen_Range;
+
+typedef struct
+{
+	blkhdgen_Range range;
+	float default_value;
+	float step_size;
+} blkhdgen_RangeValue;
 
 typedef void (*blkhdgen_EnvelopeRangeAttribute_Set)(void* proc_data, float value);
 typedef float (*blkhdgen_EnvelopeRangeAttribute_Get)(void* proc_data);
 
 typedef struct
 {
-	blkhdgen_Range range;
+	blkhdgen_RangeValue range;
 
 	void* proc_data;
 
@@ -59,6 +65,12 @@ typedef struct
 	blkhdgen_EnvelopeRangeAttribute min;
 	blkhdgen_EnvelopeRangeAttribute max;
 } blkhdgen_EnvelopeRange;
+
+typedef struct
+{
+	blkhdgen_RangeValue step_size;
+	float default_snap_amount;
+} blkhdgen_EnvelopeSnapSettings;
 
 typedef float (*blkhdgen_Normalize)(void* proc_data, float value);
 typedef float (*blkhdgen_InverseNormalize)(void* proc_data, float value);
@@ -95,6 +107,7 @@ enum blkhdgen_ParameterFlags
 // Can be manipulated in Blockhead using the envelope editor
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
+typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
 typedef blkhdgen_Index(*blkhdgen_Envelope_AddPoint)(void* proc_data, blkhdgen_IntPosition position, float value);
 typedef blkhdgen_Error(*blkhdgen_Envelope_RemovePoint)(void* proc_data, blkhdgen_Index index);
 typedef blkhdgen_Error(*blkhdgen_Envelope_MovePoint)(void* proc_data, blkhdgen_Index index, blkhdgen_IntPosition new_position, float new_value);
@@ -108,6 +121,7 @@ typedef struct
 	void* proc_data;
 
 	blkhdgen_Envelope_GetRange get_range;
+	blkhdgen_Envelope_GetSnapSettings get_snap_settings;
 
 	// Transform an envelope value [min..max] to a normalized value [0..1]
 	blkhdgen_Normalize normalize;
@@ -181,7 +195,7 @@ typedef blkhdgen_Error(*blkhdgen_Slider_Set)(void* proc_data, float value);
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Slider
-	blkhdgen_Range range;
+	blkhdgen_RangeValue range;
 
 	void* proc_data;
 

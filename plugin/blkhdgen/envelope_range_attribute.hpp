@@ -1,6 +1,6 @@
 #pragma once
 
-#include "range.hpp"
+#include "range_value.hpp"
 
 namespace blkhdgen {
 
@@ -11,7 +11,7 @@ public:
 	void set(float value);
 	float get() const;
 
-	const Range<float>& get_range() const;
+	const RangeValue<float>& get_range() const;
 };
 
 }

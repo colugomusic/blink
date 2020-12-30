@@ -20,7 +20,18 @@ inline blkhdgen_Range range(const Range<T>& range)
 
 	out.min = range.min;
 	out.max = range.max;
-	out.step_size = range.step_size;
+
+	return out;
+}
+
+template <class T>
+inline blkhdgen_RangeValue range_value(const RangeValue<T>& range_value)
+{
+	blkhdgen_RangeValue out;
+
+	out.range = range(range_value.range);
+	out.default_value = range_value.value;
+	out.step_size = range_value.step_size;
 
 	return out;
 }
@@ -30,7 +41,7 @@ inline blkhdgen_EnvelopeRangeAttribute envelope_range_attribute(EnvelopeRangeAtt
 	blkhdgen_EnvelopeRangeAttribute out;
 
 	out.proc_data = &attribute;
-	out.range = range(attribute.get_range());
+	out.range = range_value(attribute.get_range());
 
 	out.set = [](void* proc_data, float value)
 	{
@@ -154,7 +165,7 @@ inline blkhdgen_Slider slider(SliderParameter& slider)
 
 	out.parameter_type = blkhdgen_ParameterType_Slider;
 	out.proc_data = &slider;
-	out.range = range(slider.range());
+	out.range = range_value(slider.range());
 
 	out.normalize = [](void* proc_data, float value)
 	{
