@@ -13,6 +13,7 @@ struct EnvelopeSpec : public ParameterSpec
 	std::function<std::string(float)> display_value;
 	RangeSpec<float> range;
 	RangeValue<float> step_size;
+	float default_value = 0.0f;
 	float default_snap_amount = 0.0f;
 };
 

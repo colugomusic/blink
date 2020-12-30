@@ -25,6 +25,7 @@ public:
 	blkhdgen_Error remove_warp_point(blkhdgen_Index index);
 	blkhdgen_Error move_warp_point(blkhdgen_Index index, blkhdgen_IntPosition new_position);
 	blkhdgen_Error clear_warp_points();
+	blkhdgen_Error set_warp_points(blkhdgen_Index count, blkhdgen_WarpPoint* points);
 
 	int get_num_groups() const;
 	int get_num_parameters() const;
@@ -44,7 +45,9 @@ protected:
 
 	void add_group(blkhdgen_ID id, std::string name);
 	void add_parameter(EnvelopeSpec spec);
+	void add_parameter(OptionSpec spec);
 	void add_parameter(SliderSpec spec);
+	void add_parameter(ToggleSpec spec);
 
 private:
 
@@ -64,9 +67,19 @@ void Generator::add_parameter(EnvelopeSpec spec)
 	parameters_[spec.uuid] = std::make_shared<EnvelopeParameter>(spec);
 }
 
+void Generator::add_parameter(OptionSpec spec)
+{
+	parameters_[spec.uuid] = std::make_shared<OptionParameter>(spec);
+}
+
 void Generator::add_parameter(SliderSpec spec)
 {
 	parameters_[spec.uuid] = std::make_shared<SliderParameter>(spec);
+}
+
+void Generator::add_parameter(ToggleSpec spec)
+{
+	parameters_[spec.uuid] = std::make_shared<ToggleParameter>(spec);
 }
 
 blkhdgen_Index Generator::add_warp_point(blkhdgen_IntPosition block_position)
@@ -85,6 +98,11 @@ blkhdgen_Error Generator::move_warp_point(blkhdgen_Index index, blkhdgen_IntPosi
 }
 
 blkhdgen_Error Generator::clear_warp_points()
+{
+	// TODO: implement this
+}
+
+blkhdgen_Error Generator::set_warp_points(blkhdgen_Index count, blkhdgen_WarpPoint* points)
 {
 	// TODO: implement this
 }

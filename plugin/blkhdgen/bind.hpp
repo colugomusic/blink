@@ -112,6 +112,7 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 	blkhdgen_Envelope out;
 
 	out.parameter_type = blkhdgen_ParameterType_Envelope;
+	out.default_value = envelope.get_default_value();
 	out.proc_data = &envelope;
 
 	out.get_range = [](void* proc_data)
@@ -149,11 +150,11 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->display_value(value);
 	};
 
-	out.add_point = [](void* proc_data, blkhdgen_IntPosition position, float value)
+	out.add_point = [](void* proc_data, blkhdgen_EnvelopePoint point)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->add_point(position, value);
+		return envelope->add_point(point);
 	};
 
 	out.remove_point = [](void* proc_data, blkhdgen_Index index)
@@ -163,11 +164,11 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->remove_point(index);
 	};
 
-	out.move_point = [](void* proc_data, blkhdgen_Index index, blkhdgen_IntPosition new_position, float new_value)
+	out.move_point = [](void* proc_data, blkhdgen_Index index, blkhdgen_EnvelopePointPosition new_position)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->move_point(index, new_position, new_value);
+		return envelope->move_point(index, new_position);
 	};
 
 	out.clear = [](void* proc_data)
@@ -175,6 +176,13 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
 		return envelope->clear();
+	};
+
+	out.set_points = [](void* proc_data, blkhdgen_Index count, blkhdgen_EnvelopePoint* points)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->set_points(count, points);
 	};
 
 	out.set_point_curve = [](void* proc_data, blkhdgen_Index index, float curve)
@@ -192,6 +200,7 @@ inline blkhdgen_Option option(OptionParameter& option)
 	blkhdgen_Option out;
 
 	out.parameter_type = blkhdgen_ParameterType_Option;
+	out.default_value = option.get_default_value();
 	out.proc_data = &option;
 
 	out.set = [](void* proc_data, blkhdgen_Index index)
@@ -255,6 +264,7 @@ inline blkhdgen_Toggle toggle(ToggleParameter& toggle)
 	blkhdgen_Toggle out;
 
 	out.parameter_type = blkhdgen_ParameterType_Toggle;
+	out.default_value = toggle.get_default_value() ? BLKHDGEN_TRUE : BLKHDGEN_FALSE;
 	out.proc_data = &toggle;
 
 	out.set = [](void* proc_data, blkhdgen_Bool on)
@@ -350,6 +360,13 @@ inline blkhdgen_Generator generator(Generator* generator)
 		auto generator = (Generator*)(proc_data);
 
 		return generator->clear_warp_points();
+	};
+
+	out.set_warp_points = [](void* proc_data, blkhdgen_Index count, blkhdgen_WarpPoint* points)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->set_warp_points(count, points);
 	};
 
 	out.get_group = [](void* proc_data, blkhdgen_Index index)

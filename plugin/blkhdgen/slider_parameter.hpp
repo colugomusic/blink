@@ -30,7 +30,7 @@ private:
 };
 
 SliderParameter::SliderParameter(SliderSpec spec)
-	: Parameter(spec.uuid, spec.group_id, spec.name, spec.flags)
+	: Parameter(spec)
 	, range_(spec.range)
 	, transform_(spec.transform)
 	, inverse_transform_(spec.inverse_transform)

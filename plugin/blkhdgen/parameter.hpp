@@ -2,6 +2,7 @@
 
 #include <string>
 #include <blkhdgen/draft.h>
+#include "parameter_spec.hpp"
 
 namespace blkhdgen {
 
@@ -9,7 +10,7 @@ class Parameter
 {
 public:
 
-	Parameter(blkhdgen_UUID uuid, blkhdgen_ID group_id, std::string name, int flags);
+	Parameter(const ParameterSpec& spec);
 
 	blkhdgen_UUID get_uuid() const;
 	blkhdgen_ID get_group_id() const;
@@ -26,11 +27,11 @@ private:
 	int flags_;
 };
 
-Parameter::Parameter(blkhdgen_UUID uuid, blkhdgen_ID group_id, std::string name, int flags)
-	: uuid_(uuid)
-	, group_id_(group_id)
-	, name_(name)
-	, flags_(flags)
+Parameter::Parameter(const ParameterSpec& spec)
+	: uuid_(spec.uuid)
+	, group_id_(spec.group_id)
+	, name_(spec.name)
+	, flags_(spec.flags)
 {
 }
 

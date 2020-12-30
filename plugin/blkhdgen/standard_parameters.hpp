@@ -104,6 +104,7 @@ inline EnvelopeSpec amp()
 	out.step_size.value = 0.0f;
 	out.step_size.step_size = 0.0f;
 
+	out.default_value = 0.0f;
 	out.default_snap_amount = 0.0f;
 
 	return out;
@@ -143,6 +144,7 @@ inline EnvelopeSpec pan()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 0.0f;
 
+	out.default_value = 0.0f;
 	out.default_snap_amount = 0.0f;
 
 	return out;
@@ -189,6 +191,7 @@ inline EnvelopeSpec pitch()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 1.0f;
 
+	out.default_value = 0.0f;
 	out.default_snap_amount = 1.0f;
 
 	return out;
@@ -228,6 +231,7 @@ inline EnvelopeSpec speed()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 0.25f;
 
+	out.default_value = 1.0f;
 	out.default_snap_amount = 0.0f;
 
 	return out;
@@ -274,6 +278,7 @@ inline EnvelopeSpec formant()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 1.0f;
 
+	out.default_value = 0.0f;
 	out.default_snap_amount = 1.0f;
 
 	return out;
@@ -320,6 +325,7 @@ inline EnvelopeSpec noise_amount()
 	out.step_size.value = 0.0f;
 	out.step_size.step_size = 0.0f;
 
+	out.default_value = 0.0f;
 	out.default_snap_amount = 0.0f;
 
 	return out;
@@ -366,6 +372,7 @@ inline EnvelopeSpec noise_color()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 0.0f;
 
+	out.default_value = 0.0f;
 	out.default_snap_amount = 0.0f;
 
 	return out;
