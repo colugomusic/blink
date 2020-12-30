@@ -4,12 +4,15 @@
 
 #define BLKHDGEN_VECTOR_SIZE 64
 #define BLKHDGEN_OK 0
+#define BLKHDGEN_TRUE 1
+#define BLKHDGEN_FALSE 0
 
 typedef uint8_t blkhdgen_ChannelCount;
 typedef uint32_t blkhdgen_FrameCount;
 typedef uint32_t blkhdgen_ParamCount;
 typedef uint32_t blkhdgen_Index;
 typedef uint32_t blkhdgen_ID;
+typedef const char* blkhdgen_UUID;
 typedef uint32_t blkhdgen_SR;
 typedef uint8_t blkhdgen_BitDepth;
 typedef double blkhdgen_Position;
@@ -20,21 +23,20 @@ typedef int8_t blkhdgen_Bool;
 // any errors but this might be useful for future proofing
 typedef int blkhdgen_Error;
 
-// IDs of standard Blockhead parameters which allow the user to switch back and
-// forth between generators without losing modulation data (for example the "Amp",
-// "Pan" and "Pitch" envelopes are shared between Classic and Fudge generators.)
+// UUIDs of standard Blockhead parameters.
+// Generators can share parameter IDs to allow the user to switch back and forth
+// between different generators without losing modulation data (for example the
+// "Amp", "Pan" and "Pitch" envelopes are shared between Classic and Fudge
+// generators.)
 //
-// Generators are not required to use these
-enum blkhdgen_StdParam
-{
-    blkhdgen_StdParam_Amp = -1,
-    blkhdgen_StdParam_Pan = -2,
-    blkhdgen_StdParam_Pitch = -3,
-    blkhdgen_StdParam_Speed = -4,
-    blkhdgen_StdParam_Formant = -5,
-    blkhdgen_StdParam_NoiseAmount = -6,
-    blkhdgen_StdParam_NoiseColor = -7,
-};
+// New generators are not required to use these
+#define BLKHDGEN_STDPARAM_AMP "273e7c30-404b-4db6-ba97-20f33d49fe51";
+#define BLKHDGEN_STDPARAM_PAN "9c312a2c-a1b4-4a8d-ab68-07ea157c4574";
+#define BLKHDGEN_STDPARAM_PITCH "ca2529db-e7bd-4019-9a07-22aee24526d1";
+#define BLKHDGEN_STDPARAM_SPEED "02f68738-f54a-4f35-947b-c30e73896aa4";
+#define BLKHDGEN_STDPARAM_FORMANT "7b72dbef-e36d-4dce-958b-b0fa498ae41e";
+#define BLKHDGEN_STDPARAM_NOISE_AMOUNT "29d5ecb5-cb5d-4f19-afd3-835dd805682a";
+#define BLKHDGEN_STDPARAM_NOISE_COLOR "30100123-7343-4386-9ed2-f913b9e1e571";
 
 typedef struct
 {
@@ -43,8 +45,8 @@ typedef struct
     float step_size;
 } blkhdgen_Range;
 
-typedef void (*blkhdgen_EnvelopeAttribute_Set)(void* proc_data, float value);
-typedef float (*blkhdgen_EnvelopeAttribute_Get)(void* proc_data);
+typedef void (*blkhdgen_EnvelopeRangeAttribute_Set)(void* proc_data, float value);
+typedef float (*blkhdgen_EnvelopeRangeAttribute_Get)(void* proc_data);
 
 typedef struct 
 {
@@ -52,9 +54,9 @@ typedef struct
 
     void* proc_data;
 
-    blkhdgen_EnvelopeAttribute_Set set;
-    blkhdgen_EnvelopeAttribute_Get get;
-} blkhdgen_EnvelopeAttribute;
+    blkhdgen_EnvelopeRangeAttribute_Set set;
+    blkhdgen_EnvelopeRangeAttribute_Get get;
+} blkhdgen_EnvelopeRangeAttribute;
 
 // Min/max values for envelope parameters can be modified by the user so
 // the min and max values are themselves ranges with their own min and max
@@ -69,8 +71,8 @@ typedef struct
 //   - step size for max value
 typedef struct
 {
-    blkhdgen_EnvelopeAttribute min;
-    blkhdgen_EnvelopeAttribute max;
+    blkhdgen_EnvelopeRangeAttribute min;
+    blkhdgen_EnvelopeRangeAttribute max;
 } blkhdgen_EnvelopeRange;
 
 typedef float (*blkhdgen_Normalize)(void* proc_data, float value);
@@ -107,7 +109,7 @@ enum blkhdgen_ParameterFlags
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
-typedef blkhdgen_EnvelopeRange* (*blkhdgen_Envelope_GetRange)(void* proc_data);
+typedef blkhdgen_EnvelopeRange (*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_Index (*blkhdgen_Envelope_AddPoint)(void* proc_data, blkhdgen_IntPosition position, float value);
 typedef blkhdgen_Error (*blkhdgen_Envelope_RemovePoint)(void* proc_data, blkhdgen_Index index);
 typedef blkhdgen_Error (*blkhdgen_Envelope_MovePoint)(void* proc_data, blkhdgen_Index index, blkhdgen_IntPosition new_position, float new_value);
@@ -166,21 +168,6 @@ typedef struct
 } blkhdgen_Chord;
 
 //
-// Toggle parameter
-// On/off value
-//
-typedef blkhdgen_Error (*blkhdgen_Toggle_Set)(void* proc_data, blkhdgen_Bool on);
-
-typedef struct
-{
-    enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Toggle
-
-    void* proc_data;
-
-    blkhdgen_Toggle_Set set;
-} blkhdgen_Toggle;
-
-//
 // Option parameter
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
 //
@@ -219,6 +206,21 @@ typedef struct
     blkhdgen_Slider_Set set;
 } blkhdgen_Slider;
 
+//
+// Toggle parameter
+// On/off value
+//
+typedef blkhdgen_Error(*blkhdgen_Toggle_Set)(void* proc_data, blkhdgen_Bool on);
+
+typedef struct
+{
+	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Toggle
+
+	void* proc_data;
+
+	blkhdgen_Toggle_Set set;
+} blkhdgen_Toggle;
+
 union blkhdgen_ParameterObject
 {
     blkhdgen_Chord chord;
@@ -230,7 +232,7 @@ union blkhdgen_ParameterObject
 
 typedef struct
 {
-    blkhdgen_ID id;
+    blkhdgen_UUID uuid;
 
     // Zero if the parameter does not belong to a group
     blkhdgen_ID group_id;
@@ -247,10 +249,13 @@ typedef struct
     const char* name;
 } blkhdgen_Group;
 
-typedef blkhdgen_Group* (*blkhdgen_Generator_GetGroup)(blkhdgen_Index index);
-typedef blkhdgen_Group* (*blkhdgen_Generator_GetGroupByID)(blkhdgen_ID id);
-typedef blkhdgen_Parameter* (*blkhdgen_Generator_GetParameter)(blkhdgen_Index index);
-typedef blkhdgen_Parameter* (*blkhdgen_Generator_GetParameterByID)(blkhdgen_ID id);
+typedef void (*blkhdgen_GetSampleInfoCB)(void* user, blkhdgen_SampleInfo* info);
+typedef void (*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+
+typedef blkhdgen_Group (*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
+typedef blkhdgen_Group (*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
+typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
+typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
 typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* user, blkhdgen_GetSampleInfoCB cb);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* user, blkhdgen_GetSampleDataCB cb);
@@ -266,7 +271,7 @@ typedef struct
 {
     const char* name;
     int num_groups;
-    int num_params;
+    int num_parameters;
     blkhdgen_ChannelCount num_channels;
 
     void* proc_data;
@@ -307,3 +312,16 @@ typedef struct
     blkhd_Generator_MoveWarpPoint move_warp_point;
     blkhd_Generator_ClearWarpPoints clear_warp_points;
 } blkhdgen_Generator;
+
+#ifdef BLKHDGEN_EXPORT
+
+#ifdef _WIN32
+# define EXPORTED  __declspec( dllexport )
+#else
+# define EXPORTED
+#endif
+
+EXPORTED blkhdgen_Generator make_generator();
+EXPORTED blkhdgen_Error destroy_generator(blkhdgen_Generator generator);
+
+#endif
