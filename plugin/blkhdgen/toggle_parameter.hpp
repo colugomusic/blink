@@ -16,15 +16,18 @@ public:
 	blkhdgen_Error set(bool on);
 	bool get() const;
 	bool get_default_value() const;
+	int get_flags() const;
 
 private:
 	std::atomic<bool> current_value_;
 	bool default_value_;
+	int flags_;
 };
 
 ToggleParameter::ToggleParameter(ToggleSpec spec)
 	: Parameter(spec)
 	, default_value_(spec.default_value)
+	, flags_(spec.flags)
 {
 
 }
@@ -44,6 +47,11 @@ bool ToggleParameter::get() const
 bool ToggleParameter::get_default_value() const
 {
 	return default_value_;
+}
+
+int ToggleParameter::get_flags() const
+{
+	return flags_;
 }
 
 }

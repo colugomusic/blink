@@ -126,13 +126,24 @@ enum blkhdgen_ParameterType
 	blkhdgen_ParameterType_Toggle,
 };
 
-enum blkhdgen_ParameterFlags
+enum blkhdgen_EnvelopeFlags
 {
-	blkhdgen_ParameterFlags_None = 0x0,
-	blkhdgen_ParameterFlags_AlwaysShowButtonWhenGroupIsVisible = 0x1,
-	blkhdgen_ParameterFlags_ShowIcon = 0x2,
-	blkhdgen_ParameterFlags_ShowName = 0x4,
-	blkhdgen_ParameterFlags_DefaultOn = 0x8,
+	blkhdgen_EnvelopeFlags_None = 0x0,
+	blkhdgen_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 0x1,
+	blkhdgen_EnvelopeFlags_ShowIcon = 0x2,
+	blkhdgen_EnvelopeFlags_ShowName = 0x4,
+	blkhdgen_EnvelopeFlags_DefaultEnabled = 0x8,
+	blkhdgen_EnvelopeFlags_DefaultVisible = 0x10,
+};
+
+enum blkhdgen_ToggleFlags
+{
+	blkhdgen_ToggleFlags_None = 0x0,
+	blkhdgen_ToggleFlags_ShowButton = 0x1,
+	blkhdgen_ToggleFlags_ShowIcon = 0x2,
+	blkhdgen_ToggleFlags_ShowName = 0x3,
+	blkhdgen_ToggleFlags_ShowInContextMenu = 0x4,
+	blkhdgen_ToggleFlags_DefaultEnabled = 0x8,
 };
 
 //
@@ -152,6 +163,7 @@ typedef struct
 	blkhdgen_Envelope_GetRange get_range;
 	blkhdgen_Envelope_GetSnapSettings get_snap_settings;
 	float default_value;
+	int flags; // blkhdgen_EnvelopeFlags
 
 	// Transform an envelope value [min..max] to a normalized value [0..1]
 	blkhdgen_Transform transform;
@@ -243,6 +255,7 @@ typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Toggle
 	blkhdgen_Bool default_value;
+	int flags; // blkhdgen_ToggleFlags
 
 	void* proc_data;
 
@@ -270,7 +283,6 @@ typedef struct
 	blkhdgen_ID group_id;
 
 	const char* name;
-	int flags; // blkhdgen_ParameterFlags
 
 	union blkhdgen_ParameterObject parameter;
 } blkhdgen_Parameter;

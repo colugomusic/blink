@@ -507,4 +507,32 @@ inline SliderSpec speed()
 
 } // sliders
 
+namespace toggles {
+
+inline ToggleSpec loop()
+{
+	ToggleSpec out;
+
+	out.uuid = "";
+	out.name = "Loop";
+	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu;
+	out.default_value = false;
+
+	return out;
+}
+
+inline ToggleSpec reverse()
+{
+	ToggleSpec out;
+
+	out.uuid = "";
+	out.name = "Reverse";
+	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu;
+	out.default_value = false;
+
+	return out;
+}
+
+} // toggles
+
 }}

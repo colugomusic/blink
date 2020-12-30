@@ -15,6 +15,7 @@ struct EnvelopeSpec : public ParameterSpec
 	RangeValue<float> step_size;
 	float default_value = 0.0f;
 	float default_snap_amount = 0.0f;
+	int flags = 0;
 };
 
 }

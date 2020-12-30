@@ -20,6 +20,7 @@ public:
 	float transform(float value) const;
 	float inverse_transform(float value) const;
 	const char* display_value(float value) const;
+	int get_flags() const;
 
 	blkhdgen_Error set_points_memory(blkhdgen_EnvelopePoints** memory);
 
@@ -31,6 +32,7 @@ private:
 	EnvelopeRange range_;
 	EnvelopeSnapSettings snap_settings_;
 	float default_value_;
+	int flags_;
 	std::function<float(float)> transform_;
 	std::function<float(float)> inverse_transform_;
 	std::function<std::string(float)> display_value_;
@@ -43,6 +45,7 @@ EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 	, range_(spec.range)
 	, snap_settings_{ spec.step_size, spec.default_snap_amount }
 	, default_value_(spec.default_value)
+	, flags_(spec.flags)
 	, transform_(spec.transform)
 	, inverse_transform_(spec.inverse_transform)
 	, display_value_(spec.display_value)
@@ -52,6 +55,11 @@ EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 float EnvelopeParameter::get_default_value() const
 {
 	return default_value_;
+}
+
+int EnvelopeParameter::get_flags() const
+{
+	return flags_;
 }
 
 float EnvelopeParameter::transform(float value) const

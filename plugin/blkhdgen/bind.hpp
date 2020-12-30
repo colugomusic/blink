@@ -113,6 +113,7 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 
 	out.parameter_type = blkhdgen_ParameterType_Envelope;
 	out.default_value = envelope.get_default_value();
+	out.flags = envelope.get_flags();
 	out.proc_data = &envelope;
 
 	out.get_range = [](void* proc_data)
@@ -230,6 +231,7 @@ inline blkhdgen_Toggle toggle(ToggleParameter& toggle)
 
 	out.parameter_type = blkhdgen_ParameterType_Toggle;
 	out.default_value = toggle.get_default_value() ? BLKHDGEN_TRUE : BLKHDGEN_FALSE;
+	out.flags = toggle.get_flags();
 	out.proc_data = &toggle;
 
 	out.set = [](void* proc_data, blkhdgen_Bool on)
@@ -249,7 +251,6 @@ inline blkhdgen_Parameter parameter(Parameter& parameter)
 	out.uuid = parameter.get_uuid();
 	out.group_id = parameter.get_group_id();
 	out.name = parameter.get_name();
-	out.flags = parameter.get_flags();
 
 	const auto type = parameter.get_type();
 

@@ -63,6 +63,8 @@ const RangeValue<float>& SliderParameter::range()
 blkhdgen_Error SliderParameter::set(float value)
 {
 	current_value_ = value;
+
+	return BLKHDGEN_OK;
 }
 
 float SliderParameter::get() const
