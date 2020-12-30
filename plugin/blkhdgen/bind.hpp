@@ -70,12 +70,22 @@ inline blkhdgen_EnvelopeRange envelope_range(EnvelopeRange& range)
 	return out;
 }
 
+inline blkhdgen_EnvelopeSnapSettings envelope_snap_settings(const EnvelopeSnapSettings& snap_settings)
+{
+	blkhdgen_EnvelopeSnapSettings out;
+
+	out.step_size = range_value(snap_settings.step_size);
+	out.default_snap_amount = snap_settings.default_snap_amount;
+
+	return out;
+}
+
 inline blkhdgen_Group group(const Group& group)
 {
 	blkhdgen_Group out;
 
-	out.id = group.get_id();
-	out.name = group.get_name();
+	out.id = group.id;
+	out.name = group.name.c_str();
 
 	return out;
 }
@@ -111,18 +121,25 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope_range(envelope->range());
 	};
 
-	out.normalize = [](void* proc_data, float value)
+	out.get_snap_settings = [](void* proc_data)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->normalize(value);
+		return envelope_snap_settings(envelope->snap_settings());
 	};
 
-	out.inverse_normalize = [](void* proc_data, float value)
+	out.transform = [](void* proc_data, float value)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->inverse_normalize(value);
+		return envelope->transform(value);
+	};
+
+	out.inverse_transform = [](void* proc_data, float value)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->inverse_transform(value);
 	};
 
 	out.display_value = [](void* proc_data, float value)
@@ -130,6 +147,41 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
 		return envelope->display_value(value);
+	};
+
+	out.add_point = [](void* proc_data, blkhdgen_IntPosition position, float value)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->add_point(position, value);
+	};
+
+	out.remove_point = [](void* proc_data, blkhdgen_Index index)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->remove_point(index);
+	};
+
+	out.move_point = [](void* proc_data, blkhdgen_Index index, blkhdgen_IntPosition new_position, float new_value)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->move_point(index, new_position, new_value);
+	};
+
+	out.clear = [](void* proc_data)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->clear();
+	};
+
+	out.set_point_curve = [](void* proc_data, blkhdgen_Index index, float curve)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->set_point_curve(index, curve);
 	};
 
 	return out;
@@ -167,18 +219,18 @@ inline blkhdgen_Slider slider(SliderParameter& slider)
 	out.proc_data = &slider;
 	out.range = range_value(slider.range());
 
-	out.normalize = [](void* proc_data, float value)
+	out.transform = [](void* proc_data, float value)
 	{
 		auto slider = (SliderParameter*)(proc_data);
 
-		return slider->normalize(value);
+		return slider->transform(value);
 	};
 
-	out.inverse_normalize = [](void* proc_data, float value)
+	out.inverse_transform = [](void* proc_data, float value)
 	{
 		auto slider = (SliderParameter*)(proc_data);
 
-		return slider->inverse_normalize(value);
+		return slider->inverse_transform(value);
 	};
 
 	out.display_value = [](void* proc_data, float value)

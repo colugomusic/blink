@@ -1,15 +1,14 @@
 #pragma once
 
+#include <string>
 #include <blkhdgen/draft.h>
 
 namespace blkhdgen {
 
-class Group
+struct Group
 {
-public:
-
-	blkhdgen_ID get_id() const;
-	const char* get_name() const;
+	blkhdgen_ID id;
+	std::string name;
 };
 
 }

@@ -55,10 +55,12 @@ typedef struct
 // - min value:
 //   - minimum min value
 //   - maximum min value
+//   - default min value
 //   - step size for min value
 // - max value:
 //   - minimum max value
 //   - maximum max value
+//   - default max value
 //   - step size for max value
 typedef struct
 {
@@ -68,12 +70,14 @@ typedef struct
 
 typedef struct
 {
+	// Step size is also a range with a value that
+	// can be configured by the user
 	blkhdgen_RangeValue step_size;
 	float default_snap_amount;
 } blkhdgen_EnvelopeSnapSettings;
 
-typedef float (*blkhdgen_Normalize)(void* proc_data, float value);
-typedef float (*blkhdgen_InverseNormalize)(void* proc_data, float value);
+typedef float (*blkhdgen_Transform)(void* proc_data, float value);
+typedef float (*blkhdgen_InverseTransform)(void* proc_data, float value);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
 
 typedef struct
@@ -124,10 +128,10 @@ typedef struct
 	blkhdgen_Envelope_GetSnapSettings get_snap_settings;
 
 	// Transform an envelope value [min..max] to a normalized value [0..1]
-	blkhdgen_Normalize normalize;
+	blkhdgen_Transform transform;
 
 	// Transform a normalized value [0..1] to an envelope value [min..max]
-	blkhdgen_InverseNormalize inverse_normalize;
+	blkhdgen_InverseTransform inverse_transform;
 
 	// Convert a non-normalized value to a display string
 	// e.g. "50" -> "50%"
@@ -199,8 +203,8 @@ typedef struct
 
 	void* proc_data;
 
-	blkhdgen_Normalize normalize;
-	blkhdgen_InverseNormalize inverse_normalize;
+	blkhdgen_Transform transform;
+	blkhdgen_InverseTransform inverse_transform;
 	blkhdgen_DisplayValue display_value;
 	blkhdgen_Slider_Set set;
 } blkhdgen_Slider;

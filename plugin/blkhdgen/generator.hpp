@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "parameter.hpp"
@@ -41,9 +42,29 @@ public:
 
 protected:
 
+	void add_group(blkhdgen_ID id, std::string name);
 	void add_parameter(EnvelopeSpec spec);
 	void add_parameter(SliderSpec spec);
 
+private:
+
+	std::map<blkhdgen_ID, Group> groups_;
+	std::map<blkhdgen_UUID, std::shared_ptr<Parameter>> parameters_;
 };
+
+void Generator::add_group(blkhdgen_ID id, std::string name)
+{
+	groups_[id] = { id, name };
+}
+
+void Generator::add_parameter(EnvelopeSpec spec)
+{
+	parameters_[spec.uuid] = std::make_shared<EnvelopeParameter>(spec);
+}
+
+void Generator::add_parameter(SliderSpec spec)
+{
+	parameters_[spec.uuid] = std::make_shared<SliderParameter>(spec);
+}
 
 }

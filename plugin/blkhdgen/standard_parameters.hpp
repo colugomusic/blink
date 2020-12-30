@@ -80,7 +80,6 @@ inline EnvelopeSpec amp()
 	out.transform = [](float v)
 	{
 		return math::db_to_af(v);
-		//return math::inverse_lerp(math::db_to_af(min), math::db_to_af(max), math::db_to_af(v));
 	};
 
 	out.inverse_transform = [](float v)
@@ -104,6 +103,8 @@ inline EnvelopeSpec amp()
 	out.step_size.range.max = 0.0f;
 	out.step_size.value = 0.0f;
 	out.step_size.step_size = 0.0f;
+
+	out.default_snap_amount = 0.0f;
 
 	return out;
 }
@@ -141,6 +142,8 @@ inline EnvelopeSpec pan()
 	out.step_size.range.max = 1.0f;
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 0.0f;
+
+	out.default_snap_amount = 0.0f;
 
 	return out;
 }
@@ -186,6 +189,8 @@ inline EnvelopeSpec pitch()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 1.0f;
 
+	out.default_snap_amount = 1.0f;
+
 	return out;
 }
 
@@ -222,6 +227,8 @@ inline EnvelopeSpec speed()
 	out.step_size.range.max = 32.0f;
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 0.25f;
+
+	out.default_snap_amount = 0.0f;
 
 	return out;
 }
@@ -267,6 +274,8 @@ inline EnvelopeSpec formant()
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 1.0f;
 
+	out.default_snap_amount = 1.0f;
+
 	return out;
 }
 
@@ -311,6 +320,8 @@ inline EnvelopeSpec noise_amount()
 	out.step_size.value = 0.0f;
 	out.step_size.step_size = 0.0f;
 
+	out.default_snap_amount = 0.0f;
+
 	return out;
 }
 
@@ -354,6 +365,8 @@ inline EnvelopeSpec noise_color()
 	out.step_size.range.max = 1.0f;
 	out.step_size.value = 1.0f;
 	out.step_size.step_size = 0.0f;
+
+	out.default_snap_amount = 0.0f;
 
 	return out;
 }
