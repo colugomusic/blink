@@ -17,12 +17,14 @@ public:
 	float inverse_transform(float value) const;
 	const char* display_value(float value) const;
 	blkhdgen_Error set(float value);
+	float get() const;
 
 	const RangeValue<float>& range();
 
 private:
 
 	RangeValue<float> range_;
+	std::atomic<float> current_value_;
 	std::function<float(float)> transform_;
 	std::function<float(float)> inverse_transform_;
 	std::function<std::string(float)> display_value_;
@@ -56,6 +58,16 @@ const char* SliderParameter::display_value(float value) const
 const RangeValue<float>& SliderParameter::range()
 {
 	return range_;
+}
+
+blkhdgen_Error SliderParameter::set(float value)
+{
+	current_value_ = value;
+}
+
+float SliderParameter::get() const
+{
+	return current_value_;
 }
 
 }

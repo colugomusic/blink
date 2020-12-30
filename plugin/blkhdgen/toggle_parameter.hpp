@@ -18,7 +18,7 @@ public:
 	bool get_default_value() const;
 
 private:
-	bool current_value_;
+	std::atomic<bool> current_value_;
 	bool default_value_;
 };
 

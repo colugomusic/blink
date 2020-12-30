@@ -21,7 +21,7 @@ public:
 private:
 
 	std::map<int, std::string> options_;
-	blkhdgen_Index current_value_;
+	std::atomic<blkhdgen_Index> current_value_;
 	blkhdgen_Index default_value_;
 };
 
