@@ -20,6 +20,8 @@ public:
 	{
 		return current_value_;
 	}
+
+	const RangeValue<float>& get_range() const
 	{
 		return range_;
 	}
