@@ -150,46 +150,11 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->display_value(value);
 	};
 
-	out.add_point = [](void* proc_data, blkhdgen_EnvelopePoint point)
+	out.set_points_memory = [](void* proc_data, blkhdgen_EnvelopePoints** points)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->add_point(point);
-	};
-
-	out.remove_point = [](void* proc_data, blkhdgen_Index index)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->remove_point(index);
-	};
-
-	out.move_point = [](void* proc_data, blkhdgen_Index index, blkhdgen_EnvelopePointPosition new_position)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->move_point(index, new_position);
-	};
-
-	out.clear = [](void* proc_data)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->clear();
-	};
-
-	out.set_points = [](void* proc_data, blkhdgen_Index count, blkhdgen_EnvelopePoint* points)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->set_points(count, points);
-	};
-
-	out.set_point_curve = [](void* proc_data, blkhdgen_Index index, float curve)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->set_point_curve(index, curve);
+		return envelope->set_points_memory(points);
 	};
 
 	return out;
@@ -334,39 +299,11 @@ inline blkhdgen_Generator generator(Generator* generator)
 	out.num_groups = generator->get_num_groups();
 	out.num_parameters = generator->get_num_parameters();
 
-	out.add_warp_point = [](void* proc_data, blkhdgen_IntPosition block_position)
+	out.set_warp_points_memory = [](void* proc_data, blkhdgen_WarpPoints** memory)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->add_warp_point(block_position);
-	};
-
-	out.remove_warp_point = [](void* proc_data, blkhdgen_Index index)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->remove_warp_point(index);
-	};
-
-	out.move_warp_point = [](void* proc_data, blkhdgen_Index index, blkhdgen_IntPosition new_position)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->move_warp_point(index, new_position);
-	};
-
-	out.clear_warp_points = [](void* proc_data)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->clear_warp_points();
-	};
-
-	out.set_warp_points = [](void* proc_data, blkhdgen_Index count, blkhdgen_WarpPoint* points)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->set_warp_points(count, points);
+		return generator->set_warp_points_memory(memory);
 	};
 
 	out.get_group = [](void* proc_data, blkhdgen_Index index)

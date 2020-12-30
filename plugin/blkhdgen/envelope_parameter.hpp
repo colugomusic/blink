@@ -21,12 +21,7 @@ public:
 	float inverse_transform(float value) const;
 	const char* display_value(float value) const;
 
-	blkhdgen_Index add_point(blkhdgen_EnvelopePoint point);
-	blkhdgen_Error remove_point(blkhdgen_Index index);
-	blkhdgen_Error move_point(blkhdgen_Index index, blkhdgen_EnvelopePointPosition new_position);
-	blkhdgen_Error clear();
-	blkhdgen_Error set_points(blkhdgen_Index count, blkhdgen_EnvelopePoint* points);
-	blkhdgen_Error set_point_curve(blkhdgen_Index index, float curve);
+	blkhdgen_Error set_points_memory(blkhdgen_EnvelopePoints** memory);
 
 	EnvelopeRange& range();
 	const EnvelopeSnapSettings& snap_settings() const;
@@ -83,36 +78,5 @@ const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
 {
 	return snap_settings_;
 }
-
-blkhdgen_Index EnvelopeParameter::add_point(blkhdgen_EnvelopePoint point)
-{
-	points_.insert(std::lower_bound(points_.begin(), points_.end(), point, [](blkhdgen_EnvelopePoint a, blkhdgen_EnvelopePoint b) { return a.position.x < a.position.y; }), point);
-}
-
-blkhdgen_Error EnvelopeParameter::remove_point(blkhdgen_Index index)
-{
-
-}
-
-blkhdgen_Error EnvelopeParameter::move_point(blkhdgen_Index index, blkhdgen_EnvelopePointPosition new_position)
-{
-
-}
-
-blkhdgen_Error EnvelopeParameter::clear()
-{
-
-}
-
-blkhdgen_Error set_points(blkhdgen_Index count, blkhdgen_EnvelopePoint* points)
-{
-
-}
-
-blkhdgen_Error EnvelopeParameter::set_point_curve(blkhdgen_Index index, float curve)
-{
-	return BLKHDGEN_OK;
-}
-
 
 }

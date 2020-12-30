@@ -21,11 +21,7 @@ public:
 
 	int get_num_channels() const { return 2; }
 
-	blkhdgen_Index add_warp_point(blkhdgen_IntPosition block_position);
-	blkhdgen_Error remove_warp_point(blkhdgen_Index index);
-	blkhdgen_Error move_warp_point(blkhdgen_Index index, blkhdgen_IntPosition new_position);
-	blkhdgen_Error clear_warp_points();
-	blkhdgen_Error set_warp_points(blkhdgen_Index count, blkhdgen_WarpPoint* points);
+	blkhdgen_Error set_warp_points_memory(blkhdgen_WarpPoints** memory);
 
 	int get_num_groups() const;
 	int get_num_parameters() const;
@@ -82,29 +78,10 @@ void Generator::add_parameter(ToggleSpec spec)
 	parameters_[spec.uuid] = std::make_shared<ToggleParameter>(spec);
 }
 
-blkhdgen_Index Generator::add_warp_point(blkhdgen_IntPosition block_position)
+blkhdgen_Error Generator::set_warp_points_memory(blkhdgen_WarpPoints** memory)
 {
 	// TODO: implement this
-}
-
-blkhdgen_Error Generator::remove_warp_point(blkhdgen_Index index)
-{
-	// TODO: implement this
-}
-
-blkhdgen_Error Generator::move_warp_point(blkhdgen_Index index, blkhdgen_IntPosition new_position)
-{
-	// TODO: implement this
-}
-
-blkhdgen_Error Generator::clear_warp_points()
-{
-	// TODO: implement this
-}
-
-blkhdgen_Error Generator::set_warp_points(blkhdgen_Index count, blkhdgen_WarpPoint* points)
-{
-	// TODO: implement this
+	return 1;
 }
 
 int Generator::get_num_groups() const
@@ -152,11 +129,13 @@ Parameter& Generator::get_parameter_by_id(blkhdgen_UUID uuid)
 float Generator::get_mod_value(blkhdgen_Position block_position) const
 {
 	// TODO: implement this
+	return 0.0;
 }
 
 blkhdgen_Position Generator::get_waveform_position(blkhdgen_Position block_position) const
 {
 	// TODO: implement this
+	return 0;
 }
 
 blkhdgen_Error Generator::set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb)
@@ -165,6 +144,8 @@ blkhdgen_Error Generator::set_get_sample_info_cb(void* user, blkhdgen_GetSampleI
 	{
 		cb(user, info);
 	};
+
+	return BLKHDGEN_OK;
 }
 
 blkhdgen_Error Generator::set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb)
@@ -173,6 +154,8 @@ blkhdgen_Error Generator::set_get_sample_data_cb(void* user, blkhdgen_GetSampleD
 	{
 		cb(user, channel, index, size, buffer);
 	};
+
+	return BLKHDGEN_OK;
 }
 
 }

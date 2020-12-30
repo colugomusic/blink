@@ -48,6 +48,12 @@ typedef struct
 
 typedef struct
 {
+	blkhdgen_Index count;
+	blkhdgen_WarpPoint* points;
+} blkhdgen_WarpPoints;
+
+typedef struct
+{
 	float min;
 	float max;
 } blkhdgen_Range;
@@ -135,12 +141,6 @@ enum blkhdgen_ParameterFlags
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-typedef blkhdgen_Index(*blkhdgen_Envelope_AddPoint)(void* proc_data, blkhdgen_EnvelopePoint point);
-typedef blkhdgen_Error(*blkhdgen_Envelope_RemovePoint)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Error(*blkhdgen_Envelope_MovePoint)(void* proc_data, blkhdgen_Index index, blkhdgen_EnvelopePointPosition new_position);
-typedef blkhdgen_Error(*blkhdgen_Envelope_Clear)(void* proc_data);
-typedef blkhdgen_Error(*blkhdgen_Envelope_SetPoints)(void* proc_data, blkhdgen_Index count, blkhdgen_EnvelopePoint* points);
-typedef blkhdgen_Error(*blkhdgen_Envelope_SetPointCurve)(void* proc_data, blkhdgen_Index index, float curve);
 typedef blkhdgen_Error(*blkhdgen_Envelope_SetPointsMemory)(void* proc_data, blkhdgen_EnvelopePoints** memory);
 
 typedef struct
@@ -173,23 +173,9 @@ typedef struct
 	// It is the host's responsibilty to ensure that the data at the pointed-to
 	// location remains valid for the duration of any blkhdgen call.
 	//
-	// Generators should never store the address of the point data because it could
-	// become invalid in between API calls.
+	// Generators should never store the address of the point data because it
+	// could become invalid in between blkhdgen calls.
 	blkhdgen_Envelope_SetPointsMemory set_points_memory;
-
-	// Manipulate modulation points
-	blkhdgen_Envelope_AddPoint add_point;
-	blkhdgen_Envelope_RemovePoint remove_point;
-	blkhdgen_Envelope_MovePoint move_point;
-	blkhdgen_Envelope_Clear clear;
-	blkhdgen_Envelope_SetPoints set_points;
-
-	// Set the curve [-1..1] for the specified point. This effects the connecting
-	// modulation to the right of this point, if it has a neighboring point to the
-	// right.
-	//
-	// This is currently not supported by Blockhead so it can be left unimplemented.
-	blkhdgen_Envelope_SetPointCurve set_point_curve;
 } blkhdgen_Envelope;
 
 //
@@ -308,11 +294,7 @@ typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, 
 typedef blkhdgen_Error(*blkhdgen_Generator_Process)(void* proc_data, const blkhdgen_Position* pos, float** out);
 typedef blkhdgen_Position(*blkhdgen_Generator_GetWaveformPosition)(void* proc_data, blkhdgen_Position block_position);
 typedef float (*blkhdgen_Generator_GetModValue)(void* proc_data, blkhdgen_Position block_position);
-typedef blkhdgen_Index(*blkhdgen_Generator_AddWarpPoint)(void* proc_data, blkhdgen_WarpPoint point);
-typedef blkhdgen_Error(*blkhdgen_Generator_RemoveWarpPoint)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Error(*blkhdgen_Generator_MoveWarpPoint)(void* proc_data, blkhdgen_Index index, blkhdgen_IntPosition new_position);
-typedef blkhdgen_Error(*blkhdgen_Generator_ClearWarpPoints)(void* proc_data);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetWarpPoints)(void* proc_data, blkhdgen_Index count, blkhdgen_WarpPoint* points);
+typedef blkhdgen_Error(*blkhdgen_Generator_SetWarpPointsMemory)(void* proc_data, blkhdgen_WarpPoints** memory);
 
 typedef struct
 {
@@ -353,12 +335,15 @@ typedef struct
 	// Get the normalized modulation value [0..1] for the given block position
 	blkhdgen_Generator_GetModValue get_mod_value;
 
-	// Manipulate warp points
-	blkhdgen_Generator_AddWarpPoint add_warp_point;
-	blkhdgen_Generator_RemoveWarpPoint remove_warp_point;
-	blkhdgen_Generator_MoveWarpPoint move_warp_point;
-	blkhdgen_Generator_ClearWarpPoints clear_warp_points;
-	blkhdgen_Generator_SetWarpPoints set_warp_points;
+	// Host will call this once to let the plugin know where to read warp point
+	// data from.
+	//
+	// It is the host's responsibilty to ensure that the data at the pointed-to
+	// location remains valid for the duration of any blkhdgen call.
+	//
+	// Generators should never store the address of the point data because it
+	// could become invalid in between blkhdgen calls.
+	blkhdgen_Generator_SetWarpPointsMemory set_warp_points_memory;
 } blkhdgen_Generator;
 
 #ifdef BLKHDGEN_EXPORT
