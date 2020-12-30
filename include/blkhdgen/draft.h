@@ -257,7 +257,7 @@ typedef struct
 } blkhdgen_Group;
 
 typedef void (*blkhdgen_GetSampleInfoCB)(void* user, blkhdgen_SampleInfo* info);
-typedef void (*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+typedef void (*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
 
 typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
 typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);

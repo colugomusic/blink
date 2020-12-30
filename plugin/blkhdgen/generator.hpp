@@ -29,10 +29,10 @@ public:
 	int get_num_groups() const;
 	int get_num_parameters() const;
 
-	Group& get_group(blkhdgen_Index index) const;
-	Group& get_group_by_id(blkhdgen_ID id) const;
-	Parameter& get_parameter(blkhdgen_Index index) const;
-	Parameter& get_parameter_by_id(blkhdgen_UUID uuid) const;
+	const Group& get_group(blkhdgen_Index index) const;
+	const Group& get_group_by_id(blkhdgen_ID id) const;
+	Parameter& get_parameter(blkhdgen_Index index);
+	Parameter& get_parameter_by_id(blkhdgen_UUID uuid);
 
 	float get_mod_value(blkhdgen_Position block_position) const;
 	blkhdgen_Position get_waveform_position(blkhdgen_Position block_position) const;
@@ -50,6 +50,8 @@ private:
 
 	std::map<blkhdgen_ID, Group> groups_;
 	std::map<blkhdgen_UUID, std::shared_ptr<Parameter>> parameters_;
+	std::function<void(blkhdgen_SampleInfo*)> get_sample_info_;
+	std::function<void(blkhdgen_ChannelCount, blkhdgen_Index, blkhdgen_FrameCount, float*)> get_sample_data_;
 };
 
 void Generator::add_group(blkhdgen_ID id, std::string name)
@@ -65,6 +67,94 @@ void Generator::add_parameter(EnvelopeSpec spec)
 void Generator::add_parameter(SliderSpec spec)
 {
 	parameters_[spec.uuid] = std::make_shared<SliderParameter>(spec);
+}
+
+blkhdgen_Index Generator::add_warp_point(blkhdgen_IntPosition block_position)
+{
+	// TODO: implement this
+}
+
+blkhdgen_Error Generator::remove_warp_point(blkhdgen_Index index)
+{
+	// TODO: implement this
+}
+
+blkhdgen_Error Generator::move_warp_point(blkhdgen_Index index, blkhdgen_IntPosition new_position)
+{
+	// TODO: implement this
+}
+
+blkhdgen_Error Generator::clear_warp_points()
+{
+	// TODO: implement this
+}
+
+int Generator::get_num_groups() const
+{
+	return int(groups_.size());
+}
+
+int Generator::get_num_parameters() const
+{
+	return int(parameters_.size());
+}
+
+const Group& Generator::get_group(blkhdgen_Index index) const
+{
+	auto pos = groups_.begin();
+
+	std::advance(pos, index);
+
+	return pos->second;
+}
+
+const Group& Generator::get_group_by_id(blkhdgen_ID id) const
+{
+	auto pos = groups_.find(id);
+
+	return pos->second;
+}
+
+Parameter& Generator::get_parameter(blkhdgen_Index index)
+{
+	auto pos = parameters_.begin();
+
+	std::advance(pos, index);
+
+	return *pos->second;
+}
+
+Parameter& Generator::get_parameter_by_id(blkhdgen_UUID uuid)
+{
+	auto pos = parameters_.find(uuid);
+
+	return *pos->second;
+}
+
+float Generator::get_mod_value(blkhdgen_Position block_position) const
+{
+	// TODO: implement this
+}
+
+blkhdgen_Position Generator::get_waveform_position(blkhdgen_Position block_position) const
+{
+	// TODO: implement this
+}
+
+blkhdgen_Error Generator::set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb)
+{
+	get_sample_info_ = [user, cb](blkhdgen_SampleInfo* info)
+	{
+		cb(user, info);
+	};
+}
+
+blkhdgen_Error Generator::set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb)
+{
+	get_sample_data_ = [user, cb](blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer)
+	{
+		cb(user, channel, index, size, buffer);
+	};
 }
 
 }
