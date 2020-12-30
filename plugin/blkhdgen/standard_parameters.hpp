@@ -513,7 +513,7 @@ inline ToggleSpec loop()
 {
 	ToggleSpec out;
 
-	out.uuid = "";
+	out.uuid = "dfa36d24-3c41-4a13-9b57-dc0116ef19f7";
 	out.name = "Loop";
 	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu;
 	out.default_value = false;
@@ -525,7 +525,7 @@ inline ToggleSpec reverse()
 {
 	ToggleSpec out;
 
-	out.uuid = "";
+	out.uuid = "e7cacaf8-4afc-4e81-83de-50620fed4b13";
 	out.name = "Reverse";
 	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu;
 	out.default_value = false;

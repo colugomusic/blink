@@ -146,13 +146,15 @@ enum blkhdgen_ToggleFlags
 	blkhdgen_ToggleFlags_DefaultEnabled = 0x8,
 };
 
+typedef blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* user);
+
 //
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-typedef blkhdgen_Error(*blkhdgen_Envelope_SetPointsMemory)(void* proc_data, blkhdgen_EnvelopePoints** memory);
+typedef blkhdgen_Error(*blkhdgen_Envelope_SetGetPointDataCB)(void* proc_data, blkhdgen_GetPointDataCB cb);
 
 typedef struct
 {
@@ -179,15 +181,15 @@ typedef struct
 	// until the generator is destroyed.
 	blkhdgen_DisplayValue display_value;
 
-	// Host will call this once to let the plugin know where to read point data
-	// from.
+	// Host will call this once to set a callback that the plugin uses to
+	// retrieve point data.
 	//
-	// It is the host's responsibilty to ensure that the data at the pointed-to
-	// location remains valid for the duration of any blkhdgen call.
+	// It is the host's responsibility to ensure that the returned data remains
+	// valid for the duration of the call.
 	//
-	// Generators should never store the address of the point data because it
-	// could become invalid in between blkhdgen calls.
-	blkhdgen_Envelope_SetPointsMemory set_points_memory;
+	// If the callback is called simultaneously from the GUI and audio threads
+	// then the host may return two different pointers.
+	blkhdgen_Envelope_SetGetPointDataCB set_get_point_data_cb;
 } blkhdgen_Envelope;
 
 //
@@ -262,6 +264,9 @@ typedef struct
 	blkhdgen_Toggle_Set set;
 } blkhdgen_Toggle;
 
+//
+// Generic Parameter
+//
 union blkhdgen_ParameterObject
 {
 	blkhdgen_Chord chord;
@@ -293,9 +298,42 @@ typedef struct
 	const char* name;
 } blkhdgen_Group;
 
+// Manipulators
+//
+// This will be a future Blockhead feature, plugins don't need
+// to worry about it yet.
+typedef struct
+{
+	blkhdgen_UUID uuid;
+	blkhdgen_ID local_id;
+	const char* name;
+} blkhdgen_ManipulatorTarget;
+
+typedef struct
+{
+	blkhdgen_ID local_id;
+	float value;
+	float glide_in;
+	float glide_out;
+} blkhdgen_ManipulatorPoint;
+
+typedef struct
+{
+	blkhdgen_Index count;
+	blkhdgen_ManipulatorPoint* points;
+} blkhdgen_ManipulatorData;
+
+//
+// Callbacks
+//
 typedef void (*blkhdgen_GetSampleInfoCB)(void* user, blkhdgen_SampleInfo* info);
 typedef void (*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* user);
+typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* user);
 
+//
+// Generator
+//
 typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
 typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
 typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
@@ -303,10 +341,11 @@ typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data
 typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* user, blkhdgen_GetSampleInfoCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* user, blkhdgen_GetSampleDataCB cb);
+typedef blkhdgen_Error(*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* user, blkhdgen_GetWarpPointDataCB cb);
+typedef blkhdgen_Error(*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_Process)(void* proc_data, const blkhdgen_Position* pos, float** out);
 typedef blkhdgen_Position(*blkhdgen_Generator_GetWaveformPosition)(void* proc_data, blkhdgen_Position block_position);
 typedef float (*blkhdgen_Generator_GetModValue)(void* proc_data, blkhdgen_Position block_position);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetWarpPointsMemory)(void* proc_data, blkhdgen_WarpPoints** memory);
 
 typedef struct
 {
@@ -314,6 +353,7 @@ typedef struct
 	int num_groups;
 	int num_parameters;
 	blkhdgen_ChannelCount num_channels;
+	int num_manipulator_targets;
 
 	void* proc_data;
 
@@ -332,6 +372,17 @@ typedef struct
 	// Set the callback for retrieving sample data
 	blkhdgen_Generator_SetGetSampleDataCB set_get_sample_data_cb;
 
+	// Host will call these once to set callbacks that the plugin uses to
+	// retrieve data.
+	//
+	// It is the host's responsibility to ensure that the returned data remains
+	// valid for the duration of the call.
+	//
+	// If the callback is called simultaneously from the GUI and audio threads
+	// then the host may return two different pointers.
+	blkhdgen_Generator_SetGetWarpPointDataCB set_get_warp_point_data_cb;
+	blkhdgen_Generator_SetGetManipulatorDataCB set_get_manipulator_data_cb;
+
 	// pos is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
 	//
 	// Positions will usually be increasing linearly but may jump back in the case of
@@ -346,16 +397,6 @@ typedef struct
 
 	// Get the normalized modulation value [0..1] for the given block position
 	blkhdgen_Generator_GetModValue get_mod_value;
-
-	// Host will call this once to let the plugin know where to read warp point
-	// data from.
-	//
-	// It is the host's responsibilty to ensure that the data at the pointed-to
-	// location remains valid for the duration of any blkhdgen call.
-	//
-	// Generators should never store the address of the point data because it
-	// could become invalid in between blkhdgen calls.
-	blkhdgen_Generator_SetWarpPointsMemory set_warp_points_memory;
 } blkhdgen_Generator;
 
 #ifdef BLKHDGEN_EXPORT
