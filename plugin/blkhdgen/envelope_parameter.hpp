@@ -93,25 +93,23 @@ const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
 
 float EnvelopeParameter::get_mod_value(blkhdgen_Position block_position) const
 {
-	//const auto points = get_point_data_();
+	const auto points = get_point_data_();
 
-	//if (!points) return default_value_;
-	//if (points->count < 1) return default_value_;
-	//if (points->count == 1) return points->points[0].position.y;
+	if (points != last_point_data_)
+	{
+		last_point_data_ = points;
+		point_search_index_ = -1;
+	}
 
-	//if (points != last_point_data_)
-	//{
-	//	last_point_data_ = points;
-	//	point_search_index_ = -1;
-	//}
+	if (!points) return default_value_;
+	if (points->count < 1) return default_value_;
 
-	//if (point_search_index_)
-	//{
+	const auto min = range_.min().get();
+	const auto max = range_.max().get();
 
-	//}
-	//
-	//// TODO: implement this
-	return 0.0;
+	const auto normalized_value = envelope_search(points, min, max, block_position, &point_search_index_);
+
+	return math::transform_and_denormalize(curve_, min, max, normalized_value);
 }
 
 blkhdgen_Error EnvelopeParameter::set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb)

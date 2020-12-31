@@ -6,10 +6,8 @@
 
 namespace blkhdgen {
 
-inline float envelope_search(blkhdgen_EnvelopePoints* points, float min, float max, blkhdgen_Position block_position, float default_value, int* search_index)
+inline float envelope_search(blkhdgen_EnvelopePoints* points, float min, float max, blkhdgen_Position block_position, int* search_index)
 {
-	if (!points) return default_value;
-	if (points->count < 1) return default_value;
 	if (points->count == 1) return points->points[0].position.y;
 
 	const auto beg = points->points;
@@ -36,7 +34,7 @@ inline float envelope_search(blkhdgen_EnvelopePoints* points, float min, float m
 		search_pos = beg + *search_index;
 	}
 
-	for (; search_pos != end; search_pos++, *search_index++)
+	for (; search_pos != end; search_pos++, (*search_index)++)
 	{
 		const auto p1 = search_pos;
 
@@ -52,9 +50,9 @@ inline float envelope_search(blkhdgen_EnvelopePoints* points, float min, float m
 
 			if (segment_size > 0)
 			{
-				auto t = (block_position - p0->position.x) / segment_size;
+				auto t = float(block_position - p0->position.x) / segment_size;
 
-				return math::lerp(p0->position.y, p1->position.y, float(t));
+				return math::lerp(p0->position.y, p1->position.y, t);
 			}
 		}
 	}
