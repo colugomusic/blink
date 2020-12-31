@@ -77,12 +77,12 @@ inline EnvelopeSpec amp()
 	out.uuid = "273e7c30-404b-4db6-ba97-20f33d49fe51";
 	out.name = "Amp";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return math::db_to_af(v);
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return math::af_to_db(v);
 	};
@@ -117,12 +117,12 @@ inline EnvelopeSpec pan()
 	out.uuid = "9c312a2c-a1b4-4a8d-ab68-07ea157c4574";
 	out.name = "Pan";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -157,12 +157,12 @@ inline EnvelopeSpec pitch()
 	out.uuid = "ca2529db-e7bd-4019-9a07-22aee24526d1";
 	out.name = "Pitch";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -204,12 +204,12 @@ inline EnvelopeSpec speed()
 	out.uuid = "02f68738-f54a-4f35-947b-c30e73896aa4";
 	out.name = "Speed";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return std::pow(v, 2.0f);
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return std::sqrt(v);
 	};
@@ -244,12 +244,12 @@ inline EnvelopeSpec formant()
 	out.uuid = "7b72dbef-e36d-4dce-958b-b0fa498ae41e";
 	out.name = "Formant";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -291,12 +291,12 @@ inline EnvelopeSpec noise_amount()
 	out.uuid = "29d5ecb5-cb5d-4f19-afd3-835dd805682a";
 	out.name = "Noise Amount";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -338,12 +338,12 @@ inline EnvelopeSpec noise_color()
 	out.uuid = "30100123-7343-4386-9ed2-f913b9e1e571";
 	out.name = "Noise Color";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -390,12 +390,12 @@ inline SliderSpec amp()
 	out.uuid = "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5";
 	out.name = "Amp";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return math::db_to_af(v);
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return math::af_to_db(v);
 	};
@@ -417,12 +417,12 @@ inline SliderSpec pan()
 	out.uuid = "b5bf03f3-17e2-4546-8cc2-e29790ea02a2";
 	out.name = "Pan";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -444,12 +444,12 @@ inline SliderSpec pitch()
 	out.uuid = "00859eeb-ce9e-43cd-9994-bff881a9d32d";
 	out.name = "Pitch";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return v;
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return v;
 	};
@@ -478,12 +478,12 @@ inline SliderSpec speed()
 	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
 	out.name = "Speed";
 
-	out.transform = [](float v)
+	out.curve = [](float v)
 	{
 		return std::pow(v, 2.0f);
 	};
 
-	out.inverse_transform = [](float v)
+	out.inverse_curve = [](float v)
 	{
 		return std::sqrt(v);
 	};

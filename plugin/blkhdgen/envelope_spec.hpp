@@ -8,8 +8,8 @@ namespace blkhdgen {
 
 struct EnvelopeSpec : public ParameterSpec
 {
-	std::function<float(float)> transform;
-	std::function<float(float)> inverse_transform;
+	std::function<float(float)> curve;
+	std::function<float(float)> inverse_curve;
 	std::function<std::string(float)> display_value;
 	RangeSpec<float> range;
 	RangeValue<float> step_size;

@@ -16,12 +16,10 @@ public:
 	virtual ~Generator() {}
 
 	virtual const char* get_name() const = 0;
-	virtual blkhdgen_Error process(const blkhdgen_Position* pos, float** out) = 0;
+	virtual blkhdgen_Error process(blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out) = 0;
 	virtual const char* get_error_string(blkhdgen_Error error) const = 0;
 
 	int get_num_channels() const { return 2; }
-
-	blkhdgen_Error set_warp_points_memory(blkhdgen_WarpPoints** memory);
 
 	int get_num_groups() const;
 	int get_num_parameters() const;
@@ -31,11 +29,12 @@ public:
 	Parameter& get_parameter(blkhdgen_Index index);
 	Parameter& get_parameter_by_id(blkhdgen_UUID uuid);
 
-	float get_mod_value(blkhdgen_Position block_position) const;
 	blkhdgen_Position get_waveform_position(blkhdgen_Position block_position) const;
 
 	blkhdgen_Error set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb);
 	blkhdgen_Error set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb);
+	blkhdgen_Error set_get_warp_point_data_cb(void* user, blkhdgen_GetWarpPointDataCB cb);
+	blkhdgen_Error set_get_manipulator_data_cb(void* user, blkhdgen_GetManipulatorDataCB cb);
 
 protected:
 
@@ -51,6 +50,8 @@ private:
 	std::map<blkhdgen_UUID, std::shared_ptr<Parameter>> parameters_;
 	std::function<void(blkhdgen_SampleInfo*)> get_sample_info_;
 	std::function<void(blkhdgen_ChannelCount, blkhdgen_Index, blkhdgen_FrameCount, float*)> get_sample_data_;
+	std::function<blkhdgen_WarpPoints*()> get_warp_point_data_;
+	std::function<blkhdgen_ManipulatorData*()> get_manipulator_data_;
 };
 
 void Generator::add_group(blkhdgen_ID id, std::string name)
@@ -76,12 +77,6 @@ void Generator::add_parameter(SliderSpec spec)
 void Generator::add_parameter(ToggleSpec spec)
 {
 	parameters_[spec.uuid] = std::make_shared<ToggleParameter>(spec);
-}
-
-blkhdgen_Error Generator::set_warp_points_memory(blkhdgen_WarpPoints** memory)
-{
-	// TODO: implement this
-	return 1;
 }
 
 int Generator::get_num_groups() const
@@ -126,12 +121,6 @@ Parameter& Generator::get_parameter_by_id(blkhdgen_UUID uuid)
 	return *pos->second;
 }
 
-float Generator::get_mod_value(blkhdgen_Position block_position) const
-{
-	// TODO: implement this
-	return 0.0;
-}
-
 blkhdgen_Position Generator::get_waveform_position(blkhdgen_Position block_position) const
 {
 	// TODO: implement this
@@ -153,6 +142,26 @@ blkhdgen_Error Generator::set_get_sample_data_cb(void* user, blkhdgen_GetSampleD
 	get_sample_data_ = [user, cb](blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer)
 	{
 		cb(user, channel, index, size, buffer);
+	};
+
+	return BLKHDGEN_OK;
+}
+
+blkhdgen_Error Generator::set_get_warp_point_data_cb(void* user, blkhdgen_GetWarpPointDataCB cb)
+{
+	get_warp_point_data_ = [user, cb]()
+	{
+		return cb(user);
+	};
+
+	return BLKHDGEN_OK;
+}
+
+blkhdgen_Error Generator::set_get_manipulator_data_cb(void* user, blkhdgen_GetManipulatorDataCB cb)
+{
+	get_manipulator_data_ = [user, cb]()
+	{
+		return cb(user);
 	};
 
 	return BLKHDGEN_OK;

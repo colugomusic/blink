@@ -130,18 +130,25 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope_snap_settings(envelope->snap_settings());
 	};
 
-	out.transform = [](void* proc_data, float value)
+	out.get_mod_value = [](void* proc_data, blkhdgen_Position block_position)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->transform(value);
+		return envelope->get_mod_value(block_position);
 	};
 
-	out.inverse_transform = [](void* proc_data, float value)
+	out.curve = [](void* proc_data, float value)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->inverse_transform(value);
+		return envelope->curve(value);
+	};
+
+	out.inverse_curve = [](void* proc_data, float value)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->inverse_curve(value);
 	};
 
 	out.display_value = [](void* proc_data, float value)
@@ -151,11 +158,11 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->display_value(value);
 	};
 
-	out.set_points_memory = [](void* proc_data, blkhdgen_EnvelopePoints** points)
+	out.set_get_point_data_cb = [](void* proc_data, void* user, blkhdgen_GetPointDataCB cb)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->set_points_memory(points);
+		return envelope->set_get_point_data_cb(user, cb);
 	};
 
 	return out;
@@ -194,18 +201,18 @@ inline blkhdgen_Slider slider(SliderParameter& slider)
 	out.proc_data = &slider;
 	out.range = range_value(slider.range());
 
-	out.transform = [](void* proc_data, float value)
+	out.curve = [](void* proc_data, float value)
 	{
 		auto slider = (SliderParameter*)(proc_data);
 
-		return slider->transform(value);
+		return slider->curve(value);
 	};
 
-	out.inverse_transform = [](void* proc_data, float value)
+	out.inverse_curve = [](void* proc_data, float value)
 	{
 		auto slider = (SliderParameter*)(proc_data);
 
-		return slider->inverse_transform(value);
+		return slider->inverse_curve(value);
 	};
 
 	out.display_value = [](void* proc_data, float value)
@@ -300,11 +307,18 @@ inline blkhdgen_Generator generator(Generator* generator)
 	out.num_groups = generator->get_num_groups();
 	out.num_parameters = generator->get_num_parameters();
 
-	out.set_warp_points_memory = [](void* proc_data, blkhdgen_WarpPoints** memory)
+	out.set_get_warp_point_data_cb = [](void* proc_data, void* user, blkhdgen_GetWarpPointDataCB cb)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->set_warp_points_memory(memory);
+		return generator->set_get_warp_point_data_cb(user, cb);
+	};
+
+	out.set_get_manipulator_data_cb = [](void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->set_get_manipulator_data_cb(user, cb);
 	};
 
 	out.get_group = [](void* proc_data, blkhdgen_Index index)
@@ -342,18 +356,11 @@ inline blkhdgen_Generator generator(Generator* generator)
 		return generator->get_error_string(error);
 	};
 
-	out.process = [](void* proc_data, const blkhdgen_Position* pos, float** out)
+	out.process = [](void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->process(pos, out);
-	};
-
-	out.get_mod_value = [](void* proc_data, blkhdgen_Position block_position)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->get_mod_value(block_position);
+		return generator->process(song_rate, sample_rate, pos, out);
 	};
 
 	out.get_waveform_position = [](void* proc_data, blkhdgen_Position block_position)

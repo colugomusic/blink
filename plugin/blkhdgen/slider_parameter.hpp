@@ -13,8 +13,8 @@ public:
 
 	blkhdgen_ParameterType get_type() const override { return blkhdgen_ParameterType_Slider; }
 
-	float transform(float value) const;
-	float inverse_transform(float value) const;
+	float curve(float value) const;
+	float inverse_curve(float value) const;
 	const char* display_value(float value) const;
 	blkhdgen_Error set(float value);
 	float get() const;
@@ -25,8 +25,8 @@ private:
 
 	RangeValue<float> range_;
 	std::atomic<float> current_value_;
-	std::function<float(float)> transform_;
-	std::function<float(float)> inverse_transform_;
+	std::function<float(float)> curve_;
+	std::function<float(float)> inverse_curve_;
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
 };
@@ -34,20 +34,20 @@ private:
 SliderParameter::SliderParameter(SliderSpec spec)
 	: Parameter(spec)
 	, range_(spec.range)
-	, transform_(spec.transform)
-	, inverse_transform_(spec.inverse_transform)
+	, curve_(spec.curve)
+	, inverse_curve_(spec.inverse_curve)
 	, display_value_(spec.display_value)
 {
 }
 
-float SliderParameter::transform(float value) const
+float SliderParameter::curve(float value) const
 {
-	return math::inverse_lerp(transform_(range_.range.min), transform_(range_.range.max), transform_(value));
+	return curve_(value);
 }
 
-float SliderParameter::inverse_transform(float value) const
+float SliderParameter::inverse_curve(float value) const
 {
-	return inverse_transform_(math::lerp(transform_(range_.range.min), transform_(range_.range.max), value));
+	return inverse_curve_(value);
 }
 
 const char* SliderParameter::display_value(float value) const
