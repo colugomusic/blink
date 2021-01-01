@@ -88,17 +88,16 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 			{
 				point_search_index_ = 0;
 
-				auto y1 = double(p1.position.y) + transpose;
+				const auto y1 = double(p1.position.y) + transpose;
+				const auto y1_ff = math::p_to_ff(y1);
 
-				if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(y1, y1, 1.0, block_position));
+				if (derivative) *derivative = float(y1_ff);
 
-				return float(weird_math_that_i_dont_understand(y1, y1, 1.0, double(block_position))) + segment_start_;
+				return float(block_position * y1_ff) + segment_start_;
 			}
 
 			auto p0 = pitch_points->points[i - 1];
-
 			auto n = block_position - p0.position.x;
-
 			auto segment_size = double(p1.position.x) - p0.position.x;
 
 			if (segment_size > 0.0f)
@@ -119,10 +118,10 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 			{
 				point_search_index_ = 1;
 
-				auto y0 = double(p1.position.y) + transpose;
-				auto y1 = double(p1.position.y) + transpose;
+				const auto y1 = double(p1.position.y) + transpose;
+				const auto y1_ff = math::p_to_ff(y1);
 
-				segment_start_ = float(weird_math_that_i_dont_understand(y0, y1, 1.0, double(p1.position.x))) + segment_start_;
+				segment_start_ += float(p1.position.x * y1_ff) + segment_start_;
 			}
 			else
 			{
@@ -145,11 +144,12 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 	auto p0 = pitch_points->points[pitch_points->count - 1];
 	auto n = block_position - p0.position.x;
 
-	auto y0 = double(p0.position.y) + transpose;
+	const auto y0 = double(p0.position.y) + transpose;
+	const auto y0_ff = math::p_to_ff(y0);
 
-	if (derivative) *derivative = float(math::p_to_ff(y0));
+	if (derivative) *derivative = float(y0_ff);
 
-	return float(n * math::p_to_ff(y0)) + segment_start_;
+	return float(n * y0_ff) + segment_start_;
 }
 
 float Classic::operator()(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, int sample_offset, float* derivative)
