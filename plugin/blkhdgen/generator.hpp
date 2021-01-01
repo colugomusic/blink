@@ -18,6 +18,7 @@ public:
 	virtual const char* get_name() const = 0;
 	virtual blkhdgen_Error process(blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out) = 0;
 	virtual const char* get_error_string(blkhdgen_Error error) const = 0;
+	virtual blkhdgen_Position get_waveform_position(blkhdgen_Position block_position) const = 0;
 
 	int get_num_channels() const { return 2; }
 
@@ -29,8 +30,6 @@ public:
 	Parameter& get_parameter(blkhdgen_Index index);
 	Parameter& get_parameter_by_id(blkhdgen_UUID uuid);
 
-	blkhdgen_Position get_waveform_position(blkhdgen_Position block_position) const;
-
 	blkhdgen_Error set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb);
 	blkhdgen_Error set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb);
 	blkhdgen_Error set_get_warp_point_data_cb(void* user, blkhdgen_GetWarpPointDataCB cb);
@@ -39,10 +38,12 @@ public:
 protected:
 
 	void add_group(blkhdgen_ID id, std::string name);
-	void add_parameter(EnvelopeSpec spec);
-	void add_parameter(OptionSpec spec);
-	void add_parameter(SliderSpec spec);
-	void add_parameter(ToggleSpec spec);
+	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeSpec spec);
+	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
+	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
+
+	template <class T>
+	std::shared_ptr<SliderParameter<T>> add_parameter(SliderSpec<T> spec);
 
 private:
 
@@ -59,24 +60,41 @@ void Generator::add_group(blkhdgen_ID id, std::string name)
 	groups_[id] = { id, name };
 }
 
-void Generator::add_parameter(EnvelopeSpec spec)
+std::shared_ptr<EnvelopeParameter> Generator::add_parameter(EnvelopeSpec spec)
 {
-	parameters_[spec.uuid] = std::make_shared<EnvelopeParameter>(spec);
+	const auto param = std::make_shared<EnvelopeParameter>(spec);
+
+	parameters_[spec.uuid] = param;
+
+	return param;
 }
 
-void Generator::add_parameter(OptionSpec spec)
+std::shared_ptr<OptionParameter> Generator::add_parameter(OptionSpec spec)
 {
-	parameters_[spec.uuid] = std::make_shared<OptionParameter>(spec);
+	const auto param = std::make_shared<OptionParameter>(spec);
+
+	parameters_[spec.uuid] = param;
+
+	return param;
 }
 
-void Generator::add_parameter(SliderSpec spec)
+template <class T>
+std::shared_ptr<SliderParameter<T>> Generator::add_parameter(SliderSpec<T> spec)
 {
-	parameters_[spec.uuid] = std::make_shared<SliderParameter>(spec);
+	const auto param = std::make_shared<SliderParameter<T>>(spec);
+
+	parameters_[spec.uuid] = param;
+
+	return param;
 }
 
-void Generator::add_parameter(ToggleSpec spec)
+std::shared_ptr<ToggleParameter> Generator::add_parameter(ToggleSpec spec)
 {
-	parameters_[spec.uuid] = std::make_shared<ToggleParameter>(spec);
+	const auto param = std::make_shared<ToggleParameter>(spec);
+
+	parameters_[spec.uuid] = param;
+
+	return param;
 }
 
 int Generator::get_num_groups() const
@@ -119,12 +137,6 @@ Parameter& Generator::get_parameter_by_id(blkhdgen_UUID uuid)
 	auto pos = parameters_.find(uuid);
 
 	return *pos->second;
-}
-
-blkhdgen_Position Generator::get_waveform_position(blkhdgen_Position block_position) const
-{
-	// TODO: implement this
-	return 0;
 }
 
 blkhdgen_Error Generator::set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb)

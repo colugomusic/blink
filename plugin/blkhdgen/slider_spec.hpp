@@ -5,12 +5,13 @@
 
 namespace blkhdgen {
 
+template <class T>
 struct SliderSpec : public ParameterSpec
 {
-	std::function<float(float)> curve;
-	std::function<float(float)> inverse_curve;
-	std::function<std::string(float)> display_value;
-	RangeValue<float> range;
+	std::function<T(T)> curve;
+	std::function<T(T)> inverse_curve;
+	std::function<std::string(T)> display_value;
+	RangeValue<T> range;
 };
 
 }

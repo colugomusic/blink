@@ -5,33 +5,35 @@
 
 namespace blkhdgen {
 
+template <class T>
 class SliderParameter : public Parameter
 {
 public:
 
-	SliderParameter(SliderSpec spec);
+	SliderParameter(SliderSpec<T> spec);
 
 	blkhdgen_ParameterType get_type() const override { return blkhdgen_ParameterType_Slider; }
 
-	float curve(float value) const;
-	float inverse_curve(float value) const;
-	const char* display_value(float value) const;
-	blkhdgen_Error set(float value);
-	float get() const;
+	T curve(T value) const;
+	T inverse_curve(T value) const;
+	const char* display_value(T value) const;
+	blkhdgen_Error set(T value);
+	T get() const;
 
-	const RangeValue<float>& range();
+	const RangeValue<T>& range();
 
 private:
 
-	RangeValue<float> range_;
-	std::atomic<float> current_value_;
-	std::function<float(float)> curve_;
-	std::function<float(float)> inverse_curve_;
-	std::function<std::string(float)> display_value_;
+	RangeValue<T> range_;
+	std::atomic<T> current_value_;
+	std::function<T(T)> curve_;
+	std::function<T(T)> inverse_curve_;
+	std::function<std::string(T)> display_value_;
 	mutable std::string display_value_buffer_;
 };
 
-SliderParameter::SliderParameter(SliderSpec spec)
+template <class T>
+SliderParameter<T>::SliderParameter(SliderSpec<T> spec)
 	: Parameter(spec)
 	, range_(spec.range)
 	, curve_(spec.curve)
@@ -40,34 +42,40 @@ SliderParameter::SliderParameter(SliderSpec spec)
 {
 }
 
-float SliderParameter::curve(float value) const
+template <class T>
+T SliderParameter<T>::curve(T value) const
 {
 	return curve_(value);
 }
 
-float SliderParameter::inverse_curve(float value) const
+template <class T>
+T SliderParameter<T>::inverse_curve(T value) const
 {
 	return inverse_curve_(value);
 }
 
-const char* SliderParameter::display_value(float value) const
+template <class T>
+const char* SliderParameter<T>::display_value(T value) const
 {
 	return (display_value_buffer_ = display_value_(value)).c_str();
 }
 
-const RangeValue<float>& SliderParameter::range()
+template <class T>
+const RangeValue<T>& SliderParameter<T>::range()
 {
 	return range_;
 }
 
-blkhdgen_Error SliderParameter::set(float value)
+template <class T>
+blkhdgen_Error SliderParameter<T>::set(T value)
 {
 	current_value_ = value;
 
 	return BLKHDGEN_OK;
 }
 
-float SliderParameter::get() const
+template <class T>
+T SliderParameter<T>::get() const
 {
 	return current_value_;
 }

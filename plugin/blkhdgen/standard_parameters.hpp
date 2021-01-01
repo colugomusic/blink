@@ -383,9 +383,9 @@ inline EnvelopeSpec noise_color()
 namespace sliders
 {
 
-inline SliderSpec amp()
+inline SliderSpec<float> amp()
 {
-	SliderSpec out;
+	SliderSpec<float> out;
 
 	out.uuid = "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5";
 	out.name = "Amp";
@@ -410,9 +410,9 @@ inline SliderSpec amp()
 	return out;
 }
 
-inline SliderSpec pan()
+inline SliderSpec<float> pan()
 {
-	SliderSpec out;
+	SliderSpec<float> out;
 
 	out.uuid = "b5bf03f3-17e2-4546-8cc2-e29790ea02a2";
 	out.name = "Pan";
@@ -437,9 +437,9 @@ inline SliderSpec pan()
 	return out;
 }
 
-inline SliderSpec pitch()
+inline SliderSpec<float> pitch()
 {
-	SliderSpec out;
+	SliderSpec<float> out;
 
 	out.uuid = "00859eeb-ce9e-43cd-9994-bff881a9d32d";
 	out.name = "Pitch";
@@ -471,9 +471,9 @@ inline SliderSpec pitch()
 	return out;
 }
 
-inline SliderSpec speed()
+inline SliderSpec<float> speed()
 {
-	SliderSpec out;
+	SliderSpec<float> out;
 
 	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
 	out.name = "Speed";
@@ -501,6 +501,33 @@ inline SliderSpec speed()
 	out.range.range.max = 32.0f;
 	out.range.value = 1.0f;
 	out.range.step_size = 0.0f;
+
+	return out;
+}
+
+inline SliderSpec<int> sample_offset()
+{
+	SliderSpec<int> out;
+
+	out.uuid = "88373752-7656-4d0e-8da2-a18c05af0106";
+	out.name = "Sample Offset";
+
+	out.curve = [](int v) { return v; };
+	out.inverse_curve = [](int v) { return v; };
+
+	out.display_value = [](int v)
+	{
+		std::stringstream ss;
+
+		ss << v;
+
+		return ss.str();
+	};
+
+	out.range.range.min = std::numeric_limits<int>::min();
+	out.range.range.max = std::numeric_limits<int>::max();
+	out.range.value = 0;
+	out.range.step_size = 1;
 
 	return out;
 }

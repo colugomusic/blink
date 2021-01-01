@@ -28,6 +28,7 @@ public:
 
 	EnvelopeRange& range();
 	const EnvelopeSnapSettings& snap_settings() const;
+	const blkhdgen_EnvelopePoints* get_point_data() const;
 
 private:
 
@@ -39,8 +40,9 @@ private:
 	std::function<float(float)> inverse_curve_;
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
-	std::function<blkhdgen_EnvelopePoints*(void)> get_point_data_;
-	mutable blkhdgen_EnvelopePoints* last_point_data_ = nullptr;
+	std::function<const blkhdgen_EnvelopePoints*(void)> get_point_data_;
+	mutable const blkhdgen_EnvelopePoints* last_point_data_ = nullptr;
+	mutable blkhdgen_Position last_search_position_ = std::numeric_limits<blkhdgen_Position>::min();
 	mutable int point_search_index_ = -1;
 };
 
@@ -93,16 +95,25 @@ const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
 
 float EnvelopeParameter::get_mod_value(blkhdgen_Position block_position) const
 {
-	const auto points = get_point_data_();
+	const auto points = get_point_data();
 
-	if (points != last_point_data_)
-	{
+	//
+	// It's assumed that we are usually traversing envelope points from left to right
+	//
+	// If the point data changed, or we traversed backwards, a binary search will
+	// be performed instead (triggered by setting point_search_index_ to -1)
+	//
+	if (points != last_point_data_ || block_position < last_search_position_)
+	{ 
 		last_point_data_ = points;
+
 		point_search_index_ = -1;
 	}
 
 	if (!points) return default_value_;
 	if (points->count < 1) return default_value_;
+
+	last_search_position_ = block_position;
 
 	const auto min = range_.min().get();
 	const auto max = range_.max().get();
@@ -120,6 +131,11 @@ blkhdgen_Error EnvelopeParameter::set_get_point_data_cb(void* user, blkhdgen_Get
 	};
 
 	return BLKHDGEN_OK;
+}
+
+const blkhdgen_EnvelopePoints* EnvelopeParameter::get_point_data() const
+{
+	return get_point_data_();
 }
 
 }

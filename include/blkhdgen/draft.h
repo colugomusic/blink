@@ -18,6 +18,7 @@ typedef uint8_t blkhdgen_BitDepth;
 typedef double blkhdgen_Position;
 typedef uint32_t blkhdgen_IntPosition;
 typedef int8_t blkhdgen_Bool;
+typedef uint32_t blkhdgen_Scale;
 
 // Generators define their own error codes. Blockhead will probably just ignore
 // any errors but this might be useful for future proofing
@@ -60,10 +61,23 @@ typedef struct
 
 typedef struct
 {
+	int min;
+	int max;
+} blkhdgen_IntRange;
+
+typedef struct
+{
 	blkhdgen_Range range;
 	float default_value;
 	float step_size;
 } blkhdgen_RangeValue;
+
+typedef struct
+{
+	blkhdgen_IntRange range;
+	int default_value;
+	int step_size;
+} blkhdgen_IntRangeValue;
 
 typedef void (*blkhdgen_EnvelopeRangeAttribute_Set)(void* proc_data, float value);
 typedef float (*blkhdgen_EnvelopeRangeAttribute_Get)(void* proc_data);
@@ -108,6 +122,7 @@ typedef struct
 typedef float (*blkhdgen_Curve)(void* proc_data, float value);
 typedef float (*blkhdgen_InverseCurve)(void* proc_data, float value);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
+typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
 
 typedef struct
 {
@@ -123,6 +138,7 @@ enum blkhdgen_ParameterType
 	blkhdgen_ParameterType_Envelope,
 	blkhdgen_ParameterType_Option,
 	blkhdgen_ParameterType_Slider,
+	blkhdgen_ParameterType_IntSlider,
 	blkhdgen_ParameterType_Toggle,
 };
 
@@ -146,7 +162,7 @@ enum blkhdgen_ToggleFlags
 	blkhdgen_ToggleFlags_DefaultEnabled = 0x8,
 };
 
-typedef blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* user);
+typedef const blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* user);
 
 //
 // Envelope parameter
@@ -200,7 +216,20 @@ typedef struct
 // Chord parameter
 // Can be manipulated in Blockhead using the chord/scale/harmonics editor thing
 //
-typedef blkhdgen_Error(*blkhdgen_Chord_Set)(void* proc_data, blkhdgen_Index note, blkhdgen_Index beg, blkhdgen_Index end, blkhdgen_Bool on);
+typedef struct
+{
+	blkhdgen_IntPosition position;
+	blkhdgen_Scale scale;
+} blkhdgen_ChordBlock;
+
+typedef struct
+{
+	blkhdgen_Index count;
+	blkhdgen_ChordBlock* blocks;
+} blkhdgen_ChordData;
+
+typedef blkhdgen_ChordData* (*blkhdgen_GetChordDataCB)(void* user);
+typedef blkhdgen_Error(*blkhdgen_Chord_SetGetChordDataCB)(void* proc_data, void* user, blkhdgen_GetChordDataCB cb);
 
 typedef struct
 {
@@ -208,7 +237,7 @@ typedef struct
 
 	void* proc_data;
 
-	blkhdgen_Chord_Set set;
+	blkhdgen_Chord_SetGetChordDataCB set_get_chord_data_cb;
 } blkhdgen_Chord;
 
 //
@@ -237,6 +266,7 @@ typedef struct
 // Will be displayed in Blockhead as a slider or spinbox control
 //
 typedef blkhdgen_Error(*blkhdgen_Slider_Set)(void* proc_data, float value);
+typedef blkhdgen_Error(*blkhdgen_IntSlider_Set)(void* proc_data, int value);
 
 typedef struct
 {
@@ -250,6 +280,17 @@ typedef struct
 	blkhdgen_DisplayValue display_value;
 	blkhdgen_Slider_Set set;
 } blkhdgen_Slider;
+
+typedef struct
+{
+	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_IntSlider
+	blkhdgen_IntRangeValue range;
+
+	void* proc_data;
+
+	blkhdgen_IntDisplayValue display_value;
+	blkhdgen_IntSlider_Set set;
+} blkhdgen_IntSlider;
 
 //
 // Toggle parameter
@@ -277,6 +318,7 @@ union blkhdgen_ParameterObject
 	blkhdgen_Envelope envelope;
 	blkhdgen_Option option;
 	blkhdgen_Slider slider;
+	blkhdgen_IntSlider int_slider;
 	blkhdgen_Toggle toggle;
 };
 

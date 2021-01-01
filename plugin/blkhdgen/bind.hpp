@@ -13,8 +13,7 @@
 namespace blkhdgen {
 namespace bind {
 
-template <class T>
-inline blkhdgen_Range range(const Range<T>& range)
+inline blkhdgen_Range range(const Range<float>& range)
 {
 	blkhdgen_Range out;
 
@@ -24,10 +23,30 @@ inline blkhdgen_Range range(const Range<T>& range)
 	return out;
 }
 
-template <class T>
-inline blkhdgen_RangeValue range_value(const RangeValue<T>& range_value)
+inline blkhdgen_IntRange range(const Range<int>& range)
+{
+	blkhdgen_IntRange out;
+
+	out.min = range.min;
+	out.max = range.max;
+
+	return out;
+}
+
+inline blkhdgen_RangeValue range_value(const RangeValue<float>& range_value)
 {
 	blkhdgen_RangeValue out;
+
+	out.range = range(range_value.range);
+	out.default_value = range_value.value;
+	out.step_size = range_value.step_size;
+
+	return out;
+}
+
+inline blkhdgen_IntRangeValue range_value(const RangeValue<int>& range_value)
+{
+	blkhdgen_IntRangeValue out;
 
 	out.range = range(range_value.range);
 	out.default_value = range_value.value;
@@ -97,11 +116,11 @@ inline blkhdgen_Chord chord(ChordParameter& chord)
 	out.parameter_type = blkhdgen_ParameterType_Chord;
 	out.proc_data = &chord;
 
-	out.set = [](void* proc_data, blkhdgen_Index note, blkhdgen_Index beg, blkhdgen_Index end, blkhdgen_Bool on) -> blkhdgen_Error
+	out.set_get_chord_data_cb = [](void* proc_data, void* user, blkhdgen_GetChordDataCB cb) -> blkhdgen_Error
 	{
 		auto chord = (ChordParameter*)(proc_data);
 
-		return chord->set(note, beg, end, on == BLKHDGEN_TRUE);
+		return chord->set_get_chord_data_cb(user, cb);
 	};
 
 	return out;
@@ -193,7 +212,7 @@ inline blkhdgen_Option option(OptionParameter& option)
 	return out;
 }
 
-inline blkhdgen_Slider slider(SliderParameter& slider)
+inline blkhdgen_Slider slider(SliderParameter<float>& slider)
 {
 	blkhdgen_Slider out;
 
@@ -203,28 +222,53 @@ inline blkhdgen_Slider slider(SliderParameter& slider)
 
 	out.curve = [](void* proc_data, float value)
 	{
-		auto slider = (SliderParameter*)(proc_data);
+		auto slider = (SliderParameter<float>*)(proc_data);
 
 		return slider->curve(value);
 	};
 
 	out.inverse_curve = [](void* proc_data, float value)
 	{
-		auto slider = (SliderParameter*)(proc_data);
+		auto slider = (SliderParameter<float>*)(proc_data);
 
 		return slider->inverse_curve(value);
 	};
 
 	out.display_value = [](void* proc_data, float value)
 	{
-		auto slider = (SliderParameter*)(proc_data);
+		auto slider = (SliderParameter<float>*)(proc_data);
 
 		return slider->display_value(value);
 	};
 
 	out.set = [](void* proc_data, float value)
 	{
-		auto slider = (SliderParameter*)(proc_data);
+		auto slider = (SliderParameter<float>*)(proc_data);
+
+		return slider->set(value);
+	};
+
+	return out;
+}
+
+inline blkhdgen_IntSlider slider(SliderParameter<int>& slider)
+{
+	blkhdgen_IntSlider out;
+
+	out.parameter_type = blkhdgen_ParameterType_Slider;
+	out.proc_data = &slider;
+	out.range = range_value(slider.range());
+
+	out.display_value = [](void* proc_data, int value)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
+
+		return slider->display_value(value);
+	};
+
+	out.set = [](void* proc_data, int value)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
 
 		return slider->set(value);
 	};
@@ -283,7 +327,13 @@ inline blkhdgen_Parameter parameter(Parameter& parameter)
 
 		case blkhdgen_ParameterType_Slider:
 		{
-			out.parameter.slider = slider(*static_cast<SliderParameter*>(&parameter));
+			out.parameter.slider = slider(*static_cast<SliderParameter<float>*>(&parameter));
+			break;
+		}
+
+		case blkhdgen_ParameterType_IntSlider:
+		{
+			out.parameter.int_slider = slider(*static_cast<SliderParameter<int>*>(&parameter));
 			break;
 		}
 

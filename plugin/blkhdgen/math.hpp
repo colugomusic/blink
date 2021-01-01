@@ -16,6 +16,18 @@ constexpr T db_to_af(T v)
 }
 
 template <class T>
+T p_to_ff(T p)
+{
+	return std::pow(T(2), p / T(12));
+}
+
+template <class T>
+T ff_to_p(T ff)
+{
+	return (std::log(ff) / std::log(T(2))) * T(12);
+}
+
+template <class T>
 constexpr T lerp(T a, T b, T x)
 {
 	return (x * (b - a)) + a;
