@@ -15,9 +15,8 @@ private:
 
 	float calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative = nullptr);
 
-	float segment_start_;
+	float segment_start_ = 0.0f;
 	int point_search_index_ = 0;
-	float prev_pos_ = std::numeric_limits<float>::min();
 	const blkhdgen_EnvelopePoints* last_pitch_point_data_ = nullptr;
 	mutable blkhdgen_Position last_search_position_ = std::numeric_limits<blkhdgen_Position>::min();
 };
@@ -61,7 +60,7 @@ template <class T> T weird_math_that_i_dont_understand_ff(T min, T max, T distan
 // not good enough to simply traverse the entire sample.
 //
 // blkhdgen_EnvelopePoint has an unused 'curve' member which could be
-// used to represent a ease-in/ease-out curve from one envelope point
+// used to represent an ease-in/ease-out curve from one envelope point
 // to the next. This is not implemented because I do not understand
 // the mathematics involved in calculating the resulting sample
 // position.

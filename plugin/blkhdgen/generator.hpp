@@ -18,7 +18,8 @@ public:
 	virtual const char* get_name() const = 0;
 	virtual blkhdgen_Error process(blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out) = 0;
 	virtual const char* get_error_string(blkhdgen_Error error) const = 0;
-	virtual blkhdgen_Position get_waveform_position(blkhdgen_Position block_position) const = 0;
+	virtual blkhdgen_Position get_waveform_position(blkhdgen_Position block_position, float* derivative = nullptr) const = 0;
+	virtual void set_data_offset(int offset) = 0;
 
 	int get_num_channels() const { return 2; }
 

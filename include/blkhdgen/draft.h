@@ -390,7 +390,7 @@ typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, 
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* user, blkhdgen_GetWarpPointDataCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
-typedef blkhdgen_Position(*blkhdgen_Generator_GetWaveformPosition)(void* proc_data, blkhdgen_Position block_position);
+typedef blkhdgen_Position(*blkhdgen_Generator_GetWaveformPosition)(void* proc_data, blkhdgen_Position block_position, float* derivative);
 
 typedef struct
 {
