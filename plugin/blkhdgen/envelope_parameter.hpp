@@ -5,6 +5,7 @@
 #include "envelope_search.hpp"
 #include "envelope_snap_settings.hpp"
 #include "parameter.hpp"
+#include "traverser.hpp"
 #include "math.hpp"
 
 namespace blkhdgen {
@@ -25,6 +26,7 @@ public:
 
 	float get_mod_value(blkhdgen_Position block_position) const;
 	blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
+	void set_data_offset(PointTraverser::DataOffset offset);
 
 	EnvelopeRange& range();
 	const EnvelopeSnapSettings& snap_settings() const;
@@ -41,8 +43,7 @@ private:
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
 	std::function<const blkhdgen_EnvelopePoints*(void)> get_point_data_;
-	mutable const blkhdgen_EnvelopePoints* last_point_data_ = nullptr;
-	mutable blkhdgen_Position last_search_position_ = std::numeric_limits<blkhdgen_Position>::min();
+	mutable PointTraverser traverser_;
 	mutable int point_search_index_ = -1;
 };
 
@@ -97,28 +98,28 @@ float EnvelopeParameter::get_mod_value(blkhdgen_Position block_position) const
 {
 	const auto points = get_point_data();
 
+	traverser_.set_points(points);
+	traverser_.set_block_position(block_position);
+
 	//
 	// It's assumed that we are usually traversing envelope points from left to right
 	//
 	// If the point data changed, or we traversed backwards, a binary search will
 	// be performed instead (triggered by setting point_search_index_ to -1)
 	//
-	if (points != last_point_data_ || block_position < last_search_position_)
-	{ 
-		last_point_data_ = points;
-
+	if (traverser_.needs_reset())
+	{
+		traverser_.reset();
 		point_search_index_ = -1;
 	}
 
 	if (!points) return default_value_;
 	if (points->count < 1) return default_value_;
 
-	last_search_position_ = block_position;
-
 	const auto min = range_.min().get();
 	const auto max = range_.max().get();
 
-	const auto normalized_value = envelope_search(points, min, max, block_position, &point_search_index_);
+	const auto normalized_value = envelope_search(points, traverser_.get_read_position(), &point_search_index_);
 
 	return math::transform_and_denormalize(curve_, min, max, normalized_value);
 }
@@ -131,6 +132,11 @@ blkhdgen_Error EnvelopeParameter::set_get_point_data_cb(void* user, blkhdgen_Get
 	};
 
 	return BLKHDGEN_OK;
+}
+
+void EnvelopeParameter::set_data_offset(PointTraverser::DataOffset offset)
+{
+	traverser_.set_data_offset(offset);
 }
 
 const blkhdgen_EnvelopePoints* EnvelopeParameter::get_point_data() const

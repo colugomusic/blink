@@ -5,20 +5,20 @@
 namespace blkhdgen {
 namespace std_traversers {
 
-class Classic : public Traverser
+class Classic
 {
 public:
 
 	float operator()(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, int sample_offset, float* derivative = nullptr);
+	void set_data_offset(PointTraverser::DataOffset offset);
 
 private:
 
-	float calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative = nullptr);
+	float calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position position, float* derivative = nullptr);
 
 	float segment_start_ = 0.0f;
 	int point_search_index_ = 0;
-	const blkhdgen_EnvelopePoints* last_pitch_point_data_ = nullptr;
-	mutable blkhdgen_Position last_search_position_ = std::numeric_limits<blkhdgen_Position>::min();
+	PointTraverser traverser_;
 };
 
 template <class T> T ratio(T min, T max, T distance)
@@ -153,17 +153,21 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 
 float Classic::operator()(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, int sample_offset, float* derivative)
 {
-	block_position -= data_offset_;
+	traverser_.set_points(pitch_points);
+	traverser_.set_block_position(block_position);
 
-	if (pitch_points != last_pitch_point_data_ || block_position < last_search_position_)
+	if (traverser_.needs_reset())
 	{
-		last_pitch_point_data_ = pitch_points;
+		traverser_.reset();
 		point_search_index_ = 0;
 	}
 
-	last_search_position_ = block_position;
+	return calculate(transpose, pitch_points, traverser_.get_read_position(), derivative) + sample_offset;
+}
 
-	return calculate(transpose, pitch_points, block_position, derivative) + sample_offset;
+void Classic::set_data_offset(PointTraverser::DataOffset offset)
+{
+	traverser_.set_data_offset(offset);
 }
 
 }}

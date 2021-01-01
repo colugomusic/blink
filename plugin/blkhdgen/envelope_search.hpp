@@ -6,7 +6,7 @@
 
 namespace blkhdgen {
 
-inline float envelope_search(const blkhdgen_EnvelopePoints* points, float min, float max, blkhdgen_Position block_position, int* search_index)
+inline float envelope_search(const blkhdgen_EnvelopePoints* points, blkhdgen_Position block_position, int* search_index)
 {
 	if (points->count == 1) return points->points[0].position.y;
 
