@@ -146,11 +146,10 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 	auto n = block_position - p0.position.x;
 
 	auto y0 = double(p0.position.y) + transpose;
-	auto y1 = double(p0.position.y) + transpose;
 
-	if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(y0, y1, 1.0, n));
+	if (derivative) *derivative = float(math::p_to_ff(y0));
 
-	return float(weird_math_that_i_dont_understand(y0, y1, 1.0, n)) + segment_start_;
+	return float(n * math::p_to_ff(y0)) + segment_start_;
 }
 
 float Classic::operator()(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, int sample_offset, float* derivative)
