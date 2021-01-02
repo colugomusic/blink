@@ -387,7 +387,7 @@ typedef blkhdgen_Error(*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_dat
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
 typedef blkhdgen_Error(*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
-typedef blkhdgen_Position(*blkhdgen_Generator_GetWaveformPosition)(void* proc_data, blkhdgen_Position block_position, float* derivative);
+typedef blkhdgen_Error(*blkhdgen_Generator_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
 
 typedef struct
 {
@@ -434,8 +434,9 @@ typedef struct
 	// The is the only function that is called in the audio thread
 	blkhdgen_Generator_Process process;
 
-	// Get the transformed waveform position for the given block position
-	blkhdgen_Generator_GetWaveformPosition get_waveform_position;
+	// Get the transformed waveform positions and derivatives for the given block
+	// positions
+	blkhdgen_Generator_GetWaveformPositions get_waveform_positions;
 } blkhdgen_Generator;
 
 #ifdef BLKHDGEN_EXPORT

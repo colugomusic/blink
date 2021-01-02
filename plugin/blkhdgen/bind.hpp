@@ -415,11 +415,11 @@ inline blkhdgen_Generator generator(Generator* generator)
 		return generator->process(song_rate, sample_rate, pos, out);
 	};
 
-	out.get_waveform_position = [](void* proc_data, blkhdgen_Position block_position, float* derivative)
+	out.get_waveform_positions = [](void* proc_data, const blkhdgen_Position* block_positions, float* out, float* derivatives)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->get_waveform_position(block_position, derivative);
+		return generator->get_waveform_positions(block_positions, out, derivatives);
 	};
 
 	out.set_get_sample_data_cb = [](void* proc_data, void* user, blkhdgen_GetSampleDataCB cb)
