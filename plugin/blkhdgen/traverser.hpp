@@ -74,6 +74,9 @@ private:
 	bool is_vector_ = false;
 };
 
+//
+// Puts a reset event at the traverser's start if the point data changed
+//
 class TraverserPointDataResetter
 {
 public:

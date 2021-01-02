@@ -25,6 +25,12 @@ T p_to_ff(T p)
 	return std::pow(T(2), p / T(12));
 }
 
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> p_to_ff(const ml::DSPVectorArray<ROWS>& p)
+{
+	return ml::pow(2.0f, p / 12.0f);
+}
+
 template <class T>
 T ff_to_p(T ff)
 {

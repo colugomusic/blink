@@ -68,15 +68,6 @@ template <class T> T weird_math_that_i_dont_understand_ff(T min, T max, T distan
 
 float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative)
 {
-	if (!pitch_points || pitch_points->count < 1)
-	{
-		auto ff = math::p_to_ff(transpose);
-
-		if (derivative) *derivative = ff;
-
-		return float(block_position * ff);
-	}
-
 	for (blkhdgen_Index i = point_search_index_; i < pitch_points->count; i++)
 	{
 		auto p1 = pitch_points->points[i];
@@ -153,10 +144,20 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 
 float Classic::get_position(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivative)
 {
+	const auto& read_position = traverser->get_read_position();
+
+	if (!pitch_points || pitch_points->count < 1)
+	{
+		const auto ff = math::p_to_ff(transpose);
+
+		if (derivative) *derivative = ff;
+
+		return float(read_position[0] * ff);
+	}
+
 	traverser_resetter_.check(pitch_points, traverser);
 
 	const auto& resets = traverser->get_resets();
-	const auto& read_position = traverser->get_read_position();
 
 	if (resets[0] > 0)
 	{
@@ -169,10 +170,20 @@ float Classic::get_position(float transpose, const blkhdgen_EnvelopePoints* pitc
 
 ml::DSPVector Classic::get_positions(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
 {
+	const auto& read_position = traverser->get_read_position();
+
+	if (!pitch_points || pitch_points->count < 1)
+	{
+		const auto ff = math::p_to_ff(transpose);
+
+		if (derivatives) ml::store(ml::DSPVector(ff), derivatives);
+
+		return read_position * ff;
+	}
+
 	traverser_resetter_.check(pitch_points, traverser);
 
 	const auto& resets = traverser->get_resets();
-	const auto& read_position = traverser->get_read_position();
 
 	ml::DSPVector out;
 

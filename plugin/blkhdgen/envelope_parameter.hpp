@@ -26,6 +26,7 @@ public:
 
 	ml::DSPVector get_mod_values(Traverser* traverser) const;
 	float get_mod_value(Traverser* traverser) const;
+	float get_mod_value(const blkhdgen_EnvelopePoints* points, float position, bool reset) const;
 	blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
 
 	EnvelopeRange& range();
@@ -110,17 +111,7 @@ ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) const
 
 	for (int i = 0; i < kFloatsPerDSPVector; i++)
 	{
-		if (resets[i] > 0)
-		{
-			point_search_index_ = -1;
-		}
-
-		const auto min = range_.min().get();
-		const auto max = range_.max().get();
-
-		const auto normalized_value = envelope_search(points, read_position[i], &point_search_index_);
-
-		out[i] = math::transform_and_denormalize(curve_, min, max, normalized_value);
+		out[i] = get_mod_value(points, read_position[i], resets[i] > 0);
 	}
 	
 	return out;
@@ -138,15 +129,17 @@ float EnvelopeParameter::get_mod_value(Traverser* traverser) const
 	const auto& resets = traverser->get_resets();
 	const auto& read_position = traverser->get_read_position();
 
-	if (resets[0] > 0)
-	{
-		point_search_index_ = -1;
-	}
+	return get_mod_value(points, read_position[0], resets[0] > 0);
+}
+
+float EnvelopeParameter::get_mod_value(const blkhdgen_EnvelopePoints* points, float position, bool reset) const
+{
+	if (reset) point_search_index_ = -1;
 
 	const auto min = range_.min().get();
 	const auto max = range_.max().get();
 
-	const auto normalized_value = envelope_search(points, read_position[0], &point_search_index_);
+	const auto normalized_value = envelope_search(points, position, &point_search_index_);
 
 	return math::transform_and_denormalize(curve_, min, max, normalized_value);
 }
