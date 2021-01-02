@@ -24,9 +24,9 @@ public:
 	const char* display_value(float value) const;
 	int get_flags() const;
 
-	float get_mod_value(blkhdgen_Position block_position) const;
+	ml::DSPVector get_mod_values(Traverser* traverser) const;
+	float get_mod_value(Traverser* traverser) const;
 	blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
-	void set_data_offset(PointTraverser::DataOffset offset);
 
 	EnvelopeRange& range();
 	const EnvelopeSnapSettings& snap_settings() const;
@@ -43,7 +43,7 @@ private:
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
 	std::function<const blkhdgen_EnvelopePoints*(void)> get_point_data_;
-	mutable PointTraverser traverser_;
+	mutable TraverserPointDataResetter traverser_resetter_;
 	mutable int point_search_index_ = -1;
 };
 
@@ -94,32 +94,59 @@ const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
 	return snap_settings_;
 }
 
-float EnvelopeParameter::get_mod_value(blkhdgen_Position block_position) const
+ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) const
 {
 	const auto points = get_point_data();
-
-	traverser_.set_points(points);
-	traverser_.set_block_position(block_position);
-
-	//
-	// It's assumed that we are usually traversing envelope points from left to right
-	//
-	// If the point data changed, or we traversed backwards, a binary search will
-	// be performed instead (triggered by setting point_search_index_ to -1)
-	//
-	if (traverser_.needs_reset())
-	{
-		traverser_.reset();
-		point_search_index_ = -1;
-	}
 
 	if (!points) return default_value_;
 	if (points->count < 1) return default_value_;
 
+	traverser_resetter_.check(points, traverser);
+
+	const auto& resets = traverser->get_resets();
+	const auto& read_position = traverser->get_read_position();
+
+	ml::DSPVector out;
+
+	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	{
+		if (resets[i] > 0)
+		{
+			point_search_index_ = -1;
+		}
+
+		const auto min = range_.min().get();
+		const auto max = range_.max().get();
+
+		const auto normalized_value = envelope_search(points, read_position[i], &point_search_index_);
+
+		out[i] = math::transform_and_denormalize(curve_, min, max, normalized_value);
+	}
+	
+	return out;
+}
+
+float EnvelopeParameter::get_mod_value(Traverser* traverser) const
+{
+	const auto points = get_point_data();
+
+	if (!points) return default_value_;
+	if (points->count < 1) return default_value_;
+
+	traverser_resetter_.check(points, traverser);
+
+	const auto& resets = traverser->get_resets();
+	const auto& read_position = traverser->get_read_position();
+
+	if (resets[0] > 0)
+	{
+		point_search_index_ = -1;
+	}
+
 	const auto min = range_.min().get();
 	const auto max = range_.max().get();
 
-	const auto normalized_value = envelope_search(points, traverser_.get_read_position(), &point_search_index_);
+	const auto normalized_value = envelope_search(points, read_position[0], &point_search_index_);
 
 	return math::transform_and_denormalize(curve_, min, max, normalized_value);
 }
@@ -132,11 +159,6 @@ blkhdgen_Error EnvelopeParameter::set_get_point_data_cb(void* user, blkhdgen_Get
 	};
 
 	return BLKHDGEN_OK;
-}
-
-void EnvelopeParameter::set_data_offset(PointTraverser::DataOffset offset)
-{
-	traverser_.set_data_offset(offset);
 }
 
 const blkhdgen_EnvelopePoints* EnvelopeParameter::get_point_data() const

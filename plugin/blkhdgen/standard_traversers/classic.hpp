@@ -9,8 +9,8 @@ class Classic
 {
 public:
 
-	float operator()(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, int sample_offset, float* derivative = nullptr);
-	void set_data_offset(PointTraverser::DataOffset offset);
+	float get_position(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivative = nullptr);
+	ml::DSPVector get_positions(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
 
 private:
 
@@ -18,7 +18,7 @@ private:
 
 	float segment_start_ = 0.0f;
 	int point_search_index_ = 0;
-	PointTraverser traverser_;
+	TraverserPointDataResetter traverser_resetter_;
 };
 
 template <class T> T ratio(T min, T max, T distance)
@@ -151,23 +151,43 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 	return float(n * y0_ff) + segment_start_;
 }
 
-float Classic::operator()(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, int sample_offset, float* derivative)
+float Classic::get_position(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivative)
 {
-	traverser_.set_points(pitch_points);
-	traverser_.set_block_position(block_position);
+	traverser_resetter_.check(pitch_points, traverser);
 
-	if (traverser_.needs_reset())
+	const auto& resets = traverser->get_resets();
+	const auto& read_position = traverser->get_read_position();
+
+	if (resets[0] > 0)
 	{
-		traverser_.reset();
+		segment_start_ = 0.0f;
 		point_search_index_ = 0;
 	}
 
-	return calculate(transpose, pitch_points, traverser_.get_read_position(), derivative) + sample_offset;
+	return calculate(transpose, pitch_points, read_position[0], derivative) + sample_offset;
 }
 
-void Classic::set_data_offset(PointTraverser::DataOffset offset)
+ml::DSPVector Classic::get_positions(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
 {
-	traverser_.set_data_offset(offset);
+	traverser_resetter_.check(pitch_points, traverser);
+
+	const auto& resets = traverser->get_resets();
+	const auto& read_position = traverser->get_read_position();
+
+	ml::DSPVector out;
+
+	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	{
+		if (resets[i] > 0)
+		{
+			segment_start_ = 0.0f;
+			point_search_index_ = 0;
+		}
+
+		out[i] = calculate(transpose, pitch_points, read_position[i], &(derivatives[i])) + sample_offset;
+	}
+
+	return out;
 }
 
 }}

@@ -4,6 +4,7 @@
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "parameter.hpp"
+#include "sample_data.hpp"
 #include "slider_spec.hpp"
 
 namespace blkhdgen {
@@ -19,8 +20,8 @@ public:
 	virtual blkhdgen_Error process(blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out) = 0;
 	virtual const char* get_error_string(blkhdgen_Error error) const = 0;
 	virtual blkhdgen_Position get_waveform_position(blkhdgen_Position block_position, float* derivative = nullptr) const = 0;
-	virtual void set_data_offset(int offset) = 0;
-
+	
+	void set_data_offset(int offset);
 	int get_num_channels() const { return 2; }
 
 	int get_num_groups() const;
@@ -46,15 +47,38 @@ protected:
 	template <class T>
 	std::shared_ptr<SliderParameter<T>> add_parameter(SliderSpec<T> spec);
 
+	const blkhdgen_SampleInfo* get_sample_info() const;
+	blkhdgen_FrameCount get_sample_data(blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer) const;
+	ml::DSPVector read_sample_frames_interp(blkhdgen_ChannelCount channel, const ml::DSPVector& pos, bool loop);
+	int get_data_offset() const { return data_offset_; }
+
+	static ml::DSPVectorArray<2> stereo_pan(const ml::DSPVectorArray<2> in, float pan, std::shared_ptr<EnvelopeParameter> pan_envelope, Traverser* traverser);
+
 private:
 
 	std::map<blkhdgen_ID, Group> groups_;
 	std::map<blkhdgen_UUID, std::shared_ptr<Parameter>> parameters_;
-	std::function<void(blkhdgen_SampleInfo*)> get_sample_info_;
-	std::function<void(blkhdgen_ChannelCount, blkhdgen_Index, blkhdgen_FrameCount, float*)> get_sample_data_;
 	std::function<blkhdgen_WarpPoints*()> get_warp_point_data_;
 	std::function<blkhdgen_ManipulatorData*()> get_manipulator_data_;
+
+	SampleData sample_data_;
+	std::atomic<int> data_offset_;
 };
+
+void Generator::set_data_offset(int offset)
+{
+	data_offset_ = offset;
+}
+
+const blkhdgen_SampleInfo* Generator::get_sample_info() const
+{
+	return sample_data_.get_info();
+}
+
+blkhdgen_FrameCount Generator::get_sample_data(blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer) const
+{
+	return sample_data_.get_data(channel, index, size, buffer);
+}
 
 void Generator::add_group(blkhdgen_ID id, std::string name)
 {
@@ -140,26 +164,6 @@ Parameter& Generator::get_parameter_by_id(blkhdgen_UUID uuid)
 	return *pos->second;
 }
 
-blkhdgen_Error Generator::set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb)
-{
-	get_sample_info_ = [user, cb](blkhdgen_SampleInfo* info)
-	{
-		cb(user, info);
-	};
-
-	return BLKHDGEN_OK;
-}
-
-blkhdgen_Error Generator::set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb)
-{
-	get_sample_data_ = [user, cb](blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer)
-	{
-		cb(user, channel, index, size, buffer);
-	};
-
-	return BLKHDGEN_OK;
-}
-
 blkhdgen_Error Generator::set_get_warp_point_data_cb(void* user, blkhdgen_GetWarpPointDataCB cb)
 {
 	get_warp_point_data_ = [user, cb]()
@@ -178,6 +182,40 @@ blkhdgen_Error Generator::set_get_manipulator_data_cb(void* user, blkhdgen_GetMa
 	};
 
 	return BLKHDGEN_OK;
+}
+
+ml::DSPVector Generator::read_sample_frames_interp(blkhdgen_ChannelCount channel, const ml::DSPVector& pos, bool loop)
+{
+	return sample_data_.read_frames_interp(channel, pos, loop);
+}
+
+ml::DSPVectorArray<2> Generator::stereo_pan(const ml::DSPVectorArray<2> in, float pan, std::shared_ptr<EnvelopeParameter> pan_envelope, Traverser* traverser)
+{
+	auto out = in;
+
+	ml::DSPVector env_pan;
+
+	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	{
+		env_pan[i] = pan_envelope->get_mod_value(traverser);
+	}
+
+	const auto zero = ml::DSPVector(0.0f);
+	const auto one = ml::DSPVector(1.0f);
+
+	env_pan = ml::clamp(env_pan + pan, ml::DSPVector(-1.0f), ml::DSPVector(1.0f));
+
+	const auto pan_amp_L = ml::lerp(one, zero, ml::max(zero, env_pan));
+	const auto pan_amp_R = ml::lerp(one, zero, ml::max(zero, 0.0f - env_pan));
+
+	const auto pan_vec = ml::concatRows(pan_amp_L, pan_amp_R);
+
+	out *= pan_vec;
+
+	out.row(0) += out.row(1) * (1.0f - pan_amp_R);
+	out.row(1) += out.row(0) * (1.0f - pan_amp_L);
+
+	return out;
 }
 
 }

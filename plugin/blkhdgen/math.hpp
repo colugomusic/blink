@@ -1,5 +1,9 @@
 #pragma once
 
+#pragma warning(push, 0)
+#include <DSP/MLDSPOps.h>
+#pragma warning(pop)
+
 namespace blkhdgen {
 namespace math {
 
@@ -83,6 +87,52 @@ template <class T,class InverseCurve>
 constexpr T inverse_transform_and_normalize(InverseCurve inverse_curve, T min, T max, T value)
 {
 	return inverse_curve(inverse_lerp(min, max, value));
+}
+
+template <class T>
+inline T wrap(T x, T y)
+{
+	x = std::fmod(x, y);
+
+	if (x < T(0)) x += y;
+
+	return x;
+}
+
+inline int wrap(int x, int y)
+{
+	x = x % y;
+
+	if (x < 0) x += y;
+
+	return x;
+}
+
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> wrap(const ml::DSPVectorArray<ROWS>& x, float y)
+{
+	ml::DSPVectorArray<ROWS> out;
+
+	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	{
+		out[i] = std::fmod(x[i], y);
+
+		if (out[i] < 0.0f) out[i] += y;
+	}
+
+	return out;
+}
+
+template <size_t ROWS>
+ml::DSPVectorArrayInt<ROWS> ceil(const ml::DSPVectorArray<ROWS>& in)
+{
+	return ml::truncateFloatToInt(in + 1);
+}
+
+template <size_t ROWS>
+ml::DSPVectorArrayInt<ROWS> floor(const ml::DSPVectorArray<ROWS>& in)
+{
+	return ml::truncateFloatToInt(in);
 }
 
 }

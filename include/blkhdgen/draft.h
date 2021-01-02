@@ -170,7 +170,6 @@ typedef const blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* user);
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-typedef float (*blkhdgen_Envelope_GetModValue)(void* proc_data, blkhdgen_Position block_position);
 typedef blkhdgen_Error(*blkhdgen_Envelope_SetGetPointDataCB)(void* proc_data, void* user, blkhdgen_GetPointDataCB cb);
 
 typedef struct
@@ -195,9 +194,6 @@ typedef struct
 	// The returned buffer remains valid until the next call to display_value or
 	// until the generator is destroyed.
 	blkhdgen_DisplayValue display_value;
-
-	// Get the modulation value [min..max] for the given block position
-	blkhdgen_Envelope_GetModValue get_mod_value;
 
 	// Host will call this once to set a callback that the plugin uses to
 	// retrieve point data.
@@ -372,8 +368,8 @@ typedef struct
 //
 // Callbacks
 //
-typedef void (*blkhdgen_GetSampleInfoCB)(void* user, blkhdgen_SampleInfo* info);
-typedef void (*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+typedef const blkhdgen_SampleInfo* (*blkhdgen_GetSampleInfoCB)(void* user);
+typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
 typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* user);
 typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* user);
 
@@ -389,6 +385,7 @@ typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, 
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* user, blkhdgen_GetSampleDataCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* user, blkhdgen_GetWarpPointDataCB cb);
 typedef blkhdgen_Error(*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb);
+typedef blkhdgen_Error(*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
 typedef blkhdgen_Error(*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
 typedef blkhdgen_Position(*blkhdgen_Generator_GetWaveformPosition)(void* proc_data, blkhdgen_Position block_position, float* derivative);
 
@@ -406,6 +403,8 @@ typedef struct
 	blkhdgen_Generator_GetGroupByID get_group_by_id;
 	blkhdgen_Generator_GetParameter get_parameter;
 	blkhdgen_Generator_GetParameterByID get_parameter_by_id;
+
+	blkhdgen_Generator_SetDataOffset set_data_offset;
 
 	// Returned buffer remains valid until the next call to get_error_string or
 	// until the generator is destroyed

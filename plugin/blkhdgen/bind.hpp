@@ -149,13 +149,6 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope_snap_settings(envelope->snap_settings());
 	};
 
-	out.get_mod_value = [](void* proc_data, blkhdgen_Position block_position)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->get_mod_value(block_position);
-	};
-
 	out.curve = [](void* proc_data, float value)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
@@ -397,6 +390,15 @@ inline blkhdgen_Generator generator(Generator* generator)
 		auto generator = (Generator*)(proc_data);
 
 		return parameter(generator->get_parameter_by_id(uuid));
+	};
+
+	out.set_data_offset = [](void* proc_data, int offset)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		generator->set_data_offset(offset);
+
+		return BLKHDGEN_OK;
 	};
 
 	out.get_error_string = [](void* proc_data, blkhdgen_Error error)
