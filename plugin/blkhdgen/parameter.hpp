@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <blkhdgen/draft.h>
+#include <blkhdgen.h>
 #include "parameter_spec.hpp"
 
 namespace blkhdgen {
