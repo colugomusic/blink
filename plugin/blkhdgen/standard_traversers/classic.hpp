@@ -1,27 +1,12 @@
 #pragma once
 
 #include "../traverser.hpp"
-#include "blkhdgen/envelope_parameter.hpp"
-#include "blkhdgen/slider_parameter.hpp"
+#include "../cached.hpp"
+#include "../envelope_parameter.hpp"
+#include "../slider_parameter.hpp"
 
 namespace blkhdgen {
 namespace std_traversers {
-
-class Classic
-{
-public:
-
-	float get_position(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivative = nullptr);
-	ml::DSPVector get_positions(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
-
-private:
-
-	float calculate(float transpose, const EnvelopeParameter& env_pitch, blkhdgen_Position position, float* derivative = nullptr);
-
-	float segment_start_ = 0.0f;
-	int point_search_index_ = 0;
-	TraverserPointDataResetter traverser_resetter_;
-};
 
 template <class T> T ratio(T min, T max, T distance)
 {
@@ -54,109 +39,201 @@ template <class T> T weird_math_that_i_dont_understand_ff(T min, T max, T distan
 	return math::p_to_ff(min) * std::pow(ratio(min, max, distance), n);
 }
 
-// We use this for both sample playback and waveform generation. This
-// calculation needs to be fast, preferably O(n) or better.
-//
-// If we are calculating waveforms the start of the waveform might be
-// millions of pixels off the left edge of the screen therefore it is
-// not good enough to simply traverse the entire sample.
-//
-// blkhdgen_EnvelopePoint has an unused 'curve' member which could be
-// used to represent an ease-in/ease-out curve from one envelope point
-// to the next. This is not implemented because I do not understand
-// the mathematics involved in calculating the resulting sample
-// position.
-//
-
-float Classic::calculate(float transpose, const EnvelopeParameter& env_pitch, blkhdgen_Position block_position, float* derivative)
+class ClassicCalculator
 {
-	const auto pitch_points = env_pitch.get_point_data();
+public:
 
-	const auto transform = [&env_pitch](float value)
+	ClassicCalculator()
+		// These values are expensive to calculate and usually will not change so
+		// they are cached instead of calculating them every frame
+		: p0_([this]() { return transform(p0_.p.position.y) + transpose_; },
+			  [this]() { return math::p_to_ff(p0_.y.get()); })
+		, p1_([this]() { return transform(p1_.p.position.y) + transpose_; },
+			  [this]() { return math::p_to_ff(p1_.y.get()); })
+	{}
+
+	// We use this for both sample playback and waveform generation. This
+	// calculation needs to be fast, preferably O(n) or better.
+	//
+	// If we are calculating waveforms the start of the waveform might be
+	// millions of pixels off the left edge of the screen therefore it is
+	// not good enough to simply traverse the entire sample.
+	//
+	// blkhdgen_EnvelopePoint has an unused 'curve' member which could be
+	// used to represent an ease-in/ease-out curve from one envelope point
+	// to the next. This is not implemented because I do not understand
+	// the mathematics involved in calculating the resulting sample
+	// position.
+	//
+	float calculate(float transpose, const EnvelopeParameter& env_pitch, blkhdgen_Position block_position, float* derivative = nullptr)
 	{
-		const auto curve = [&env_pitch](float value)
+		if (transpose_ != transpose)
 		{
-			return env_pitch.curve(value);
-		};
+			set_y0_dirty();
+			set_y1_dirty();
 
-		const auto& range = env_pitch.range();
-
-		return math::transform_and_denormalize(curve, range.min().get(), range.max().get(), value);
-	};
-
-	for (blkhdgen_Index i = point_search_index_; i < pitch_points->count; i++)
-	{
-		auto p1 = pitch_points->points[i];
-
-		if (block_position < p1.position.x)
-		{
-			if (i == 0)
-			{
-				point_search_index_ = 0;
-
-				const auto y1 = transform(p1.position.y) + transpose;
-				const auto y1_ff = math::p_to_ff(transform(y1));
-
-				if (derivative) *derivative = float(y1_ff);
-
-				return float(block_position * y1_ff) + segment_start_;
-			}
-
-			auto p0 = pitch_points->points[i - 1];
-			auto n = block_position - p0.position.x;
-			auto segment_size = double(p1.position.x) - p0.position.x;
-
-			if (segment_size > 0.0f)
-			{
-				point_search_index_ = i;
-
-				auto y0 = double(transform(p0.position.y)) + transpose;
-				auto y1 = double(transform(p1.position.y)) + transpose;
-
-				if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(y0, y1, segment_size, n));
-
-				return float(weird_math_that_i_dont_understand(y0, y1, segment_size, n)) + segment_start_;
-			}
+			transpose_ = transpose;
 		}
-		else
+
+		env_pitch_ = &env_pitch;
+
+		const auto pitch_points = env_pitch_->get_point_data();
+
+		for (blkhdgen_Index i = point_search_index_; i < pitch_points->count; i++)
 		{
-			if (i == 0)
+			p1_.get(pitch_points, i);
+
+			if (block_position < p1_.p.position.x)
 			{
-				point_search_index_ = 1;
+				if (i == 0)
+				{
+					point_search_index_ = 0;
 
-				const auto y1 = double(transform(p1.position.y)) + transpose;
-				const auto y1_ff = math::p_to_ff(y1);
+					if (derivative) *derivative = p1_.ff.get();
 
-				segment_start_ += float(p1.position.x * y1_ff) + segment_start_;
-			}
-			else
-			{
-				point_search_index_ = i + 1;
+					return float(block_position * p1_.ff.get()) + segment_start_;
+				}
 
-				auto p0 = pitch_points->points[i - 1];
-				auto segment_size = double(p1.position.x) - p0.position.x;
+				p0_.get(pitch_points, i - 1);
+
+				auto n = block_position - p0_.p.position.x;
+				auto segment_size = double(p1_.p.position.x) - p0_.p.position.x;
 
 				if (segment_size > 0.0f)
 				{
-					auto y0 = double(transform(p0.position.y)) + transpose;
-					auto y1 = double(transform(p1.position.y)) + transpose;
+					point_search_index_ = i;
 
-					segment_start_ = float(weird_math_that_i_dont_understand(y0, y1, segment_size, segment_size)) + segment_start_;
+					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0_.y.get()), double(p1_.y.get()), segment_size, n));
+
+					return float(weird_math_that_i_dont_understand(double(p0_.y.get()), double(p1_.y.get()), segment_size, n)) + segment_start_;
+				}
+			}
+			else
+			{
+				if (i == 0)
+				{
+					point_search_index_ = 1;
+
+					segment_start_ += float(p1_.p.position.x * p1_.ff.get()) + segment_start_;
+				}
+				else
+				{
+					point_search_index_ = i + 1;
+
+					p0_.get(pitch_points, i - 1);
+
+					auto segment_size = double(p1_.p.position.x) - p0_.p.position.x;
+
+					if (segment_size > 0.0f)
+					{
+						segment_start_ = float(weird_math_that_i_dont_understand(double(p0_.y.get()), double(p1_.y.get()), segment_size, segment_size)) + segment_start_;
+					}
 				}
 			}
 		}
+
+		p0_.get(pitch_points, pitch_points->count - 1);
+
+		auto n = block_position - p0_.p.position.x;
+
+		if (derivative) *derivative = p0_.ff.get();
+
+		return float(n * p0_.ff.get()) + segment_start_;
 	}
 
-	auto p0 = pitch_points->points[pitch_points->count - 1];
-	auto n = block_position - p0.position.x;
+	void reset()
+	{
+		segment_start_ = 0.0f;
+		point_search_index_ = 0;
 
-	const auto y0 = double(transform(p0.position.y)) + transpose;
-	const auto y0_ff = math::p_to_ff(y0);
+		set_y0_dirty();
+		set_y1_dirty();
+	}
 
-	if (derivative) *derivative = float(y0_ff);
+private:
 
-	return float(n * y0_ff) + segment_start_;
-}
+	void set_y0_dirty()
+	{
+		p0_.y.set_dirty();
+		p0_.ff.set_dirty();
+	}
+
+	void set_y1_dirty()
+	{
+		p1_.y.set_dirty();
+		p1_.ff.set_dirty();
+	}
+
+	float transform(float y) const
+	{
+		const auto curve = [this](float value)
+		{
+			return env_pitch_->curve(value);
+		};
+
+		const auto& range = env_pitch_->range();
+
+		return math::transform_and_denormalize(curve, range.min().get(), range.max().get(), y);
+	}
+
+	struct CachePoint
+	{
+		Cached<float> y;
+		Cached<float> ff;
+		blkhdgen_EnvelopePoint p;
+		blkhdgen_Index index;
+
+		CachePoint(std::function<float(void)> update_y, std::function<float(void)> update_ff)
+			: y(update_y)
+			, ff(update_ff)
+		{
+		}
+
+		bool set_index(blkhdgen_Index new_index)
+		{
+			if (index != new_index)
+			{
+				index = new_index;
+
+				y.set_dirty();
+				ff.set_dirty();
+
+				return true;
+			}
+
+			return false;
+		}
+
+		void get(const blkhdgen_EnvelopePoints* points, blkhdgen_Index new_index)
+		{
+			if (set_index(new_index))
+			{
+				p = points->points[new_index];
+			}
+		}
+	};
+
+	float transpose_;
+	const EnvelopeParameter* env_pitch_;
+	float segment_start_ = 0.0f;
+	int point_search_index_ = 0;
+
+	CachePoint p0_;
+	CachePoint p1_;
+};
+
+class Classic
+{
+public:
+
+	float get_position(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivative = nullptr);
+	ml::DSPVector get_positions(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
+
+private:
+
+	ClassicCalculator calculator_;
+	TraverserPointDataResetter traverser_resetter_;
+};
 
 float Classic::get_position(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivative)
 {
@@ -178,11 +255,10 @@ float Classic::get_position(float transpose, const EnvelopeParameter& env_pitch,
 
 	if (resets[0] > 0)
 	{
-		segment_start_ = 0.0f;
-		point_search_index_ = 0;
+		calculator_.reset();
 	}
 
-	return calculate(transpose, env_pitch, read_position[0], derivative) + sample_offset;
+	return calculator_.calculate(transpose, env_pitch, read_position[0], derivative) + sample_offset;
 }
 
 ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivatives)
@@ -209,11 +285,10 @@ ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& e
 	{
 		if (resets[i] > 0)
 		{
-			segment_start_ = 0.0f;
-			point_search_index_ = 0;
+			calculator_.reset();
 		}
 
-		out[i] = calculate(transpose, env_pitch, read_position[i], &(derivatives[i])) + sample_offset;
+		out[i] = calculator_.calculate(transpose, env_pitch, read_position[i], &(derivatives[i])) + sample_offset;
 	}
 
 	return out;
