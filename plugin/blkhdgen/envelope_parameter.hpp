@@ -30,6 +30,7 @@ public:
 	blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
 
 	EnvelopeRange& range();
+	const EnvelopeRange& range() const;
 	const EnvelopeSnapSettings& snap_settings() const;
 	const blkhdgen_EnvelopePoints* get_point_data() const;
 
@@ -86,6 +87,11 @@ const char* EnvelopeParameter::display_value(float value) const
 }
 
 EnvelopeRange& EnvelopeParameter::range()
+{
+	return range_;
+}
+
+const EnvelopeRange& EnvelopeParameter::range() const
 {
 	return range_;
 }

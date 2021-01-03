@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../traverser.hpp"
+#include "blkhdgen/envelope_parameter.hpp"
+#include "blkhdgen/slider_parameter.hpp"
 
 namespace blkhdgen {
 namespace std_traversers {
@@ -9,12 +11,12 @@ class Classic
 {
 public:
 
-	float get_position(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivative = nullptr);
-	ml::DSPVector get_positions(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
+	float get_position(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivative = nullptr);
+	ml::DSPVector get_positions(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
 
 private:
 
-	float calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position position, float* derivative = nullptr);
+	float calculate(float transpose, const EnvelopeParameter& env_pitch, blkhdgen_Position position, float* derivative = nullptr);
 
 	float segment_start_ = 0.0f;
 	int point_search_index_ = 0;
@@ -66,8 +68,22 @@ template <class T> T weird_math_that_i_dont_understand_ff(T min, T max, T distan
 // position.
 //
 
-float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative)
+float Classic::calculate(float transpose, const EnvelopeParameter& env_pitch, blkhdgen_Position block_position, float* derivative)
 {
+	const auto pitch_points = env_pitch.get_point_data();
+
+	const auto transform = [&env_pitch](float value)
+	{
+		const auto curve = [&env_pitch](float value)
+		{
+			return env_pitch.curve(value);
+		};
+
+		const auto& range = env_pitch.range();
+
+		return math::transform_and_denormalize(curve, range.min().get(), range.max().get(), value);
+	};
+
 	for (blkhdgen_Index i = point_search_index_; i < pitch_points->count; i++)
 	{
 		auto p1 = pitch_points->points[i];
@@ -78,8 +94,8 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 			{
 				point_search_index_ = 0;
 
-				const auto y1 = double(p1.position.y) + transpose;
-				const auto y1_ff = math::p_to_ff(y1);
+				const auto y1 = transform(p1.position.y) + transpose;
+				const auto y1_ff = math::p_to_ff(transform(y1));
 
 				if (derivative) *derivative = float(y1_ff);
 
@@ -94,8 +110,8 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 			{
 				point_search_index_ = i;
 
-				auto y0 = double(p0.position.y) + transpose;
-				auto y1 = double(p1.position.y) + transpose;
+				auto y0 = double(transform(p0.position.y)) + transpose;
+				auto y1 = double(transform(p1.position.y)) + transpose;
 
 				if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(y0, y1, segment_size, n));
 
@@ -108,7 +124,7 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 			{
 				point_search_index_ = 1;
 
-				const auto y1 = double(p1.position.y) + transpose;
+				const auto y1 = double(transform(p1.position.y)) + transpose;
 				const auto y1_ff = math::p_to_ff(y1);
 
 				segment_start_ += float(p1.position.x * y1_ff) + segment_start_;
@@ -122,8 +138,8 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 
 				if (segment_size > 0.0f)
 				{
-					auto y0 = double(p0.position.y) + transpose;
-					auto y1 = double(p1.position.y) + transpose;
+					auto y0 = double(transform(p0.position.y)) + transpose;
+					auto y1 = double(transform(p1.position.y)) + transpose;
 
 					segment_start_ = float(weird_math_that_i_dont_understand(y0, y1, segment_size, segment_size)) + segment_start_;
 				}
@@ -134,7 +150,7 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 	auto p0 = pitch_points->points[pitch_points->count - 1];
 	auto n = block_position - p0.position.x;
 
-	const auto y0 = double(p0.position.y) + transpose;
+	const auto y0 = double(transform(p0.position.y)) + transpose;
 	const auto y0_ff = math::p_to_ff(y0);
 
 	if (derivative) *derivative = float(y0_ff);
@@ -142,9 +158,10 @@ float Classic::calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_p
 	return float(n * y0_ff) + segment_start_;
 }
 
-float Classic::get_position(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivative)
+float Classic::get_position(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivative)
 {
 	const auto& read_position = traverser->get_read_position();
+	const auto pitch_points = env_pitch.get_point_data();
 
 	if (!pitch_points || pitch_points->count < 1)
 	{
@@ -165,12 +182,13 @@ float Classic::get_position(float transpose, const blkhdgen_EnvelopePoints* pitc
 		point_search_index_ = 0;
 	}
 
-	return calculate(transpose, pitch_points, read_position[0], derivative) + sample_offset;
+	return calculate(transpose, env_pitch, read_position[0], derivative) + sample_offset;
 }
 
-ml::DSPVector Classic::get_positions(float transpose, const blkhdgen_EnvelopePoints* pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
+ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivatives)
 {
 	const auto& read_position = traverser->get_read_position();
+	const auto pitch_points = env_pitch.get_point_data();
 
 	if (!pitch_points || pitch_points->count < 1)
 	{
@@ -195,7 +213,7 @@ ml::DSPVector Classic::get_positions(float transpose, const blkhdgen_EnvelopePoi
 			point_search_index_ = 0;
 		}
 
-		out[i] = calculate(transpose, pitch_points, read_position[i], &(derivatives[i])) + sample_offset;
+		out[i] = calculate(transpose, env_pitch, read_position[i], &(derivatives[i])) + sample_offset;
 	}
 
 	return out;
