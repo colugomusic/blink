@@ -16,7 +16,6 @@ public:
 
 	virtual ~Generator() {}
 
-	virtual const char* get_name() const = 0;
 	virtual blkhdgen_Error process(blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out) = 0;
 	virtual const char* get_error_string(blkhdgen_Error error) const = 0;
 	virtual blkhdgen_Error get_waveform_positions(const blkhdgen_Position* block_positions, float* out, float* derivative = nullptr) const = 0;

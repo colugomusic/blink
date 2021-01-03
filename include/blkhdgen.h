@@ -406,6 +406,7 @@ typedef blkhdgen_Error (*blkhdgen_Generator_PreprocessSample)(void* proc_data, v
 
 typedef struct
 {
+	blkhdgen_UUID uuid;
 	const char* name;
 	int num_groups;
 	int num_parameters;

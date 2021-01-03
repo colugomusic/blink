@@ -340,15 +340,17 @@ inline blkhdgen_Parameter parameter(Parameter& parameter)
 	return out;
 }
 
-inline blkhdgen_Generator generator(Generator* generator)
+inline blkhdgen_Generator generator(Generator* generator, const char* uuid, const char* name, bool requires_preprocess)
 {
 	blkhdgen_Generator out;
 
 	out.proc_data = generator;
-	out.name = generator->get_name();
+	out.uuid = uuid;
+	out.name = name;
 	out.num_channels = generator->get_num_channels();
 	out.num_groups = generator->get_num_groups();
 	out.num_parameters = generator->get_num_parameters();
+	out.requires_preprocess = requires_preprocess;
 
 	out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb)
 	{
@@ -456,7 +458,7 @@ inline blkhdgen_Generator generator(Generator* generator)
 template <class GeneratorType>
 blkhdgen_Generator make_generator()
 {
-	return bind::generator(new GeneratorType());
+	return bind::generator(new GeneratorType(), GeneratorType::UUID, GeneratorType::NAME, GeneratorType::REQUIRES_PREPROCESS);
 }
 
 blkhdgen_Error destroy_generator(blkhdgen_Generator generator)
