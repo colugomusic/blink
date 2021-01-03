@@ -116,11 +116,11 @@ inline blkhdgen_Chord chord(ChordParameter& chord)
 	out.parameter_type = blkhdgen_ParameterType_Chord;
 	out.proc_data = &chord;
 
-	out.set_get_chord_data_cb = [](void* proc_data, void* user, blkhdgen_GetChordDataCB cb) -> blkhdgen_Error
+	out.set_get_chord_data_cb = [](void* proc_data, void* host, blkhdgen_GetChordDataCB cb) -> blkhdgen_Error
 	{
 		auto chord = (ChordParameter*)(proc_data);
 
-		return chord->set_get_chord_data_cb(user, cb);
+		return chord->set_get_chord_data_cb(host, cb);
 	};
 
 	return out;
@@ -170,11 +170,11 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->display_value(value);
 	};
 
-	out.set_get_point_data_cb = [](void* proc_data, void* user, blkhdgen_GetPointDataCB cb)
+	out.set_get_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetPointDataCB cb)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->set_get_point_data_cb(user, cb);
+		return envelope->set_get_point_data_cb(host, cb);
 	};
 
 	return out;
@@ -350,18 +350,18 @@ inline blkhdgen_Generator generator(Generator* generator)
 	out.num_groups = generator->get_num_groups();
 	out.num_parameters = generator->get_num_parameters();
 
-	out.set_get_warp_point_data_cb = [](void* proc_data, void* user, blkhdgen_GetWarpPointDataCB cb)
+	out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_warp_point_data_cb(user, cb);
+		return generator->set_get_warp_point_data_cb(host, cb);
 	};
 
-	out.set_get_manipulator_data_cb = [](void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb)
+	out.set_get_manipulator_data_cb = [](void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_manipulator_data_cb(user, cb);
+		return generator->set_get_manipulator_data_cb(host, cb);
 	};
 
 	out.get_group = [](void* proc_data, blkhdgen_Index index)
@@ -422,18 +422,32 @@ inline blkhdgen_Generator generator(Generator* generator)
 		return generator->get_waveform_positions(block_positions, out, derivatives);
 	};
 
-	out.set_get_sample_data_cb = [](void* proc_data, void* user, blkhdgen_GetSampleDataCB cb)
+	out.set_get_sample_data_cb = [](void* proc_data, void* host, blkhdgen_GetSampleDataCB cb)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_sample_data_cb(user, cb);
+		return generator->set_get_sample_data_cb(host, cb);
 	};
 
-	out.set_get_sample_info_cb = [](void* proc_data, void* user, blkhdgen_GetSampleInfoCB cb)
+	out.set_get_sample_info_cb = [](void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb)
 	{
 		auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_sample_info_cb(user, cb);
+		return generator->set_get_sample_info_cb(host, cb);
+	};
+
+	out.get_required_aux_buffer_size = [](void* proc_data)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->get_required_aux_buffer_size();
+	};
+
+	out.preprocess_sample = [](void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->preprocess_sample(host, callbacks);
 	};
 
 	return out;

@@ -124,12 +124,25 @@ typedef float (*blkhdgen_InverseCurve)(void* proc_data, float value);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
 typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
 
+//
+// Sample Preprocessing
+//
+typedef bool (*blkhdgen_Preprocess_ShouldAbort)(void* host);
+typedef void (*blkhdgen_Preprocess_ReportProgress)(void* host, float progress);
+
+typedef struct
+{
+	blkhdgen_Preprocess_ShouldAbort should_abort;
+	blkhdgen_Preprocess_ReportProgress report_progress;
+} blkhdgen_PreprocessCallbacks;
+
 typedef struct
 {
 	blkhdgen_ChannelCount num_channels;
 	blkhdgen_FrameCount num_frames;
 	blkhdgen_SR SR;
 	blkhdgen_BitDepth bit_depth;
+	void* aux_buffer;
 } blkhdgen_SampleInfo;
 
 enum blkhdgen_ParameterType
@@ -162,7 +175,7 @@ enum blkhdgen_ToggleFlags
 	blkhdgen_ToggleFlags_DefaultEnabled = 0x8,
 };
 
-typedef const blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* user);
+typedef const blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* host);
 
 //
 // Envelope parameter
@@ -170,7 +183,7 @@ typedef const blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* user);
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-typedef blkhdgen_Error(*blkhdgen_Envelope_SetGetPointDataCB)(void* proc_data, void* user, blkhdgen_GetPointDataCB cb);
+typedef blkhdgen_Error(*blkhdgen_Envelope_SetGetPointDataCB)(void* proc_data, void* host, blkhdgen_GetPointDataCB cb);
 
 typedef struct
 {
@@ -224,8 +237,8 @@ typedef struct
 	blkhdgen_ChordBlock* blocks;
 } blkhdgen_ChordData;
 
-typedef blkhdgen_ChordData* (*blkhdgen_GetChordDataCB)(void* user);
-typedef blkhdgen_Error(*blkhdgen_Chord_SetGetChordDataCB)(void* proc_data, void* user, blkhdgen_GetChordDataCB cb);
+typedef blkhdgen_ChordData* (*blkhdgen_GetChordDataCB)(void* host);
+typedef blkhdgen_Error(*blkhdgen_Chord_SetGetChordDataCB)(void* proc_data, void* host, blkhdgen_GetChordDataCB cb);
 
 typedef struct
 {
@@ -368,26 +381,28 @@ typedef struct
 //
 // Callbacks
 //
-typedef const blkhdgen_SampleInfo* (*blkhdgen_GetSampleInfoCB)(void* user);
-typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* user, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
-typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* user);
-typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* user);
+typedef const blkhdgen_SampleInfo* (*blkhdgen_GetSampleInfoCB)(void* host);
+typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* host, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* host);
+typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* host);
 
 //
 // Generator
 //
-typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
-typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
+typedef blkhdgen_Group (*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
+typedef blkhdgen_Group (*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
+typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
+typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
 typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* user, blkhdgen_GetSampleInfoCB cb);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* user, blkhdgen_GetSampleDataCB cb);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* user, blkhdgen_GetWarpPointDataCB cb);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* user, blkhdgen_GetManipulatorDataCB cb);
-typedef blkhdgen_Error(*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
-typedef blkhdgen_Error(*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
-typedef blkhdgen_Error(*blkhdgen_Generator_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
+typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
+typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
+typedef blkhdgen_Error (*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
+typedef blkhdgen_Error (*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb);
+typedef blkhdgen_Error (*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
+typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
+typedef blkhdgen_Error (*blkhdgen_Generator_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
+typedef size_t (*blkhdgen_Generator_GetAuxBufferSize)(void* proc_data);
+typedef blkhdgen_Error (*blkhdgen_Generator_PreprocessSample)(void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks);
 
 typedef struct
 {
@@ -396,6 +411,7 @@ typedef struct
 	int num_parameters;
 	blkhdgen_ChannelCount num_channels;
 	int num_manipulator_targets;
+	bool requires_preprocess;
 
 	void* proc_data;
 
@@ -403,7 +419,6 @@ typedef struct
 	blkhdgen_Generator_GetGroupByID get_group_by_id;
 	blkhdgen_Generator_GetParameter get_parameter;
 	blkhdgen_Generator_GetParameterByID get_parameter_by_id;
-
 	blkhdgen_Generator_SetDataOffset set_data_offset;
 
 	// Returned buffer remains valid until the next call to get_error_string or
@@ -432,11 +447,50 @@ typedef struct
 	// than BLKHDGEN_VECTOR_SIZE)
 	//
 	// The is the only function that is called in the audio thread
+	//
+	// output pointer is aligned on a 16-byte boundary
 	blkhdgen_Generator_Process process;
 
 	// Get the transformed waveform positions and derivatives for the given block
 	// positions
+	//
+	// output pointers are aligned on 16-byte boundaries
 	blkhdgen_Generator_GetWaveformPositions get_waveform_positions;
+
+	// The host can allocate a buffer of memory that the plugin can use to read
+	// and write data related to the current sample. The lifetime of the buffer
+	// will be tied to the sample so it won't be freed unless the sample is 
+	// deleted.
+	//
+	// This function should return the size in bytes of the required buffer.
+	//
+	// The plugin can use the GetSampleInfo/GetSampleData callbacks to access the
+	// current sample.
+	//
+	// The host will always wait for this function to complete before process() is
+	// called for the current sample.
+	//
+	// If no buffer is required then the plugin should return zero.
+	blkhdgen_Generator_GetAuxBufferSize get_required_aux_buffer_size;
+
+	// Called by the host once per sample if requires_preprocess==true
+	//
+	// This function will be called in a separate thread from everything else.
+	//
+	// The plugin should periodically call the ShouldAbort callback and stop
+	// preprocessing if it returns true.
+	//
+	// The plugin should periodically report the completion percentage by
+	// calling the ReportProgress callback with a value between 0 and 1.
+	//
+	// If get_required_aux_buffer_size() returns > 0 then the required buffer
+	// will be available via the GetSampleInfo callback.
+	//
+	// The process() function may be called in the audio thread before
+	// preprocessing has finished so the plugin needs to synchronize this
+	// situation. It is ok to simply return silence until preprocessing has
+	// completed.
+	blkhdgen_Generator_PreprocessSample preprocess_sample;
 } blkhdgen_Generator;
 
 #ifdef BLKHDGEN_EXPORT

@@ -176,7 +176,7 @@ ml::DSPVector Classic::get_positions(float transpose, const blkhdgen_EnvelopePoi
 	{
 		const auto ff = math::p_to_ff(transpose);
 
-		if (derivatives) ml::store(ml::DSPVector(ff), derivatives);
+		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 
 		return read_position * ff;
 	}
