@@ -340,12 +340,11 @@ inline blkhdgen_Parameter parameter(Parameter& parameter)
 	return out;
 }
 
-inline blkhdgen_Generator generator(Generator* generator, const char* uuid, const char* name, bool requires_preprocess)
+inline blkhdgen_Generator generator(Generator* generator, const char* name, bool requires_preprocess)
 {
 	blkhdgen_Generator out;
 
 	out.proc_data = generator;
-	out.uuid = uuid;
 	out.name = name;
 	out.num_channels = generator->get_num_channels();
 	out.num_groups = generator->get_num_groups();
@@ -359,12 +358,12 @@ inline blkhdgen_Generator generator(Generator* generator, const char* uuid, cons
 		return generator->set_get_warp_point_data_cb(host, cb);
 	};
 
-	out.set_get_manipulator_data_cb = [](void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb)
-	{
-		auto generator = (Generator*)(proc_data);
+	//out.set_get_manipulator_data_cb = [](void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb)
+	//{
+	//	auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_manipulator_data_cb(host, cb);
-	};
+	//	return generator->set_get_manipulator_data_cb(host, cb);
+	//};
 
 	out.get_group = [](void* proc_data, blkhdgen_Index index)
 	{
@@ -438,13 +437,6 @@ inline blkhdgen_Generator generator(Generator* generator, const char* uuid, cons
 		return generator->set_get_sample_info_cb(host, cb);
 	};
 
-	out.get_required_aux_buffer_size = [](void* proc_data)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->get_required_aux_buffer_size();
-	};
-
 	out.preprocess_sample = [](void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks)
 	{
 		auto generator = (Generator*)(proc_data);
@@ -458,7 +450,7 @@ inline blkhdgen_Generator generator(Generator* generator, const char* uuid, cons
 template <class GeneratorType>
 blkhdgen_Generator make_generator()
 {
-	return bind::generator(new GeneratorType(), GeneratorType::UUID, GeneratorType::NAME, GeneratorType::REQUIRES_PREPROCESS);
+	return bind::generator(new GeneratorType(), GeneratorType::NAME, GeneratorType::REQUIRES_PREPROCESS);
 }
 
 blkhdgen_Error destroy_generator(blkhdgen_Generator generator)

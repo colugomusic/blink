@@ -138,11 +138,11 @@ typedef struct
 
 typedef struct
 {
+	blkhdgen_ID id;
 	blkhdgen_ChannelCount num_channels;
 	blkhdgen_FrameCount num_frames;
 	blkhdgen_SR SR;
 	blkhdgen_BitDepth bit_depth;
-	void* aux_buffer;
 } blkhdgen_SampleInfo;
 
 enum blkhdgen_ParameterType
@@ -355,8 +355,8 @@ typedef struct
 
 // Manipulators
 //
-// This will be a future Blockhead feature, plugins don't need
-// to worry about it yet.
+// This will be a future Blockhead feature, not sure how it is going
+// to look. Plugins don't need to worry about it yet.
 typedef struct
 {
 	blkhdgen_UUID uuid;
@@ -394,6 +394,7 @@ typedef blkhdgen_Group (*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhd
 typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
 typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
 typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
+typedef blkhdgen_Error (*blkhdgen_Generator_SampleDeleted)(void* proc_data, blkhdgen_ID sample_id);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
 typedef blkhdgen_Error (*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
@@ -406,13 +407,13 @@ typedef blkhdgen_Error (*blkhdgen_Generator_PreprocessSample)(void* proc_data, v
 
 typedef struct
 {
-	blkhdgen_UUID uuid;
 	const char* name;
 	int num_groups;
 	int num_parameters;
 	blkhdgen_ChannelCount num_channels;
-	int num_manipulator_targets;
 	bool requires_preprocess;
+	bool enable_warp_markers;
+	bool is_sampler;
 
 	void* proc_data;
 
@@ -437,7 +438,6 @@ typedef struct
 	blkhdgen_Generator_SetGetSampleInfoCB set_get_sample_info_cb;
 	blkhdgen_Generator_SetGetSampleDataCB set_get_sample_data_cb;
 	blkhdgen_Generator_SetGetWarpPointDataCB set_get_warp_point_data_cb;
-	blkhdgen_Generator_SetGetManipulatorDataCB set_get_manipulator_data_cb;
 
 	// pos is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
 	//
@@ -456,23 +456,9 @@ typedef struct
 	// positions
 	//
 	// output pointers are aligned on 16-byte boundaries
+	//
+	// Never called if is_sampler==false
 	blkhdgen_Generator_GetWaveformPositions get_waveform_positions;
-
-	// The host can allocate a buffer of memory that the plugin can use to read
-	// and write data related to the current sample. The lifetime of the buffer
-	// will be tied to the sample so it won't be freed unless the sample is 
-	// deleted.
-	//
-	// This function should return the size in bytes of the required buffer.
-	//
-	// The plugin can use the GetSampleInfo/GetSampleData callbacks to access the
-	// current sample.
-	//
-	// The host will always wait for this function to complete before process() is
-	// called for the current sample.
-	//
-	// If no buffer is required then the plugin should return zero.
-	blkhdgen_Generator_GetAuxBufferSize get_required_aux_buffer_size;
 
 	// Called by the host once per sample if requires_preprocess==true
 	//
@@ -484,14 +470,28 @@ typedef struct
 	// The plugin should periodically report the completion percentage by
 	// calling the ReportProgress callback with a value between 0 and 1.
 	//
-	// If get_required_aux_buffer_size() returns > 0 then the required buffer
-	// will be available via the GetSampleInfo callback.
-	//
 	// The process() function may be called in the audio thread before
 	// preprocessing has finished so the plugin needs to synchronize this
 	// situation. It is ok to simply return silence until preprocessing has
 	// completed.
+	//
+	// If the plugin allocates any memory for the active sample it should
+	// be freed when the host calls sample_deleted().
+	//
+	// Never called if is_sampler==false
 	blkhdgen_Generator_PreprocessSample preprocess_sample;
+
+	// Called when the sample is deleted by Blockhead. The plugin should free
+	// any data associated to the sample.
+	//
+	// Note that Blockhead may keep samples in memory after the user requests
+	// their deletion so this function may not be called immediately.
+	//
+	// It is the host's responsibility to ensure that this function is not
+	// called until the last call to process() has completed for this sample.
+	//
+	// Never called if is_sampler==false
+	blkhdgen_Generator_SampleDeleted sample_deleted;
 } blkhdgen_Generator;
 
 #ifdef BLKHDGEN_EXPORT
@@ -502,7 +502,9 @@ typedef struct
 # define EXPORTED
 #endif
 
-EXPORTED blkhdgen_Generator make_generator();
-EXPORTED blkhdgen_Error destroy_generator(blkhdgen_Generator generator);
+EXPORTED blkhdgen_UUID blkhdgen_get_plugin_uuid();
+EXPORTED blkhdgen_Bool blkhdgen_is_sampler();
+EXPORTED blkhdgen_Generator blkhdgen_make_generator();
+EXPORTED blkhdgen_Error blkhdgen_destroy_generator(blkhdgen_Generator generator);
 
 #endif

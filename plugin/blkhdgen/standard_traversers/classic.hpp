@@ -52,6 +52,17 @@ public:
 			  [this]() { return math::p_to_ff(p1_.y.get()); })
 	{}
 
+	void set_transpose(float transpose)
+	{
+		if (transpose_ != transpose)
+		{
+			set_y0_dirty();
+			set_y1_dirty();
+
+			transpose_ = transpose;
+		}
+	}
+
 	// We use this for both sample playback and waveform generation. This
 	// calculation needs to be fast, preferably O(n) or better.
 	//
@@ -65,16 +76,8 @@ public:
 	// the mathematics involved in calculating the resulting sample
 	// position.
 	//
-	float calculate(float transpose, const EnvelopeParameter& env_pitch, blkhdgen_Position block_position, float* derivative = nullptr)
+	float calculate(const EnvelopeParameter& env_pitch, blkhdgen_Position block_position, float* derivative = nullptr)
 	{
-		if (transpose_ != transpose)
-		{
-			set_y0_dirty();
-			set_y1_dirty();
-
-			transpose_ = transpose;
-		}
-
 		env_pitch_ = &env_pitch;
 
 		const auto pitch_points = env_pitch_->get_point_data();
@@ -258,7 +261,9 @@ float Classic::get_position(float transpose, const EnvelopeParameter& env_pitch,
 		calculator_.reset();
 	}
 
-	return calculator_.calculate(transpose, env_pitch, read_position[0], derivative) + sample_offset;
+	calculator_.set_transpose(transpose);
+
+	return calculator_.calculate(env_pitch, read_position[0], derivative) + sample_offset;
 }
 
 ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& env_pitch, Traverser* traverser, int sample_offset, float* derivatives)
@@ -279,6 +284,8 @@ ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& e
 
 	const auto& resets = traverser->get_resets();
 
+	calculator_.set_transpose(transpose);
+
 	ml::DSPVector out;
 
 	for (int i = 0; i < kFloatsPerDSPVector; i++)
@@ -288,7 +295,7 @@ ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& e
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(transpose, env_pitch, read_position[i], &(derivatives[i])) + sample_offset;
+		out[i] = calculator_.calculate(env_pitch, read_position[i], &(derivatives[i])) + sample_offset;
 	}
 
 	return out;
