@@ -36,7 +36,7 @@ public:
 	blkhdgen_Error set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb);
 	blkhdgen_Error set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb);
 	blkhdgen_Error set_get_warp_point_data_cb(void* user, blkhdgen_GetWarpPointDataCB cb);
-	blkhdgen_Error set_get_manipulator_data_cb(void* user, blkhdgen_GetManipulatorDataCB cb);
+	//blkhdgen_Error set_get_manipulator_data_cb(void* user, blkhdgen_GetManipulatorDataCB cb);
 
 protected:
 
@@ -60,11 +60,25 @@ private:
 	std::map<blkhdgen_ID, Group> groups_;
 	std::map<blkhdgen_UUID, std::shared_ptr<Parameter>> parameters_;
 	std::function<blkhdgen_WarpPoints*()> get_warp_point_data_;
-	std::function<blkhdgen_ManipulatorData*()> get_manipulator_data_;
+	//std::function<blkhdgen_ManipulatorData*()> get_manipulator_data_;
 
 	SampleData sample_data_;
 	std::atomic<int> data_offset_;
 };
+
+blkhdgen_Error Generator::set_get_sample_info_cb(void* user, blkhdgen_GetSampleInfoCB cb)
+{
+	sample_data_.set_get_sample_info_cb(user, cb);
+
+	return BLKHDGEN_OK;
+}
+
+blkhdgen_Error Generator::set_get_sample_data_cb(void* user, blkhdgen_GetSampleDataCB cb)
+{
+	sample_data_.set_get_sample_data_cb(user, cb);
+
+	return BLKHDGEN_OK;
+}
 
 void Generator::set_data_offset(int offset)
 {
@@ -175,15 +189,15 @@ blkhdgen_Error Generator::set_get_warp_point_data_cb(void* user, blkhdgen_GetWar
 	return BLKHDGEN_OK;
 }
 
-blkhdgen_Error Generator::set_get_manipulator_data_cb(void* user, blkhdgen_GetManipulatorDataCB cb)
-{
-	get_manipulator_data_ = [user, cb]()
-	{
-		return cb(user);
-	};
-
-	return BLKHDGEN_OK;
-}
+//blkhdgen_Error Generator::set_get_manipulator_data_cb(void* user, blkhdgen_GetManipulatorDataCB cb)
+//{
+//	get_manipulator_data_ = [user, cb]()
+//	{
+//		return cb(user);
+//	};
+//
+//	return BLKHDGEN_OK;
+//}
 
 ml::DSPVector Generator::read_sample_frames_interp(blkhdgen_ChannelCount channel, const ml::DSPVector& pos, bool loop)
 {

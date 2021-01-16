@@ -9,25 +9,22 @@ class EnvelopeRange
 {
 public:
 
-	EnvelopeRange(RangeSpec<float> spec);
+	EnvelopeRange(RangeSpec<float> spec)
+		: min_(spec.min_range)
+		, max_(spec.max_range)
+	{
+	}
 
-	EnvelopeRangeAttribute& min();
-	EnvelopeRangeAttribute& max();
+	EnvelopeRangeAttribute& min() { return min_; }
+	EnvelopeRangeAttribute& max() { return max_; }
 
-	const EnvelopeRangeAttribute& min() const;
-	const EnvelopeRangeAttribute& max() const;
+	const EnvelopeRangeAttribute& min() const { return min_; }
+	const EnvelopeRangeAttribute& max() const { return max_; }
 
 private:
 
 	EnvelopeRangeAttribute min_;
 	EnvelopeRangeAttribute max_;
 };
-
-EnvelopeRange::EnvelopeRange(RangeSpec<float> spec)
-	: min_(spec.min_range)
-	, max_(spec.max_range)
-{
-
-}
 
 }

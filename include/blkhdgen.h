@@ -389,21 +389,21 @@ typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* host);
 //
 // Generator
 //
-typedef blkhdgen_Group (*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Group (*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
-typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Parameter (*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
-typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
-typedef blkhdgen_Error (*blkhdgen_Generator_SampleDeleted)(void* proc_data, blkhdgen_ID sample_id);
-typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
-typedef blkhdgen_Error (*blkhdgen_Generator_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
-typedef blkhdgen_Error (*blkhdgen_Generator_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
-typedef blkhdgen_Error (*blkhdgen_Generator_SetGetManipulatorDataCB)(void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb);
+
 typedef blkhdgen_Error (*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
+
+// pos is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
+//
+// Positions will usually be increasing linearly but may jump back in the case of
+// loop events.
+//
+// Be aware that Blockhead supports looping over extremely small regions (less
+// than BLKHDGEN_VECTOR_SIZE)
+//
+// The is the only function that is called in the audio thread
+//
+// output pointer is aligned on a 16-byte boundary
 typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
-typedef blkhdgen_Error (*blkhdgen_Generator_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
-typedef size_t (*blkhdgen_Generator_GetAuxBufferSize)(void* proc_data);
-typedef blkhdgen_Error (*blkhdgen_Generator_PreprocessSample)(void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks);
 
 typedef struct
 {
@@ -411,88 +411,8 @@ typedef struct
 	int num_groups;
 	int num_parameters;
 	blkhdgen_ChannelCount num_channels;
-	bool requires_preprocess;
-	bool enable_warp_markers;
-	bool is_sampler;
-
 	void* proc_data;
-
-	blkhdgen_Generator_GetGroup get_group;
-	blkhdgen_Generator_GetGroupByID get_group_by_id;
-	blkhdgen_Generator_GetParameter get_parameter;
-	blkhdgen_Generator_GetParameterByID get_parameter_by_id;
-	blkhdgen_Generator_SetDataOffset set_data_offset;
-
-	// Returned buffer remains valid until the next call to get_error_string or
-	// until the generator is destroyed
-	blkhdgen_Generator_GetErrorString get_error_string;
-
-	// Host will call these once to set callbacks that the plugin uses to
-	// retrieve data.
-	//
-	// It is the host's responsibility to ensure that the returned data remains
-	// valid for the duration of the call.
-	//
-	// If the callback is called simultaneously from the GUI and audio threads
-	// then the host may return two different pointers.
-	blkhdgen_Generator_SetGetSampleInfoCB set_get_sample_info_cb;
-	blkhdgen_Generator_SetGetSampleDataCB set_get_sample_data_cb;
-	blkhdgen_Generator_SetGetWarpPointDataCB set_get_warp_point_data_cb;
-
-	// pos is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
-	//
-	// Positions will usually be increasing linearly but may jump back in the case of
-	// loop events.
-	//
-	// Be aware that Blockhead supports looping over extremely small regions (less
-	// than BLKHDGEN_VECTOR_SIZE)
-	//
-	// The is the only function that is called in the audio thread
-	//
-	// output pointer is aligned on a 16-byte boundary
-	blkhdgen_Generator_Process process;
-
-	// Get the transformed waveform positions and derivatives for the given block
-	// positions
-	//
-	// output pointers are aligned on 16-byte boundaries
-	//
-	// Never called if is_sampler==false
-	blkhdgen_Generator_GetWaveformPositions get_waveform_positions;
-
-	// Called by the host once per sample if requires_preprocess==true
-	//
-	// This function will be called in a separate thread from everything else.
-	//
-	// The plugin should periodically call the ShouldAbort callback and stop
-	// preprocessing if it returns true.
-	//
-	// The plugin should periodically report the completion percentage by
-	// calling the ReportProgress callback with a value between 0 and 1.
-	//
-	// The process() function may be called in the audio thread before
-	// preprocessing has finished so the plugin needs to synchronize this
-	// situation. It is ok to simply return silence until preprocessing has
-	// completed.
-	//
-	// If the plugin allocates any memory for the active sample it should
-	// be freed when the host calls sample_deleted().
-	//
-	// Never called if is_sampler==false
-	blkhdgen_Generator_PreprocessSample preprocess_sample;
-
-	// Called when the sample is deleted by Blockhead. The plugin should free
-	// any data associated to the sample.
-	//
-	// Note that Blockhead may keep samples in memory after the user requests
-	// their deletion so this function may not be called immediately.
-	//
-	// It is the host's responsibility to ensure that this function is not
-	// called until the last call to process() has completed for this sample.
-	//
-	// Never called if is_sampler==false
-	blkhdgen_Generator_SampleDeleted sample_deleted;
-} blkhdgen_Generator;
+} blkhdgen_GeneratorInfo;
 
 #ifdef BLKHDGEN_EXPORT
 
@@ -502,9 +422,15 @@ typedef struct
 # define EXPORTED
 #endif
 
-EXPORTED blkhdgen_UUID blkhdgen_get_plugin_uuid();
-EXPORTED blkhdgen_Bool blkhdgen_is_sampler();
-EXPORTED blkhdgen_Generator blkhdgen_make_generator();
-EXPORTED blkhdgen_Error blkhdgen_destroy_generator(blkhdgen_Generator generator);
+extern "C"
+{
+	EXPORTED blkhdgen_UUID blkhdgen_get_plugin_uuid();
+	EXPORTED blkhdgen_Group blkhdgen_get_group(blkhdgen_Index index);
+	EXPORTED blkhdgen_Group blkhdgen_get_group_by_id(blkhdgen_ID id);
+	EXPORTED blkhdgen_Parameter blkhdgen_get_parameter(blkhdgen_Index index);
+	EXPORTED blkhdgen_Parameter blkhdgen_get_parameter_by_id(blkhdgen_UUID uuid);
 
+	// Returned buffer remains valid until the next call to blkhdgen_get_error_string
+	EXPORTED const char* blkhdgen_get_error_string(blkhdgen_Error error);
+}
 #endif
