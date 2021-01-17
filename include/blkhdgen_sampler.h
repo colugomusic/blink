@@ -2,6 +2,8 @@
 
 #include "blkhdgen.h"
 
+#define BLKHDGEN_SAMPLER
+
 typedef blkhdgen_Error (*blkhdgen_Sampler_SampleDeleted)(void* proc_data, blkhdgen_ID sample_id);
 typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
 typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
@@ -12,12 +14,12 @@ typedef blkhdgen_Error (*blkhdgen_Sampler_PreprocessSample)(void* proc_data, voi
 
 typedef struct
 {
-	blkhdgen_GeneratorInfo generator_info;
+	blkhdgen_GeneratorBase generator;
+
+	void* proc_data;
 
 	bool requires_preprocess;
 	bool enable_warp_markers;
-
-	blkhdgen_Generator_SetDataOffset set_data_offset;
 
 	// Host will call these once to set callbacks that the plugin uses to
 	// retrieve data.

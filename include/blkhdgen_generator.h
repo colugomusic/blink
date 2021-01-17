@@ -4,9 +4,10 @@
 
 typedef struct
 {
-	blkhdgen_GeneratorInfo generator_info;
+	blkhdgen_GeneratorBase generator;
 
-	blkhdgen_Generator_SetDataOffset set_data_offset;
+	void* proc_data;
+
 	blkhdgen_Generator_Process process;
 } blkhdgen_Generator;
 

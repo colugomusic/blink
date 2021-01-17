@@ -391,6 +391,11 @@ typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* host);
 //
 
 typedef blkhdgen_Error (*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
+typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
+typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
+typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
+typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
+typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
 
 // pos is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
 //
@@ -411,8 +416,17 @@ typedef struct
 	int num_groups;
 	int num_parameters;
 	blkhdgen_ChannelCount num_channels;
-	void* proc_data;
-} blkhdgen_GeneratorInfo;
+
+	blkhdgen_Generator_GetGroup get_group;
+	blkhdgen_Generator_GetGroupByID get_group_by_id;
+	blkhdgen_Generator_GetParameter get_parameter;
+	blkhdgen_Generator_GetParameterByID get_parameter_by_id;
+	blkhdgen_Generator_SetDataOffset set_data_offset;
+
+	// Returned buffer remains valid until the next call to get_error_string or
+	// until the generator is destroyed
+	blkhdgen_Generator_GetErrorString get_error_string;
+} blkhdgen_GeneratorBase;
 
 #ifdef BLKHDGEN_EXPORT
 
@@ -425,12 +439,6 @@ typedef struct
 extern "C"
 {
 	EXPORTED blkhdgen_UUID blkhdgen_get_plugin_uuid();
-	EXPORTED blkhdgen_Group blkhdgen_get_group(blkhdgen_Index index);
-	EXPORTED blkhdgen_Group blkhdgen_get_group_by_id(blkhdgen_ID id);
-	EXPORTED blkhdgen_Parameter blkhdgen_get_parameter(blkhdgen_Index index);
-	EXPORTED blkhdgen_Parameter blkhdgen_get_parameter_by_id(blkhdgen_UUID uuid);
-
-	// Returned buffer remains valid until the next call to blkhdgen_get_error_string
-	EXPORTED const char* blkhdgen_get_error_string(blkhdgen_Error error);
 }
+
 #endif

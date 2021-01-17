@@ -17,9 +17,10 @@ typedef blkhdgen_Error (*blkhdgen_Effect_Process)(void* proc_data, blkhdgen_SR s
 
 typedef struct
 {
-	blkhdgen_GeneratorInfo generator_info;
+	blkhdgen_GeneratorBase generator;
 
-	blkhdgen_Generator_SetDataOffset set_data_offset;
+	void* proc_data;
+
 	blkhdgen_Effect_Process process;
 } blkhdgen_Effect;
 

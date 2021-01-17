@@ -8,6 +8,7 @@
 #include "slider_parameter.hpp"
 #include "toggle_parameter.hpp"
 #include "generator.hpp"
+#include "sampler.hpp"
 #include "group.hpp"
 
 namespace blkhdgen {
@@ -340,6 +341,7 @@ inline blkhdgen_Parameter parameter(Parameter& parameter)
 	return out;
 }
 
+#ifdef BLKHDGEN_GENERATOR
 inline blkhdgen_Generator generator(Generator* generator, const char* name, bool requires_preprocess)
 {
 	blkhdgen_Generator out;
@@ -459,5 +461,130 @@ blkhdgen_Error destroy_generator(blkhdgen_Generator generator)
 
 	return BLKHDGEN_OK;
 }
+#endif
+
+inline blkhdgen_GeneratorBase generator_base(GeneratorBase* generator, const char* name)
+{
+	blkhdgen_GeneratorBase out;
+
+	out.name = name;
+	out.num_channels = generator->get_num_channels();
+	out.num_groups = generator->get_num_groups();
+	out.num_parameters = generator->get_num_parameters();
+
+	out.get_group = [](void* proc_data, blkhdgen_Index index)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return group(generator->get_group(index));
+	};
+
+	out.get_group_by_id = [](void* proc_data, blkhdgen_ID id)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return group(generator->get_group_by_id(id));
+	};
+
+	out.get_parameter = [](void* proc_data, blkhdgen_Index index)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return parameter(generator->get_parameter(index));
+	};
+
+	out.get_parameter_by_id = [](void* proc_data, blkhdgen_UUID uuid)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return parameter(generator->get_parameter_by_id(uuid));
+	};
+
+	out.set_data_offset = [](void* proc_data, int offset)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		generator->set_data_offset(offset);
+
+		return BLKHDGEN_OK;
+	};
+
+	out.get_error_string = [](void* proc_data, blkhdgen_Error error)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->get_error_string(error);
+	};
+
+	return out;
+}
+
+#ifdef BLKHDGEN_SAMPLER
+inline blkhdgen_Sampler sampler(Sampler* sampler, const char* name, bool requires_preprocess)
+{
+	blkhdgen_Sampler out;
+
+	out.generator = generator_base(sampler, name);
+	out.proc_data = sampler;
+	out.requires_preprocess = requires_preprocess;
+
+	out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->set_get_warp_point_data_cb(host, cb);
+	};
+
+	out.process = [](void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->process(song_rate, sample_rate, pos, out);
+	};
+
+	out.get_waveform_positions = [](void* proc_data, const blkhdgen_Position* block_positions, float* out, float* derivatives)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->get_waveform_positions(block_positions, out, derivatives);
+	};
+
+	out.set_get_sample_data_cb = [](void* proc_data, void* host, blkhdgen_GetSampleDataCB cb)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->set_get_sample_data_cb(host, cb);
+	};
+
+	out.set_get_sample_info_cb = [](void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->set_get_sample_info_cb(host, cb);
+	};
+
+	out.preprocess_sample = [](void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks)
+	{
+		auto generator = (Generator*)(proc_data);
+
+		return generator->preprocess_sample(host, callbacks);
+	};
+
+	return out;
+}
+
+template <class SamplerType>
+blkhdgen_Sampler make_sampler()
+{
+	return bind::sampler(new SamplerType(), SamplerType::NAME, SamplerType::REQUIRES_PREPROCESS);
+}
+
+blkhdgen_Error destroy_sampler(blkhdgen_Sampler sampler)
+{
+	delete (Sampler*)(sampler.proc_data);
+
+	return BLKHDGEN_OK;
+}
+#endif
 
 }}
