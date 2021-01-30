@@ -174,16 +174,13 @@ enum blkhdgen_ToggleFlags
 	blkhdgen_ToggleFlags_ShowInContextMenu = 0x4,
 	blkhdgen_ToggleFlags_DefaultEnabled = 0x8,
 };
-
-typedef const blkhdgen_EnvelopePoints* (*blkhdgen_GetPointDataCB)(void* host);
-
 //
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-typedef blkhdgen_Error(*blkhdgen_Envelope_SetGetPointDataCB)(void* proc_data, void* host, blkhdgen_GetPointDataCB cb);
+typedef blkhdgen_Error(*blkhdgen_Envelope_SetPoints)(void* proc_data, const blkhdgen_EnvelopePoints* points);
 
 typedef struct
 {
@@ -208,17 +205,8 @@ typedef struct
 	// until the generator is destroyed.
 	blkhdgen_DisplayValue display_value;
 
-	// Host will call this once to set a callback that the plugin uses to
-	// retrieve point data.
-	//
-	// It is the host's responsibility to ensure that the returned data remains
-	// valid for the duration of the call.
-	//
-	// If the callback is called simultaneously from the GUI and audio threads
-	// then the host may return two different pointers.
-	//
 	// The point data will be normalized
-	blkhdgen_Envelope_SetGetPointDataCB set_get_point_data_cb;
+	blkhdgen_Envelope_SetPoints set_points;
 } blkhdgen_Envelope;
 
 //
@@ -306,6 +294,7 @@ typedef struct
 // On/off value
 //
 typedef blkhdgen_Error(*blkhdgen_Toggle_Set)(void* proc_data, blkhdgen_Bool on);
+typedef blkhdgen_Bool(*blkhdgen_Toggle_Get)(void* proc_data);
 
 typedef struct
 {
@@ -316,6 +305,7 @@ typedef struct
 	void* proc_data;
 
 	blkhdgen_Toggle_Set set;
+	blkhdgen_Toggle_Get get;
 } blkhdgen_Toggle;
 
 //
@@ -323,6 +313,7 @@ typedef struct
 //
 union blkhdgen_ParameterObject
 {
+	enum blkhdgen_ParameterType type;
 	blkhdgen_Chord chord;
 	blkhdgen_Envelope envelope;
 	blkhdgen_Option option;
@@ -342,7 +333,16 @@ typedef struct
 	// Zero if the parameter does not belong to a group
 	blkhdgen_ID group_id;
 
+	// User-friendly parameter name
 	const char* name;
+
+	// If set to true, Blockhead will trigger a crossfade at the start of the
+	// next audio buffer whenever this parameter changes (can be used to avoid
+	// clicking artifacts.)
+	//
+	// It is the plugin's responsibility to perform the actual crossfade
+	// (see blkhdgen_Generator_BeginCrossfade() etc. below)
+	bool requires_crossfade;
 
 	union blkhdgen_ParameterObject parameter;
 } blkhdgen_Parameter;
@@ -397,25 +397,45 @@ typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, bl
 typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
 typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
 
-// pos is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
+// <positions> is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
 //
 // Positions will usually be increasing linearly but may jump back in the case of
 // loop events.
 //
 // Be aware that Blockhead supports looping over extremely small regions (less
 // than BLKHDGEN_VECTOR_SIZE)
+typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionData)(void* proc_data, const blkhdgen_Position* positions);
+
+// If a crossfade is occurring, Blockhead will call SetPositionDataCrossfade() instead of SetPositionData(). <positions> points
+// to two position buffers (one for each side of the crossfade)
+typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionDataCrossfade)(void* proc_data, const blkhdgen_Position** positions);
+
+// If called, the plugin should begin a crossfade at the start of the next call to Process().
+// A crossfade may last for several buffers.
+// Any data passed to the plugin for the previous buffer will remain valid until the crossfade is complete.
+typedef blkhdgen_Error(*blkhdgen_Generator_BeginCrossfade)(void* proc_data);
+
+// Array of floats from 0.0 to 1.0. A crossfade may last for several buffers but the length in frames will always
+// be a multiple of BLKHDGEN_VECTOR_SIZE.
+//
+// For example if the crossfade lasts for 4 buffers then xfade arrays will range from 0.0 to 1.0 of the span of
+// four buffers, e.g. [0.0..0.25], [0.25..0.5], [0.5..0.75], [0.75..1.0]
+typedef blkhdgen_Error(*blkhdgen_Generator_SetCrossfade)(void* proc_data, const float* xfade);
+
+typedef blkhdgen_Error(*blkhdgen_Generator_EndCrossfade)(void* proc_data);
+
 //
 // The is the only function that is called in the audio thread
 //
 // output pointer is aligned on a 16-byte boundary
-typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out);
+typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, float** out);
 
 typedef struct
 {
-	const char* name;
 	int num_groups;
 	int num_parameters;
 	blkhdgen_ChannelCount num_channels;
+	void* proc_data;
 
 	blkhdgen_Generator_GetGroup get_group;
 	blkhdgen_Generator_GetGroupByID get_group_by_id;
@@ -439,6 +459,7 @@ typedef struct
 extern "C"
 {
 	EXPORTED blkhdgen_UUID blkhdgen_get_plugin_uuid();
+	EXPORTED const char* blkhdgen_get_plugin_name();
 }
 
 #endif

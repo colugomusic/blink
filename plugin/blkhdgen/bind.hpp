@@ -286,6 +286,13 @@ inline blkhdgen_Toggle toggle(ToggleParameter& toggle)
 		return toggle->set(on == BLKHDGEN_TRUE);
 	};
 
+	out.get = [](void* proc_data) -> blkhdgen_Bool
+	{
+		auto toggle = (ToggleParameter*)(proc_data);
+
+		return toggle->get() ? BLKHDGEN_TRUE : BLKHDGEN_FALSE;
+	};
+
 	return out;
 }
 
@@ -463,14 +470,14 @@ blkhdgen_Error destroy_generator(blkhdgen_Generator generator)
 }
 #endif
 
-inline blkhdgen_GeneratorBase generator_base(GeneratorBase* generator, const char* name)
+inline blkhdgen_GeneratorBase generator_base(GeneratorBase* generator)
 {
 	blkhdgen_GeneratorBase out;
 
-	out.name = name;
 	out.num_channels = generator->get_num_channels();
 	out.num_groups = generator->get_num_groups();
 	out.num_parameters = generator->get_num_parameters();
+	out.proc_data = generator;
 
 	out.get_group = [](void* proc_data, blkhdgen_Index index)
 	{
@@ -520,11 +527,11 @@ inline blkhdgen_GeneratorBase generator_base(GeneratorBase* generator, const cha
 }
 
 #ifdef BLKHDGEN_SAMPLER
-inline blkhdgen_Sampler sampler(Sampler* sampler, const char* name, bool requires_preprocess)
+inline blkhdgen_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 {
 	blkhdgen_Sampler out;
 
-	out.generator = generator_base(sampler, name);
+	out.generator = generator_base(sampler);
 	out.proc_data = sampler;
 	out.requires_preprocess = requires_preprocess;
 
@@ -576,7 +583,7 @@ inline blkhdgen_Sampler sampler(Sampler* sampler, const char* name, bool require
 template <class SamplerType>
 blkhdgen_Sampler make_sampler()
 {
-	return bind::sampler(new SamplerType(), SamplerType::NAME, SamplerType::REQUIRES_PREPROCESS);
+	return bind::sampler(new SamplerType(), SamplerType::REQUIRES_PREPROCESS);
 }
 
 blkhdgen_Error destroy_sampler(blkhdgen_Sampler sampler)
