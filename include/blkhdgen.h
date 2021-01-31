@@ -336,14 +336,6 @@ typedef struct
 	// User-friendly parameter name
 	const char* name;
 
-	// If set to true, Blockhead will trigger a crossfade at the start of the
-	// next audio buffer whenever this parameter changes (can be used to avoid
-	// clicking artifacts.)
-	//
-	// It is the plugin's responsibility to perform the actual crossfade
-	// (see blkhdgen_Generator_BeginCrossfade() etc. below)
-	bool requires_crossfade;
-
 	union blkhdgen_ParameterObject parameter;
 } blkhdgen_Parameter;
 
