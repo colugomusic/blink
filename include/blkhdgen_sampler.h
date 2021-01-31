@@ -4,13 +4,11 @@
 
 #define BLKHDGEN_SAMPLER
 
-typedef blkhdgen_Error (*blkhdgen_Sampler_SampleDeleted)(void* proc_data, blkhdgen_ID sample_id);
 typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
 typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
 typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
 typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetManipulatorDataCB)(void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb);
 typedef blkhdgen_Error (*blkhdgen_Sampler_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
-typedef blkhdgen_Error (*blkhdgen_Sampler_PreprocessSample)(void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks);
 
 typedef struct
 {
@@ -18,7 +16,6 @@ typedef struct
 
 	void* proc_data;
 
-	bool requires_preprocess;
 	bool enable_warp_markers;
 
 	// Host will call these once to set callbacks that the plugin uses to
@@ -40,8 +37,20 @@ typedef struct
 	//
 	// output pointers are aligned on 16-byte boundaries
 	blkhdgen_Sampler_GetWaveformPositions get_waveform_positions;
+} blkhdgen_Sampler;
 
-	// Called by the host once per sample if requires_preprocess==true
+#ifdef BLKHDGEN_EXPORT
+extern "C"
+{
+	// Blockhead will call this twice per sampler block to create a pair of samplers
+	// for the purposes of crossfading between them to avoid clicks.
+	EXPORTED blkhdgen_Sampler blkhdgen_make_sampler();
+
+	EXPORTED blkhdgen_Error blkhdgen_destroy_sampler(blkhdgen_Sampler sampler);
+
+	EXPORTED blkhdgen_Bool blkhdgen_sampler_requires_preprocessing();
+
+	// Called by the host once per sample if blkhdgen_sampler_requires_preprocessing() returns true
 	//
 	// This function will be called in a separate thread from everything else.
 	//
@@ -57,8 +66,8 @@ typedef struct
 	// completed.
 	//
 	// If the plugin allocates any memory for the active sample it should
-	// be freed when the host calls sample_deleted().
-	blkhdgen_Sampler_PreprocessSample preprocess_sample;
+	// be freed when the host calls blkhdgen_sampler_sample_deleted().
+	EXPORTED blkhdgen_Error blkhdgen_sampler_preprocess_sample(void* host, blkhdgen_PreprocessCallbacks callbacks, const blkhdgen_SampleInfo* sample_info);
 
 	// Called when the sample is deleted by Blockhead. The plugin should free
 	// any data associated to the sample.
@@ -68,13 +77,6 @@ typedef struct
 	//
 	// It is the host's responsibility to ensure that this function is not
 	// called until the last call to process() has completed for this sample.
-	blkhdgen_Sampler_SampleDeleted sample_deleted;
-} blkhdgen_Sampler;
-
-#ifdef BLKHDGEN_EXPORT
-extern "C"
-{
-	EXPORTED blkhdgen_Sampler blkhdgen_make_sampler();
-	EXPORTED blkhdgen_Error blkhdgen_destroy_sampler(blkhdgen_Sampler sampler);
+	EXPORTED blkhdgen_Error blkhdgen_sampler_sample_deleted(blkhdgen_ID sample_id);
 }
 #endif

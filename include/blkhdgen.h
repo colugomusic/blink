@@ -406,24 +406,6 @@ typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdg
 // than BLKHDGEN_VECTOR_SIZE)
 typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionData)(void* proc_data, const blkhdgen_Position* positions);
 
-// If a crossfade is occurring, Blockhead will call SetPositionDataCrossfade() instead of SetPositionData(). <positions> points
-// to two position buffers (one for each side of the crossfade)
-typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionDataCrossfade)(void* proc_data, const blkhdgen_Position** positions);
-
-// If called, the plugin should begin a crossfade at the start of the next call to Process().
-// A crossfade may last for several buffers.
-// Any data passed to the plugin for the previous buffer will remain valid until the crossfade is complete.
-typedef blkhdgen_Error(*blkhdgen_Generator_BeginCrossfade)(void* proc_data);
-
-// Array of floats from 0.0 to 1.0. A crossfade may last for several buffers but the length in frames will always
-// be a multiple of BLKHDGEN_VECTOR_SIZE.
-//
-// For example if the crossfade lasts for 4 buffers then xfade arrays will range from 0.0 to 1.0 of the span of
-// four buffers, e.g. [0.0..0.25], [0.25..0.5], [0.5..0.75], [0.75..1.0]
-typedef blkhdgen_Error(*blkhdgen_Generator_SetCrossfade)(void* proc_data, const float* xfade);
-
-typedef blkhdgen_Error(*blkhdgen_Generator_EndCrossfade)(void* proc_data);
-
 //
 // The is the only function that is called in the audio thread
 //
