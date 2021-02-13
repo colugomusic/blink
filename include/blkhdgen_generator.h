@@ -4,11 +4,11 @@
 
 typedef struct
 {
-	blkhdgen_GeneratorBase generator;
+	//blkhdgen_GeneratorBase generator;
 
 	void* proc_data;
 
-	blkhdgen_Generator_Process process;
+	//blkhdgen_Generator_Process process;
 } blkhdgen_Generator;
 
 #ifdef BLKHDGEN_EXPORT

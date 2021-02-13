@@ -25,24 +25,24 @@ private:
 	std::string name_;
 };
 
-Parameter::Parameter(const ParameterSpec& spec)
+inline Parameter::Parameter(const ParameterSpec& spec)
 	: uuid_(spec.uuid)
 	, group_id_(spec.group_id)
 	, name_(spec.name)
 {
 }
 
-blkhdgen_UUID Parameter::get_uuid() const
+inline blkhdgen_UUID Parameter::get_uuid() const
 {
 	return uuid_;
 }
 
-blkhdgen_ID Parameter::get_group_id() const
+inline blkhdgen_ID Parameter::get_group_id() const
 {
 	return group_id_;
 }
 
-const char* Parameter::get_name() const
+inline const char* Parameter::get_name() const
 {
 	return name_.c_str();
 }

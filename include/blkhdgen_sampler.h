@@ -4,15 +4,60 @@
 
 #define BLKHDGEN_SAMPLER
 
-typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
-typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
-typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
-typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetManipulatorDataCB)(void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb);
-typedef blkhdgen_Error (*blkhdgen_Sampler_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
+//
+// Sample Preprocessing
+//
+typedef bool (*blkhdgen_Preprocess_ShouldAbort)(void* host);
+typedef void (*blkhdgen_Preprocess_ReportProgress)(void* host, float progress);
 
 typedef struct
 {
-	blkhdgen_GeneratorBase generator;
+	blkhdgen_Preprocess_ShouldAbort should_abort;
+	blkhdgen_Preprocess_ReportProgress report_progress;
+} blkhdgen_PreprocessCallbacks;
+
+//
+// Sample Info
+//
+typedef struct
+{
+	blkhdgen_ID id;
+	blkhdgen_ChannelCount num_channels;
+	blkhdgen_FrameCount num_frames;
+	blkhdgen_SR SR;
+	blkhdgen_BitDepth bit_depth;
+} blkhdgen_SampleInfo;
+
+//
+// Sampler Buffer
+//
+typedef struct
+{
+	blkhdgen_SR song_rate;
+	blkhdgen_SR sample_rate;
+
+	blkhdgen_SampleInfo* sample_info;
+	blkhdgen_Position* positions;
+	blkhdgen_WarpPoints* warp_points;
+	blkhdgen_ParameterData* parameter_data;
+
+	// TODO:
+
+} blkhdgen_SamplerBuffer;
+
+//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
+//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
+//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
+//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetManipulatorDataCB)(void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb);
+typedef blkhdgen_Error (*blkhdgen_Sampler_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
+
+// output pointer is aligned on a 16-byte boundary
+// output pointer is an array of size BLKHDGEN_VECTOR_SIZE * 2 for non-interleaved L and R channels 
+typedef blkhdgen_Error(*blkhdgen_Sampler_Process)(void* proc_data, const blkhdgen_SamplerBuffer* buffer, float* out);
+
+typedef struct
+{
+	//blkhdgen_GeneratorBase generator;
 
 	void* proc_data;
 
@@ -26,17 +71,11 @@ typedef struct
 	//
 	// If the callback is called simultaneously from the GUI and audio threads
 	// then the host may return two different pointers.
-	blkhdgen_Sampler_SetGetSampleInfoCB set_get_sample_info_cb;
-	blkhdgen_Sampler_SetGetSampleDataCB set_get_sample_data_cb;
-	blkhdgen_Sampler_SetGetWarpPointDataCB set_get_warp_point_data_cb;
+	//blkhdgen_Sampler_SetGetSampleInfoCB set_get_sample_info_cb;
+	//blkhdgen_Sampler_SetGetSampleDataCB set_get_sample_data_cb;
+	//blkhdgen_Sampler_SetGetWarpPointDataCB set_get_warp_point_data_cb;
 
-	blkhdgen_Generator_Process process;
-
-	// Get the transformed waveform positions and derivatives for the given block
-	// positions
-	//
-	// output pointers are aligned on 16-byte boundaries
-	blkhdgen_Sampler_GetWaveformPositions get_waveform_positions;
+	blkhdgen_Sampler_Process process;
 } blkhdgen_Sampler;
 
 #ifdef BLKHDGEN_EXPORT
@@ -78,5 +117,11 @@ extern "C"
 	// It is the host's responsibility to ensure that this function is not
 	// called until the last call to process() has completed for this sample.
 	EXPORTED blkhdgen_Error blkhdgen_sampler_sample_deleted(blkhdgen_ID sample_id);
+
+	// Get the transformed waveform positions and derivatives for the given block
+	// positions
+	//
+	// output pointers are aligned on 16-byte boundaries
+	EXPORTED blkhdgen_Error blkhdgen_sampler_get_waveform_positions(const blkhdgen_ParameterData* parameter_data, int data_offset, const blkhdgen_Position* pos, float* out, float* derivatives);
 }
 #endif

@@ -32,7 +32,7 @@ private:
 	std::atomic<float> current_value_;
 };
 
-EnvelopeRangeAttribute::EnvelopeRangeAttribute(RangeValue<float> range)
+inline EnvelopeRangeAttribute::EnvelopeRangeAttribute(RangeValue<float> range)
 	: range_(range)
 	, current_value_(range_.value)
 {

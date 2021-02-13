@@ -124,27 +124,6 @@ typedef float (*blkhdgen_InverseCurve)(void* proc_data, float value);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
 typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
 
-//
-// Sample Preprocessing
-//
-typedef bool (*blkhdgen_Preprocess_ShouldAbort)(void* host);
-typedef void (*blkhdgen_Preprocess_ReportProgress)(void* host, float progress);
-
-typedef struct
-{
-	blkhdgen_Preprocess_ShouldAbort should_abort;
-	blkhdgen_Preprocess_ReportProgress report_progress;
-} blkhdgen_PreprocessCallbacks;
-
-typedef struct
-{
-	blkhdgen_ID id;
-	blkhdgen_ChannelCount num_channels;
-	blkhdgen_FrameCount num_frames;
-	blkhdgen_SR SR;
-	blkhdgen_BitDepth bit_depth;
-} blkhdgen_SampleInfo;
-
 enum blkhdgen_ParameterType
 {
 	blkhdgen_ParameterType_Chord,
@@ -180,7 +159,6 @@ enum blkhdgen_ToggleFlags
 //
 typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
 typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-typedef blkhdgen_Error(*blkhdgen_Envelope_SetPoints)(void* proc_data, const blkhdgen_EnvelopePoints* points);
 
 typedef struct
 {
@@ -204,9 +182,6 @@ typedef struct
 	// The returned buffer remains valid until the next call to display_value or
 	// until the generator is destroyed.
 	blkhdgen_DisplayValue display_value;
-
-	// The point data will be normalized
-	blkhdgen_Envelope_SetPoints set_points;
 } blkhdgen_Envelope;
 
 //
@@ -223,25 +198,17 @@ typedef struct
 {
 	blkhdgen_Index count;
 	blkhdgen_ChordBlock* blocks;
-} blkhdgen_ChordData;
-
-typedef blkhdgen_ChordData* (*blkhdgen_GetChordDataCB)(void* host);
-typedef blkhdgen_Error(*blkhdgen_Chord_SetGetChordDataCB)(void* proc_data, void* host, blkhdgen_GetChordDataCB cb);
+} blkhdgen_ChordBlocks;
 
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Chord
-
-	void* proc_data;
-
-	blkhdgen_Chord_SetGetChordDataCB set_get_chord_data_cb;
 } blkhdgen_Chord;
 
 //
 // Option parameter
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
 //
-typedef blkhdgen_Error(*blkhdgen_Option_Set)(void* proc_data, blkhdgen_Index value);
 typedef const char* (*blkhdgen_Option_GetText)(void* proc_data, blkhdgen_Index value);
 
 typedef struct
@@ -252,8 +219,6 @@ typedef struct
 
 	void* proc_data;
 
-	blkhdgen_Option_Set set;
-
 	// Returns the display text for the option index
 	blkhdgen_Option_GetText get_text;
 } blkhdgen_Option;
@@ -262,8 +227,6 @@ typedef struct
 // Slider parameter
 // Will be displayed in Blockhead as a slider or spinbox control
 //
-typedef blkhdgen_Error(*blkhdgen_Slider_Set)(void* proc_data, float value);
-typedef blkhdgen_Error(*blkhdgen_IntSlider_Set)(void* proc_data, int value);
 
 typedef struct
 {
@@ -275,7 +238,6 @@ typedef struct
 	blkhdgen_Curve curve;
 	blkhdgen_InverseCurve inverse_curve;
 	blkhdgen_DisplayValue display_value;
-	blkhdgen_Slider_Set set;
 } blkhdgen_Slider;
 
 typedef struct
@@ -286,26 +248,18 @@ typedef struct
 	void* proc_data;
 
 	blkhdgen_IntDisplayValue display_value;
-	blkhdgen_IntSlider_Set set;
 } blkhdgen_IntSlider;
 
 //
 // Toggle parameter
 // On/off value
 //
-typedef blkhdgen_Error(*blkhdgen_Toggle_Set)(void* proc_data, blkhdgen_Bool on);
-typedef blkhdgen_Bool(*blkhdgen_Toggle_Get)(void* proc_data);
 
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Toggle
 	blkhdgen_Bool default_value;
 	int flags; // blkhdgen_ToggleFlags
-
-	void* proc_data;
-
-	blkhdgen_Toggle_Set set;
-	blkhdgen_Toggle_Get get;
 } blkhdgen_Toggle;
 
 //
@@ -370,24 +324,71 @@ typedef struct
 	blkhdgen_ManipulatorPoint* points;
 } blkhdgen_ManipulatorData;
 
+typedef struct
+{
+	blkhdgen_ParameterType type;
+	blkhdgen_ChordBlocks* blocks;
+} blkhdgen_ChordData;
+
+typedef struct
+{
+	blkhdgen_ParameterType type;
+	blkhdgen_EnvelopePoints points;
+} blkhdgen_EnvelopeData;
+
+typedef struct
+{
+	blkhdgen_ParameterType type;
+	int value;
+} blkhdgen_OptionData;
+
+typedef struct
+{
+	blkhdgen_ParameterType type;
+	float value;
+} blkhdgen_SliderData;
+
+typedef struct
+{
+	blkhdgen_ParameterType type;
+	int value;
+} blkhdgen_IntSliderData;
+
+typedef struct
+{
+	blkhdgen_ParameterType type;
+	blkhdgen_Bool value;
+} blkhdgen_ToggleData;
+
+union blkhdgen_ParameterData
+{
+	blkhdgen_ParameterType type;
+	blkhdgen_ChordData chord;
+	blkhdgen_EnvelopeData envelope;
+	blkhdgen_OptionData option;
+	blkhdgen_SliderData slider;
+	blkhdgen_IntSliderData int_slider;
+	blkhdgen_ToggleData toggle;
+};
+
 //
 // Callbacks
 //
-typedef const blkhdgen_SampleInfo* (*blkhdgen_GetSampleInfoCB)(void* host);
-typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* host, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
-typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* host);
-typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* host);
+//typedef const blkhdgen_SampleInfo* (*blkhdgen_GetSampleInfoCB)(void* host);
+//typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* host, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+//typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* host);
+//typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* host);
 
 //
 // Generator
 //
 
-typedef blkhdgen_Error (*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
-typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
-typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
-typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
-typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
+//typedef blkhdgen_Error (*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
+//typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
+//typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
+//typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
+//typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
+//typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
 
 // <positions> is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
 //
@@ -396,31 +397,15 @@ typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdg
 //
 // Be aware that Blockhead supports looping over extremely small regions (less
 // than BLKHDGEN_VECTOR_SIZE)
-typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionData)(void* proc_data, const blkhdgen_Position* positions);
+//typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionData)(void* proc_data, const blkhdgen_Position* positions);
 
-//
-// The is the only function that is called in the audio thread
-//
 // output pointer is aligned on a 16-byte boundary
-typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, float** out);
-
-typedef struct
-{
-	int num_groups;
-	int num_parameters;
-	blkhdgen_ChannelCount num_channels;
-	void* proc_data;
-
-	blkhdgen_Generator_GetGroup get_group;
-	blkhdgen_Generator_GetGroupByID get_group_by_id;
-	blkhdgen_Generator_GetParameter get_parameter;
-	blkhdgen_Generator_GetParameterByID get_parameter_by_id;
-	blkhdgen_Generator_SetDataOffset set_data_offset;
-
-	// Returned buffer remains valid until the next call to get_error_string or
-	// until the generator is destroyed
-	blkhdgen_Generator_GetErrorString get_error_string;
-} blkhdgen_GeneratorBase;
+//typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, float** out);
+//
+//typedef struct
+//{
+//	void* proc_data;
+//} blkhdgen_GeneratorBase;
 
 #ifdef BLKHDGEN_EXPORT
 
@@ -434,6 +419,18 @@ extern "C"
 {
 	EXPORTED blkhdgen_UUID blkhdgen_get_plugin_uuid();
 	EXPORTED const char* blkhdgen_get_plugin_name();
+	EXPORTED blkhdgen_Error blkhdgen_init();
+	EXPORTED blkhdgen_Error blkhdgen_terminate();
+	EXPORTED int blkhdgen_get_num_groups();
+	EXPORTED int blkhdgen_get_num_parameters();
+	EXPORTED blkhdgen_Group blkhdgen_get_group(blkhdgen_Index index);
+	EXPORTED blkhdgen_Group blkhdgen_get_group_by_id(blkhdgen_ID id);
+	EXPORTED blkhdgen_Parameter blkhdgen_get_parameter(blkhdgen_Index index);
+	EXPORTED blkhdgen_Parameter blkhdgen_get_parameter_by_uuid(blkhdgen_UUID id);
+
+	// Returned buffer remains valid until the next call to get_error_string or
+	// until the generator is destroyed
+	EXPORTED const char* blkhdgen_get_error_string(blkhdgen_Error error);
 }
 
 #endif

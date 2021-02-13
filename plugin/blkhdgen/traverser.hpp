@@ -1,6 +1,11 @@
 #pragma once
 
 #include <blkhdgen.h>
+#include <cstdint>
+
+#pragma warning(push, 0)
+#include <DSP/MLDSPOps.h>
+#pragma warning(pop)
 
 namespace blkhdgen {
 

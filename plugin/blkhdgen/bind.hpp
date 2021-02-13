@@ -115,14 +115,6 @@ inline blkhdgen_Chord chord(ChordParameter& chord)
 	blkhdgen_Chord out;
 
 	out.parameter_type = blkhdgen_ParameterType_Chord;
-	out.proc_data = &chord;
-
-	out.set_get_chord_data_cb = [](void* proc_data, void* host, blkhdgen_GetChordDataCB cb) -> blkhdgen_Error
-	{
-		auto chord = (ChordParameter*)(proc_data);
-
-		return chord->set_get_chord_data_cb(host, cb);
-	};
 
 	return out;
 }
@@ -171,12 +163,12 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->display_value(value);
 	};
 
-	out.set_get_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetPointDataCB cb)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
+	//out.set_get_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetPointDataCB cb)
+	//{
+	//	auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->set_get_point_data_cb(host, cb);
-	};
+	//	return envelope->set_get_point_data_cb(host, cb);
+	//};
 
 	return out;
 }
@@ -188,13 +180,6 @@ inline blkhdgen_Option option(OptionParameter& option)
 	out.parameter_type = blkhdgen_ParameterType_Option;
 	out.default_value = option.get_default_value();
 	out.proc_data = &option;
-
-	out.set = [](void* proc_data, blkhdgen_Index index)
-	{
-		auto option = (OptionParameter*)(proc_data);
-
-		return option->set(index);
-	};
 
 	out.get_text = [](void* proc_data, blkhdgen_Index index)
 	{
@@ -235,13 +220,6 @@ inline blkhdgen_Slider slider(SliderParameter<float>& slider)
 		return slider->display_value(value);
 	};
 
-	out.set = [](void* proc_data, float value)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		return slider->set(value);
-	};
-
 	return out;
 }
 
@@ -260,13 +238,6 @@ inline blkhdgen_IntSlider slider(SliderParameter<int>& slider)
 		return slider->display_value(value);
 	};
 
-	out.set = [](void* proc_data, int value)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		return slider->set(value);
-	};
-
 	return out;
 }
 
@@ -277,21 +248,6 @@ inline blkhdgen_Toggle toggle(ToggleParameter& toggle)
 	out.parameter_type = blkhdgen_ParameterType_Toggle;
 	out.default_value = toggle.get_default_value() ? BLKHDGEN_TRUE : BLKHDGEN_FALSE;
 	out.flags = toggle.get_flags();
-	out.proc_data = &toggle;
-
-	out.set = [](void* proc_data, blkhdgen_Bool on)
-	{
-		auto toggle = (ToggleParameter*)(proc_data);
-
-		return toggle->set(on == BLKHDGEN_TRUE);
-	};
-
-	out.get = [](void* proc_data) -> blkhdgen_Bool
-	{
-		auto toggle = (ToggleParameter*)(proc_data);
-
-		return toggle->get() ? BLKHDGEN_TRUE : BLKHDGEN_FALSE;
-	};
 
 	return out;
 }
@@ -470,112 +426,112 @@ blkhdgen_Error destroy_generator(blkhdgen_Generator generator)
 }
 #endif
 
-inline blkhdgen_GeneratorBase generator_base(GeneratorBase* generator)
-{
-	blkhdgen_GeneratorBase out;
-
-	out.num_channels = generator->get_num_channels();
-	out.num_groups = generator->get_num_groups();
-	out.num_parameters = generator->get_num_parameters();
-	out.proc_data = generator;
-
-	out.get_group = [](void* proc_data, blkhdgen_Index index)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return group(generator->get_group(index));
-	};
-
-	out.get_group_by_id = [](void* proc_data, blkhdgen_ID id)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return group(generator->get_group_by_id(id));
-	};
-
-	out.get_parameter = [](void* proc_data, blkhdgen_Index index)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return parameter(generator->get_parameter(index));
-	};
-
-	out.get_parameter_by_id = [](void* proc_data, blkhdgen_UUID uuid)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return parameter(generator->get_parameter_by_id(uuid));
-	};
-
-	out.set_data_offset = [](void* proc_data, int offset)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		generator->set_data_offset(offset);
-
-		return BLKHDGEN_OK;
-	};
-
-	out.get_error_string = [](void* proc_data, blkhdgen_Error error)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->get_error_string(error);
-	};
-
-	return out;
-}
+//inline blkhdgen_GeneratorBase generator_base(GeneratorBase* generator)
+//{
+//	blkhdgen_GeneratorBase out;
+//
+//	out.num_channels = generator->get_num_channels();
+//	out.num_groups = generator->get_num_groups();
+//	out.num_parameters = generator->get_num_parameters();
+//	out.proc_data = generator;
+//
+//	out.get_group = [](void* proc_data, blkhdgen_Index index)
+//	{
+//		auto generator = (Generator*)(proc_data);
+//
+//		return group(generator->get_group(index));
+//	};
+//
+//	out.get_group_by_id = [](void* proc_data, blkhdgen_ID id)
+//	{
+//		auto generator = (Generator*)(proc_data);
+//
+//		return group(generator->get_group_by_id(id));
+//	};
+//
+//	out.get_parameter = [](void* proc_data, blkhdgen_Index index)
+//	{
+//		auto generator = (Generator*)(proc_data);
+//
+//		return parameter(generator->get_parameter(index));
+//	};
+//
+//	out.get_parameter_by_id = [](void* proc_data, blkhdgen_UUID uuid)
+//	{
+//		auto generator = (Generator*)(proc_data);
+//
+//		return parameter(generator->get_parameter_by_id(uuid));
+//	};
+//
+//	out.set_data_offset = [](void* proc_data, int offset)
+//	{
+//		auto generator = (Generator*)(proc_data);
+//
+//		generator->set_data_offset(offset);
+//
+//		return BLKHDGEN_OK;
+//	};
+//
+//	out.get_error_string = [](void* proc_data, blkhdgen_Error error)
+//	{
+//		auto generator = (Generator*)(proc_data);
+//
+//		return generator->get_error_string(error);
+//	};
+//
+//	return out;
+//}
 
 #ifdef BLKHDGEN_SAMPLER
 inline blkhdgen_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 {
 	blkhdgen_Sampler out;
 
-	out.generator = generator_base(sampler);
+	//out.generator = generator_base(sampler);
 	out.proc_data = sampler;
-	out.requires_preprocess = requires_preprocess;
+	//out.requires_preprocess = requires_preprocess;
 
-	out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb)
+	//out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb)
+	//{
+	//	auto generator = (Generator*)(proc_data);
+
+	//	return generator->set_get_warp_point_data_cb(host, cb);
+	//};
+
+	out.process = [](void* proc_data, const blkhdgen_SamplerBuffer* buffer, float* out)
 	{
-		auto generator = (Generator*)(proc_data);
+		auto sampler = (Sampler*)(proc_data);
 
-		return generator->set_get_warp_point_data_cb(host, cb);
+		return sampler->process(buffer, out);
 	};
 
-	out.process = [](void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, const blkhdgen_Position* pos, float** out)
-	{
-		auto generator = (Generator*)(proc_data);
+	//out.get_waveform_positions = [](void* proc_data, const blkhdgen_Position* block_positions, float* out, float* derivatives)
+	//{
+	//	auto sampler = (Sampler*)(proc_data);
 
-		return generator->process(song_rate, sample_rate, pos, out);
-	};
+	//	return sampler->get_waveform_positions(block_positions, out, derivatives);
+	//};
 
-	out.get_waveform_positions = [](void* proc_data, const blkhdgen_Position* block_positions, float* out, float* derivatives)
-	{
-		auto generator = (Generator*)(proc_data);
+	//out.set_get_sample_data_cb = [](void* proc_data, void* host, blkhdgen_GetSampleDataCB cb)
+	//{
+	//	auto generator = (Generator*)(proc_data);
 
-		return generator->get_waveform_positions(block_positions, out, derivatives);
-	};
+	//	return generator->set_get_sample_data_cb(host, cb);
+	//};
 
-	out.set_get_sample_data_cb = [](void* proc_data, void* host, blkhdgen_GetSampleDataCB cb)
-	{
-		auto generator = (Generator*)(proc_data);
+	//out.set_get_sample_info_cb = [](void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb)
+	//{
+	//	auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_sample_data_cb(host, cb);
-	};
+	//	return generator->set_get_sample_info_cb(host, cb);
+	//};
 
-	out.set_get_sample_info_cb = [](void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb)
-	{
-		auto generator = (Generator*)(proc_data);
+	//out.preprocess_sample = [](void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks)
+	//{
+	//	auto generator = (Generator*)(proc_data);
 
-		return generator->set_get_sample_info_cb(host, cb);
-	};
-
-	out.preprocess_sample = [](void* proc_data, void* host, blkhdgen_PreprocessCallbacks callbacks)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->preprocess_sample(host, callbacks);
-	};
+	//	return generator->preprocess_sample(host, callbacks);
+	//};
 
 	return out;
 }

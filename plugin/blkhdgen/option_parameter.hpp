@@ -25,7 +25,7 @@ private:
 	blkhdgen_Index default_value_;
 };
 
-OptionParameter::OptionParameter(OptionSpec spec)
+inline OptionParameter::OptionParameter(OptionSpec spec)
 	: Parameter(spec)
 	, options_(spec.options)
 	, current_value_(spec.default_value)
@@ -33,19 +33,19 @@ OptionParameter::OptionParameter(OptionSpec spec)
 {
 }
 
-blkhdgen_Error OptionParameter::set(blkhdgen_Index value)
+inline blkhdgen_Error OptionParameter::set(blkhdgen_Index value)
 {
 	current_value_ = value;
 
 	return BLKHDGEN_OK;
 }
 
-blkhdgen_Index OptionParameter::get() const
+inline blkhdgen_Index OptionParameter::get() const
 {
 	return current_value_;
 }
 
-const char* OptionParameter::get_text(blkhdgen_Index value) const
+inline const char* OptionParameter::get_text(blkhdgen_Index value) const
 {
 	const auto pos = options_.find(value);
 
@@ -54,7 +54,7 @@ const char* OptionParameter::get_text(blkhdgen_Index value) const
 	return pos->second.c_str();
 }
 
-blkhdgen_Index OptionParameter::get_default_value() const
+inline blkhdgen_Index OptionParameter::get_default_value() const
 {
 	return default_value_;
 }

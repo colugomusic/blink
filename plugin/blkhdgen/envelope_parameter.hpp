@@ -27,7 +27,7 @@ public:
 	ml::DSPVector get_mod_values(Traverser* traverser) const;
 	float get_mod_value(Traverser* traverser) const;
 	float get_mod_value(const blkhdgen_EnvelopePoints* points, float position, bool reset) const;
-	blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
+	//blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
 
 	EnvelopeRange& range();
 	const EnvelopeRange& range() const;
@@ -44,12 +44,12 @@ private:
 	std::function<float(float)> inverse_curve_;
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
-	std::function<const blkhdgen_EnvelopePoints*(void)> get_point_data_;
+	//std::function<const blkhdgen_EnvelopePoints*(void)> get_point_data_;
 	mutable TraverserPointDataResetter traverser_resetter_;
 	mutable int point_search_index_ = -1;
 };
 
-EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
+inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 	: Parameter(spec)
 	, range_(spec.range)
 	, snap_settings_{ spec.step_size, spec.default_snap_amount }
@@ -61,47 +61,47 @@ EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 {
 }
 
-float EnvelopeParameter::get_default_value() const
+inline float EnvelopeParameter::get_default_value() const
 {
 	return default_value_;
 }
 
-int EnvelopeParameter::get_flags() const
+inline int EnvelopeParameter::get_flags() const
 {
 	return flags_;
 }
 
-float EnvelopeParameter::curve(float value) const
+inline float EnvelopeParameter::curve(float value) const
 {
 	return curve_(value);
 }
 
-float EnvelopeParameter::inverse_curve(float value) const
+inline float EnvelopeParameter::inverse_curve(float value) const
 {
 	return inverse_curve_(value);
 }
 
-const char* EnvelopeParameter::display_value(float value) const
+inline const char* EnvelopeParameter::display_value(float value) const
 {
 	return (display_value_buffer_ = display_value_(value)).c_str();
 }
 
-EnvelopeRange& EnvelopeParameter::range()
+inline EnvelopeRange& EnvelopeParameter::range()
 {
 	return range_;
 }
 
-const EnvelopeRange& EnvelopeParameter::range() const
+inline const EnvelopeRange& EnvelopeParameter::range() const
 {
 	return range_;
 }
 
-const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
+inline const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
 {
 	return snap_settings_;
 }
 
-ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) const
+inline ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) const
 {
 	const auto points = get_point_data();
 
@@ -123,7 +123,7 @@ ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) const
 	return out;
 }
 
-float EnvelopeParameter::get_mod_value(Traverser* traverser) const
+inline float EnvelopeParameter::get_mod_value(Traverser* traverser) const
 {
 	const auto points = get_point_data();
 
@@ -138,7 +138,7 @@ float EnvelopeParameter::get_mod_value(Traverser* traverser) const
 	return get_mod_value(points, read_position[0], resets[0] > 0);
 }
 
-float EnvelopeParameter::get_mod_value(const blkhdgen_EnvelopePoints* points, float position, bool reset) const
+inline float EnvelopeParameter::get_mod_value(const blkhdgen_EnvelopePoints* points, float position, bool reset) const
 {
 	if (reset) point_search_index_ = -1;
 
@@ -150,19 +150,9 @@ float EnvelopeParameter::get_mod_value(const blkhdgen_EnvelopePoints* points, fl
 	return math::transform_and_denormalize(curve_, min, max, normalized_value);
 }
 
-blkhdgen_Error EnvelopeParameter::set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb)
+inline const blkhdgen_EnvelopePoints* EnvelopeParameter::get_point_data() const
 {
-	get_point_data_ = [user, cb]()
-	{
-		return cb(user);
-	};
-
-	return BLKHDGEN_OK;
-}
-
-const blkhdgen_EnvelopePoints* EnvelopeParameter::get_point_data() const
-{
-	return get_point_data_();
+	return nullptr; //TODO: return get_point_data_();
 }
 
 }
