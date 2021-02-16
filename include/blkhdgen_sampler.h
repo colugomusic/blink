@@ -16,6 +16,8 @@ typedef struct
 	blkhdgen_Preprocess_ReportProgress report_progress;
 } blkhdgen_PreprocessCallbacks;
 
+typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* host, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
+
 //
 // Sample Info
 //
@@ -26,6 +28,9 @@ typedef struct
 	blkhdgen_FrameCount num_frames;
 	blkhdgen_SR SR;
 	blkhdgen_BitDepth bit_depth;
+
+	void* host;
+	blkhdgen_GetSampleDataCB get_data;
 } blkhdgen_SampleInfo;
 
 //
@@ -35,20 +40,14 @@ typedef struct
 {
 	blkhdgen_SR song_rate;
 	blkhdgen_SR sample_rate;
+	int data_offset;
 
-	blkhdgen_SampleInfo* sample_info;
+	const blkhdgen_SampleInfo* sample_info;
 	blkhdgen_Position* positions;
 	blkhdgen_WarpPoints* warp_points;
 	blkhdgen_ParameterData* parameter_data;
-
-	// TODO:
-
 } blkhdgen_SamplerBuffer;
 
-//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleInfoCB)(void* proc_data, void* host, blkhdgen_GetSampleInfoCB cb);
-//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetSampleDataCB)(void* proc_data, void* host, blkhdgen_GetSampleDataCB cb);
-//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetWarpPointDataCB)(void* proc_data, void* host, blkhdgen_GetWarpPointDataCB cb);
-//typedef blkhdgen_Error (*blkhdgen_Sampler_SetGetManipulatorDataCB)(void* proc_data, void* host, blkhdgen_GetManipulatorDataCB cb);
 typedef blkhdgen_Error (*blkhdgen_Sampler_GetWaveformPositions)(void* proc_data, const blkhdgen_Position* pos, float* out, float* derivatives);
 
 // output pointer is aligned on a 16-byte boundary
@@ -57,23 +56,9 @@ typedef blkhdgen_Error(*blkhdgen_Sampler_Process)(void* proc_data, const blkhdge
 
 typedef struct
 {
-	//blkhdgen_GeneratorBase generator;
-
-	void* proc_data;
-
 	bool enable_warp_markers;
 
-	// Host will call these once to set callbacks that the plugin uses to
-	// retrieve data.
-	//
-	// It is the host's responsibility to ensure that the returned data remains
-	// valid for the duration of the call.
-	//
-	// If the callback is called simultaneously from the GUI and audio threads
-	// then the host may return two different pointers.
-	//blkhdgen_Sampler_SetGetSampleInfoCB set_get_sample_info_cb;
-	//blkhdgen_Sampler_SetGetSampleDataCB set_get_sample_data_cb;
-	//blkhdgen_Sampler_SetGetWarpPointDataCB set_get_warp_point_data_cb;
+	void* proc_data;
 
 	blkhdgen_Sampler_Process process;
 } blkhdgen_Sampler;

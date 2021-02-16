@@ -78,7 +78,7 @@ constexpr T transform_and_normalize(Curve curve, T min, T max, T value)
 template <class T, class Curve>
 constexpr T transform(Curve curve, T min, T max, T value)
 {
-	return lerp(min, max, transform_normalize(value));
+	return lerp(min, max, transform_and_normalize(curve, min, max, value));
 }
 
 // Apply curve and return value in range [min..max]

@@ -24,15 +24,13 @@ public:
 	const char* display_value(float value) const;
 	int get_flags() const;
 
-	ml::DSPVector get_mod_values(Traverser* traverser) const;
-	float get_mod_value(Traverser* traverser) const;
+	ml::DSPVector get_mod_values(Traverser* traverser, const blkhdgen_EnvelopePoints* points) const;
+	float get_mod_value(Traverser* traverser, const blkhdgen_EnvelopePoints* points) const;
 	float get_mod_value(const blkhdgen_EnvelopePoints* points, float position, bool reset) const;
-	//blkhdgen_Error set_get_point_data_cb(void* user, blkhdgen_GetPointDataCB cb);
 
 	EnvelopeRange& range();
 	const EnvelopeRange& range() const;
 	const EnvelopeSnapSettings& snap_settings() const;
-	const blkhdgen_EnvelopePoints* get_point_data() const;
 
 private:
 
@@ -44,7 +42,6 @@ private:
 	std::function<float(float)> inverse_curve_;
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
-	//std::function<const blkhdgen_EnvelopePoints*(void)> get_point_data_;
 	mutable TraverserPointDataResetter traverser_resetter_;
 	mutable int point_search_index_ = -1;
 };
@@ -101,12 +98,10 @@ inline const EnvelopeSnapSettings& EnvelopeParameter::snap_settings() const
 	return snap_settings_;
 }
 
-inline ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) const
+inline ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser, const blkhdgen_EnvelopePoints* points) const
 {
-	const auto points = get_point_data();
-
-	if (!points) return default_value_;
-	if (points->count < 1) return default_value_;
+	if (!points) return curve_(default_value_);
+	if (points->count < 1) return curve_(default_value_);
 
 	traverser_resetter_.check(points, traverser);
 
@@ -123,12 +118,10 @@ inline ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser) con
 	return out;
 }
 
-inline float EnvelopeParameter::get_mod_value(Traverser* traverser) const
+inline float EnvelopeParameter::get_mod_value(Traverser* traverser, const blkhdgen_EnvelopePoints* points) const
 {
-	const auto points = get_point_data();
-
-	if (!points) return default_value_;
-	if (points->count < 1) return default_value_;
+	if (!points) return curve_(default_value_);
+	if (points->count < 1) return curve_(default_value_);
 
 	traverser_resetter_.check(points, traverser);
 
@@ -148,11 +141,6 @@ inline float EnvelopeParameter::get_mod_value(const blkhdgen_EnvelopePoints* poi
 	const auto normalized_value = envelope_search(points, position, &point_search_index_);
 
 	return math::transform_and_denormalize(curve_, min, max, normalized_value);
-}
-
-inline const blkhdgen_EnvelopePoints* EnvelopeParameter::get_point_data() const
-{
-	return nullptr; //TODO: return get_point_data_();
 }
 
 }

@@ -536,10 +536,10 @@ inline blkhdgen_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 	return out;
 }
 
-template <class SamplerType>
-blkhdgen_Sampler make_sampler()
+template <class SamplerType, class ...Args>
+blkhdgen_Sampler make_sampler(Args... args)
 {
-	return bind::sampler(new SamplerType(), SamplerType::REQUIRES_PREPROCESS);
+	return bind::sampler(new SamplerType(args...), SamplerType::REQUIRES_PREPROCESS);
 }
 
 blkhdgen_Error destroy_sampler(blkhdgen_Sampler sampler)

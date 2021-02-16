@@ -19,11 +19,11 @@ public:
 
 	int get_num_channels() const { return 2; }
 
-	static ml::DSPVectorArray<2> stereo_pan(const ml::DSPVectorArray<2> in, float pan, std::shared_ptr<EnvelopeParameter> pan_envelope, Traverser* traverser);
+	static ml::DSPVectorArray<2> stereo_pan(const ml::DSPVectorArray<2> in, float pan, const EnvelopeParameter& pan_envelope, const blkhdgen_EnvelopePoints* points, Traverser* traverser);
 
 };
 
-inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(const ml::DSPVectorArray<2> in, float pan, std::shared_ptr<EnvelopeParameter> pan_envelope, Traverser* traverser)
+inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(const ml::DSPVectorArray<2> in, float pan, const EnvelopeParameter& pan_envelope, const blkhdgen_EnvelopePoints* points, Traverser* traverser)
 {
 	auto out = in;
 
@@ -31,7 +31,7 @@ inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(const ml::DSPVectorArray<
 
 	for (int i = 0; i < kFloatsPerDSPVector; i++)
 	{
-		env_pan[i] = pan_envelope->get_mod_value(traverser);
+		env_pan[i] = pan_envelope.get_mod_value(traverser, points);
 	}
 
 	const auto zero = ml::DSPVector(0.0f);

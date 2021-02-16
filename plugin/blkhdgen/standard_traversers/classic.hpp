@@ -76,11 +76,9 @@ public:
 	// the mathematics involved in calculating the resulting sample
 	// position.
 	//
-	float calculate(const EnvelopeParameter& env_pitch, blkhdgen_Position block_position, float* derivative = nullptr)
+	float calculate(const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative = nullptr)
 	{
 		env_pitch_ = &env_pitch;
-
-		const auto pitch_points = env_pitch_->get_point_data();
 
 		for (blkhdgen_Index i = point_search_index_; i < pitch_points->count; i++)
 		{
@@ -256,7 +254,7 @@ inline float Classic::get_position(float transpose, const EnvelopeParameter& env
 
 	calculator_.set_transpose(transpose);
 
-	return calculator_.calculate(env_pitch, read_position[0], derivative) + sample_offset;
+	return calculator_.calculate(env_pitch, env_pitch_points, read_position[0], derivative) + sample_offset;
 }
 
 inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
@@ -287,7 +285,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParam
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(env_pitch, read_position[i], &(derivatives[i])) + sample_offset;
+		out[i] = calculator_.calculate(env_pitch, env_pitch_points, read_position[i], &(derivatives[i])) + sample_offset;
 	}
 
 	return out;

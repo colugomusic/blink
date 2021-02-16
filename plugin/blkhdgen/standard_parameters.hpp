@@ -404,7 +404,7 @@ inline SliderSpec<float> amp()
 
 	out.range.range.min = -60.0f;
 	out.range.range.max = 12.0f;
-	out.range.value = -60.0f;
+	out.range.value = 0.0f;
 	out.range.step_size = 0.0f;
 
 	return out;
