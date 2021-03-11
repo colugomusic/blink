@@ -126,11 +126,13 @@ typedef float (*blkhdgen_Drag)(void* proc_data, float start_value, int amount, b
 typedef float (*blkhdgen_Increment)(void* proc_data, float value, bool precise);
 typedef float (*blkhdgen_Decrement)(void* proc_data, float value, bool precise);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
+typedef bool (*blkhdgen_FromString)(void* proc_data, const char* str, float* value);
 typedef int (*blkhdgen_IntConstrain)(void* proc_data, int value);
 typedef int (*blkhdgen_IntDrag)(void* proc_data, int start_value, int amount, bool precise);
 typedef int (*blkhdgen_IntIncrement)(void* proc_data, int value, bool precise);
 typedef int (*blkhdgen_IntDecrement)(void* proc_data, int value, bool precise);
 typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
+typedef bool (*blkhdgen_IntFromString)(void* proc_data, const char* str, int* value);
 
 enum blkhdgen_ParameterType
 {
@@ -247,6 +249,7 @@ typedef struct
 	//blkhdgen_InverseCurve inverse_curve;
 
 	blkhdgen_DisplayValue display_value;
+	blkhdgen_FromString from_string;
 	blkhdgen_Constrain constrain;
 	blkhdgen_Drag drag;
 	blkhdgen_Increment increment;
@@ -261,6 +264,7 @@ typedef struct
 	void* proc_data;
 
 	blkhdgen_IntDisplayValue display_value;
+	blkhdgen_IntFromString from_string;
 	blkhdgen_IntConstrain constrain;
 	blkhdgen_IntDrag drag;
 	blkhdgen_IntIncrement increment;

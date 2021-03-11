@@ -234,6 +234,21 @@ inline blkhdgen_Slider slider(SliderParameter<float>& slider)
 		return slider->display_value(value);
 	};
 
+	out.from_string = [](void* proc_data, const char* str, float* value)
+	{
+		auto slider = (SliderParameter<float>*)(proc_data);
+
+		auto result = slider->from_string(str);
+
+		if (result)
+		{
+			*value = *result;
+			return true;
+		}
+
+		return false;
+	};
+
 	return out;
 }
 
@@ -278,6 +293,21 @@ inline blkhdgen_IntSlider slider(SliderParameter<int>& slider)
 		auto slider = (SliderParameter<int>*)(proc_data);
 
 		return slider->display_value(value);
+	};
+
+	out.from_string = [](void* proc_data, const char* str, int* value)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
+
+		auto result = slider->from_string(str);
+
+		if (result)
+		{
+			*value = *result;
+			return true;
+		}
+
+		return false;
 	};
 
 	return out;

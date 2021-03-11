@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+#include <regex>
 #include <sstream>
 #include "envelope_spec.hpp"
 #include "slider_spec.hpp"
@@ -7,11 +9,36 @@
 namespace blkhdgen {
 namespace std_params {
 
+template <class T>
+std::optional<T> find_number(const std::string& str);
+
+template <>
+std::optional<float> find_number<float>(const std::string& str)
+{
+	std::regex r("(\\-?\\s*[\\.\\d]+)");
+	std::smatch match;
+
+	if (!std::regex_search(str, match, r)) return std::optional<float>();
+
+	return std::stof(match[0].str());
+}
+
+template <>
+std::optional<int> find_number<int>(const std::string& str)
+{
+	std::regex r("(\\-?\\s*[\\d]+)");
+	std::smatch match;
+
+	if (!std::regex_search(str, match, r)) return std::optional<int>();
+
+	return std::stoi(match[0].str());
+}
+
 inline std::string amp_display(float v)
 {
 	std::stringstream ss;
 
-	ss << v << " dB";
+	ss << math::stepify(float(math::linear2db(v)), 0.01f) << " dB";
 
 	return ss.str();
 }
@@ -35,6 +62,16 @@ inline std::string pan_display(float v)
 
 	return ss.str();
 }
+
+inline float amp_constrain(float v)
+{
+	const auto db = math::linear2db(v);
+
+	if (db < -60.0f) return 0.0f;
+	if (db > 12.0f) return math::db2linear(12.0f);
+
+	return v;
+};
 
 inline float pan_constrain(float v)
 {
@@ -416,6 +453,36 @@ inline SliderSpec<float> amp()
 	out.uuid = "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5";
 	out.name = "Amp";
 
+	out.constrain = amp_constrain;
+
+	out.increment = [](float v, bool precise)
+	{
+		if (v <= 0.0f) return math::db2linear(-60.0f);
+
+		return amp_constrain(math::db2linear(increment<1, 10>(math::linear2db(v), precise)));
+	};
+
+	out.decrement = [](float v, bool precise)
+	{
+		return amp_constrain(math::db2linear(decrement<1, 10>(math::linear2db(v), precise)));
+	};
+
+	out.drag = [](float v, int amount, bool precise)
+	{
+		if (v <= 0.0f) v = math::db2linear(-61.0f);
+
+		return amp_constrain(math::db2linear(math::stepify(drag<1, 10>(math::linear2db(v), amount / 5, precise), 0.01f)));
+	};
+
+	out.from_string = [](const std::string& str) -> std::optional<float>
+	{
+		auto db = find_number<float>(str);
+
+		if (!db) return db;
+
+		return math::db2linear(*db);
+	};
+
 	out.display_value = amp_display;
 	out.default_value = 1.0f;
 
@@ -444,6 +511,17 @@ inline SliderSpec<float> pan()
 	out.drag = [](float v, int amount, bool precise)
 	{
 		return pan_constrain(math::stepify(drag<10, 100>(v, amount / 5, precise), 0.01f));
+	};
+
+	out.from_string = [](const std::string& str)->std::optional<float>
+	{
+		std::string uppercase = str;
+
+		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
+
+		if (uppercase.find("CENTER") != std::string::npos) return 0.0f;
+
+		return find_number<float>(str);
 	};
 
 	out.display_value = pan_display;
@@ -491,6 +569,7 @@ inline SliderSpec<float> pitch()
 		return ss.str();
 	};
 
+	out.from_string = find_number<float>;
 	out.default_value = 0.0f;
 
 	return out;
@@ -513,6 +592,7 @@ inline SliderSpec<float> speed()
 		return ss.str();
 	};
 
+	out.from_string = find_number<float>;
 	out.default_value = 1.0f;
 
 	return out;
@@ -554,6 +634,7 @@ inline SliderSpec<int> sample_offset()
 		return ss.str();
 	};
 
+	out.from_string = find_number<int>;
 	out.default_value = 0;
 
 	return out;

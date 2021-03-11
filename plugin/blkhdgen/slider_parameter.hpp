@@ -23,6 +23,7 @@ public:
 	T get() const;
 
 	T get_default_value() { return default_value_; }
+	std::optional<T> from_string(const std::string& str) { return from_string_(str); }
 
 private:
 
@@ -33,6 +34,7 @@ private:
 	std::function<T(T, bool)> decrement_;
 	std::function<T(T, int, bool)> drag_;
 	std::function<std::string(T)> display_value_;
+	std::function<std::optional<T>(const std::string&)> from_string_;
 	mutable std::string display_value_buffer_;
 };
 
@@ -45,6 +47,7 @@ SliderParameter<T>::SliderParameter(SliderSpec<T> spec)
 	, decrement_(spec.decrement)
 	, drag_(spec.drag)
 	, display_value_(spec.display_value)
+	, from_string_(spec.from_string)
 {
 }
 
