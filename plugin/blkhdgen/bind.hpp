@@ -197,20 +197,34 @@ inline blkhdgen_Slider slider(SliderParameter<float>& slider)
 
 	out.parameter_type = blkhdgen_ParameterType_Slider;
 	out.proc_data = &slider;
-	out.range = range_value(slider.range());
+	out.default_value = slider.get_default_value();
 
-	out.curve = [](void* proc_data, float value)
+	out.constrain = [](void* proc_data, float value)
 	{
 		auto slider = (SliderParameter<float>*)(proc_data);
 
-		return slider->curve(value);
+		return slider->constrain(value);
 	};
 
-	out.inverse_curve = [](void* proc_data, float value)
+	out.increment = [](void* proc_data, float value, bool precise)
 	{
 		auto slider = (SliderParameter<float>*)(proc_data);
 
-		return slider->inverse_curve(value);
+		return slider->increment(value, precise);
+	};
+
+	out.decrement = [](void* proc_data, float value, bool precise)
+	{
+		auto slider = (SliderParameter<float>*)(proc_data);
+
+		return slider->decrement(value, precise);
+	};
+
+	out.drag = [](void* proc_data, float value, int amount, bool precise)
+	{
+		auto slider = (SliderParameter<float>*)(proc_data);
+
+		return slider->drag(value, amount, precise);
 	};
 
 	out.display_value = [](void* proc_data, float value)
@@ -227,9 +241,37 @@ inline blkhdgen_IntSlider slider(SliderParameter<int>& slider)
 {
 	blkhdgen_IntSlider out;
 
-	out.parameter_type = blkhdgen_ParameterType_Slider;
+	out.parameter_type = blkhdgen_ParameterType_IntSlider;
 	out.proc_data = &slider;
-	out.range = range_value(slider.range());
+	out.default_value = slider.get_default_value();
+
+	out.constrain = [](void* proc_data, int value)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
+
+		return slider->constrain(value);
+	};
+
+	out.increment = [](void* proc_data, int value, bool precise)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
+
+		return slider->increment(value, precise);
+	};
+
+	out.decrement = [](void* proc_data, int value, bool precise)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
+
+		return slider->decrement(value, precise);
+	};
+
+	out.drag = [](void* proc_data, int value, int amount, bool precise)
+	{
+		auto slider = (SliderParameter<int>*)(proc_data);
+
+		return slider->drag(value, amount, precise);
+	};
 
 	out.display_value = [](void* proc_data, int value)
 	{

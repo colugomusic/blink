@@ -36,6 +36,32 @@ inline std::string pan_display(float v)
 	return ss.str();
 }
 
+inline float pan_constrain(float v)
+{
+	if (v < -1.0f) return -1.0f;
+	if (v > 1.0f) return 1.0f;
+
+	return v;
+};
+
+template <int Normal, int Precise>
+inline float increment(float v, bool precise)
+{
+	return v + 1.0f / (precise ? Precise : Normal);
+}
+
+template <int Normal, int Precise>
+inline float decrement(float v, bool precise)
+{
+	return v - 1.0f / (precise ? Precise : Normal);
+}
+
+template <int Normal, int Precise>
+inline float drag(float v, int amount, bool precise)
+{
+	return v + (float(amount) / (precise ? Precise : Normal));
+}
+
 inline std::string speed_display(float v)
 {
 	std::stringstream ss;
@@ -79,12 +105,12 @@ inline EnvelopeSpec amp()
 
 	out.curve = [](float v)
 	{
-		return math::db_to_af(v);
+		return math::db2linear(v);
 	};
 
 	out.inverse_curve = [](float v)
 	{
-		return math::af_to_db(v);
+		return math::linear2db(v);
 	};
 
 	out.display_value = amp_display;
@@ -390,22 +416,8 @@ inline SliderSpec<float> amp()
 	out.uuid = "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5";
 	out.name = "Amp";
 
-	out.curve = [](float v)
-	{
-		return math::db_to_af(v);
-	};
-
-	out.inverse_curve = [](float v)
-	{
-		return math::af_to_db(v);
-	};
-
 	out.display_value = amp_display;
-
-	out.range.range.min = -60.0f;
-	out.range.range.max = 12.0f;
-	out.range.value = 0.0f;
-	out.range.step_size = 0.0f;
+	out.default_value = 1.0f;
 
 	return out;
 }
@@ -417,22 +429,25 @@ inline SliderSpec<float> pan()
 	out.uuid = "b5bf03f3-17e2-4546-8cc2-e29790ea02a2";
 	out.name = "Pan";
 
-	out.curve = [](float v)
+	out.constrain = pan_constrain;
+
+	out.increment = [](float v, bool precise)
 	{
-		return v;
+		return pan_constrain(math::stepify(increment<10, 100>(v, precise), 0.01f));
+	};
+	
+	out.decrement = [](float v, bool precise)
+	{
+		return pan_constrain(math::stepify(decrement<10, 100>(v, precise), 0.01f));
 	};
 
-	out.inverse_curve = [](float v)
+	out.drag = [](float v, int amount, bool precise)
 	{
-		return v;
+		return pan_constrain(math::stepify(drag<10, 100>(v, amount / 5, precise), 0.01f));
 	};
 
 	out.display_value = pan_display;
-
-	out.range.range.min = -1.0f;
-	out.range.range.max = 1.0f;
-	out.range.value = 0.0f;
-	out.range.step_size = 0.0f;
+	out.default_value = 0.0f;
 
 	return out;
 }
@@ -444,14 +459,27 @@ inline SliderSpec<float> pitch()
 	out.uuid = "00859eeb-ce9e-43cd-9994-bff881a9d32d";
 	out.name = "Pitch";
 
-	out.curve = [](float v)
+	out.constrain = [](float v)
 	{
+		if (v < -60.0f) return -60.0f;
+		if (v > 60.0f) return 60.0f;
+
 		return v;
 	};
 
-	out.inverse_curve = [](float v)
+	out.increment = [out](float v, bool precise)
 	{
-		return v;
+		return out.constrain(math::stepify(increment<1, 10>(v, precise), 0.1f));
+	};
+
+	out.decrement = [out](float v, bool precise)
+	{
+		return out.constrain(math::stepify(decrement<1, 10>(v, precise), 0.1f));
+	};
+
+	out.drag = [out](float v, int amount, bool precise)
+	{
+		return out.constrain(math::stepify(drag<1, 10>(v, amount / 5, precise), 0.1f));
 	};
 
 	out.display_value = [](float v)
@@ -463,10 +491,7 @@ inline SliderSpec<float> pitch()
 		return ss.str();
 	};
 
-	out.range.range.min = -60.0f;
-	out.range.range.max = 60.0f;
-	out.range.value = 0.0f;
-	out.range.step_size = 1.0f;
+	out.default_value = 0.0f;
 
 	return out;
 }
@@ -478,15 +503,6 @@ inline SliderSpec<float> speed()
 	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
 	out.name = "Speed";
 
-	out.curve = [](float v)
-	{
-		return std::pow(v, 2.0f);
-	};
-
-	out.inverse_curve = [](float v)
-	{
-		return std::sqrt(v);
-	};
 
 	out.display_value = [](float v)
 	{
@@ -497,10 +513,7 @@ inline SliderSpec<float> speed()
 		return ss.str();
 	};
 
-	out.range.range.min = 0.0f;
-	out.range.range.max = 32.0f;
-	out.range.value = 1.0f;
-	out.range.step_size = 0.0f;
+	out.default_value = 1.0f;
 
 	return out;
 }
@@ -512,8 +525,25 @@ inline SliderSpec<int> sample_offset()
 	out.uuid = "88373752-7656-4d0e-8da2-a18c05af0106";
 	out.name = "Sample Offset";
 
-	out.curve = [](int v) { return v; };
-	out.inverse_curve = [](int v) { return v; };
+	out.constrain = [](int v)
+	{
+		return v;
+	};
+
+	out.increment = [](int v, bool precise)
+	{
+		return v + 1;
+	};
+
+	out.decrement = [](int v, bool precise)
+	{
+		return v - 1;
+	};
+
+	out.drag = [](int v, int amount, bool precise)
+	{
+		return v + (amount / (precise ? 50 : 5));
+	};
 
 	out.display_value = [](int v)
 	{
@@ -524,10 +554,7 @@ inline SliderSpec<int> sample_offset()
 		return ss.str();
 	};
 
-	out.range.range.min = std::numeric_limits<int>::min();
-	out.range.range.max = std::numeric_limits<int>::max();
-	out.range.value = 0;
-	out.range.step_size = 1;
+	out.default_value = 0;
 
 	return out;
 }

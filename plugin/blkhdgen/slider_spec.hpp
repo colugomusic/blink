@@ -8,10 +8,14 @@ namespace blkhdgen {
 template <class T>
 struct SliderSpec : public ParameterSpec
 {
-	std::function<T(T)> curve;
-	std::function<T(T)> inverse_curve;
+	//std::function<T(T)> curve;
+	//std::function<T(T)> inverse_curve;
 	std::function<std::string(T)> display_value;
-	RangeValue<T> range;
+	std::function<T(T)> constrain;
+	std::function<T(T, int, bool)> drag;
+	std::function<T(T, bool)> increment;
+	std::function<T(T, bool)> decrement;
+	T default_value;
 };
 
 }

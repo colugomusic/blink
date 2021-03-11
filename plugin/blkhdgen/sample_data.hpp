@@ -43,7 +43,8 @@ inline ml::DSPVector SampleData::read_frames(blkhdgen_ChannelCount channel, cons
 		}
 		else
 		{
-			get_data(channel, pos[i], 1, &(out[i]));
+			// Could return zero if sample header wasn't loaded yet.
+			if (get_data(channel, pos[i], 1, &(out[i])) == 0) break;
 		}
 	}
 

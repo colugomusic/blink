@@ -12,22 +12,26 @@ public:
 
 	SliderParameter(SliderSpec<T> spec);
 
-	blkhdgen_ParameterType get_type() const override { return blkhdgen_ParameterType_Slider; }
+	blkhdgen_ParameterType get_type() const override;
 
-	T curve(T value) const;
-	T inverse_curve(T value) const;
+	T constrain(T value) const;
+	T increment(T value, bool precise) const;
+	T decrement(T value, bool precise) const;
+	T drag(T value, int amount, bool precise) const;
 	const char* display_value(T value) const;
 	blkhdgen_Error set(T value);
 	T get() const;
 
-	const RangeValue<T>& range();
+	T get_default_value() { return default_value_; }
 
 private:
 
-	RangeValue<T> range_;
+	T default_value_;
 	std::atomic<T> current_value_;
-	std::function<T(T)> curve_;
-	std::function<T(T)> inverse_curve_;
+	std::function<T(T)> constrain_;
+	std::function<T(T, bool)> increment_;
+	std::function<T(T, bool)> decrement_;
+	std::function<T(T, int, bool)> drag_;
 	std::function<std::string(T)> display_value_;
 	mutable std::string display_value_buffer_;
 };
@@ -35,35 +39,53 @@ private:
 template <class T>
 SliderParameter<T>::SliderParameter(SliderSpec<T> spec)
 	: Parameter(spec)
-	, range_(spec.range)
-	, curve_(spec.curve)
-	, inverse_curve_(spec.inverse_curve)
+	, default_value_(spec.default_value)
+	, constrain_(spec.constrain)
+	, increment_(spec.increment)
+	, decrement_(spec.decrement)
+	, drag_(spec.drag)
 	, display_value_(spec.display_value)
 {
 }
 
-template <class T>
-T SliderParameter<T>::curve(T value) const
+inline blkhdgen_ParameterType SliderParameter<float>::get_type() const
 {
-	return curve_(value);
+	return blkhdgen_ParameterType_Slider;
+}
+
+inline blkhdgen_ParameterType SliderParameter<int>::get_type() const
+{
+	return blkhdgen_ParameterType_IntSlider;
 }
 
 template <class T>
-T SliderParameter<T>::inverse_curve(T value) const
+T SliderParameter<T>::constrain(T value) const
 {
-	return inverse_curve_(value);
+	return constrain_(value);
+}
+
+template <class T>
+T SliderParameter<T>::increment(T value, bool precise) const
+{
+	return increment_(value, precise);
+}
+
+template <class T>
+T SliderParameter<T>::decrement(T value, bool precise) const
+{
+	return decrement_(value, precise);
+}
+
+template <class T>
+T SliderParameter<T>::drag(T value, int amount, bool precise) const
+{
+	return drag_(value, amount, precise);
 }
 
 template <class T>
 const char* SliderParameter<T>::display_value(T value) const
 {
 	return (display_value_buffer_ = display_value_(value)).c_str();
-}
-
-template <class T>
-const RangeValue<T>& SliderParameter<T>::range()
-{
-	return range_;
 }
 
 template <class T>

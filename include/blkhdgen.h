@@ -121,7 +121,15 @@ typedef struct
 
 typedef float (*blkhdgen_Curve)(void* proc_data, float value);
 typedef float (*blkhdgen_InverseCurve)(void* proc_data, float value);
+typedef float (*blkhdgen_Constrain)(void* proc_data, float value);
+typedef float (*blkhdgen_Drag)(void* proc_data, float start_value, int amount, bool precise);
+typedef float (*blkhdgen_Increment)(void* proc_data, float value, bool precise);
+typedef float (*blkhdgen_Decrement)(void* proc_data, float value, bool precise);
 typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
+typedef int (*blkhdgen_IntConstrain)(void* proc_data, int value);
+typedef int (*blkhdgen_IntDrag)(void* proc_data, int start_value, int amount, bool precise);
+typedef int (*blkhdgen_IntIncrement)(void* proc_data, int value, bool precise);
+typedef int (*blkhdgen_IntDecrement)(void* proc_data, int value, bool precise);
 typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
 
 enum blkhdgen_ParameterType
@@ -231,23 +239,32 @@ typedef struct
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Slider
-	blkhdgen_RangeValue range;
+	float default_value;
 
 	void* proc_data;
 
-	blkhdgen_Curve curve;
-	blkhdgen_InverseCurve inverse_curve;
+	//blkhdgen_Curve curve;
+	//blkhdgen_InverseCurve inverse_curve;
+
 	blkhdgen_DisplayValue display_value;
+	blkhdgen_Constrain constrain;
+	blkhdgen_Drag drag;
+	blkhdgen_Increment increment;
+	blkhdgen_Decrement decrement;
 } blkhdgen_Slider;
 
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_IntSlider
-	blkhdgen_IntRangeValue range;
+	int default_value;
 
 	void* proc_data;
 
 	blkhdgen_IntDisplayValue display_value;
+	blkhdgen_IntConstrain constrain;
+	blkhdgen_IntDrag drag;
+	blkhdgen_IntIncrement increment;
+	blkhdgen_IntDecrement decrement;
 } blkhdgen_IntSlider;
 
 //

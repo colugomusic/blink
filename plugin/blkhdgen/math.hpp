@@ -7,16 +7,24 @@
 namespace blkhdgen {
 namespace math {
 
-template <class T>
-constexpr T af_to_db(T v)
+inline double linear2db(double linear)
 {
-	return std::log(v) / std::log(T(1.12202));
+	return std::log(linear) * 8.6858896380650365530225783783321;
 }
 
-template <class T>
-constexpr T db_to_af(T v)
+inline float linear2db(float linear)
 {
-	return std::pow(T(1.122018456459045), v);
+	return std::log(linear) * 8.6858896380650365530225783783321f;
+}
+
+inline double db2linear(double db)
+{
+	return std::exp(db * 0.11512925464970228420089957273422);
+}
+
+inline float db2linear(float db)
+{
+	return std::exp(db * 0.11512925464970228420089957273422f);
 }
 
 template <class T>
@@ -47,6 +55,17 @@ template <class T>
 constexpr T inverse_lerp(T a, T b, T x)
 {
 	return (x - a) / (b - a);
+}
+
+template <class T>
+constexpr T stepify(T value, T step)
+{
+	if (step != 0)
+	{
+		value = std::floor(value / step + T(0.5)) * step;
+	}
+
+	return value;
 }
 
 //template <class T, class Curve>
