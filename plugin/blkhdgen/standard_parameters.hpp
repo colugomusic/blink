@@ -9,8 +9,8 @@
 namespace blkhdgen {
 namespace std_params {
 
-template <class T>
-std::optional<T> find_number(const std::string& str);
+template <class T> std::optional<T> find_number(const std::string& str);
+template <class T> std::optional<T> find_positive_number(const std::string& str);
 
 template <>
 std::optional<float> find_number<float>(const std::string& str)
@@ -34,6 +34,17 @@ std::optional<int> find_number<int>(const std::string& str)
 	return std::stoi(match[0].str());
 }
 
+template <>
+std::optional<int> find_positive_number<int>(const std::string& str)
+{
+	std::regex r("([\\d]+)");
+	std::smatch match;
+
+	if (!std::regex_search(str, match, r)) return std::optional<int>();
+
+	return std::stoi(match[0].str());
+}
+
 inline std::string amp_display(float v)
 {
 	std::stringstream ss;
@@ -49,11 +60,11 @@ inline std::string pan_display(float v)
 
 	if (v < 0.0f)
 	{
-		ss << v << " L";
+		ss << std::abs(v * 100) << "% L";
 	}
 	else if (v > 0.0f)
 	{
-		ss << v << " R";
+		ss << v * 100 << "% R";
 	}
 	else
 	{
@@ -91,6 +102,18 @@ template <int Normal, int Precise>
 inline float decrement(float v, bool precise)
 {
 	return v - 1.0f / (precise ? Precise : Normal);
+}
+
+template <int Normal>
+inline float increment(float v)
+{
+	return v + 1.0f / (Normal);
+}
+
+template <int Normal>
+inline float decrement(float v)
+{
+	return v - 1.0f / (Normal);
 }
 
 template <int Normal, int Precise>
@@ -450,7 +473,7 @@ inline SliderSpec<float> amp()
 {
 	SliderSpec<float> out;
 
-	out.uuid = "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5";
+	out.uuid = BLKHDGEN_STD_UUID_SLIDER_AMP;
 	out.name = "Amp";
 
 	out.constrain = amp_constrain;
@@ -500,17 +523,17 @@ inline SliderSpec<float> pan()
 
 	out.increment = [](float v, bool precise)
 	{
-		return pan_constrain(math::stepify(increment<10, 100>(v, precise), 0.01f));
+		return pan_constrain(math::stepify(increment<100>(v), 0.01f));
 	};
 	
 	out.decrement = [](float v, bool precise)
 	{
-		return pan_constrain(math::stepify(decrement<10, 100>(v, precise), 0.01f));
+		return pan_constrain(math::stepify(decrement<100>(v), 0.01f));
 	};
 
 	out.drag = [](float v, int amount, bool precise)
 	{
-		return pan_constrain(math::stepify(drag<10, 100>(v, amount / 5, precise), 0.01f));
+		return pan_constrain(math::stepify(drag<500, 5000>(v, amount, precise), 0.01f));
 	};
 
 	out.from_string = [](const std::string& str)->std::optional<float>
@@ -521,7 +544,13 @@ inline SliderSpec<float> pan()
 
 		if (uppercase.find("CENTER") != std::string::npos) return 0.0f;
 
-		return find_number<float>(str);
+		const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
+		
+		auto value = find_positive_number<int>(str);
+
+		if (!value) return std::optional<float>();
+
+		return (float(*value) / 100) * (negative ? -1 : 1);
 	};
 
 	out.display_value = pan_display;
