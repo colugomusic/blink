@@ -103,10 +103,9 @@ extern "C"
 	// called until the last call to process() has completed for this sample.
 	EXPORTED blkhdgen_Error blkhdgen_sampler_sample_deleted(blkhdgen_ID sample_id);
 
-	// Get the transformed waveform positions and derivatives for the given block
-	// positions
-	//
-	// output pointers are aligned on 16-byte boundaries
-	EXPORTED blkhdgen_Error blkhdgen_sampler_get_waveform_positions(const blkhdgen_ParameterData* parameter_data, int data_offset, const blkhdgen_Position* pos, float* out, float* derivatives);
+	// Get the transformed waveform positions and derivatives for the given
+	// n block positions
+	// n may not be a multiple of BLKHDGEN_VECTOR_SIZE
+	EXPORTED blkhdgen_Error blkhdgen_sampler_get_waveform_positions(const blkhdgen_SamplerBuffer* buffer, blkhdgen_FrameCount n, float* out, float* derivatives);
 }
 #endif

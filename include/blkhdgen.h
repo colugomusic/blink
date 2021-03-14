@@ -7,6 +7,8 @@
 #define BLKHDGEN_TRUE 1
 #define BLKHDGEN_FALSE 0
 
+#define BLKHDGEN_STD_UUID_SLIDER_AMP "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5"
+
 typedef uint8_t blkhdgen_ChannelCount;
 typedef uint32_t blkhdgen_FrameCount;
 typedef uint32_t blkhdgen_ParamCount;
