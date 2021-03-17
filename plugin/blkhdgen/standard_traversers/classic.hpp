@@ -285,7 +285,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParam
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(env_pitch, env_pitch_points, read_position[i], &(derivatives[i])) + sample_offset;
+		out[i] = calculator_.calculate(env_pitch, env_pitch_points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) + sample_offset;
 	}
 
 	return out;

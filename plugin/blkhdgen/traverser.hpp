@@ -22,13 +22,13 @@ public:
 
 	using DataOffset = std::int32_t;
 
-	void generate(const blkhdgen_Position* block_pos, DataOffset data_offset)
+	void generate(const blkhdgen_Position* block_pos, int n, DataOffset data_offset)
 	{
 		reset_ = 0;
 
 		blkhdgen_Position position = last_read_position_;
 
-		for (int i = 0; i < kFloatsPerDSPVector; i++)
+		for (int i = 0; i < n; i++)
 		{
 			read_position_[i] = float(block_pos[i]) - data_offset;
 

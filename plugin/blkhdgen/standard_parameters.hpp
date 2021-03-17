@@ -563,7 +563,7 @@ inline SliderSpec<float> pitch()
 {
 	SliderSpec<float> out;
 
-	out.uuid = "00859eeb-ce9e-43cd-9994-bff881a9d32d";
+	out.uuid = BLKHDGEN_STD_UUID_SLIDER_PITCH;
 	out.name = "Pitch";
 
 	out.constrain = [](float v)
@@ -631,7 +631,7 @@ inline SliderSpec<int> sample_offset()
 {
 	SliderSpec<int> out;
 
-	out.uuid = "88373752-7656-4d0e-8da2-a18c05af0106";
+	out.uuid = BLKHDGEN_STD_UUID_SLIDER_SAMPLE_OFFSET;
 	out.name = "Sample Offset";
 
 	out.constrain = [](int v)
@@ -677,9 +677,9 @@ inline ToggleSpec loop()
 {
 	ToggleSpec out;
 
-	out.uuid = "dfa36d24-3c41-4a13-9b57-dc0116ef19f7";
+	out.uuid = BLKHDGEN_STD_UUID_TOGGLE_LOOP;
 	out.name = "Loop";
-	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu;
+	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu | blkhdgen_ToggleFlags_ShowInFront;
 	out.default_value = false;
 
 	return out;
@@ -689,9 +689,9 @@ inline ToggleSpec reverse()
 {
 	ToggleSpec out;
 
-	out.uuid = "e7cacaf8-4afc-4e81-83de-50620fed4b13";
+	out.uuid = BLKHDGEN_STD_UUID_TOGGLE_REVERSE;
 	out.name = "Reverse";
-	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu;
+	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu | blkhdgen_ToggleFlags_ShowInFront;
 	out.default_value = false;
 
 	return out;

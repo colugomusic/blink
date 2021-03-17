@@ -8,6 +8,10 @@
 #define BLKHDGEN_FALSE 0
 
 #define BLKHDGEN_STD_UUID_SLIDER_AMP "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5"
+#define BLKHDGEN_STD_UUID_SLIDER_PITCH "00859eeb-ce9e-43cd-9994-bff881a9d32d"
+#define BLKHDGEN_STD_UUID_SLIDER_SAMPLE_OFFSET "88373752-7656-4d0e-8da2-a18c05af0106"
+#define BLKHDGEN_STD_UUID_TOGGLE_LOOP "dfa36d24-3c41-4a13-9b57-dc0116ef19f7"
+#define BLKHDGEN_STD_UUID_TOGGLE_REVERSE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
 
 typedef uint8_t blkhdgen_ChannelCount;
 typedef uint32_t blkhdgen_FrameCount;
@@ -163,7 +167,8 @@ enum blkhdgen_ToggleFlags
 	blkhdgen_ToggleFlags_ShowIcon = 0x2,
 	blkhdgen_ToggleFlags_ShowName = 0x3,
 	blkhdgen_ToggleFlags_ShowInContextMenu = 0x4,
-	blkhdgen_ToggleFlags_DefaultEnabled = 0x8,
+	blkhdgen_ToggleFlags_ShowInFront = 0x8,
+	blkhdgen_ToggleFlags_DefaultEnabled = 0x10,
 };
 //
 // Envelope parameter
