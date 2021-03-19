@@ -22,12 +22,14 @@ public:
 	blkhdgen_Error set(T value);
 	T get() const;
 
-	T get_default_value() { return default_value_; }
+	T get_default_value() const { return default_value_; }
+	blkhdgen_StdIcon get_icon() const { return icon_; }
 	std::optional<T> from_string(const std::string& str) { return from_string_(str); }
 
 private:
 
 	T default_value_;
+	blkhdgen_StdIcon icon_;
 	std::atomic<T> current_value_;
 	std::function<T(T)> constrain_;
 	std::function<T(T, bool)> increment_;
@@ -42,6 +44,7 @@ template <class T>
 SliderParameter<T>::SliderParameter(SliderSpec<T> spec)
 	: Parameter(spec)
 	, default_value_(spec.default_value)
+	, icon_(spec.icon)
 	, constrain_(spec.constrain)
 	, increment_(spec.increment)
 	, decrement_(spec.decrement)

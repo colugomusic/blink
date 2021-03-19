@@ -508,6 +508,7 @@ inline SliderSpec<float> amp()
 
 	out.display_value = amp_display;
 	out.default_value = 1.0f;
+	out.icon = blkhdgen_StdIcon_Amp;
 
 	return out;
 }
@@ -555,6 +556,7 @@ inline SliderSpec<float> pan()
 
 	out.display_value = pan_display;
 	out.default_value = 0.0f;
+	out.icon = blkhdgen_StdIcon_Pan;
 
 	return out;
 }
@@ -600,6 +602,7 @@ inline SliderSpec<float> pitch()
 
 	out.from_string = find_number<float>;
 	out.default_value = 0.0f;
+	out.icon = blkhdgen_StdIcon_Pitch;
 
 	return out;
 }
@@ -651,7 +654,7 @@ inline SliderSpec<int> sample_offset()
 
 	out.drag = [](int v, int amount, bool precise)
 	{
-		return v + (amount / (precise ? 50 : 5));
+		return v + (amount / (precise ? 50 : 1));
 	};
 
 	out.display_value = [](int v)
@@ -665,6 +668,7 @@ inline SliderSpec<int> sample_offset()
 
 	out.from_string = find_number<int>;
 	out.default_value = 0;
+	out.icon = blkhdgen_StdIcon_SampleOffset;
 
 	return out;
 }
@@ -679,7 +683,7 @@ inline ToggleSpec loop()
 
 	out.uuid = BLKHDGEN_STD_UUID_TOGGLE_LOOP;
 	out.name = "Loop";
-	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu | blkhdgen_ToggleFlags_ShowInFront;
+	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu | blkhdgen_ToggleFlags_ShowButton;
 	out.default_value = false;
 
 	return out;
@@ -691,7 +695,7 @@ inline ToggleSpec reverse()
 
 	out.uuid = BLKHDGEN_STD_UUID_TOGGLE_REVERSE;
 	out.name = "Reverse";
-	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu | blkhdgen_ToggleFlags_ShowInFront;
+	out.flags = blkhdgen_ToggleFlags_ShowInContextMenu | blkhdgen_ToggleFlags_ShowButton;
 	out.default_value = false;
 
 	return out;

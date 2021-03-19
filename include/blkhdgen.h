@@ -26,6 +26,18 @@ typedef uint32_t blkhdgen_IntPosition;
 typedef int8_t blkhdgen_Bool;
 typedef uint32_t blkhdgen_Scale;
 
+enum blkhdgen_StdIcon
+{
+	blkhdgen_StdIcon_None = 0,
+	blkhdgen_StdIcon_Amp = 1,
+	blkhdgen_StdIcon_Pan = 2,
+	blkhdgen_StdIcon_Pitch = 3,
+	blkhdgen_StdIcon_SampleOffset = 4,
+	blkhdgen_StdIcon_Speed = 5,
+	blkhdgen_StdIcon_Loop = 6,
+	blkhdgen_StdIcon_Reverse = 7,
+};
+
 // Generators define their own error codes. Blockhead will probably just ignore
 // any errors but this might be useful for future proofing
 typedef int blkhdgen_Error;
@@ -154,21 +166,16 @@ enum blkhdgen_EnvelopeFlags
 {
 	blkhdgen_EnvelopeFlags_None = 0x0,
 	blkhdgen_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 0x1,
-	blkhdgen_EnvelopeFlags_ShowIcon = 0x2,
-	blkhdgen_EnvelopeFlags_ShowName = 0x4,
-	blkhdgen_EnvelopeFlags_DefaultEnabled = 0x8,
-	blkhdgen_EnvelopeFlags_DefaultVisible = 0x10,
+	blkhdgen_EnvelopeFlags_DefaultEnabled = 0x2,
+	blkhdgen_EnvelopeFlags_DefaultVisible = 0x4,
 };
 
 enum blkhdgen_ToggleFlags
 {
 	blkhdgen_ToggleFlags_None = 0x0,
 	blkhdgen_ToggleFlags_ShowButton = 0x1,
-	blkhdgen_ToggleFlags_ShowIcon = 0x2,
-	blkhdgen_ToggleFlags_ShowName = 0x3,
-	blkhdgen_ToggleFlags_ShowInContextMenu = 0x4,
-	blkhdgen_ToggleFlags_ShowInFront = 0x8,
-	blkhdgen_ToggleFlags_DefaultEnabled = 0x10,
+	blkhdgen_ToggleFlags_ShowInContextMenu = 0x2,
+	blkhdgen_ToggleFlags_DefaultEnabled = 0x4,
 };
 //
 // Envelope parameter
@@ -249,6 +256,7 @@ typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Slider
 	float default_value;
+	blkhdgen_StdIcon icon;
 
 	void* proc_data;
 
@@ -261,12 +269,14 @@ typedef struct
 	blkhdgen_Drag drag;
 	blkhdgen_Increment increment;
 	blkhdgen_Decrement decrement;
+	
 } blkhdgen_Slider;
 
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_IntSlider
 	int default_value;
+	blkhdgen_StdIcon icon;
 
 	void* proc_data;
 
@@ -287,6 +297,7 @@ typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Toggle
 	blkhdgen_Bool default_value;
+	blkhdgen_StdIcon icon;
 	int flags; // blkhdgen_ToggleFlags
 } blkhdgen_Toggle;
 

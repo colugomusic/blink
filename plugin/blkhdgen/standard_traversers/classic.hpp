@@ -240,7 +240,7 @@ inline float Classic::get_position(float transpose, const EnvelopeParameter& env
 
 		if (derivative) *derivative = ff;
 
-		return float(read_position[0] * ff);
+		return (read_position[0] * ff) - float(sample_offset);
 	}
 
 	traverser_resetter_.check(env_pitch_points, traverser);
@@ -254,7 +254,7 @@ inline float Classic::get_position(float transpose, const EnvelopeParameter& env
 
 	calculator_.set_transpose(transpose);
 
-	return calculator_.calculate(env_pitch, env_pitch_points, read_position[0], derivative) + sample_offset;
+	return calculator_.calculate(env_pitch, env_pitch_points, read_position[0], derivative) - sample_offset;
 }
 
 inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
@@ -267,7 +267,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParam
 
 		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 
-		return read_position * ff;
+		return (read_position * ff) - float(sample_offset);
 	}
 
 	traverser_resetter_.check(env_pitch_points, traverser);
@@ -285,7 +285,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParam
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(env_pitch, env_pitch_points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) + sample_offset;
+		out[i] = calculator_.calculate(env_pitch, env_pitch_points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
 	}
 
 	return out;

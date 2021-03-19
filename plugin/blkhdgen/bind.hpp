@@ -198,6 +198,7 @@ inline blkhdgen_Slider slider(SliderParameter<float>& slider)
 	out.parameter_type = blkhdgen_ParameterType_Slider;
 	out.proc_data = &slider;
 	out.default_value = slider.get_default_value();
+	out.icon = slider.get_icon();
 
 	out.constrain = [](void* proc_data, float value)
 	{
@@ -259,6 +260,7 @@ inline blkhdgen_IntSlider slider(SliderParameter<int>& slider)
 	out.parameter_type = blkhdgen_ParameterType_IntSlider;
 	out.proc_data = &slider;
 	out.default_value = slider.get_default_value();
+	out.icon = slider.get_icon();
 
 	out.constrain = [](void* proc_data, int value)
 	{
@@ -319,6 +321,7 @@ inline blkhdgen_Toggle toggle(ToggleParameter& toggle)
 
 	out.parameter_type = blkhdgen_ParameterType_Toggle;
 	out.default_value = toggle.get_default_value() ? BLKHDGEN_TRUE : BLKHDGEN_FALSE;
+	out.icon = toggle.get_icon();
 	out.flags = toggle.get_flags();
 
 	return out;
