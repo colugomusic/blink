@@ -28,6 +28,18 @@ inline float db2linear(float db)
 }
 
 template <class T>
+constexpr inline T linear2speed(T linear)
+{
+	return std::pow(T(0.5), -linear);
+}
+
+template <class T>
+constexpr inline T speed2linear(T speed)
+{
+	return std::log(speed) / std::log(T(2));
+}
+
+template <class T>
 T p_to_ff(T p)
 {
 	return std::pow(T(2), p / T(12));

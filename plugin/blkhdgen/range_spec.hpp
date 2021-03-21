@@ -1,14 +1,14 @@
 #pragma once
 
-#include "range_value.hpp"
+#include "slider_spec.hpp"
 
 namespace blkhdgen {
 
 template <class T>
 struct RangeSpec
 {
-	RangeValue<T> min_range;
-	RangeValue<T> max_range;
+	SliderSpec<T> min;
+	SliderSpec<T> max;
 };
 
 }

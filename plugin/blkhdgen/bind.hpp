@@ -6,6 +6,7 @@
 #include "envelope_range_attribute.hpp"
 #include "option_parameter.hpp"
 #include "slider_parameter.hpp"
+#include "slider_parameter_spec.hpp"
 #include "toggle_parameter.hpp"
 #include "generator.hpp"
 #include "sampler.hpp"
@@ -13,16 +14,6 @@
 
 namespace blkhdgen {
 namespace bind {
-
-inline blkhdgen_Range range(const Range<float>& range)
-{
-	blkhdgen_Range out;
-
-	out.min = range.min;
-	out.max = range.max;
-
-	return out;
-}
 
 inline blkhdgen_IntRange range(const Range<int>& range)
 {
@@ -34,47 +25,121 @@ inline blkhdgen_IntRange range(const Range<int>& range)
 	return out;
 }
 
-inline blkhdgen_RangeValue range_value(const RangeValue<float>& range_value)
+inline blkhdgen_Slider slider(const Slider<float>& slider)
 {
-	blkhdgen_RangeValue out;
+	blkhdgen_Slider out;
 
-	out.range = range(range_value.range);
-	out.default_value = range_value.value;
-	out.step_size = range_value.step_size;
+	out.proc_data = (void*)(&slider);
+	out.default_value = slider.spec().default_value;
 
-	return out;
-}
-
-inline blkhdgen_IntRangeValue range_value(const RangeValue<int>& range_value)
-{
-	blkhdgen_IntRangeValue out;
-
-	out.range = range(range_value.range);
-	out.default_value = range_value.value;
-	out.step_size = range_value.step_size;
-
-	return out;
-}
-
-inline blkhdgen_EnvelopeRangeAttribute envelope_range_attribute(EnvelopeRangeAttribute& attribute)
-{
-	blkhdgen_EnvelopeRangeAttribute out;
-
-	out.proc_data = &attribute;
-	out.range = range_value(attribute.get_range());
-
-	out.set = [](void* proc_data, float value)
+	out.constrain = [](void* proc_data, float value)
 	{
-		auto attribute = (EnvelopeRangeAttribute*)(proc_data);
+		auto slider = (Slider<float>*)(proc_data);
 
-		attribute->set(value);
+		return slider->spec().constrain(value);
 	};
 
-	out.get = [](void* proc_data)
+	out.increment = [](void* proc_data, float value, bool precise)
 	{
-		auto attribute = (EnvelopeRangeAttribute*)(proc_data);
+		auto slider = (Slider<float>*)(proc_data);
 
-		return attribute->get();
+		return slider->spec().increment(value, precise);
+	};
+
+	out.decrement = [](void* proc_data, float value, bool precise)
+	{
+		auto slider = (Slider<float>*)(proc_data);
+
+		return slider->spec().decrement(value, precise);
+	};
+
+	out.drag = [](void* proc_data, float value, int amount, bool precise)
+	{
+		auto slider = (Slider<float>*)(proc_data);
+
+		return slider->spec().drag(value, amount, precise);
+	};
+
+	out.display_value = [](void* proc_data, float value)
+	{
+		auto slider = (Slider<float>*)(proc_data);
+
+		return slider->display_value(value);
+	};
+
+	out.from_string = [](void* proc_data, const char* str, float* value)
+	{
+		auto slider = (Slider<float>*)(proc_data);
+
+		auto result = slider->spec().from_string(str);
+
+		if (result)
+		{
+			*value = *result;
+			return true;
+		}
+
+		return false;
+	};
+
+	return out;
+}
+
+inline blkhdgen_IntSlider slider(const Slider<int>& slider)
+{
+	blkhdgen_IntSlider out;
+
+	out.proc_data = (void*)(&slider);
+	out.default_value = slider.spec().default_value;
+
+	out.constrain = [](void* proc_data, int value)
+	{
+		auto slider = (Slider<int>*)(proc_data);
+
+		return slider->spec().constrain(value);
+	};
+
+	out.increment = [](void* proc_data, int value, bool precise)
+	{
+		auto slider = (Slider<int>*)(proc_data);
+
+		return slider->spec().increment(value, precise);
+	};
+
+	out.decrement = [](void* proc_data, int value, bool precise)
+	{
+		auto slider = (Slider<int>*)(proc_data);
+
+		return slider->spec().decrement(value, precise);
+	};
+
+	out.drag = [](void* proc_data, int value, int amount, bool precise)
+	{
+		auto slider = (Slider<int>*)(proc_data);
+
+		return slider->spec().drag(value, amount, precise);
+	};
+
+	out.display_value = [](void* proc_data, int value)
+	{
+		auto slider = (Slider<int>*)(proc_data);
+
+		return slider->display_value(value);
+	};
+
+	out.from_string = [](void* proc_data, const char* str, int* value)
+	{
+		auto slider = (Slider<int>*)(proc_data);
+
+		auto result = slider->spec().from_string(str);
+
+		if (result)
+		{
+			*value = *result;
+			return true;
+		}
+
+		return false;
 	};
 
 	return out;
@@ -84,8 +149,8 @@ inline blkhdgen_EnvelopeRange envelope_range(EnvelopeRange& range)
 {
 	blkhdgen_EnvelopeRange out;
 
-	out.min = envelope_range_attribute(range.min());
-	out.min = envelope_range_attribute(range.max());
+	out.min = slider(range.min());
+	out.min = slider(range.max());
 
 	return out;
 }
@@ -94,7 +159,7 @@ inline blkhdgen_EnvelopeSnapSettings envelope_snap_settings(const EnvelopeSnapSe
 {
 	blkhdgen_EnvelopeSnapSettings out;
 
-	out.step_size = range_value(snap_settings.step_size);
+	out.step_size = slider(snap_settings.step_size);
 	out.default_snap_amount = snap_settings.default_snap_amount;
 
 	return out;
@@ -127,34 +192,7 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 	out.default_value = envelope.get_default_value();
 	out.flags = envelope.get_flags();
 	out.proc_data = &envelope;
-
-	out.get_range = [](void* proc_data)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope_range(envelope->range());
-	};
-
-	out.get_snap_settings = [](void* proc_data)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope_snap_settings(envelope->snap_settings());
-	};
-
-	out.curve = [](void* proc_data, float value)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->curve(value);
-	};
-
-	out.inverse_curve = [](void* proc_data, float value)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->inverse_curve(value);
-	};
+	out.snap_settings = envelope_snap_settings(envelope.snap_settings());
 
 	out.display_value = [](void* proc_data, float value)
 	{
@@ -162,13 +200,6 @@ inline blkhdgen_Envelope envelope(EnvelopeParameter& envelope)
 
 		return envelope->display_value(value);
 	};
-
-	//out.set_get_point_data_cb = [](void* proc_data, void* host, blkhdgen_GetPointDataCB cb)
-	//{
-	//	auto envelope = (EnvelopeParameter*)(proc_data);
-
-	//	return envelope->set_get_point_data_cb(host, cb);
-	//};
 
 	return out;
 }
@@ -191,126 +222,26 @@ inline blkhdgen_Option option(OptionParameter& option)
 	return out;
 }
 
-inline blkhdgen_Slider slider(SliderParameter<float>& slider)
+
+inline blkhdgen_SliderParameter slider_parameter(SliderParameter<float>& slider_parameter)
 {
-	blkhdgen_Slider out;
+	blkhdgen_SliderParameter out;
 
 	out.parameter_type = blkhdgen_ParameterType_Slider;
-	out.proc_data = &slider;
-	out.default_value = slider.get_default_value();
-	out.icon = slider.get_icon();
 
-	out.constrain = [](void* proc_data, float value)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		return slider->constrain(value);
-	};
-
-	out.increment = [](void* proc_data, float value, bool precise)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		return slider->increment(value, precise);
-	};
-
-	out.decrement = [](void* proc_data, float value, bool precise)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		return slider->decrement(value, precise);
-	};
-
-	out.drag = [](void* proc_data, float value, int amount, bool precise)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		return slider->drag(value, amount, precise);
-	};
-
-	out.display_value = [](void* proc_data, float value)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		return slider->display_value(value);
-	};
-
-	out.from_string = [](void* proc_data, const char* str, float* value)
-	{
-		auto slider = (SliderParameter<float>*)(proc_data);
-
-		auto result = slider->from_string(str);
-
-		if (result)
-		{
-			*value = *result;
-			return true;
-		}
-
-		return false;
-	};
+	out.slider = slider(slider_parameter.slider());
+	out.icon = slider_parameter.spec().icon;
 
 	return out;
 }
 
-inline blkhdgen_IntSlider slider(SliderParameter<int>& slider)
+inline blkhdgen_IntSliderParameter slider_parameter(SliderParameter<int>& slider_parameter)
 {
-	blkhdgen_IntSlider out;
+	blkhdgen_IntSliderParameter out;
 
 	out.parameter_type = blkhdgen_ParameterType_IntSlider;
-	out.proc_data = &slider;
-	out.default_value = slider.get_default_value();
-	out.icon = slider.get_icon();
-
-	out.constrain = [](void* proc_data, int value)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		return slider->constrain(value);
-	};
-
-	out.increment = [](void* proc_data, int value, bool precise)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		return slider->increment(value, precise);
-	};
-
-	out.decrement = [](void* proc_data, int value, bool precise)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		return slider->decrement(value, precise);
-	};
-
-	out.drag = [](void* proc_data, int value, int amount, bool precise)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		return slider->drag(value, amount, precise);
-	};
-
-	out.display_value = [](void* proc_data, int value)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		return slider->display_value(value);
-	};
-
-	out.from_string = [](void* proc_data, const char* str, int* value)
-	{
-		auto slider = (SliderParameter<int>*)(proc_data);
-
-		auto result = slider->from_string(str);
-
-		if (result)
-		{
-			*value = *result;
-			return true;
-		}
-
-		return false;
-	};
+	out.slider = slider(slider_parameter.slider());
+	out.icon = slider_parameter.spec().icon;
 
 	return out;
 }
@@ -359,13 +290,13 @@ inline blkhdgen_Parameter parameter(Parameter& parameter)
 
 		case blkhdgen_ParameterType_Slider:
 		{
-			out.parameter.slider = slider(*static_cast<SliderParameter<float>*>(&parameter));
+			out.parameter.slider = slider_parameter(*static_cast<SliderParameter<float>*>(&parameter));
 			break;
 		}
 
 		case blkhdgen_ParameterType_IntSlider:
 		{
-			out.parameter.int_slider = slider(*static_cast<SliderParameter<int>*>(&parameter));
+			out.parameter.int_slider = slider_parameter(*static_cast<SliderParameter<int>*>(&parameter));
 			break;
 		}
 

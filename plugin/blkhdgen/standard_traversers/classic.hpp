@@ -43,26 +43,6 @@ class ClassicCalculator
 {
 public:
 
-	ClassicCalculator()
-		// These values are expensive to calculate and usually will not change so
-		// they are cached instead of calculating them every frame
-		: p0_([this]() { return transform(p0_.p.position.y) + transpose_; },
-			  [this]() { return math::p_to_ff(p0_.y.get()); })
-		, p1_([this]() { return transform(p1_.p.position.y) + transpose_; },
-			  [this]() { return math::p_to_ff(p1_.y.get()); })
-	{}
-
-	void set_transpose(float transpose)
-	{
-		if (transpose_ != transpose)
-		{
-			p0_.set_dirty();
-			p1_.set_dirty();
-
-			transpose_ = transpose;
-		}
-	}
-
 	// We use this for both sample playback and waveform generation. This
 	// calculation needs to be fast, preferably O(n) or better.
 	//
@@ -76,37 +56,84 @@ public:
 	// the mathematics involved in calculating the resulting sample
 	// position.
 	//
-	float calculate(const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative = nullptr)
+	float calculate(float transpose, const blkhdgen_EnvelopePoints* pitch_points, blkhdgen_Position block_position, float* derivative = nullptr)
 	{
-		env_pitch_ = &env_pitch;
+		struct PitchPointData
+		{
+			bool set;
+			float transpose;
+			float pitch;
+			float ff;
+		};
+
+		struct PitchPoint
+		{
+			PitchPoint(const blkhdgen_EnvelopePoint& p, float transpose)
+				: position(p.position)
+				, data_((PitchPointData*)(p.plugin_data))
+			{
+				if (data_->transpose != transpose)
+				{
+					data_->set = false;
+					data_->transpose = transpose;
+				}
+			}
+
+			void calculate() const
+			{
+				data_->set = true;
+				data_->pitch = position.y + data_->transpose;
+				data_->ff = math::p_to_ff(data_->pitch);
+			}
+
+			float get_pitch() const
+			{
+				if (!data_->set) calculate();
+
+				return data_->pitch;
+			}
+
+			float get_ff() const
+			{
+				if (!data_->set) calculate();
+
+				return data_->ff;
+			}
+
+			blkhdgen_EnvelopePointPosition position;
+
+		private:
+
+			PitchPointData* data_;
+		};
 
 		for (blkhdgen_Index i = point_search_index_; i < pitch_points->count; i++)
 		{
-			p1_.get(pitch_points, i);
+			PitchPoint p1(pitch_points->points[i], transpose);
 
-			if (block_position < p1_.p.position.x)
+			if (block_position < p1.position.x)
 			{
 				if (i == 0)
 				{
 					point_search_index_ = 0;
 
-					if (derivative) *derivative = p1_.ff.get();
+					if (derivative) *derivative = p1.get_ff();
 
-					return float(block_position * p1_.ff.get()) + segment_start_;
+					return float(block_position * p1.get_ff()) + segment_start_;
 				}
 
-				p0_.get(pitch_points, i - 1);
+				PitchPoint p0(pitch_points->points[i - 1], transpose);
 
-				auto n = block_position - p0_.p.position.x;
-				auto segment_size = double(p1_.p.position.x) - p0_.p.position.x;
+				auto n = block_position - p0.position.x;
+				auto segment_size = double(p1.position.x) - p0.position.x;
 
 				if (segment_size > 0.0f)
 				{
 					point_search_index_ = i;
 
-					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0_.y.get()), double(p1_.y.get()), segment_size, n));
+					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0.get_pitch()), double(p1.get_pitch()), segment_size, n));
 
-					return float(weird_math_that_i_dont_understand(double(p0_.y.get()), double(p1_.y.get()), segment_size, n)) + segment_start_;
+					return float(weird_math_that_i_dont_understand(double(p0.get_pitch()), double(p1.get_pitch()), segment_size, n)) + segment_start_;
 				}
 			}
 			else
@@ -115,114 +142,51 @@ public:
 				{
 					point_search_index_ = 1;
 
-					segment_start_ += float(p1_.p.position.x * p1_.ff.get()) + segment_start_;
+					segment_start_ += float(p1.position.x * p1.get_ff()) + segment_start_;
 				}
 				else
 				{
 					point_search_index_ = i + 1;
 
-					p0_.get(pitch_points, i - 1);
+					PitchPoint p0(pitch_points->points[i - 1], transpose);
 
-					auto segment_size = double(p1_.p.position.x) - p0_.p.position.x;
+					auto segment_size = double(p1.position.x) - p0.position.x;
 
 					if (segment_size > 0.0f)
 					{
-						segment_start_ = float(weird_math_that_i_dont_understand(double(p0_.y.get()), double(p1_.y.get()), segment_size, segment_size)) + segment_start_;
+						segment_start_ = float(weird_math_that_i_dont_understand(double(p0.get_pitch()), double(p1.get_pitch()), segment_size, segment_size)) + segment_start_;
 					}
 				}
 			}
 		}
 
-		p0_.get(pitch_points, pitch_points->count - 1);
+		PitchPoint p0(pitch_points->points[pitch_points->count - 1], transpose);
 
-		auto n = block_position - p0_.p.position.x;
+		auto n = block_position - p0.position.x;
 
-		if (derivative) *derivative = p0_.ff.get();
+		if (derivative) *derivative = p0.get_ff();
 
-		return float(n * p0_.ff.get()) + segment_start_;
+		return float(n * p0.get_ff()) + segment_start_;
 	}
 
 	void reset()
 	{
 		segment_start_ = 0.0f;
 		point_search_index_ = 0;
-
-		p0_.set_dirty();
-		p1_.set_dirty();
 	}
 
 private:
 
-	float transform(float y) const
-	{
-		const auto curve = [this](float value)
-		{
-			return env_pitch_->curve(value);
-		};
-
-		const auto& range = env_pitch_->range();
-
-		return math::transform_and_denormalize(curve, range.min().get(), range.max().get(), y);
-	}
-
-	struct CachePoint
-	{
-		Cached<float> y;
-		Cached<float> ff;
-		blkhdgen_EnvelopePoint p;
-		blkhdgen_Index index;
-
-		CachePoint(std::function<float(void)> update_y, std::function<float(void)> update_ff)
-			: y(update_y)
-			, ff(update_ff)
-		{
-		}
-
-		bool set_index(blkhdgen_Index new_index)
-		{
-			if (index != new_index)
-			{
-				index = new_index;
-
-				y.set_dirty();
-				ff.set_dirty();
-
-				return true;
-			}
-
-			return false;
-		}
-
-		void get(const blkhdgen_EnvelopePoints* points, blkhdgen_Index new_index)
-		{
-			if (set_index(new_index))
-			{
-				p = points->points[new_index];
-			}
-		}
-
-		void set_dirty()
-		{
-			y.set_dirty();
-			ff.set_dirty();
-		}
-	};
-
-	float transpose_;
-	const EnvelopeParameter* env_pitch_;
 	float segment_start_ = 0.0f;
 	int point_search_index_ = 0;
-
-	CachePoint p0_;
-	CachePoint p1_;
 };
 
 class Classic
 {
 public:
 
-	float get_position(float transpose, const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivative = nullptr);
-	ml::DSPVector get_positions(float transpose, const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
+	float get_position(float transpose, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivative = nullptr);
+	ml::DSPVector get_positions(float transpose, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
 
 private:
 
@@ -230,7 +194,7 @@ private:
 	TraverserPointDataResetter traverser_resetter_;
 };
 
-inline float Classic::get_position(float transpose, const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivative)
+inline float Classic::get_position(float transpose, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivative)
 {
 	const auto& read_position = traverser->get_read_position();
 
@@ -252,12 +216,10 @@ inline float Classic::get_position(float transpose, const EnvelopeParameter& env
 		calculator_.reset();
 	}
 
-	calculator_.set_transpose(transpose);
-
-	return calculator_.calculate(env_pitch, env_pitch_points, read_position[0], derivative) - sample_offset;
+	return calculator_.calculate(transpose, env_pitch_points, read_position[0], derivative) - sample_offset;
 }
 
-inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParameter& env_pitch, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
+inline ml::DSPVector Classic::get_positions(float transpose, const blkhdgen_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
 {
 	const auto& read_position = traverser->get_read_position();
 
@@ -274,8 +236,6 @@ inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParam
 
 	const auto& resets = traverser->get_resets();
 
-	calculator_.set_transpose(transpose);
-
 	ml::DSPVector out;
 
 	for (int i = 0; i < kFloatsPerDSPVector; i++)
@@ -285,7 +245,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const EnvelopeParam
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(env_pitch, env_pitch_points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
+		out[i] = calculator_.calculate(transpose, env_pitch_points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
 	}
 
 	return out;

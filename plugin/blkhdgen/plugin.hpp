@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include "blkhdgen.h"
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "slider_spec.hpp"
@@ -23,6 +24,11 @@ public:
 	Parameter& get_parameter(blkhdgen_Index index);
 	Parameter& get_parameter_by_uuid(blkhdgen_UUID uuid);
 
+	static const blkhdgen_EnvelopeData* get_envelope_data(const blkhdgen_ParameterData* data, int index);
+	static const blkhdgen_SliderData* get_slider_data(const blkhdgen_ParameterData* data, int index);
+	static const blkhdgen_IntSliderData* get_int_slider_data(const blkhdgen_ParameterData* data, int index);
+	static const blkhdgen_ToggleData* get_toggle_data(const blkhdgen_ParameterData* data, int index);
+
 protected:
 
 	void add_group(blkhdgen_ID id, std::string name);
@@ -31,7 +37,7 @@ protected:
 	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
 
 	template <class T>
-	std::shared_ptr<SliderParameter<T>> add_parameter(SliderSpec<T> spec);
+	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
 
 private:
 
@@ -41,6 +47,26 @@ private:
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blkhdgen_UUID, Parameter*> uuid_parameter_map_;
 };
+
+inline const blkhdgen_EnvelopeData* Plugin::get_envelope_data(const blkhdgen_ParameterData* data, int index)
+{
+	return data ? &data[index].envelope : nullptr;
+}
+
+inline const blkhdgen_SliderData* Plugin::get_slider_data(const blkhdgen_ParameterData* data, int index)
+{
+	return data ? &data[index].slider : nullptr;
+}
+
+inline const blkhdgen_IntSliderData* Plugin::get_int_slider_data(const blkhdgen_ParameterData* data, int index)
+{
+	return data ? &data[index].int_slider : nullptr;
+}
+
+inline const blkhdgen_ToggleData* Plugin::get_toggle_data(const blkhdgen_ParameterData* data, int index)
+{
+	return data ? &data[index].toggle : nullptr;
+}
 
 inline void Plugin::add_group(blkhdgen_ID id, std::string name)
 {
@@ -72,7 +98,7 @@ inline std::shared_ptr<OptionParameter> Plugin::add_parameter(OptionSpec spec)
 }
 
 template <class T>
-inline std::shared_ptr<SliderParameter<T>> Plugin::add_parameter(SliderSpec<T> spec)
+inline std::shared_ptr<SliderParameter<T>> Plugin::add_parameter(SliderParameterSpec<T> spec)
 {
 	const auto param = std::make_shared<SliderParameter<T>>(spec);
 

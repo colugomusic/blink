@@ -1,41 +1,30 @@
 #pragma once
 
-#include <atomic>
-#include "range_value.hpp"
+//#include <atomic>
+//#include "range_value.hpp"
+//#include "range_slider_spec.hpp"
+//
+//namespace blkhdgen {
+//
+//class EnvelopeRangeAttribute
+//{
+//public:
+//
+//	EnvelopeRangeAttribute(const RangeSliderSpec<float>& spec);
+//
+//	const RangeSliderSpec<float>& get_range() const
+//	{
+//		return range_;
+//	}
+//
+//private:
+//
+//	RangeSliderSpec<float> range_;
+//};
+//
+//inline EnvelopeRangeAttribute::EnvelopeRangeAttribute(const RangeSliderSpec<float>& spec)
+//	: range_(spec)
+//{
+//}
 
-namespace blkhdgen {
-
-class EnvelopeRangeAttribute
-{
-public:
-
-	EnvelopeRangeAttribute(RangeValue<float> range);
-
-	void set(float value)
-	{
-		current_value_ = value;
-	}
-
-	float get() const
-	{
-		return current_value_;
-	}
-
-	const RangeValue<float>& get_range() const
-	{
-		return range_;
-	}
-
-private:
-
-	RangeValue<float> range_;
-	std::atomic<float> current_value_;
-};
-
-inline EnvelopeRangeAttribute::EnvelopeRangeAttribute(RangeValue<float> range)
-	: range_(range)
-	, current_value_(range_.value)
-{
-}
-
-}
+//}

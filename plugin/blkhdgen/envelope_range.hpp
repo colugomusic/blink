@@ -1,6 +1,5 @@
 #pragma once
 
-#include "envelope_range_attribute.hpp"
 #include "range_spec.hpp"
 
 namespace blkhdgen {
@@ -10,21 +9,19 @@ class EnvelopeRange
 public:
 
 	EnvelopeRange(RangeSpec<float> spec)
-		: min_(spec.min_range)
-		, max_(spec.max_range)
+		: spec_(spec)
 	{
 	}
 
-	EnvelopeRangeAttribute& min() { return min_; }
-	EnvelopeRangeAttribute& max() { return max_; }
+	auto& min() { return spec_.min; }
+	auto& max() { return spec_.max; }
 
-	const EnvelopeRangeAttribute& min() const { return min_; }
-	const EnvelopeRangeAttribute& max() const { return max_; }
+	const auto& min() const { return spec_.min;	}
+	const auto& max() const { return spec_.max; }
 
 private:
 
-	EnvelopeRangeAttribute min_;
-	EnvelopeRangeAttribute max_;
+	RangeSpec<float> spec_;
 };
 
 }

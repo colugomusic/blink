@@ -105,7 +105,6 @@ extern "C"
 
 	// Get the transformed waveform positions and derivatives for the given
 	// n block positions
-	// n may not be a multiple of BLKHDGEN_VECTOR_SIZE
-	EXPORTED blkhdgen_Error blkhdgen_sampler_get_waveform_positions(const blkhdgen_SamplerBuffer* buffer, blkhdgen_FrameCount n, float* out, float* derivatives);
+	EXPORTED blkhdgen_Error blkhdgen_sampler_get_waveform_positions(const blkhdgen_SamplerBuffer* buffer, blkhdgen_FrameCount n, float* out, float* derivatives, float* amp);
 }
 #endif

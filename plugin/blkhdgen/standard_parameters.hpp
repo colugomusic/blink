@@ -4,7 +4,7 @@
 #include <regex>
 #include <sstream>
 #include "envelope_spec.hpp"
-#include "slider_spec.hpp"
+#include "slider_parameter_spec.hpp"
 
 namespace blkhdgen {
 namespace std_params {
@@ -45,53 +45,6 @@ std::optional<int> find_positive_number<int>(const std::string& str)
 	return std::stoi(match[0].str());
 }
 
-inline std::string amp_display(float v)
-{
-	std::stringstream ss;
-
-	ss << math::stepify(float(math::linear2db(v)), 0.01f) << " dB";
-
-	return ss.str();
-}
-
-inline std::string pan_display(float v)
-{
-	std::stringstream ss;
-
-	if (v < 0.0f)
-	{
-		ss << std::abs(v * 100) << "% L";
-	}
-	else if (v > 0.0f)
-	{
-		ss << v * 100 << "% R";
-	}
-	else
-	{
-		ss << "Center";
-	}
-
-	return ss.str();
-}
-
-inline float amp_constrain(float v)
-{
-	const auto db = math::linear2db(v);
-
-	if (db < -60.0f) return 0.0f;
-	if (db > 12.0f) return math::db2linear(12.0f);
-
-	return v;
-};
-
-inline float pan_constrain(float v)
-{
-	if (v < -1.0f) return -1.0f;
-	if (v > 1.0f) return 1.0f;
-
-	return v;
-};
-
 template <int Normal, int Precise>
 inline float increment(float v, bool precise)
 {
@@ -122,36 +75,250 @@ inline float drag(float v, int amount, bool precise)
 	return v + (float(amount) / (precise ? Precise : Normal));
 }
 
-inline std::string speed_display(float v)
+inline float constrain(float v, float min, float max)
+{
+	if (v < min) return min;
+	if (v > max) return max;
+
+	return v;
+}
+
+inline auto display_number(float v)
 {
 	std::stringstream ss;
 
-	if (v == 0.0f)
-	{
-		ss << "Freeze";
-	}
-	else if (v == 0.25f)
-	{
-		ss << v << "Quarter";
-	}
-	else if (v == 0.5f)
-	{
-		ss << v << "Half";
-	}
-	else if (v == 1.0f)
-	{
-		ss << v << "Normal";
-	}
-	else if (v == 2.0f)
-	{
-		ss << v << "Double";
-	}
-	else
-	{
-		ss << v;
-	}
+	ss << v;
 
 	return ss.str();
+};
+
+namespace amp
+{
+	inline auto constrain(float v)
+	{
+		const auto db = math::linear2db(v);
+
+		if (db < -60.0f) return 0.0f;
+		if (db > 12.0f) return math::db2linear(12.0f);
+
+		return v;
+	};
+
+	inline auto from_string(const std::string& str) -> std::optional<float>
+	{
+		auto db = find_number<float>(str);
+
+		if (!db) return db;
+
+		return math::db2linear(*db);
+	};
+
+	inline auto display(float v)
+	{
+		std::stringstream ss;
+
+		ss << math::stepify(float(math::linear2db(v)), 0.01f) << " dB";
+
+		return ss.str();
+	}
+
+	inline auto increment(float v, bool precise)
+	{
+		if (v <= 0.0f) return math::db2linear(-60.0f);
+
+		return constrain(math::db2linear(std_params::increment<1, 10>(math::linear2db(v), precise)));
+	};
+
+	inline auto decrement(float v, bool precise)
+	{
+		return constrain(math::db2linear(std_params::decrement<1, 10>(math::linear2db(v), precise)));
+	};
+
+	inline auto drag(float v, int amount, bool precise) -> float
+	{
+		if (v <= 0.0f) v = math::db2linear(-61.0f);
+
+		return constrain(math::db2linear(math::stepify(std_params::drag<1, 10>(math::linear2db(v), amount / 5, precise), 0.01f)));
+	};
+}
+
+namespace pan
+{
+	inline float constrain(float v)
+	{
+		if (v < -1.0f) return -1.0f;
+		if (v > 1.0f) return 1.0f;
+
+		return v;
+	};
+
+	inline std::string display(float v)
+	{
+		std::stringstream ss;
+
+		if (v < 0.0f)
+		{
+			ss << std::abs(v * 100) << "% L";
+		}
+		else if (v > 0.0f)
+		{
+			ss << v * 100 << "% R";
+		}
+		else
+		{
+			ss << "Center";
+		}
+
+		return ss.str();
+	}
+	
+	inline auto increment(float v, bool precise)
+	{
+		return constrain(math::stepify(std_params::increment<100>(v), 0.01f));
+	};
+
+	inline auto decrement(float v, bool precise)
+	{
+		return constrain(math::stepify(std_params::decrement<100>(v), 0.01f));
+	};
+
+	inline auto drag(float v, int amount, bool precise) -> float
+	{
+		return constrain(math::stepify(std_params::drag<500, 5000>(v, amount, precise), 0.01f));
+	};
+
+	inline auto from_string(const std::string& str) -> std::optional<float>
+	{
+		std::string uppercase = str;
+
+		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
+
+		if (uppercase.find("CENTER") != std::string::npos) return 0.0f;
+
+		const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
+
+		auto value = find_positive_number<int>(str);
+
+		if (!value) return std::optional<float>();
+
+		return (float(*value) / 100) * (negative ? -1 : 1);
+	};
+}
+
+namespace pitch
+{
+	inline float constrain(float v)
+	{
+		if (v < -60.0f) return -60.0f;
+		if (v > 60.0f) return 60.0f;
+
+		return v;
+	};
+
+	inline auto increment(float v, bool precise)
+	{
+		return constrain(math::stepify(std_params::increment<1, 10>(v, precise), 0.1f));
+	};
+
+	inline auto decrement(float v, bool precise)
+	{
+		return constrain(math::stepify(std_params::decrement<1, 10>(v, precise), 0.1f));
+	};
+
+	inline auto drag(float v, int amount, bool precise) -> float
+	{
+		return constrain(math::stepify(std_params::drag<1, 10>(v, amount / 5, precise), 0.1f));
+	};
+}
+
+namespace speed
+{
+	constexpr auto FREEZE = -10.0f;
+	constexpr auto HALF = -1.0f;
+	constexpr auto NORMAL = 0.0f;
+	constexpr auto DOUBLE = 1.0f;
+	static auto TRIPLE = math::speed2linear(3.0f);
+
+	inline auto constrain(float v)
+	{
+		if (v < -5.0f) return FREEZE;
+		if (v > 5.0f) return 5.0f;
+	};
+
+	inline auto increment(float v, bool precise)
+	{
+		if (v <= 5.0f) return -5.0f;
+
+		return constrain(std_params::increment<1, 10>(v, precise));
+	};
+
+	inline auto decrement(float v, bool precise)
+	{
+		return constrain(std_params::decrement<1, 10>(v, precise));
+	};
+
+	inline auto drag(float v, int amount, bool precise) -> float
+	{
+		if (v <= 5.0f) v = FREEZE;
+
+		return constrain(std_params::drag<1, 10>(v, amount / 5, precise));
+	};
+
+	inline auto from_string(const std::string& str) -> std::optional<float>
+	{
+		std::string uppercase = str;
+
+		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
+
+		if (uppercase.find("FREEZE") != std::string::npos) return FREEZE;
+		if (uppercase.find("1/8") != std::string::npos) return -3.0f;
+		if (uppercase.find("1/4") != std::string::npos) return -2.0f;
+		if (uppercase.find("1/2") != std::string::npos) return HALF;
+		if (uppercase.find("NORMAL") != std::string::npos) return NORMAL;
+		if (uppercase.find("DOUBLE") != std::string::npos) return DOUBLE;
+
+		auto ff = find_number<float>(str);
+
+		if (!ff) return ff;
+
+		return math::speed2linear(*ff);
+	};
+
+	inline auto display(float v)
+	{
+		std::stringstream ss;
+
+		if (v < -0.5f)
+		{
+			ss << "Freeze";
+		}
+		else if (v == -3.0f)
+		{
+			ss << "1/8";
+		}
+		else if (v == -2.0f)
+		{
+			ss << v << "1/4";
+		}
+		else if (v == HALF)
+		{
+			ss << v << "1/2";
+		}
+		else if (v == NORMAL)
+		{
+			ss << v << "Normal";
+		}
+		else if (v == DOUBLE)
+		{
+			ss << v << "Double";
+		}
+		else
+		{
+			ss << "x" << math::linear2speed(v);
+		}
+
+		return ss.str();
+	}
 }
 
 namespace envelopes {
@@ -163,35 +330,26 @@ inline EnvelopeSpec amp()
 	out.uuid = "273e7c30-404b-4db6-ba97-20f33d49fe51";
 	out.name = "Amp";
 
-	out.curve = [](float v)
+	out.get_grid_line = [](int index) -> float
 	{
-		return math::db2linear(v);
+		return math::linear2db(math::linear2speed(float(index)));
 	};
 
-	out.inverse_curve = [](float v)
-	{
-		return math::linear2db(v);
-	};
+	out.display_value = amp::display;
 
-	out.display_value = amp_display;
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = amp::display;
 
-	out.range.min_range.range.min = -60.0f;
-	out.range.min_range.range.max = -60.0f;
-	out.range.min_range.value = -60.0f;
-	out.range.min_range.step_size = 0.0f;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = amp::display;
+	out.range.max.from_string = amp::from_string;
+	out.range.max.constrain = amp::constrain;
+	out.range.max.increment = amp::increment;
+	out.range.max.decrement = amp::decrement;
+	out.range.max.drag = amp::drag;
 
-	out.range.max_range.range.min = -60.0f;
-	out.range.max_range.range.max = 12.0f;
-	out.range.max_range.value = 0.0f;
-	out.range.max_range.step_size = 0.0;
-
-	out.step_size.range.min = 0.0f;
-	out.step_size.range.max = 0.0f;
-	out.step_size.value = 0.0f;
-	out.step_size.step_size = 0.0f;
-
-	out.default_value = 0.0f;
-	out.default_snap_amount = 0.0f;
+	out.default_value = 1.0f;
+	out.flags = blkhdgen_EnvelopeFlags_DefaultEnabled | blkhdgen_EnvelopeFlags_SnapToDefaultOnly;
 
 	return out;
 }
@@ -203,35 +361,16 @@ inline EnvelopeSpec pan()
 	out.uuid = "9c312a2c-a1b4-4a8d-ab68-07ea157c4574";
 	out.name = "Pan";
 
-	out.curve = [](float v)
-	{
-		return v;
-	};
+	out.display_value = pan::display;
 
-	out.inverse_curve = [](float v)
-	{
-		return v;
-	};
+	out.range.min.default_value = -1.0f;
+	out.range.min.display_value = pan::display;
 
-	out.display_value = pan_display;
-
-	out.range.min_range.range.min = -1.0f;
-	out.range.min_range.range.max = -1.0f;
-	out.range.min_range.value = -1.0f;
-	out.range.min_range.step_size = 0.0f;
-
-	out.range.max_range.range.min = -1.0f;
-	out.range.max_range.range.max = 1.0f;
-	out.range.max_range.value = 1.0f;
-	out.range.max_range.step_size = 0.0;
-
-	out.step_size.range.min = 1.0f;
-	out.step_size.range.max = 1.0f;
-	out.step_size.value = 1.0f;
-	out.step_size.step_size = 0.0f;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = pan::display;
 
 	out.default_value = 0.0f;
-	out.default_snap_amount = 0.0f;
+	out.flags = blkhdgen_EnvelopeFlags_DefaultEnabled | blkhdgen_EnvelopeFlags_SnapToDefaultOnly;
 
 	return out;
 }
@@ -243,16 +382,6 @@ inline EnvelopeSpec pitch()
 	out.uuid = "ca2529db-e7bd-4019-9a07-22aee24526d1";
 	out.name = "Pitch";
 
-	out.curve = [](float v)
-	{
-		return v;
-	};
-
-	out.inverse_curve = [](float v)
-	{
-		return v;
-	};
-
 	out.display_value = [](float v)
 	{
 		std::stringstream ss;
@@ -262,20 +391,34 @@ inline EnvelopeSpec pitch()
 		return ss.str();
 	};
 
-	out.range.min_range.range.min = -60.0f;
-	out.range.min_range.range.max = 0.0f;
-	out.range.min_range.value = -24.0f;
-	out.range.min_range.step_size = 1.0f;
+	out.get_grid_line = [](int index) -> float
+	{
+		return float(index * 12);
+	};
 
-	out.range.max_range.range.min = -60.0f;
-	out.range.max_range.range.max = 60.0f;
-	out.range.max_range.value = 24.0f;
-	out.range.max_range.step_size = 1.0;
+	out.range.min.constrain = pitch::constrain;
+	out.range.min.decrement = pitch::decrement;
+	out.range.min.increment = pitch::increment;
+	out.range.min.default_value = -24.0f;
+	out.range.min.display_value = display_number;
+	out.range.min.drag = pitch::drag;
+	out.range.min.from_string = find_number<float>;
 
-	out.step_size.range.min = 0.0f;
-	out.step_size.range.max = 60.0f;
-	out.step_size.value = 1.0f;
-	out.step_size.step_size = 1.0f;
+	out.range.max.constrain = pitch::constrain;
+	out.range.max.decrement = pitch::decrement;
+	out.range.max.increment = pitch::increment;
+	out.range.max.default_value = 24.0f;
+	out.range.max.display_value = display_number;
+	out.range.max.drag = pitch::drag;
+	out.range.max.from_string = find_number<float>;
+
+	out.step_size.constrain = [](float v) { return constrain(v, 0.0f, 60.0f); };
+	out.step_size.decrement = decrement<1, 10>;
+	out.step_size.increment = increment<1, 10>;
+	out.step_size.default_value = 1.0f;
+	out.step_size.display_value = display_number;
+	out.step_size.drag = pitch::drag;
+	out.step_size.from_string = find_number<float>;
 
 	out.default_value = 0.0f;
 	out.default_snap_amount = 1.0f;
@@ -290,35 +433,30 @@ inline EnvelopeSpec speed()
 	out.uuid = "02f68738-f54a-4f35-947b-c30e73896aa4";
 	out.name = "Speed";
 
-	out.curve = [](float v)
+	out.display_value = speed::display;
+
+	out.get_grid_line = [](int index) -> float
 	{
-		return std::pow(v, 2.0f);
+		return math::linear2speed(float(index));
 	};
 
-	out.inverse_curve = [](float v)
-	{
-		return std::sqrt(v);
-	};
+	out.range.min.constrain = speed::constrain;
+	out.range.min.increment = speed::increment;
+	out.range.min.decrement = speed::decrement;
+	out.range.min.display_value = speed::display;
+	out.range.min.drag = speed::drag;
+	out.range.min.from_string = speed::from_string;
+	out.range.min.default_value = speed::FREEZE;
 
-	out.display_value = speed_display;
+	out.range.min.constrain = speed::constrain;
+	out.range.min.increment = speed::increment;
+	out.range.min.decrement = speed::decrement;
+	out.range.min.display_value = speed::display;
+	out.range.min.drag = speed::drag;
+	out.range.min.from_string = speed::from_string;
+	out.range.min.default_value = 2.0f;
 
-	out.range.min_range.range.min = 0.0f;
-	out.range.min_range.range.max = 1.0f;
-	out.range.min_range.value = 0.0f;
-	out.range.min_range.step_size = 0.0f;
-
-	out.range.max_range.range.min = 0.5f;
-	out.range.max_range.range.max = 32.0f;
-	out.range.max_range.value = 2.0f;
-	out.range.max_range.step_size = 0.0f;
-
-	out.step_size.range.min = 0.0f;
-	out.step_size.range.max = 32.0f;
-	out.step_size.value = 1.0f;
-	out.step_size.step_size = 0.25f;
-
-	out.default_value = 1.0f;
-	out.default_snap_amount = 0.0f;
+	out.default_value = speed::NORMAL;
 
 	return out;
 }
@@ -330,42 +468,34 @@ inline EnvelopeSpec formant()
 	out.uuid = "7b72dbef-e36d-4dce-958b-b0fa498ae41e";
 	out.name = "Formant";
 
-	out.curve = [](float v)
-	{
-		return v;
-	};
+	// TODO:
 
-	out.inverse_curve = [](float v)
-	{
-		return v;
-	};
+	//out.display_value = [](float v)
+	//{
+	//	std::stringstream ss;
 
-	out.display_value = [](float v)
-	{
-		std::stringstream ss;
+	//	ss << v;
 
-		ss << v;
+	//	return ss.str();
+	//};
 
-		return ss.str();
-	};
+	//out.range.min_range.range.min = -60.0f;
+	//out.range.min_range.range.max = 0.0f;
+	//out.range.min_range.value = -24.0f;
+	//out.range.min_range.step_size = 1.0f;
 
-	out.range.min_range.range.min = -60.0f;
-	out.range.min_range.range.max = 0.0f;
-	out.range.min_range.value = -24.0f;
-	out.range.min_range.step_size = 1.0f;
+	//out.range.max_range.range.min = -60.0f;
+	//out.range.max_range.range.max = 60.0f;
+	//out.range.max_range.value = 24.0f;
+	//out.range.max_range.step_size = 1.0;
 
-	out.range.max_range.range.min = -60.0f;
-	out.range.max_range.range.max = 60.0f;
-	out.range.max_range.value = 24.0f;
-	out.range.max_range.step_size = 1.0;
+	//out.step_size.range.min = 0.0f;
+	//out.step_size.range.max = 60.0f;
+	//out.step_size.value = 1.0f;
+	//out.step_size.step_size = 1.0f;
 
-	out.step_size.range.min = 0.0f;
-	out.step_size.range.max = 60.0f;
-	out.step_size.value = 1.0f;
-	out.step_size.step_size = 1.0f;
-
-	out.default_value = 0.0f;
-	out.default_snap_amount = 1.0f;
+	//out.default_value = 0.0f;
+	//out.default_snap_amount = 1.0f;
 
 	return out;
 }
@@ -377,42 +507,34 @@ inline EnvelopeSpec noise_amount()
 	out.uuid = "29d5ecb5-cb5d-4f19-afd3-835dd805682a";
 	out.name = "Noise Amount";
 
-	out.curve = [](float v)
-	{
-		return v;
-	};
+	// TODO:
 
-	out.inverse_curve = [](float v)
-	{
-		return v;
-	};
+	//out.display_value = [](float v)
+	//{
+	//	std::stringstream ss;
 
-	out.display_value = [](float v)
-	{
-		std::stringstream ss;
+	//	ss << v;
 
-		ss << v;
+	//	return ss.str();
+	//};
 
-		return ss.str();
-	};
+	//out.range.min_range.range.min = 0.0f;
+	//out.range.min_range.range.max = 0.0f;
+	//out.range.min_range.value = 0.0f;
+	//out.range.min_range.step_size = 0.0f;
 
-	out.range.min_range.range.min = 0.0f;
-	out.range.min_range.range.max = 0.0f;
-	out.range.min_range.value = 0.0f;
-	out.range.min_range.step_size = 0.0f;
+	//out.range.max_range.range.min = 1.0f;
+	//out.range.max_range.range.max = 1.0f;
+	//out.range.max_range.value = 1.0f;
+	//out.range.max_range.step_size = 0.0;
 
-	out.range.max_range.range.min = 1.0f;
-	out.range.max_range.range.max = 1.0f;
-	out.range.max_range.value = 1.0f;
-	out.range.max_range.step_size = 0.0;
+	//out.step_size.range.min = 0.0f;
+	//out.step_size.range.max = 0.0f;
+	//out.step_size.value = 0.0f;
+	//out.step_size.step_size = 0.0f;
 
-	out.step_size.range.min = 0.0f;
-	out.step_size.range.max = 0.0f;
-	out.step_size.value = 0.0f;
-	out.step_size.step_size = 0.0f;
-
-	out.default_value = 0.0f;
-	out.default_snap_amount = 0.0f;
+	//out.default_value = 0.0f;
+	//out.default_snap_amount = 0.0f;
 
 	return out;
 }
@@ -424,42 +546,15 @@ inline EnvelopeSpec noise_color()
 	out.uuid = "30100123-7343-4386-9ed2-f913b9e1e571";
 	out.name = "Noise Color";
 
-	out.curve = [](float v)
-	{
-		return v;
-	};
+	// TODO:
 
-	out.inverse_curve = [](float v)
-	{
-		return v;
-	};
+	//out.step_size.range.min = 1.0f;
+	//out.step_size.range.max = 1.0f;
+	//out.step_size.value = 1.0f;
+	//out.step_size.step_size = 0.0f;
 
-	out.display_value = [](float v)
-	{
-		std::stringstream ss;
-
-		ss << v;
-
-		return ss.str();
-	};
-
-	out.range.min_range.range.min = -1.0f;
-	out.range.min_range.range.max = -1.0f;
-	out.range.min_range.value = -1.0f;
-	out.range.min_range.step_size = 0.0f;
-
-	out.range.max_range.range.min = 1.0f;
-	out.range.max_range.range.max = 1.0f;
-	out.range.max_range.value = 1.0f;
-	out.range.max_range.step_size = 0.0;
-
-	out.step_size.range.min = 1.0f;
-	out.step_size.range.max = 1.0f;
-	out.step_size.value = 1.0f;
-	out.step_size.step_size = 0.0f;
-
-	out.default_value = 0.0f;
-	out.default_snap_amount = 0.0f;
+	//out.default_value = 0.0f;
+	//out.default_snap_amount = 0.0f;
 
 	return out;
 }
@@ -469,195 +564,109 @@ inline EnvelopeSpec noise_color()
 namespace sliders
 {
 
-inline SliderSpec<float> amp()
+inline SliderParameterSpec<float> amp()
 {
-	SliderSpec<float> out;
+	SliderParameterSpec<float> out;
 
 	out.uuid = BLKHDGEN_STD_UUID_SLIDER_AMP;
 	out.name = "Amp";
 
-	out.constrain = amp_constrain;
-
-	out.increment = [](float v, bool precise)
-	{
-		if (v <= 0.0f) return math::db2linear(-60.0f);
-
-		return amp_constrain(math::db2linear(increment<1, 10>(math::linear2db(v), precise)));
-	};
-
-	out.decrement = [](float v, bool precise)
-	{
-		return amp_constrain(math::db2linear(decrement<1, 10>(math::linear2db(v), precise)));
-	};
-
-	out.drag = [](float v, int amount, bool precise)
-	{
-		if (v <= 0.0f) v = math::db2linear(-61.0f);
-
-		return amp_constrain(math::db2linear(math::stepify(drag<1, 10>(math::linear2db(v), amount / 5, precise), 0.01f)));
-	};
-
-	out.from_string = [](const std::string& str) -> std::optional<float>
-	{
-		auto db = find_number<float>(str);
-
-		if (!db) return db;
-
-		return math::db2linear(*db);
-	};
-
-	out.display_value = amp_display;
-	out.default_value = 1.0f;
+	out.slider.constrain = amp::constrain;
+	out.slider.increment = amp::increment;
+	out.slider.decrement = amp::decrement;
+	out.slider.drag = amp::drag;
+	out.slider.from_string = amp::from_string;
+	out.slider.display_value = amp::display;
+	out.slider.default_value = 1.0f;
 	out.icon = blkhdgen_StdIcon_Amp;
 
 	return out;
 }
 
-inline SliderSpec<float> pan()
+inline SliderParameterSpec<float> pan()
 {
-	SliderSpec<float> out;
+	SliderParameterSpec<float> out;
 
 	out.uuid = "b5bf03f3-17e2-4546-8cc2-e29790ea02a2";
 	out.name = "Pan";
 
-	out.constrain = pan_constrain;
-
-	out.increment = [](float v, bool precise)
-	{
-		return pan_constrain(math::stepify(increment<100>(v), 0.01f));
-	};
-	
-	out.decrement = [](float v, bool precise)
-	{
-		return pan_constrain(math::stepify(decrement<100>(v), 0.01f));
-	};
-
-	out.drag = [](float v, int amount, bool precise)
-	{
-		return pan_constrain(math::stepify(drag<500, 5000>(v, amount, precise), 0.01f));
-	};
-
-	out.from_string = [](const std::string& str)->std::optional<float>
-	{
-		std::string uppercase = str;
-
-		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
-
-		if (uppercase.find("CENTER") != std::string::npos) return 0.0f;
-
-		const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
-		
-		auto value = find_positive_number<int>(str);
-
-		if (!value) return std::optional<float>();
-
-		return (float(*value) / 100) * (negative ? -1 : 1);
-	};
-
-	out.display_value = pan_display;
-	out.default_value = 0.0f;
+	out.slider.constrain = pan::constrain;
+	out.slider.increment  = pan::increment;
+	out.slider.decrement = pan::decrement;
+	out.slider.drag = pan::drag;
+	out.slider.from_string = pan::from_string;
+	out.slider.display_value = pan::display;
+	out.slider.default_value = 0.0f;
 	out.icon = blkhdgen_StdIcon_Pan;
 
 	return out;
 }
 
-inline SliderSpec<float> pitch()
+inline SliderParameterSpec<float> pitch()
 {
-	SliderSpec<float> out;
+	SliderParameterSpec<float> out;
 
 	out.uuid = BLKHDGEN_STD_UUID_SLIDER_PITCH;
 	out.name = "Pitch";
 
-	out.constrain = [](float v)
-	{
-		if (v < -60.0f) return -60.0f;
-		if (v > 60.0f) return 60.0f;
-
-		return v;
-	};
-
-	out.increment = [out](float v, bool precise)
-	{
-		return out.constrain(math::stepify(increment<1, 10>(v, precise), 0.1f));
-	};
-
-	out.decrement = [out](float v, bool precise)
-	{
-		return out.constrain(math::stepify(decrement<1, 10>(v, precise), 0.1f));
-	};
-
-	out.drag = [out](float v, int amount, bool precise)
-	{
-		return out.constrain(math::stepify(drag<1, 10>(v, amount / 5, precise), 0.1f));
-	};
-
-	out.display_value = [](float v)
-	{
-		std::stringstream ss;
-
-		ss << v;
-
-		return ss.str();
-	};
-
-	out.from_string = find_number<float>;
-	out.default_value = 0.0f;
+	out.slider.constrain = pitch::constrain;
+	out.slider.increment = pitch::increment;
+	out.slider.decrement = pitch::decrement;
+	out.slider.drag = pitch::drag;
+	out.slider.display_value = display_number;
+	out.slider.from_string = find_number<float>;
+	out.slider.default_value = 0.0f;
 	out.icon = blkhdgen_StdIcon_Pitch;
 
 	return out;
 }
 
-inline SliderSpec<float> speed()
+inline SliderParameterSpec<float> speed()
 {
-	SliderSpec<float> out;
+	SliderParameterSpec<float> out;
 
 	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
 	out.name = "Speed";
 
+	// TODO: finish implementing
 
-	out.display_value = [](float v)
-	{
-		std::stringstream ss;
-
-		ss << v;
-
-		return ss.str();
-	};
-
-	out.from_string = find_number<float>;
-	out.default_value = 1.0f;
+	out.slider.display_value = speed::display;
+	out.slider.from_string = find_number<float>;
+	out.slider.default_value = 1.0f;
 
 	return out;
 }
 
-inline SliderSpec<int> sample_offset()
+inline SliderParameterSpec<int> sample_offset()
 {
-	SliderSpec<int> out;
+	SliderParameterSpec<int> out;
 
 	out.uuid = BLKHDGEN_STD_UUID_SLIDER_SAMPLE_OFFSET;
 	out.name = "Sample Offset";
 
-	out.constrain = [](int v)
+	// TODO: cleanup
+
+	out.slider.constrain = [](int v)
 	{
 		return v;
 	};
 
-	out.increment = [](int v, bool precise)
+	out.slider.increment = [](int v, bool precise)
 	{
 		return v + 1;
 	};
 
-	out.decrement = [](int v, bool precise)
+	out.slider.decrement = [](int v, bool precise)
 	{
 		return v - 1;
 	};
 
-	out.drag = [](int v, int amount, bool precise)
+	out.slider.drag = [](int v, int amount, bool precise)
 	{
 		return v + (amount / (precise ? 50 : 1));
 	};
 
-	out.display_value = [](int v)
+	out.slider.display_value = [](int v)
 	{
 		std::stringstream ss;
 
@@ -666,8 +675,8 @@ inline SliderSpec<int> sample_offset()
 		return ss.str();
 	};
 
-	out.from_string = find_number<int>;
-	out.default_value = 0;
+	out.slider.from_string = find_number<int>;
+	out.slider.default_value = 0;
 	out.icon = blkhdgen_StdIcon_SampleOffset;
 
 	return out;

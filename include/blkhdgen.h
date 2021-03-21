@@ -51,7 +51,15 @@ typedef struct
 typedef struct
 {
 	blkhdgen_EnvelopePointPosition position;
+
+	// Not currently used.
 	float curve;
+
+	// Plugins can write to this memory if they want
+	//
+	// It will be initialized to zero whenever the envelope
+	// points change
+	char plugin_data[128];
 } blkhdgen_EnvelopePoint;
 
 typedef struct
@@ -83,32 +91,48 @@ typedef struct
 	int max;
 } blkhdgen_IntRange;
 
+typedef float (*blkhdgen_Curve)(void* proc_data, float value);
+typedef float (*blkhdgen_InverseCurve)(void* proc_data, float value);
+typedef float (*blkhdgen_Constrain)(void* proc_data, float value);
+typedef float (*blkhdgen_Drag)(void* proc_data, float start_value, int amount, bool precise);
+typedef float (*blkhdgen_Increment)(void* proc_data, float value, bool precise);
+typedef float (*blkhdgen_Decrement)(void* proc_data, float value, bool precise);
+typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
+typedef bool (*blkhdgen_FromString)(void* proc_data, const char* str, float* value);
+typedef int (*blkhdgen_IntConstrain)(void* proc_data, int value);
+typedef int (*blkhdgen_IntDrag)(void* proc_data, int start_value, int amount, bool precise);
+typedef int (*blkhdgen_IntIncrement)(void* proc_data, int value, bool precise);
+typedef int (*blkhdgen_IntDecrement)(void* proc_data, int value, bool precise);
+typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
+typedef bool (*blkhdgen_IntFromString)(void* proc_data, const char* str, int* value);
+
 typedef struct
 {
-	blkhdgen_Range range;
 	float default_value;
-	float step_size;
-} blkhdgen_RangeValue;
-
-typedef struct
-{
-	blkhdgen_IntRange range;
-	int default_value;
-	int step_size;
-} blkhdgen_IntRangeValue;
-
-typedef void (*blkhdgen_EnvelopeRangeAttribute_Set)(void* proc_data, float value);
-typedef float (*blkhdgen_EnvelopeRangeAttribute_Get)(void* proc_data);
-
-typedef struct
-{
-	blkhdgen_RangeValue range;
 
 	void* proc_data;
 
-	blkhdgen_EnvelopeRangeAttribute_Set set;
-	blkhdgen_EnvelopeRangeAttribute_Get get;
-} blkhdgen_EnvelopeRangeAttribute;
+	blkhdgen_DisplayValue display_value;
+	blkhdgen_FromString from_string;
+	blkhdgen_Constrain constrain;
+	blkhdgen_Drag drag;
+	blkhdgen_Increment increment;
+	blkhdgen_Decrement decrement;
+} blkhdgen_Slider;
+
+typedef struct
+{
+	int default_value;
+
+	void* proc_data;
+
+	blkhdgen_IntDisplayValue display_value;
+	blkhdgen_IntFromString from_string;
+	blkhdgen_IntConstrain constrain;
+	blkhdgen_IntDrag drag;
+	blkhdgen_IntIncrement increment;
+	blkhdgen_IntDecrement decrement;
+} blkhdgen_IntSlider;
 
 // Min/max values for envelope parameters can be modified by the user so
 // the min and max values are themselves ranges with their own min and max
@@ -125,32 +149,17 @@ typedef struct
 //   - step size for max value
 typedef struct
 {
-	blkhdgen_EnvelopeRangeAttribute min;
-	blkhdgen_EnvelopeRangeAttribute max;
+	blkhdgen_Slider min;
+	blkhdgen_Slider max;
 } blkhdgen_EnvelopeRange;
 
 typedef struct
 {
 	// Step size is also a range with a value that
 	// can be configured by the user
-	blkhdgen_RangeValue step_size;
+	blkhdgen_Slider step_size;
 	float default_snap_amount;
 } blkhdgen_EnvelopeSnapSettings;
-
-typedef float (*blkhdgen_Curve)(void* proc_data, float value);
-typedef float (*blkhdgen_InverseCurve)(void* proc_data, float value);
-typedef float (*blkhdgen_Constrain)(void* proc_data, float value);
-typedef float (*blkhdgen_Drag)(void* proc_data, float start_value, int amount, bool precise);
-typedef float (*blkhdgen_Increment)(void* proc_data, float value, bool precise);
-typedef float (*blkhdgen_Decrement)(void* proc_data, float value, bool precise);
-typedef const char* (*blkhdgen_DisplayValue)(void* proc_data, float value);
-typedef bool (*blkhdgen_FromString)(void* proc_data, const char* str, float* value);
-typedef int (*blkhdgen_IntConstrain)(void* proc_data, int value);
-typedef int (*blkhdgen_IntDrag)(void* proc_data, int start_value, int amount, bool precise);
-typedef int (*blkhdgen_IntIncrement)(void* proc_data, int value, bool precise);
-typedef int (*blkhdgen_IntDecrement)(void* proc_data, int value, bool precise);
-typedef const char* (*blkhdgen_IntDisplayValue)(void* proc_data, int value);
-typedef bool (*blkhdgen_IntFromString)(void* proc_data, const char* str, int* value);
 
 enum blkhdgen_ParameterType
 {
@@ -168,6 +177,7 @@ enum blkhdgen_EnvelopeFlags
 	blkhdgen_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 0x1,
 	blkhdgen_EnvelopeFlags_DefaultEnabled = 0x2,
 	blkhdgen_EnvelopeFlags_DefaultVisible = 0x4,
+	blkhdgen_EnvelopeFlags_SnapToDefaultOnly = 0x8,
 };
 
 enum blkhdgen_ToggleFlags
@@ -177,27 +187,21 @@ enum blkhdgen_ToggleFlags
 	blkhdgen_ToggleFlags_ShowInContextMenu = 0x2,
 	blkhdgen_ToggleFlags_DefaultEnabled = 0x4,
 };
+
 //
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
-typedef blkhdgen_EnvelopeRange(*blkhdgen_Envelope_GetRange)(void* proc_data);
-typedef blkhdgen_EnvelopeSnapSettings(*blkhdgen_Envelope_GetSnapSettings)(void* proc_data);
-
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Envelope
 
 	void* proc_data;
 
-	blkhdgen_Envelope_GetRange get_range;
-	blkhdgen_Envelope_GetSnapSettings get_snap_settings;
 	float default_value;
 	int flags; // blkhdgen_EnvelopeFlags
 
-	// Defines the value curve
-	blkhdgen_Curve curve;
-	blkhdgen_InverseCurve inverse_curve;
+	blkhdgen_EnvelopeSnapSettings snap_settings;
 
 	// Convert a non-normalized value to a display string
 	// e.g. "50" -> "50%"
@@ -238,7 +242,7 @@ typedef const char* (*blkhdgen_Option_GetText)(void* proc_data, blkhdgen_Index v
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Option
-	blkhdgen_Range range;
+	blkhdgen_IntRange range;
 	blkhdgen_Index default_value;
 
 	void* proc_data;
@@ -255,38 +259,16 @@ typedef struct
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_Slider
-	float default_value;
 	blkhdgen_StdIcon icon;
-
-	void* proc_data;
-
-	//blkhdgen_Curve curve;
-	//blkhdgen_InverseCurve inverse_curve;
-
-	blkhdgen_DisplayValue display_value;
-	blkhdgen_FromString from_string;
-	blkhdgen_Constrain constrain;
-	blkhdgen_Drag drag;
-	blkhdgen_Increment increment;
-	blkhdgen_Decrement decrement;
-	
-} blkhdgen_Slider;
+	blkhdgen_Slider slider;
+} blkhdgen_SliderParameter;
 
 typedef struct
 {
 	enum blkhdgen_ParameterType parameter_type; // blkhdgen_ParameterType_IntSlider
-	int default_value;
 	blkhdgen_StdIcon icon;
-
-	void* proc_data;
-
-	blkhdgen_IntDisplayValue display_value;
-	blkhdgen_IntFromString from_string;
-	blkhdgen_IntConstrain constrain;
-	blkhdgen_IntDrag drag;
-	blkhdgen_IntIncrement increment;
-	blkhdgen_IntDecrement decrement;
-} blkhdgen_IntSlider;
+	blkhdgen_IntSlider slider;
+} blkhdgen_IntSliderParameter;
 
 //
 // Toggle parameter
@@ -310,8 +292,8 @@ union blkhdgen_ParameterObject
 	blkhdgen_Chord chord;
 	blkhdgen_Envelope envelope;
 	blkhdgen_Option option;
-	blkhdgen_Slider slider;
-	blkhdgen_IntSlider int_slider;
+	blkhdgen_SliderParameter slider;
+	blkhdgen_IntSliderParameter int_slider;
 	blkhdgen_Toggle toggle;
 };
 
@@ -373,6 +355,7 @@ typedef struct
 {
 	blkhdgen_ParameterType type;
 	blkhdgen_EnvelopePoints points;
+	blkhdgen_Range range;
 } blkhdgen_EnvelopeData;
 
 typedef struct

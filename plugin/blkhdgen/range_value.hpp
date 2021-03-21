@@ -8,8 +8,8 @@ template <class T>
 struct RangeValue
 {
 	Range<T> range;
-	T value;
-	T step_size;
+	T value = T(0);
+	T step_size = T(0);
 };
 
 }
