@@ -1,20 +1,20 @@
 #pragma once 
 
-#include "blkhdgen.h"
+#include "blink.h"
 
 typedef struct
 {
-	//blkhdgen_GeneratorBase generator;
+	//blink_GeneratorBase generator;
 
 	void* proc_data;
 
-	//blkhdgen_Generator_Process process;
-} blkhdgen_Generator;
+	//blink_Generator_Process process;
+} blink_Generator;
 
-#ifdef BLKHDGEN_EXPORT
+#ifdef BLINK_EXPORT
 extern "C"
 {
-	EXPORTED blkhdgen_Generator blkhdgen_make_generator();
-	EXPORTED blkhdgen_Error blkhdgen_destroy_generator(blkhdgen_Generator generator);
+	EXPORTED blink_Generator blink_make_generator();
+	EXPORTED blink_Error blink_destroy_generator(blink_Generator generator);
 }
 #endif
