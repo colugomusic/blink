@@ -8,8 +8,6 @@ namespace blkhdgen {
 
 struct EnvelopeSpec : public ParameterSpec
 {
-	//std::function<float(float)> curve;
-	//std::function<float(float)> inverse_curve;
 	std::function<std::string(float)> display_value;
 	std::function<std::optional<float>(const std::string&)> from_string;
 	std::function<float(int)> get_grid_line;

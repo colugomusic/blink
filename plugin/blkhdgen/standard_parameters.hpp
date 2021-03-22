@@ -587,7 +587,7 @@ inline SliderParameterSpec<float> pan()
 {
 	SliderParameterSpec<float> out;
 
-	out.uuid = "b5bf03f3-17e2-4546-8cc2-e29790ea02a2";
+	out.uuid = BLKHDGEN_STD_UUID_SLIDER_PAN;
 	out.name = "Pan";
 
 	out.slider.constrain = pan::constrain;

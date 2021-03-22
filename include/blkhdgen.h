@@ -8,6 +8,7 @@
 #define BLKHDGEN_FALSE 0
 
 #define BLKHDGEN_STD_UUID_SLIDER_AMP "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5"
+#define BLKHDGEN_STD_UUID_SLIDER_PAN "b5bf03f3-17e2-4546-8cc2-e29790ea02a2"
 #define BLKHDGEN_STD_UUID_SLIDER_PITCH "00859eeb-ce9e-43cd-9994-bff881a9d32d"
 #define BLKHDGEN_STD_UUID_SLIDER_SAMPLE_OFFSET "88373752-7656-4d0e-8da2-a18c05af0106"
 #define BLKHDGEN_STD_UUID_TOGGLE_LOOP "dfa36d24-3c41-4a13-9b57-dc0116ef19f7"
@@ -200,6 +201,8 @@ typedef struct
 
 	float default_value;
 	int flags; // blkhdgen_EnvelopeFlags
+	blkhdgen_Slider min;
+	blkhdgen_Slider max;
 
 	blkhdgen_EnvelopeSnapSettings snap_settings;
 
@@ -392,42 +395,6 @@ union blkhdgen_ParameterData
 	blkhdgen_IntSliderData int_slider;
 	blkhdgen_ToggleData toggle;
 };
-
-//
-// Callbacks
-//
-//typedef const blkhdgen_SampleInfo* (*blkhdgen_GetSampleInfoCB)(void* host);
-//typedef blkhdgen_FrameCount(*blkhdgen_GetSampleDataCB)(void* host, blkhdgen_ChannelCount channel, blkhdgen_Index index, blkhdgen_FrameCount size, float* buffer);
-//typedef blkhdgen_WarpPoints* (*blkhdgen_GetWarpPointDataCB)(void* host);
-//typedef blkhdgen_ManipulatorData* (*blkhdgen_GetManipulatorDataCB)(void* host);
-
-//
-// Generator
-//
-
-//typedef blkhdgen_Error (*blkhdgen_Generator_SetDataOffset)(void* proc_data, int offset);
-//typedef blkhdgen_Group(*blkhdgen_Generator_GetGroup)(void* proc_data, blkhdgen_Index index);
-//typedef blkhdgen_Group(*blkhdgen_Generator_GetGroupByID)(void* proc_data, blkhdgen_ID id);
-//typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameter)(void* proc_data, blkhdgen_Index index);
-//typedef blkhdgen_Parameter(*blkhdgen_Generator_GetParameterByID)(void* proc_data, blkhdgen_UUID uuid);
-//typedef const char* (*blkhdgen_Generator_GetErrorString)(void* proc_data, blkhdgen_Error error);
-
-// <positions> is a buffer of length BLKHDGEN_VECTOR_SIZE containing block positions.
-//
-// Positions will usually be increasing linearly but may jump back in the case of
-// loop events.
-//
-// Be aware that Blockhead supports looping over extremely small regions (less
-// than BLKHDGEN_VECTOR_SIZE)
-//typedef blkhdgen_Error(*blkhdgen_Generator_SetPositionData)(void* proc_data, const blkhdgen_Position* positions);
-
-// output pointer is aligned on a 16-byte boundary
-//typedef blkhdgen_Error (*blkhdgen_Generator_Process)(void* proc_data, blkhdgen_SR song_rate, blkhdgen_SR sample_rate, float** out);
-//
-//typedef struct
-//{
-//	void* proc_data;
-//} blkhdgen_GeneratorBase;
 
 #ifdef BLKHDGEN_EXPORT
 
