@@ -27,6 +27,13 @@ typedef uint32_t blink_IntPosition;
 typedef int8_t blink_Bool;
 typedef uint32_t blink_Scale;
 
+enum blink_ChannelMode
+{
+	blink_ChannelMode_Left = 0,
+	blink_ChannelMode_Right = 1,
+	blink_ChannelMode_Stereo = 2,
+};
+
 enum blink_StdIcon
 {
 	blink_StdIcon_None = 0,

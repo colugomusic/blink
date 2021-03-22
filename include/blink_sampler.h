@@ -41,6 +41,7 @@ typedef struct
 	blink_SR song_rate;
 	blink_SR sample_rate;
 	int data_offset;
+	blink_ChannelMode channel_mode;
 
 	const blink_SampleInfo* sample_info;
 	blink_Position* positions;
