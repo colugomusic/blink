@@ -19,8 +19,7 @@ public:
 	int get_num_groups() const;
 	int get_num_parameters() const;
 
-	const Group& get_group(blink_Index index) const;
-	const Group& get_group_by_id(blink_ID id) const;
+	const Group& get_group(int index) const;
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
 
@@ -31,7 +30,7 @@ public:
 
 protected:
 
-	void add_group(blink_ID id, std::string name);
+	int add_group(std::string name);
 	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeSpec spec);
 	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
 	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
@@ -43,7 +42,7 @@ private:
 
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
 
-	std::map<blink_ID, Group> groups_;
+	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
 };
@@ -68,9 +67,11 @@ inline const blink_ToggleData* Plugin::get_toggle_data(const blink_ParameterData
 	return data ? &data[index].toggle : nullptr;
 }
 
-inline void Plugin::add_group(blink_ID id, std::string name)
+inline int Plugin::add_group(std::string name)
 {
-	groups_[id] = { id, name };
+	groups_.push_back({ name });
+
+	return int(groups_.size() - 1);
 }
 
 inline void Plugin::add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter)
@@ -126,20 +127,9 @@ inline int Plugin::get_num_parameters() const
 	return int(parameters_.size());
 }
 
-inline const Group& Plugin::get_group(blink_Index index) const
+inline const Group& Plugin::get_group(int index) const
 {
-	auto pos = groups_.begin();
-
-	std::advance(pos, index);
-
-	return pos->second;
-}
-
-inline const Group& Plugin::get_group_by_id(blink_ID id) const
-{
-	auto pos = groups_.find(id);
-
-	return pos->second;
+	return groups_[index];
 }
 
 inline Parameter& Plugin::get_parameter(blink_Index index)

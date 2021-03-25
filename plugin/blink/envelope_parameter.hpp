@@ -38,7 +38,7 @@ private:
 	int flags_;
 	std::function<std::string(float)> display_value_;
 	mutable std::string display_value_buffer_;
-	mutable TraverserPointDataResetter traverser_resetter_;
+	mutable TraverserResetter<blink_EnvelopeData> traverser_resetter_;
 	mutable int point_search_index_ = -1;
 };
 
@@ -87,7 +87,7 @@ inline ml::DSPVector EnvelopeParameter::get_mod_values(Traverser* traverser, con
 	if (!data) return default_value_;
 	if (data->points.count < 1) return default_value_;
 
-	traverser_resetter_.check(&data->points, traverser);
+	traverser_resetter_.check(data, traverser);
 
 	const auto& resets = traverser->get_resets();
 	const auto& read_position = traverser->get_read_position();
@@ -107,7 +107,7 @@ inline float EnvelopeParameter::get_mod_value(Traverser* traverser, const blink_
 	if (!data) return default_value_;
 	if (data->points.count < 1) return default_value_;
 
-	traverser_resetter_.check(&data->points, traverser);
+	traverser_resetter_.check(data, traverser);
 
 	const auto& resets = traverser->get_resets();
 	const auto& read_position = traverser->get_read_position();

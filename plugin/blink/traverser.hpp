@@ -80,24 +80,25 @@ private:
 };
 
 //
-// Puts a reset event at the traverser's start if the point data changed
+// Puts a reset event at the traverser's start if the pointer changed
 //
-class TraverserPointDataResetter
+template <class T>
+class TraverserResetter
 {
 public:
 
-	void check(const blink_EnvelopePoints* points, Traverser* traverser)
+	void check(const T* ptr, Traverser* traverser)
 	{
-		if (points != last_point_data_)
+		if (ptr != last_ptr_)
 		{
 			traverser->set_reset(0);
 		}
 
-		last_point_data_ = points;
+		last_ptr_ = ptr;
 	}
 
 private:
 
-	const blink_EnvelopePoints* last_point_data_ = nullptr;
+	const T* last_ptr_ = nullptr;
 };
 }

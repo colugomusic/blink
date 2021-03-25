@@ -181,11 +181,12 @@ enum blink_ParameterType
 
 enum blink_EnvelopeFlags
 {
-	blink_EnvelopeFlags_None = 0x0,
-	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 0x1,
-	blink_EnvelopeFlags_DefaultEnabled = 0x2,
-	blink_EnvelopeFlags_DefaultVisible = 0x4,
-	blink_EnvelopeFlags_SnapToDefaultOnly = 0x8,
+	blink_EnvelopeFlags_None                               = 1 << 0,
+	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1,
+	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
+	blink_EnvelopeFlags_DefaultEnabled                     = 1 << 3,
+	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
+	blink_EnvelopeFlags_SnapToDefaultOnly                  = 1 << 5,
 };
 
 enum blink_ToggleFlags
@@ -315,8 +316,8 @@ typedef struct
 	// generators.)
 	blink_UUID uuid;
 
-	// Zero if the parameter does not belong to a group
-	blink_ID group_id;
+	// < 0 if the parameter does not belong to a group
+	blink_ID group_index;
 
 	// User-friendly parameter name
 	const char* name;
@@ -326,7 +327,6 @@ typedef struct
 
 typedef struct
 {
-	blink_ID id;
 	const char* name;
 } blink_Group;
 
@@ -365,7 +365,6 @@ typedef struct
 {
 	blink_ParameterType type;
 	blink_EnvelopePoints points;
-	blink_Range range;
 } blink_EnvelopeData;
 
 typedef struct
@@ -420,7 +419,6 @@ extern "C"
 	EXPORTED int blink_get_num_groups();
 	EXPORTED int blink_get_num_parameters();
 	EXPORTED blink_Group blink_get_group(blink_Index index);
-	EXPORTED blink_Group blink_get_group_by_id(blink_ID id);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID id);
 

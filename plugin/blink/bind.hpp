@@ -169,7 +169,6 @@ inline blink_Group group(const Group& group)
 {
 	blink_Group out;
 
-	out.id = group.id;
 	out.name = group.name.c_str();
 
 	return out;
@@ -263,7 +262,7 @@ inline blink_Parameter parameter(Parameter& parameter)
 	blink_Parameter out;
 
 	out.uuid = parameter.get_uuid();
-	out.group_id = parameter.get_group_id();
+	out.group_index = parameter.get_group_index();
 	out.name = parameter.get_name();
 
 	const auto type = parameter.get_type();
@@ -341,13 +340,6 @@ inline blink_Generator generator(Generator* generator, const char* name, bool re
 		auto generator = (Generator*)(proc_data);
 
 		return group(generator->get_group(index));
-	};
-
-	out.get_group_by_id = [](void* proc_data, blink_ID id)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return group(generator->get_group_by_id(id));
 	};
 
 	out.get_parameter = [](void* proc_data, blink_Index index)
@@ -432,77 +424,13 @@ blink_Error destroy_generator(blink_Generator generator)
 }
 #endif
 
-//inline blink_GeneratorBase generator_base(GeneratorBase* generator)
-//{
-//	blink_GeneratorBase out;
-//
-//	out.num_channels = generator->get_num_channels();
-//	out.num_groups = generator->get_num_groups();
-//	out.num_parameters = generator->get_num_parameters();
-//	out.proc_data = generator;
-//
-//	out.get_group = [](void* proc_data, blink_Index index)
-//	{
-//		auto generator = (Generator*)(proc_data);
-//
-//		return group(generator->get_group(index));
-//	};
-//
-//	out.get_group_by_id = [](void* proc_data, blink_ID id)
-//	{
-//		auto generator = (Generator*)(proc_data);
-//
-//		return group(generator->get_group_by_id(id));
-//	};
-//
-//	out.get_parameter = [](void* proc_data, blink_Index index)
-//	{
-//		auto generator = (Generator*)(proc_data);
-//
-//		return parameter(generator->get_parameter(index));
-//	};
-//
-//	out.get_parameter_by_id = [](void* proc_data, blink_UUID uuid)
-//	{
-//		auto generator = (Generator*)(proc_data);
-//
-//		return parameter(generator->get_parameter_by_id(uuid));
-//	};
-//
-//	out.set_data_offset = [](void* proc_data, int offset)
-//	{
-//		auto generator = (Generator*)(proc_data);
-//
-//		generator->set_data_offset(offset);
-//
-//		return BLINK_OK;
-//	};
-//
-//	out.get_error_string = [](void* proc_data, blink_Error error)
-//	{
-//		auto generator = (Generator*)(proc_data);
-//
-//		return generator->get_error_string(error);
-//	};
-//
-//	return out;
-//}
 
 #ifdef BLINK_SAMPLER
 inline blink_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 {
 	blink_Sampler out;
 
-	//out.generator = generator_base(sampler);
 	out.proc_data = sampler;
-	//out.requires_preprocess = requires_preprocess;
-
-	//out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blink_GetWarpPointDataCB cb)
-	//{
-	//	auto generator = (Generator*)(proc_data);
-
-	//	return generator->set_get_warp_point_data_cb(host, cb);
-	//};
 
 	out.process = [](void* proc_data, const blink_SamplerBuffer* buffer, float* out)
 	{
@@ -510,34 +438,6 @@ inline blink_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 
 		return sampler->process(buffer, out);
 	};
-
-	//out.get_waveform_positions = [](void* proc_data, const blink_Position* block_positions, float* out, float* derivatives)
-	//{
-	//	auto sampler = (Sampler*)(proc_data);
-
-	//	return sampler->get_waveform_positions(block_positions, out, derivatives);
-	//};
-
-	//out.set_get_sample_data_cb = [](void* proc_data, void* host, blink_GetSampleDataCB cb)
-	//{
-	//	auto generator = (Generator*)(proc_data);
-
-	//	return generator->set_get_sample_data_cb(host, cb);
-	//};
-
-	//out.set_get_sample_info_cb = [](void* proc_data, void* host, blink_GetSampleInfoCB cb)
-	//{
-	//	auto generator = (Generator*)(proc_data);
-
-	//	return generator->set_get_sample_info_cb(host, cb);
-	//};
-
-	//out.preprocess_sample = [](void* proc_data, void* host, blink_PreprocessCallbacks callbacks)
-	//{
-	//	auto generator = (Generator*)(proc_data);
-
-	//	return generator->preprocess_sample(host, callbacks);
-	//};
 
 	return out;
 }

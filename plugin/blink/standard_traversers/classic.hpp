@@ -185,20 +185,19 @@ class Classic
 {
 public:
 
-	float get_position(float transpose, const blink_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivative = nullptr);
-	ml::DSPVector get_positions(float transpose, const blink_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives = nullptr);
+	float get_position(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivative = nullptr);
+	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivatives = nullptr);
 
 private:
 
 	ClassicCalculator calculator_;
-	TraverserPointDataResetter traverser_resetter_;
 };
 
-inline float Classic::get_position(float transpose, const blink_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivative)
+inline float Classic::get_position(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivative)
 {
-	const auto& read_position = traverser->get_read_position();
+	const auto& read_position = traverser.get_read_position();
 
-	if (!env_pitch_points || env_pitch_points->count < 1)
+	if (!env_pitch || env_pitch->points.count < 1)
 	{
 		const auto ff = math::p_to_ff(transpose);
 
@@ -207,23 +206,21 @@ inline float Classic::get_position(float transpose, const blink_EnvelopePoints* 
 		return (read_position[0] * ff) - float(sample_offset);
 	}
 
-	traverser_resetter_.check(env_pitch_points, traverser);
-
-	const auto& resets = traverser->get_resets();
+	const auto& resets = traverser.get_resets();
 
 	if (resets[0] > 0)
 	{
 		calculator_.reset();
 	}
 
-	return calculator_.calculate(transpose, env_pitch_points, read_position[0], derivative) - sample_offset;
+	return calculator_.calculate(transpose, &env_pitch->points, read_position[0], derivative) - sample_offset;
 }
 
-inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopePoints* env_pitch_points, Traverser* traverser, int sample_offset, float* derivatives)
+inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivatives)
 {
-	const auto& read_position = traverser->get_read_position();
+	const auto& read_position = traverser.get_read_position();
 
-	if (!env_pitch_points || env_pitch_points->count < 1)
+	if (!env_pitch || env_pitch->points.count < 1)
 	{
 		const auto ff = math::p_to_ff(transpose);
 
@@ -232,9 +229,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 		return (read_position * ff) - float(sample_offset);
 	}
 
-	traverser_resetter_.check(env_pitch_points, traverser);
-
-	const auto& resets = traverser->get_resets();
+	const auto& resets = traverser.get_resets();
 
 	ml::DSPVector out;
 
@@ -245,7 +240,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(transpose, env_pitch_points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
+		out[i] = calculator_.calculate(transpose, &env_pitch->points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
 	}
 
 	return out;
