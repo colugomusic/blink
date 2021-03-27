@@ -56,62 +56,42 @@ public:
 	// the mathematics involved in calculating the resulting sample
 	// position.
 	//
-	float calculate(float transpose, const blink_EnvelopePoints* pitch_points, blink_Position block_position, float* derivative = nullptr)
+	float calculate(float transpose, const blink_EnvelopeData* envelope, blink_Position block_position, float* derivative = nullptr)
 	{
-		struct PitchPointData
-		{
-			bool set;
-			float transpose;
-			float pitch;
-			float ff;
-		};
-
 		struct PitchPoint
 		{
-			PitchPoint(const blink_EnvelopePoint& p, float transpose)
-				: position(p.position)
-				, data_((PitchPointData*)(p.plugin_data))
-			{
-				if (data_->transpose != transpose)
-				{
-					data_->set = false;
-					data_->transpose = transpose;
-				}
-			}
+			int x;
+			float pitch;
 
-			void calculate() const
+			PitchPoint(const blink_EnvelopePoint& p, float min, float max, float transpose)
+				: x(p.position.x)
+				, pitch(std::clamp(p.position.y, min, max) + transpose)
+				, ff_(1.0f)
 			{
-				data_->set = true;
-				data_->pitch = position.y + data_->transpose;
-				data_->ff = math::p_to_ff(data_->pitch);
-			}
-
-			float get_pitch() const
-			{
-				if (!data_->set) calculate();
-
-				return data_->pitch;
 			}
 
 			float get_ff() const
 			{
-				if (!data_->set) calculate();
+				if (!ff_ready_)
+				{
+					ff_ = math::p_to_ff(pitch);
+					ff_ready_ = true;
+				}
 
-				return data_->ff;
+				return ff_;
 			}
-
-			blink_EnvelopePointPosition position;
 
 		private:
 
-			PitchPointData* data_;
+			mutable bool ff_ready_ = false;
+			mutable float ff_;
 		};
 
-		for (blink_Index i = point_search_index_; i < pitch_points->count; i++)
+		for (blink_Index i = point_search_index_; i < envelope->points.count; i++)
 		{
-			PitchPoint p1(pitch_points->points[i], transpose);
+			const PitchPoint p1(envelope->points.points[i], envelope->min, envelope->max, transpose);
 
-			if (block_position < p1.position.x)
+			if (block_position < p1.x)
 			{
 				if (i == 0)
 				{
@@ -122,18 +102,18 @@ public:
 					return float(block_position * p1.get_ff()) + segment_start_;
 				}
 
-				PitchPoint p0(pitch_points->points[i - 1], transpose);
+				PitchPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, transpose);
 
-				auto n = block_position - p0.position.x;
-				auto segment_size = double(p1.position.x) - p0.position.x;
+				auto n = block_position - p0.x;
+				auto segment_size = double(p1.x) - p0.x;
 
 				if (segment_size > 0.0f)
 				{
 					point_search_index_ = i;
 
-					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0.get_pitch()), double(p1.get_pitch()), segment_size, n));
+					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0.pitch), double(p1.pitch), segment_size, n));
 
-					return float(weird_math_that_i_dont_understand(double(p0.get_pitch()), double(p1.get_pitch()), segment_size, n)) + segment_start_;
+					return float(weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, n)) + segment_start_;
 				}
 			}
 			else
@@ -142,27 +122,27 @@ public:
 				{
 					point_search_index_ = 1;
 
-					segment_start_ += float(p1.position.x * p1.get_ff()) + segment_start_;
+					segment_start_ += float(p1.x * p1.get_ff()) + segment_start_;
 				}
 				else
 				{
 					point_search_index_ = i + 1;
 
-					PitchPoint p0(pitch_points->points[i - 1], transpose);
+					PitchPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, transpose);
 
-					auto segment_size = double(p1.position.x) - p0.position.x;
+					auto segment_size = double(p1.x) - p0.x;
 
 					if (segment_size > 0.0f)
 					{
-						segment_start_ = float(weird_math_that_i_dont_understand(double(p0.get_pitch()), double(p1.get_pitch()), segment_size, segment_size)) + segment_start_;
+						segment_start_ = float(weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, segment_size)) + segment_start_;
 					}
 				}
 			}
 		}
 
-		PitchPoint p0(pitch_points->points[pitch_points->count - 1], transpose);
+		PitchPoint p0(envelope->points.points[envelope->points.count - 1], envelope->min, envelope->max, transpose);
 
-		auto n = block_position - p0.position.x;
+		auto n = block_position - p0.x;
 
 		if (derivative) *derivative = p0.get_ff();
 
@@ -199,7 +179,7 @@ inline float Classic::get_position(float transpose, const blink_EnvelopeData* en
 
 	if (!env_pitch || env_pitch->points.count < 1)
 	{
-		const auto ff = math::p_to_ff(transpose);
+		const auto ff = math::p_to_ff(std::clamp(0.0f, env_pitch->min, env_pitch->max) + transpose);
 
 		if (derivative) *derivative = ff;
 
@@ -213,16 +193,16 @@ inline float Classic::get_position(float transpose, const blink_EnvelopeData* en
 		calculator_.reset();
 	}
 
-	return calculator_.calculate(transpose, &env_pitch->points, read_position[0], derivative) - sample_offset;
+	return calculator_.calculate(transpose, env_pitch, read_position[0], derivative) - sample_offset;
 }
 
 inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivatives)
 {
 	const auto& read_position = traverser.get_read_position();
 
-	if (!env_pitch || env_pitch->points.count < 1)
+	if (env_pitch->points.count < 1)
 	{
-		const auto ff = math::p_to_ff(transpose);
+		const auto ff = math::p_to_ff(std::clamp(0.0f, env_pitch->min, env_pitch->max) + transpose);
 
 		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 
@@ -240,7 +220,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(transpose, &env_pitch->points, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
+		out[i] = calculator_.calculate(transpose, env_pitch, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
 	}
 
 	return out;

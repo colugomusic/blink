@@ -19,20 +19,17 @@ public:
 
 	int get_num_channels() const { return 2; }
 
-	static ml::DSPVectorArray<2> stereo_pan(const ml::DSPVectorArray<2> in, float pan, const EnvelopeParameter& pan_envelope, const blink_EnvelopeData* data, Traverser* traverser);
+	static ml::DSPVectorArray<2> stereo_pan(const ml::DSPVectorArray<2> in, float pan, const EnvelopeParameter& pan_envelope, const blink_EnvelopeData* data, const blink_Position* block_pos);
 
 };
 
-inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(const ml::DSPVectorArray<2> in, float pan, const EnvelopeParameter& pan_envelope, const blink_EnvelopeData* data, Traverser* traverser)
+inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(const ml::DSPVectorArray<2> in, float pan, const EnvelopeParameter& pan_envelope, const blink_EnvelopeData* data, const blink_Position* block_pos)
 {
 	auto out = in;
 
 	ml::DSPVector env_pan;
 
-	for (int i = 0; i < kFloatsPerDSPVector; i++)
-	{
-		env_pan[i] = pan_envelope.get_mod_value(traverser, data);
-	}
+	pan_envelope.search_vec(data, block_pos, kFloatsPerDSPVector, env_pan.getBuffer());
 
 	const auto zero = ml::DSPVector(0.0f);
 	const auto one = ml::DSPVector(1.0f);

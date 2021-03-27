@@ -323,6 +323,88 @@ namespace speed
 
 namespace envelopes {
 
+// returns the y value at the given block position
+// [search_beg_index] is the index of the point to begin searching from
+// [left] returns the index of the point to the left of the block position
+//        in some scenarios this can be passed as search_beg_index to
+//        speed up the search in the next iteration
+template <class SearchFunc>
+inline float generic_search(const blink_EnvelopeData* data, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+{
+	*left = -1;
+
+	const auto clamp = [data](float value)
+	{
+		return std::clamp(value, data->min, data->max);
+	};
+
+	if (data->points.count < 1) return clamp(default_value);
+	if (data->points.count == 1) return clamp(data->points.points[0].position.y);
+
+	auto search_beg = data->points.points + search_beg_index;
+	auto search_end = data->points.points + data->points.count;
+	const auto pos = search(search_beg, search_end);
+
+	if (pos == search_beg)
+	{
+		// It's the first point
+		return clamp(pos->position.y);
+	}
+
+	if (pos == search_end)
+	{
+		// No points to the right so we're at the end of the envelope
+		*left = int(std::distance<const blink_EnvelopePoint*>(data->points.points, (pos - 2)));
+
+		return clamp((pos - 1)->position.y);
+	}
+
+	// We're somewhere in between two envelope points. Linear interpolate
+	// between them.
+	const auto p0 = (pos - 1)->position;
+	const auto p1 = pos->position;
+
+	const auto segment_size = p1.x - p0.x;	// Should never be zero
+	const auto r = (block_position - p0.x) / segment_size;
+
+	*left = int(std::distance<const blink_EnvelopePoint*>(data->points.points, (pos - 1)));
+
+	return math::lerp(clamp(p0.y), clamp(p1.y), float(r));
+}
+
+// Use a binary search to locate the envelope position
+inline float generic_search_binary(const blink_EnvelopeData* data, float default_value, blink_Position block_position, int search_beg_index, int* left)
+{
+	const auto find = [block_position](const blink_EnvelopePoint* beg, const blink_EnvelopePoint* end)
+	{
+		const auto less = [](blink_Position position, const blink_EnvelopePoint& point)
+		{
+			return position < point.position.x;
+		};
+
+		return std::upper_bound(beg, end, block_position, less);
+	};
+
+	return generic_search(data, default_value, block_position, search_beg_index, left, find);
+}
+
+// Use a forward search to locate the envelope position (can be
+// faster when envelope is being traversed forwards)
+inline float generic_search_forward(const blink_EnvelopeData* data, float default_value, blink_Position block_position, int search_beg_index, int* left)
+{
+	const auto find = [block_position](const blink_EnvelopePoint* beg, const blink_EnvelopePoint* end)
+	{
+		const auto greater = [block_position](const blink_EnvelopePoint& point)
+		{
+			return point.position.x > block_position;
+		};
+
+		return std::find_if(beg, end, greater);
+	};
+
+	return generic_search(data, default_value, block_position, search_beg_index, left, find);
+}
+
 inline EnvelopeSpec amp()
 {
 	EnvelopeSpec out;
@@ -330,10 +412,14 @@ inline EnvelopeSpec amp()
 	out.uuid = "273e7c30-404b-4db6-ba97-20f33d49fe51";
 	out.name = "Amp";
 
-	out.get_grid_line = [](int index) -> float
+	out.get_gridline = [](int index) -> float
 	{
-		return math::linear2db(math::linear2speed(float(index)));
+		return math::linear2speed(float(index));
 	};
+
+	out.default_value = 1.0f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
 
 	out.display_value = amp::display;
 
@@ -348,8 +434,7 @@ inline EnvelopeSpec amp()
 	out.range.max.decrement = amp::decrement;
 	out.range.max.drag = amp::drag;
 
-	out.default_value = 1.0f;
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_SnapToDefaultOnly;
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesWaveform;
 
 	return out;
 }
@@ -361,6 +446,10 @@ inline EnvelopeSpec pan()
 	out.uuid = "9c312a2c-a1b4-4a8d-ab68-07ea157c4574";
 	out.name = "Pan";
 
+	out.default_value = 0.0f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+
 	out.display_value = pan::display;
 
 	out.range.min.default_value = -1.0f;
@@ -369,8 +458,7 @@ inline EnvelopeSpec pan()
 	out.range.max.default_value = 1.0f;
 	out.range.max.display_value = pan::display;
 
-	out.default_value = 0.0f;
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_SnapToDefaultOnly;
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_SnapToDefaultOnly | blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }
@@ -382,6 +470,10 @@ inline EnvelopeSpec pitch()
 	out.uuid = "ca2529db-e7bd-4019-9a07-22aee24526d1";
 	out.name = "Pitch";
 
+	out.default_value = 0.0f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+
 	out.display_value = [](float v)
 	{
 		std::stringstream ss;
@@ -391,9 +483,14 @@ inline EnvelopeSpec pitch()
 		return ss.str();
 	};
 
-	out.get_grid_line = [](int index) -> float
+	out.get_gridline = [](int index) -> float
 	{
 		return float(index * 12);
+	};
+
+	out.get_stepline = [](int index, float step_size) -> float
+	{
+		return step_size * index;
 	};
 
 	out.range.min.constrain = pitch::constrain;
@@ -413,15 +510,16 @@ inline EnvelopeSpec pitch()
 	out.range.max.from_string = find_number<float>;
 
 	out.step_size.constrain = [](float v) { return constrain(v, 0.0f, 60.0f); };
-	out.step_size.decrement = decrement<1, 10>;
-	out.step_size.increment = increment<1, 10>;
+	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(decrement<1, 10>(v, precise)); };
+	out.step_size.increment = [out](float v, bool precise) { return out.step_size.constrain(increment<1, 10>(v, precise)); };
 	out.step_size.default_value = 1.0f;
 	out.step_size.display_value = display_number;
-	out.step_size.drag = pitch::drag;
+	out.step_size.drag = [out](float v, int amount, bool precise) { return out.step_size.constrain(pitch::drag(v, amount, precise)); };
 	out.step_size.from_string = find_number<float>;
 
-	out.default_value = 0.0f;
 	out.default_snap_amount = 1.0f;
+
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesWaveform;
 
 	return out;
 }
@@ -433,9 +531,12 @@ inline EnvelopeSpec speed()
 	out.uuid = "02f68738-f54a-4f35-947b-c30e73896aa4";
 	out.name = "Speed";
 
+	out.default_value = speed::NORMAL;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
 	out.display_value = speed::display;
 
-	out.get_grid_line = [](int index) -> float
+	out.get_gridline = [](int index) -> float
 	{
 		return math::linear2speed(float(index));
 	};
@@ -456,7 +557,7 @@ inline EnvelopeSpec speed()
 	out.range.min.from_string = speed::from_string;
 	out.range.min.default_value = 2.0f;
 
-	out.default_value = speed::NORMAL;
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesWaveform;
 
 	return out;
 }
@@ -579,6 +680,7 @@ inline SliderParameterSpec<float> amp()
 	out.slider.display_value = amp::display;
 	out.slider.default_value = 1.0f;
 	out.icon = blink_StdIcon_Amp;
+	out.flags = blink_SliderFlags_MovesWaveform;
 
 	return out;
 }
@@ -617,6 +719,7 @@ inline SliderParameterSpec<float> pitch()
 	out.slider.from_string = find_number<float>;
 	out.slider.default_value = 0.0f;
 	out.icon = blink_StdIcon_Pitch;
+	out.flags = blink_SliderFlags_MovesWaveform;
 
 	return out;
 }
@@ -633,6 +736,7 @@ inline SliderParameterSpec<float> speed()
 	out.slider.display_value = speed::display;
 	out.slider.from_string = find_number<float>;
 	out.slider.default_value = 1.0f;
+	out.flags = blink_SliderFlags_MovesWaveform;
 
 	return out;
 }
@@ -678,6 +782,7 @@ inline SliderParameterSpec<int> sample_offset()
 	out.slider.from_string = find_number<int>;
 	out.slider.default_value = 0;
 	out.icon = blink_StdIcon_SampleOffset;
+	out.flags = blink_SliderFlags_MovesWaveform;
 
 	return out;
 }
@@ -692,7 +797,7 @@ inline ToggleSpec loop()
 
 	out.uuid = BLINK_STD_UUID_TOGGLE_LOOP;
 	out.name = "Loop";
-	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton;
+	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesWaveform;
 	out.default_value = false;
 
 	return out;
@@ -704,7 +809,7 @@ inline ToggleSpec reverse()
 
 	out.uuid = BLINK_STD_UUID_TOGGLE_REVERSE;
 	out.name = "Reverse";
-	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton;
+	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesWaveform;
 	out.default_value = false;
 
 	return out;

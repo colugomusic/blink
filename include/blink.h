@@ -62,12 +62,6 @@ typedef struct
 
 	// Not currently used.
 	float curve;
-
-	// Plugins can write to this memory if they want
-	//
-	// It will be initialized to zero whenever the envelope
-	// points change
-	char plugin_data[128];
 } blink_EnvelopePoint;
 
 typedef struct
@@ -98,6 +92,102 @@ typedef struct
 	int min;
 	int max;
 } blink_IntRange;
+
+enum blink_ParameterType
+{
+	blink_ParameterType_Chord,
+	blink_ParameterType_Envelope,
+	blink_ParameterType_Option,
+	blink_ParameterType_Slider,
+	blink_ParameterType_IntSlider,
+	blink_ParameterType_Toggle,
+};
+
+typedef struct
+{
+	blink_IntPosition position;
+	blink_Scale scale;
+} blink_ChordBlock;
+
+typedef struct
+{
+	blink_Index count;
+	blink_ChordBlock* blocks;
+} blink_ChordBlocks;
+
+// Manipulators
+//
+// This will be a future Blockhead feature, not sure how it is going
+// to look. Plugins don't need to worry about it yet.
+typedef struct
+{
+	blink_UUID uuid;
+	blink_ID local_id;
+	const char* name;
+} blink_ManipulatorTarget;
+
+typedef struct
+{
+	blink_ID local_id;
+	float value;
+	float glide_in;
+	float glide_out;
+} blink_ManipulatorPoint;
+
+typedef struct
+{
+	blink_Index count;
+	blink_ManipulatorPoint* points;
+} blink_ManipulatorData;
+
+typedef struct
+{
+	blink_ParameterType type;
+	blink_ChordBlocks* blocks;
+} blink_ChordData;
+
+typedef struct
+{
+	blink_ParameterType type;
+	blink_EnvelopePoints points;
+	float min;
+	float max;
+} blink_EnvelopeData;
+
+typedef struct
+{
+	blink_ParameterType type;
+	int value;
+} blink_OptionData;
+
+typedef struct
+{
+	blink_ParameterType type;
+	float value;
+} blink_SliderData;
+
+typedef struct
+{
+	blink_ParameterType type;
+	int value;
+} blink_IntSliderData;
+
+typedef struct
+{
+	blink_ParameterType type;
+	blink_Bool value;
+} blink_ToggleData;
+
+union blink_ParameterData
+{
+	blink_ParameterType type;
+	blink_ChordData chord;
+	blink_EnvelopeData envelope;
+	blink_OptionData option;
+	blink_SliderData slider;
+	blink_IntSliderData int_slider;
+	blink_ToggleData toggle;
+};
 
 typedef float (*blink_Curve)(void* proc_data, float value);
 typedef float (*blink_InverseCurve)(void* proc_data, float value);
@@ -142,25 +232,6 @@ typedef struct
 	blink_IntDecrement decrement;
 } blink_IntSlider;
 
-// Min/max values for envelope parameters can be modified by the user so
-// the min and max values are themselves ranges with their own min and max
-// values. So here we are representing the following data hierarchy:
-// - min value:
-//   - minimum min value
-//   - maximum min value
-//   - default min value
-//   - step size for min value
-// - max value:
-//   - minimum max value
-//   - maximum max value
-//   - default max value
-//   - step size for max value
-typedef struct
-{
-	blink_Slider min;
-	blink_Slider max;
-} blink_EnvelopeRange;
-
 typedef struct
 {
 	// Step size is also a range with a value that
@@ -168,16 +239,6 @@ typedef struct
 	blink_Slider step_size;
 	float default_snap_amount;
 } blink_EnvelopeSnapSettings;
-
-enum blink_ParameterType
-{
-	blink_ParameterType_Chord,
-	blink_ParameterType_Envelope,
-	blink_ParameterType_Option,
-	blink_ParameterType_Slider,
-	blink_ParameterType_IntSlider,
-	blink_ParameterType_Toggle,
-};
 
 enum blink_EnvelopeFlags
 {
@@ -187,20 +248,33 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_DefaultEnabled                     = 1 << 3,
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
 	blink_EnvelopeFlags_SnapToDefaultOnly                  = 1 << 5,
+	blink_EnvelopeFlags_NoGridLabels                       = 1 << 6,
+	blink_EnvelopeFlags_MovesWaveform                      = 1 << 7,
+};
+
+enum blink_SliderFlags
+{
+	blink_SliderFlags_None          = 1 << 0,
+	blink_SliderFlags_MovesWaveform = 1 << 1,
 };
 
 enum blink_ToggleFlags
 {
-	blink_ToggleFlags_None = 0x0,
-	blink_ToggleFlags_ShowButton = 0x1,
-	blink_ToggleFlags_ShowInContextMenu = 0x2,
-	blink_ToggleFlags_DefaultEnabled = 0x4,
+	blink_ToggleFlags_None              = 1 << 0,
+	blink_ToggleFlags_ShowButton        = 1 << 1,
+	blink_ToggleFlags_ShowInContextMenu = 1 << 2,
+	blink_ToggleFlags_DefaultEnabled    = 1 << 3,
+	blink_ToggleFlags_MovesWaveform     = 1 << 4,
 };
 
 //
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
+typedef bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
+typedef bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
+typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData* data, float block_position);
+
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
@@ -209,35 +283,22 @@ typedef struct
 
 	float default_value;
 	int flags; // blink_EnvelopeFlags
+
 	blink_Slider min;
 	blink_Slider max;
-
 	blink_EnvelopeSnapSettings snap_settings;
 
-	// Convert a non-normalized value to a display string
-	// e.g. "50" -> "50%"
-	//   or "1200" -> "1.2 kHz"
-	//
-	// The returned buffer remains valid until the next call to display_value or
-	// until the generator is destroyed.
 	blink_DisplayValue display_value;
+	blink_FromString from_string;
+	blink_EnvelopeSearch search;
+	blink_GetGridLine get_gridline;
+	blink_GetStepLine get_stepline;
 } blink_Envelope;
 
 //
 // Chord parameter
 // Can be manipulated in Blockhead using the chord/scale/harmonics editor thing
 //
-typedef struct
-{
-	blink_IntPosition position;
-	blink_Scale scale;
-} blink_ChordBlock;
-
-typedef struct
-{
-	blink_Index count;
-	blink_ChordBlock* blocks;
-} blink_ChordBlocks;
 
 typedef struct
 {
@@ -329,78 +390,6 @@ typedef struct
 {
 	const char* name;
 } blink_Group;
-
-// Manipulators
-//
-// This will be a future Blockhead feature, not sure how it is going
-// to look. Plugins don't need to worry about it yet.
-typedef struct
-{
-	blink_UUID uuid;
-	blink_ID local_id;
-	const char* name;
-} blink_ManipulatorTarget;
-
-typedef struct
-{
-	blink_ID local_id;
-	float value;
-	float glide_in;
-	float glide_out;
-} blink_ManipulatorPoint;
-
-typedef struct
-{
-	blink_Index count;
-	blink_ManipulatorPoint* points;
-} blink_ManipulatorData;
-
-typedef struct
-{
-	blink_ParameterType type;
-	blink_ChordBlocks* blocks;
-} blink_ChordData;
-
-typedef struct
-{
-	blink_ParameterType type;
-	blink_EnvelopePoints points;
-} blink_EnvelopeData;
-
-typedef struct
-{
-	blink_ParameterType type;
-	int value;
-} blink_OptionData;
-
-typedef struct
-{
-	blink_ParameterType type;
-	float value;
-} blink_SliderData;
-
-typedef struct
-{
-	blink_ParameterType type;
-	int value;
-} blink_IntSliderData;
-
-typedef struct
-{
-	blink_ParameterType type;
-	blink_Bool value;
-} blink_ToggleData;
-
-union blink_ParameterData
-{
-	blink_ParameterType type;
-	blink_ChordData chord;
-	blink_EnvelopeData envelope;
-	blink_OptionData option;
-	blink_SliderData slider;
-	blink_IntSliderData int_slider;
-	blink_ToggleData toggle;
-};
 
 #ifdef BLINK_EXPORT
 

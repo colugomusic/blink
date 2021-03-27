@@ -1,6 +1,7 @@
 #pragma once
 
 #include "range_spec.hpp"
+#include "slider.hpp"
 
 namespace blink {
 
@@ -9,19 +10,21 @@ class EnvelopeRange
 public:
 
 	EnvelopeRange(RangeSpec<float> spec)
-		: spec_(spec)
+		:  min_(spec.min)
+		, max_(spec.max)
 	{
 	}
 
-	auto& min() { return spec_.min; }
-	auto& max() { return spec_.max; }
+	auto& min() { return min_; }
+	auto& max() { return max_; }
 
-	const auto& min() const { return spec_.min;	}
-	const auto& max() const { return spec_.max; }
+	const auto& min() const { return min_;	}
+	const auto& max() const { return max_; }
 
 private:
 
-	RangeSpec<float> spec_;
+	Slider<float> min_;
+	Slider<float> max_;
 };
 
 }

@@ -15,6 +15,7 @@ struct SliderSpec
 	std::function<T(T, bool)> increment;
 	std::function<T(T, bool)> decrement;
 	T default_value;
+	int flags = 0;
 };
 
 }
