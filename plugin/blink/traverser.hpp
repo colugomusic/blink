@@ -22,6 +22,11 @@ public:
 
 	using DataOffset = std::int32_t;
 
+	Traverser()
+	{
+		read_position_[kFloatsPerDSPVector - 1] = std::numeric_limits<float>::max();
+	}
+
 	void generate(const blink_Position* block_pos, int n, DataOffset data_offset)
 	{
 		reset_ = 0;
@@ -66,6 +71,8 @@ public:
 	bool is_vector() const { return is_vector_; }
 	const ml::DSPVector& get_read_position() const { return read_position_; }
 	const ml::DSPVectorInt& get_resets() const { return reset_; }
+
+	float get_prev_pos() const { return read_position_[kFloatsPerDSPVector - 1]; }
 
 	void set_reset(int index) { reset_[index] = 1; }
 

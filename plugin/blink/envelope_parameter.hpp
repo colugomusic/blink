@@ -69,7 +69,7 @@ inline float EnvelopeParameter::search(const blink_EnvelopeData* data, blink_Pos
 inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const float* block_positions, blink_FrameCount n, float prev_pos, float* out) const
 {
 	int left = 0;
-	bool reset = true;
+	bool reset = false;
 
 	for (blink_FrameCount i = 0; i < n; i++)
 	{
