@@ -14,6 +14,7 @@ struct SliderSpec
 	std::function<T(T, int, bool)> drag;
 	std::function<T(T, bool)> increment;
 	std::function<T(T, bool)> decrement;
+	std::function<T(T)> stepify;
 	T default_value;
 	int flags = 0;
 };

@@ -88,6 +88,13 @@ inline blink_Slider slider(const Slider<float>& slider)
 
 			return false;
 		};
+
+		out.stepify = [](void* proc_data, float value)
+		{
+			auto slider = (Slider<float>*)(proc_data);
+
+			return slider->spec().stepify ? slider->spec().stepify(value) : value;
+		};
 	}
 
 	return out;
@@ -191,6 +198,7 @@ inline blink_Envelope envelope(EnvelopeParameter& envelope)
 	out.proc_data = &envelope;
 	out.snap_settings = envelope_snap_settings(envelope.snap_settings());
 
+	out.value_slider = slider(envelope.value_slider());
 	out.min = slider(envelope.range().min());
 	out.max = slider(envelope.range().max());
 
@@ -251,6 +259,13 @@ inline blink_Envelope envelope(EnvelopeParameter& envelope)
 		}
 
 		return false;
+	};
+
+	out.stepify = [](void* proc_data, float value)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->stepify(value);
 	};
 
 	return out;

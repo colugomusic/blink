@@ -83,7 +83,8 @@ inline float constrain(float v, float min, float max)
 	return v;
 }
 
-inline auto display_number(float v)
+template <class T>
+inline auto display_number(T v)
 {
 	std::stringstream ss;
 
@@ -94,6 +95,13 @@ inline auto display_number(float v)
 
 namespace amp
 {
+	inline auto stepify(float v) -> float
+	{
+		if (v <= 0.0f) return 0.0f;
+
+		return math::db2linear(math::stepify(math::linear2db(v), 0.1f));
+	}
+
 	inline auto constrain(float v)
 	{
 		const auto db = math::linear2db(v);
@@ -117,7 +125,14 @@ namespace amp
 	{
 		std::stringstream ss;
 
-		ss << math::stepify(float(math::linear2db(v)), 0.01f) << " dB";
+		if (v <= 0.0f)
+		{
+			ss << "Silent";
+		}
+		else
+		{
+			ss << math::stepify(float(math::linear2db(v)), 0.1f) << " dB";
+		}
 
 		return ss.str();
 	}
@@ -126,24 +141,29 @@ namespace amp
 	{
 		if (v <= 0.0f) return math::db2linear(-60.0f);
 
-		return constrain(math::db2linear(std_params::increment<1, 10>(math::linear2db(v), precise)));
+		return constrain(stepify(math::db2linear(std_params::increment<1, 10>(math::linear2db(v), precise))));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(math::db2linear(std_params::decrement<1, 10>(math::linear2db(v), precise)));
+		return constrain(stepify(math::db2linear(std_params::decrement<1, 10>(math::linear2db(v), precise))));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
 		if (v <= 0.0f) v = math::db2linear(-61.0f);
 
-		return constrain(math::db2linear(math::stepify(std_params::drag<1, 10>(math::linear2db(v), amount / 5, precise), 0.01f)));
+		return constrain(stepify(math::db2linear(std_params::drag<1, 10>(math::linear2db(v), amount / 5, precise))));
 	};
 }
 
 namespace pan
 {
+	inline auto stepify(float v) -> float
+	{
+		return math::stepify(v, 0.01f);
+	}
+
 	inline float constrain(float v)
 	{
 		if (v < -1.0f) return -1.0f;
@@ -158,11 +178,11 @@ namespace pan
 
 		if (v < 0.0f)
 		{
-			ss << std::abs(v * 100) << "% L";
+			ss << stepify(std::abs(v * 100)) << "% L";
 		}
 		else if (v > 0.0f)
 		{
-			ss << v * 100 << "% R";
+			ss << stepify(v * 100) << "% R";
 		}
 		else
 		{
@@ -174,17 +194,17 @@ namespace pan
 	
 	inline auto increment(float v, bool precise)
 	{
-		return constrain(math::stepify(std_params::increment<100>(v), 0.01f));
+		return constrain(stepify(std_params::increment<100>(v)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(math::stepify(std_params::decrement<100>(v), 0.01f));
+		return constrain(stepify(std_params::decrement<100>(v)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		return constrain(math::stepify(std_params::drag<500, 5000>(v, amount, precise), 0.01f));
+		return constrain(stepify(std_params::drag<500, 5000>(v, amount, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
@@ -207,6 +227,11 @@ namespace pan
 
 namespace pitch
 {
+	inline auto stepify(float v) -> float
+	{
+		return math::stepify(v, 0.1f);
+	}
+
 	inline float constrain(float v)
 	{
 		if (v < -60.0f) return -60.0f;
@@ -217,51 +242,55 @@ namespace pitch
 
 	inline auto increment(float v, bool precise)
 	{
-		return constrain(math::stepify(std_params::increment<1, 10>(v, precise), 0.1f));
+		return constrain(stepify(std_params::increment<1, 10>(v, precise)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(math::stepify(std_params::decrement<1, 10>(v, precise), 0.1f));
+		return constrain(stepify(std_params::decrement<1, 10>(v, precise)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		return constrain(math::stepify(std_params::drag<1, 10>(v, amount / 5, precise), 0.1f));
+		return constrain(stepify(std_params::drag<1, 10>(v, amount / 5, precise)));
 	};
 }
 
 namespace speed
 {
-	constexpr auto FREEZE = -10.0f;
-	constexpr auto HALF = -1.0f;
-	constexpr auto NORMAL = 0.0f;
-	constexpr auto DOUBLE = 1.0f;
-	static auto TRIPLE = math::speed2linear(3.0f);
+	constexpr auto FREEZE = 0.0f;
+	constexpr auto EIGHTH = 0.125f;
+	constexpr auto QUARTER = 0.25f;
+	constexpr auto HALF = 0.5f;
+	constexpr auto NORMAL = 1.0f;
+	constexpr auto DOUBLE = 2.0f;
+	constexpr auto TRIPLE = 3.0f;
 
 	inline auto constrain(float v)
 	{
-		if (v < -5.0f) return FREEZE;
-		if (v > 5.0f) return 5.0f;
+		if (v < math::linear2speed(-8.0f)) return FREEZE;
+		if (v > 32.0f) return 32.0f;
+
+		return v;
 	};
 
 	inline auto increment(float v, bool precise)
 	{
-		if (v <= 5.0f) return -5.0f;
+		if (v <= FREEZE) return math::linear2speed(-8.0f);
 
-		return constrain(std_params::increment<1, 10>(v, precise));
+		return constrain(math::linear2speed(std_params::increment<1, 10>(math::speed2linear(v), precise)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(std_params::decrement<1, 10>(v, precise));
+		return constrain(math::linear2speed(std_params::decrement<1, 10>(math::speed2linear(v), precise)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		if (v <= 5.0f) v = FREEZE;
+		if (v <= FREEZE) v = math::linear2speed(-8.0f);
 
-		return constrain(std_params::drag<1, 10>(v, amount / 5, precise));
+		return constrain(math::linear2speed(std_params::drag<1, 10>(math::speed2linear(v), amount / 5, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
@@ -271,67 +300,297 @@ namespace speed
 		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
 
 		if (uppercase.find("FREEZE") != std::string::npos) return FREEZE;
-		if (uppercase.find("1/8") != std::string::npos) return -3.0f;
-		if (uppercase.find("1/4") != std::string::npos) return -2.0f;
+		if (uppercase.find("1/8") != std::string::npos) return EIGHTH;
+		if (uppercase.find("1/4") != std::string::npos) return QUARTER;
 		if (uppercase.find("1/2") != std::string::npos) return HALF;
 		if (uppercase.find("NORMAL") != std::string::npos) return NORMAL;
 		if (uppercase.find("DOUBLE") != std::string::npos) return DOUBLE;
+		if (uppercase.find("TRIPLE") != std::string::npos) return TRIPLE;
 
 		auto ff = find_number<float>(str);
 
 		if (!ff) return ff;
 
-		return math::speed2linear(*ff);
+		return *ff;
 	};
 
 	inline auto display(float v)
 	{
+		const auto milestone_hit = [](float value, float milestone)
+		{
+			constexpr auto threshold = 0.001f;
+
+			return value > milestone - threshold && value < milestone + threshold;
+		};
+
 		std::stringstream ss;
 
-		if (v < -0.5f)
+		if (v <= FREEZE)
 		{
 			ss << "Freeze";
 		}
-		else if (v == -3.0f)
+		else if (milestone_hit(v, EIGHTH))
 		{
 			ss << "1/8";
 		}
-		else if (v == -2.0f)
+		else if (milestone_hit(v, QUARTER))
 		{
-			ss << v << "1/4";
+			ss << "1/4";
 		}
-		else if (v == HALF)
+		else if (milestone_hit(v, HALF))
 		{
-			ss << v << "1/2";
+			ss << "1/2";
 		}
-		else if (v == NORMAL)
+		else if (milestone_hit(v, NORMAL))
 		{
-			ss << v << "Normal";
+			ss << "Normal";
 		}
-		else if (v == DOUBLE)
+		else if (milestone_hit(v, DOUBLE))
 		{
-			ss << v << "Double";
+			ss << "Double";
+		}
+		else if (milestone_hit(v, TRIPLE))
+		{
+			ss << "Triple";
 		}
 		else
 		{
-			ss << "x" << math::linear2speed(v);
+			ss << "x" << v;
 		}
 
 		return ss.str();
 	}
 }
 
+namespace sample_offset {
+
+inline auto constrain(int v)
+{
+	return v;
+};
+
+inline auto from_string(const std::string& str) -> std::optional<float>
+{
+	auto db = find_number<float>(str);
+
+	if (!db) return db;
+
+	return math::db2linear(*db);
+};
+
+inline auto increment(int v, bool precise)
+{
+	return v + 1;
+};
+
+inline auto decrement(int v, bool precise)
+{
+	return v - 1;
+};
+
+inline auto drag(int v, int amount, bool precise) -> int
+{
+	return v + (amount / (precise ? 50 : 1));
+};
+
+}
+
+namespace sliders
+{
+
+inline SliderSpec<float> amp()
+{
+	SliderSpec<float> out;
+
+	out.constrain = amp::constrain;
+	out.increment = amp::increment;
+	out.decrement = amp::decrement;
+	out.drag = amp::drag;
+	out.from_string = amp::from_string;
+	out.display_value = amp::display;
+	out.stepify = amp::stepify;
+	out.default_value = 1.0f;
+
+	return out;
+}
+
+inline SliderSpec<float> pan()
+{
+	SliderSpec<float> out;
+
+	out.constrain = pan::constrain;
+	out.increment = pan::increment;
+	out.decrement = pan::decrement;
+	out.drag = pan::drag;
+	out.from_string = pan::from_string;
+	out.display_value = pan::display;
+	out.stepify = pan::stepify;
+	out.default_value = 0.0f;
+
+	return out;
+}
+
+inline SliderSpec<float> pitch()
+{
+	SliderSpec<float> out;
+
+	out.constrain = pitch::constrain;
+	out.increment = pitch::increment;
+	out.decrement = pitch::decrement;
+	out.drag = pitch::drag;
+	out.display_value = display_number<float>;
+	out.from_string = find_number<float>;
+	out.stepify = pitch::stepify;
+	out.default_value = 0.0f;
+
+	return out;
+}
+
+inline SliderSpec<float> speed()
+{
+	SliderSpec<float> out;
+
+	out.constrain = speed::constrain;
+	out.increment = speed::increment;
+	out.decrement = speed::decrement;
+	out.drag = speed::drag;
+	out.display_value = speed::display;
+	out.from_string = speed::from_string;
+	out.default_value = 1.0f;
+
+	return out;
+}
+
+inline SliderSpec<int> sample_offset()
+{
+	SliderSpec<int> out;
+
+	out.constrain = sample_offset::constrain;
+	out.increment = sample_offset::increment;
+	out.decrement = sample_offset::decrement;
+	out.drag = sample_offset::drag;
+	out.display_value = display_number<int>;
+	out.from_string = find_number<int>;
+	out.default_value = 0;
+
+	return out;
+}
+
+namespace parameters {
+
+inline SliderParameterSpec<float> amp()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = BLINK_STD_UUID_SLIDER_AMP;
+	out.name = "Amp";
+
+	out.slider = sliders::amp();
+	out.icon = blink_StdIcon_Amp;
+	out.flags = blink_SliderFlags_MovesDisplay;
+
+	return out;
+}
+
+inline SliderParameterSpec<float> pan()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = BLINK_STD_UUID_SLIDER_PAN;
+	out.name = "Pan";
+
+	out.slider = sliders::pan();
+	out.icon = blink_StdIcon_Pan;
+
+	return out;
+}
+
+inline SliderParameterSpec<float> pitch()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = BLINK_STD_UUID_SLIDER_PITCH;
+	out.name = "Pitch";
+
+	out.slider = sliders::pitch();
+	out.icon = blink_StdIcon_Pitch;
+	out.flags = blink_SliderFlags_MovesDisplay;
+
+	return out;
+}
+
+inline SliderParameterSpec<float> speed()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
+	out.name = "Speed";
+
+	out.slider = sliders::speed();
+	out.flags = blink_SliderFlags_MovesDisplay;
+
+	return out;
+}
+
+inline SliderParameterSpec<int> sample_offset()
+{
+	SliderParameterSpec<int> out;
+
+	out.uuid = BLINK_STD_UUID_SLIDER_SAMPLE_OFFSET;
+	out.name = "Sample Offset";
+
+	out.slider = sliders::sample_offset();
+
+	out.icon = blink_StdIcon_SampleOffset;
+	out.flags = blink_SliderFlags_MovesDisplay;
+
+	return out;
+}
+
+}
+
+} // sliders
+
+namespace toggles {
+
+inline ToggleSpec loop()
+{
+	ToggleSpec out;
+
+	out.uuid = BLINK_STD_UUID_TOGGLE_LOOP;
+	out.name = "Loop";
+	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesDisplay;
+	out.default_value = false;
+
+	return out;
+}
+
+inline ToggleSpec reverse()
+{
+	ToggleSpec out;
+
+	out.uuid = BLINK_STD_UUID_TOGGLE_REVERSE;
+	out.name = "Reverse";
+	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesDisplay;
+	out.default_value = false;
+
+	return out;
+}
+
+} // toggles
+
 namespace envelopes {
 
 // returns the y value at the given block position
 // [search_beg_index] is the index of the point to begin searching from
-// [left] returns the index of the point to the left of the block position
+// [left] returns the index of the point to the left of the block position,
+//        or zero if there isn't one.
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc>
 inline float generic_search(const blink_EnvelopeData* data, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
 {
-	*left = -1;
+	*left = 0;
 
 	const auto clamp = [data](float value)
 	{
@@ -420,8 +679,10 @@ inline EnvelopeSpec amp()
 	out.default_value = 1.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-
 	out.display_value = amp::display;
+	out.stepify = amp::stepify;
+
+	out.value_slider = sliders::amp();
 
 	out.range.min.default_value = 0.0f;
 	out.range.min.display_value = amp::display;
@@ -434,7 +695,7 @@ inline EnvelopeSpec amp()
 	out.range.max.decrement = amp::decrement;
 	out.range.max.drag = amp::drag;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesWaveform;
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesDisplay;
 
 	return out;
 }
@@ -449,8 +710,10 @@ inline EnvelopeSpec pan()
 	out.default_value = 0.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
+	out.stepify = pan::stepify;
 
 	out.display_value = pan::display;
+	out.value_slider = sliders::pan();
 
 	out.range.min.default_value = -1.0f;
 	out.range.min.display_value = pan::display;
@@ -473,15 +736,11 @@ inline EnvelopeSpec pitch()
 	out.default_value = 0.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
+	out.stepify = pitch::stepify;
 
-	out.display_value = [](float v)
-	{
-		std::stringstream ss;
+	out.value_slider = sliders::pitch();
 
-		ss << v;
-
-		return ss.str();
-	};
+	out.display_value = display_number<float>;
 
 	out.get_gridline = [](int index) -> float
 	{
@@ -497,7 +756,7 @@ inline EnvelopeSpec pitch()
 	out.range.min.decrement = pitch::decrement;
 	out.range.min.increment = pitch::increment;
 	out.range.min.default_value = -24.0f;
-	out.range.min.display_value = display_number;
+	out.range.min.display_value = display_number<float>;
 	out.range.min.drag = pitch::drag;
 	out.range.min.from_string = find_number<float>;
 
@@ -505,7 +764,7 @@ inline EnvelopeSpec pitch()
 	out.range.max.decrement = pitch::decrement;
 	out.range.max.increment = pitch::increment;
 	out.range.max.default_value = 24.0f;
-	out.range.max.display_value = display_number;
+	out.range.max.display_value = display_number<float>;
 	out.range.max.drag = pitch::drag;
 	out.range.max.from_string = find_number<float>;
 
@@ -513,13 +772,13 @@ inline EnvelopeSpec pitch()
 	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(decrement<1, 10>(v, precise)); };
 	out.step_size.increment = [out](float v, bool precise) { return out.step_size.constrain(increment<1, 10>(v, precise)); };
 	out.step_size.default_value = 1.0f;
-	out.step_size.display_value = display_number;
+	out.step_size.display_value = display_number<float>;
 	out.step_size.drag = [out](float v, int amount, bool precise) { return out.step_size.constrain(pitch::drag(v, amount, precise)); };
 	out.step_size.from_string = find_number<float>;
 
 	out.default_snap_amount = 1.0f;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesWaveform;
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesDisplay;
 
 	return out;
 }
@@ -536,6 +795,8 @@ inline EnvelopeSpec speed()
 	out.search_forward = generic_search_forward;
 	out.display_value = speed::display;
 
+	out.value_slider = sliders::speed();
+
 	out.get_gridline = [](int index) -> float
 	{
 		return math::linear2speed(float(index));
@@ -549,15 +810,15 @@ inline EnvelopeSpec speed()
 	out.range.min.from_string = speed::from_string;
 	out.range.min.default_value = speed::FREEZE;
 
-	out.range.min.constrain = speed::constrain;
-	out.range.min.increment = speed::increment;
-	out.range.min.decrement = speed::decrement;
-	out.range.min.display_value = speed::display;
-	out.range.min.drag = speed::drag;
-	out.range.min.from_string = speed::from_string;
-	out.range.min.default_value = 2.0f;
+	out.range.max.constrain = speed::constrain;
+	out.range.max.increment = speed::increment;
+	out.range.max.decrement = speed::decrement;
+	out.range.max.display_value = speed::display;
+	out.range.max.drag = speed::drag;
+	out.range.max.from_string = speed::from_string;
+	out.range.max.default_value = 2.0f;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesWaveform;
+	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesDisplay;
 
 	return out;
 }
@@ -661,160 +922,5 @@ inline EnvelopeSpec noise_color()
 }
 
 } // envelopes
-
-namespace sliders
-{
-
-inline SliderParameterSpec<float> amp()
-{
-	SliderParameterSpec<float> out;
-
-	out.uuid = BLINK_STD_UUID_SLIDER_AMP;
-	out.name = "Amp";
-
-	out.slider.constrain = amp::constrain;
-	out.slider.increment = amp::increment;
-	out.slider.decrement = amp::decrement;
-	out.slider.drag = amp::drag;
-	out.slider.from_string = amp::from_string;
-	out.slider.display_value = amp::display;
-	out.slider.default_value = 1.0f;
-	out.icon = blink_StdIcon_Amp;
-	out.flags = blink_SliderFlags_MovesWaveform;
-
-	return out;
-}
-
-inline SliderParameterSpec<float> pan()
-{
-	SliderParameterSpec<float> out;
-
-	out.uuid = BLINK_STD_UUID_SLIDER_PAN;
-	out.name = "Pan";
-
-	out.slider.constrain = pan::constrain;
-	out.slider.increment  = pan::increment;
-	out.slider.decrement = pan::decrement;
-	out.slider.drag = pan::drag;
-	out.slider.from_string = pan::from_string;
-	out.slider.display_value = pan::display;
-	out.slider.default_value = 0.0f;
-	out.icon = blink_StdIcon_Pan;
-
-	return out;
-}
-
-inline SliderParameterSpec<float> pitch()
-{
-	SliderParameterSpec<float> out;
-
-	out.uuid = BLINK_STD_UUID_SLIDER_PITCH;
-	out.name = "Pitch";
-
-	out.slider.constrain = pitch::constrain;
-	out.slider.increment = pitch::increment;
-	out.slider.decrement = pitch::decrement;
-	out.slider.drag = pitch::drag;
-	out.slider.display_value = display_number;
-	out.slider.from_string = find_number<float>;
-	out.slider.default_value = 0.0f;
-	out.icon = blink_StdIcon_Pitch;
-	out.flags = blink_SliderFlags_MovesWaveform;
-
-	return out;
-}
-
-inline SliderParameterSpec<float> speed()
-{
-	SliderParameterSpec<float> out;
-
-	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
-	out.name = "Speed";
-
-	// TODO: finish implementing
-
-	out.slider.display_value = speed::display;
-	out.slider.from_string = find_number<float>;
-	out.slider.default_value = 1.0f;
-	out.flags = blink_SliderFlags_MovesWaveform;
-
-	return out;
-}
-
-inline SliderParameterSpec<int> sample_offset()
-{
-	SliderParameterSpec<int> out;
-
-	out.uuid = BLINK_STD_UUID_SLIDER_SAMPLE_OFFSET;
-	out.name = "Sample Offset";
-
-	// TODO: cleanup
-
-	out.slider.constrain = [](int v)
-	{
-		return v;
-	};
-
-	out.slider.increment = [](int v, bool precise)
-	{
-		return v + 1;
-	};
-
-	out.slider.decrement = [](int v, bool precise)
-	{
-		return v - 1;
-	};
-
-	out.slider.drag = [](int v, int amount, bool precise)
-	{
-		return v + (amount / (precise ? 50 : 1));
-	};
-
-	out.slider.display_value = [](int v)
-	{
-		std::stringstream ss;
-
-		ss << v;
-
-		return ss.str();
-	};
-
-	out.slider.from_string = find_number<int>;
-	out.slider.default_value = 0;
-	out.icon = blink_StdIcon_SampleOffset;
-	out.flags = blink_SliderFlags_MovesWaveform;
-
-	return out;
-}
-
-} // sliders
-
-namespace toggles {
-
-inline ToggleSpec loop()
-{
-	ToggleSpec out;
-
-	out.uuid = BLINK_STD_UUID_TOGGLE_LOOP;
-	out.name = "Loop";
-	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesWaveform;
-	out.default_value = false;
-
-	return out;
-}
-
-inline ToggleSpec reverse()
-{
-	ToggleSpec out;
-
-	out.uuid = BLINK_STD_UUID_TOGGLE_REVERSE;
-	out.name = "Reverse";
-	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesWaveform;
-	out.default_value = false;
-
-	return out;
-}
-
-} // toggles
 
 }}

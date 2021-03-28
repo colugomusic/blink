@@ -179,7 +179,7 @@ inline float Classic::get_position(float transpose, const blink_EnvelopeData* en
 
 	if (!env_pitch || env_pitch->points.count < 1)
 	{
-		const auto ff = math::p_to_ff(std::clamp(0.0f, env_pitch->min, env_pitch->max) + transpose);
+		const auto ff = math::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
 
 		if (derivative) *derivative = ff;
 
@@ -200,9 +200,9 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 {
 	const auto& read_position = traverser.get_read_position();
 
-	if (env_pitch->points.count < 1)
+	if (!env_pitch || env_pitch->points.count < 1)
 	{
-		const auto ff = math::p_to_ff(std::clamp(0.0f, env_pitch->min, env_pitch->max) + transpose);
+		const auto ff = math::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
 
 		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 

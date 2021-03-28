@@ -191,6 +191,7 @@ union blink_ParameterData
 
 typedef float (*blink_Curve)(void* proc_data, float value);
 typedef float (*blink_InverseCurve)(void* proc_data, float value);
+typedef float (*blink_Stepify)(void* proc_data, float value);
 typedef float (*blink_Constrain)(void* proc_data, float value);
 typedef float (*blink_Drag)(void* proc_data, float start_value, int amount, bool precise);
 typedef float (*blink_Increment)(void* proc_data, float value, bool precise);
@@ -216,6 +217,7 @@ typedef struct
 	blink_Drag drag;
 	blink_Increment increment;
 	blink_Decrement decrement;
+	blink_Stepify stepify;
 } blink_Slider;
 
 typedef struct
@@ -249,13 +251,13 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
 	blink_EnvelopeFlags_SnapToDefaultOnly                  = 1 << 5,
 	blink_EnvelopeFlags_NoGridLabels                       = 1 << 6,
-	blink_EnvelopeFlags_MovesWaveform                      = 1 << 7,
+	blink_EnvelopeFlags_MovesDisplay                       = 1 << 7,
 };
 
 enum blink_SliderFlags
 {
 	blink_SliderFlags_None          = 1 << 0,
-	blink_SliderFlags_MovesWaveform = 1 << 1,
+	blink_SliderFlags_MovesDisplay  = 1 << 1,
 };
 
 enum blink_ToggleFlags
@@ -264,7 +266,7 @@ enum blink_ToggleFlags
 	blink_ToggleFlags_ShowButton        = 1 << 1,
 	blink_ToggleFlags_ShowInContextMenu = 1 << 2,
 	blink_ToggleFlags_DefaultEnabled    = 1 << 3,
-	blink_ToggleFlags_MovesWaveform     = 1 << 4,
+	blink_ToggleFlags_MovesDisplay      = 1 << 4,
 };
 
 //
@@ -284,6 +286,7 @@ typedef struct
 	float default_value;
 	int flags; // blink_EnvelopeFlags
 
+	blink_Slider value_slider;
 	blink_Slider min;
 	blink_Slider max;
 	blink_EnvelopeSnapSettings snap_settings;
@@ -293,6 +296,7 @@ typedef struct
 	blink_EnvelopeSearch search;
 	blink_GetGridLine get_gridline;
 	blink_GetStepLine get_stepline;
+	blink_Stepify stepify;
 } blink_Envelope;
 
 //
@@ -332,6 +336,7 @@ typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Slider
 	blink_StdIcon icon;
+	int flags; // blink_SliderFlags
 	blink_Slider slider;
 } blink_SliderParameter;
 
@@ -339,6 +344,7 @@ typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_IntSlider
 	blink_StdIcon icon;
+	int flags; // blink_SliderFlags
 	blink_IntSlider slider;
 } blink_IntSliderParameter;
 

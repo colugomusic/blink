@@ -21,14 +21,16 @@ public:
 	float get_default_value() const { return spec_.default_value; }
 	const char* display_value(float value) const;
 	int get_flags() const { return spec_.flags; }
+	const auto& value_slider() const { return value_slider_; }
+	float stepify(float value) const { return spec_.stepify ? spec_.stepify(value) : value; }
 	std::optional<float> get_gridline(int index) const;
 	std::optional<float> get_stepline(int index, float step_size) const;
 	std::optional<float> from_string(const std::string& str) const { return spec_.from_string(str); }
 
 	// not sure if i need this: float search_ext(const blink_EnvelopePoints* points, blink_Position block_position, int search_beg, int* left);
 	float search(const blink_EnvelopeData* data, blink_Position block_position) const;
-	void search_vec(const blink_EnvelopeData* data, const blink_Position* block_positions, blink_FrameCount n, float* out) const;
-	ml::DSPVector search_vec(const blink_EnvelopeData* data, const blink_Position* block_positions) const;
+	float search_vec(const blink_EnvelopeData* data, const float* block_positions, blink_FrameCount n, float prev_pos, float* out) const;
+	ml::DSPVector search_vec(const blink_EnvelopeData* data, const ml::DSPVector& block_positions, float prev_pos) const;
 
 	EnvelopeRange& range() { return range_; }
 	const EnvelopeRange& range() const { return range_; }
@@ -38,6 +40,7 @@ private:
 
 	EnvelopeSpec spec_;
 	EnvelopeRange range_;
+	Slider<float> value_slider_;
 	EnvelopeSnapSettings snap_settings_;
 	mutable std::string display_value_buffer_;
 };
@@ -63,11 +66,10 @@ inline float EnvelopeParameter::search(const blink_EnvelopeData* data, blink_Pos
 	return spec_.search_binary(data, spec_.default_value, block_position, 0, &left);
 }
 
-inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const blink_Position* block_positions, blink_FrameCount n, float* out) const
+inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const float* block_positions, blink_FrameCount n, float prev_pos, float* out) const
 {
 	int left = 0;
 	bool reset = true;
-	blink_Position prev_pos = 0;
 
 	for (blink_FrameCount i = 0; i < n; i++)
 	{
@@ -93,13 +95,15 @@ inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const 
 
 		prev_pos = pos;
 	}
+
+	return prev_pos;
 }
 
-inline ml::DSPVector EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const blink_Position* block_positions) const
+inline ml::DSPVector EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const ml::DSPVector& block_positions, float prev_pos) const
 {
 	ml::DSPVector out;
 
-	search_vec(data, block_positions, kFloatsPerDSPVector, out.getBuffer());
+	search_vec(data, block_positions.getConstBuffer(), kFloatsPerDSPVector, prev_pos, out.getBuffer());
 
 	return out;
 }
@@ -109,6 +113,7 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 	, spec_(spec)
 	, range_(spec.range)
 	, snap_settings_{ spec.step_size, spec.default_snap_amount }
+	, value_slider_(spec.value_slider)
 {
 }
 
