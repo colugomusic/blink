@@ -97,7 +97,7 @@ namespace amp
 {
 	inline auto stepify(float v) -> float
 	{
-		if (v <= 0.0f) return 0.0f;
+		if (v <= 0.00001f) return 0.0f;
 
 		return math::db2linear(math::stepify(math::linear2db(v), 0.1f));
 	}
