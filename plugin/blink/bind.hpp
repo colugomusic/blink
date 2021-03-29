@@ -268,6 +268,13 @@ inline blink_Envelope envelope(EnvelopeParameter& envelope)
 		return envelope->stepify(value);
 	};
 
+	out.snap_value = [](void* proc_data, float value, float step_size, float snap_amount)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->snap_value(value, step_size, snap_amount);
+	};
+
 	return out;
 }
 
@@ -298,6 +305,7 @@ inline blink_SliderParameter slider_parameter(SliderParameter<float>& slider_par
 
 	out.slider = slider(slider_parameter.slider());
 	out.icon = slider_parameter.spec().icon;
+	out.flags = slider_parameter.spec().flags;
 
 	return out;
 }
@@ -309,6 +317,7 @@ inline blink_IntSliderParameter slider_parameter(SliderParameter<int>& slider_pa
 	out.parameter_type = blink_ParameterType_IntSlider;
 	out.slider = slider(slider_parameter.slider());
 	out.icon = slider_parameter.spec().icon;
+	out.flags = slider_parameter.spec().flags;
 
 	return out;
 }

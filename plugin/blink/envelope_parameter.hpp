@@ -23,6 +23,12 @@ public:
 	int get_flags() const { return spec_.flags; }
 	const auto& value_slider() const { return value_slider_; }
 	float stepify(float value) const { return spec_.stepify ? spec_.stepify(value) : value; }
+
+	float snap_value(float value, float step_size, float snap_amount) const
+	{
+		return spec_.snap_value ? spec_.snap_value(value, step_size, snap_amount) : stepify(value);
+	}
+
 	std::optional<float> get_gridline(int index) const;
 	std::optional<float> get_stepline(int index, float step_size) const;
 	std::optional<float> from_string(const std::string& str) const { return spec_.from_string(str); }

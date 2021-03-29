@@ -93,6 +93,32 @@ inline auto display_number(T v)
 	return ss.str();
 };
 
+inline auto snap_value(float v, float step_size, float snap_amount)
+{
+	if (snap_amount <= 0.0f) return v;
+
+	if (snap_amount >= 1.0f)
+	{
+		v /= step_size;
+		v = std::round(v);
+		v *= step_size;
+
+		return v;
+	}
+
+	const auto up = std::ceil((v / step_size) + 0.0001f) * step_size;
+	const auto down = std::floor(v / step_size) * step_size;
+	const auto x = math::inverse_lerp(down, up, v);
+	const auto t = x * 2.0f;
+	const auto i = 1.0f + (std::pow(snap_amount, 4.0f) * 99.0f);
+	const auto curve =
+		t < 1.0f
+		? 1.0f - (0.5f * (std::pow(1.0f - t, 1.0f / i) + 1.0f))
+		: 0.5f * (std::pow(t - 1.0f, 1.0f / i) + 1.0f);
+
+	return math::lerp(down, up, curve);
+}
+
 namespace amp
 {
 	inline auto stepify(float v) -> float
@@ -230,6 +256,11 @@ namespace pitch
 	inline auto stepify(float v) -> float
 	{
 		return math::stepify(v, 0.1f);
+	}
+
+	inline auto snap_value(float v, float step_size, float snap_amount)
+	{
+		return stepify(std_params::snap_value(v, step_size, snap_amount));
 	}
 
 	inline float constrain(float v)
@@ -737,6 +768,7 @@ inline EnvelopeSpec pitch()
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
 	out.stepify = pitch::stepify;
+	out.snap_value = pitch::snap_value;
 
 	out.value_slider = sliders::pitch();
 

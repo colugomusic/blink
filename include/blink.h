@@ -23,7 +23,7 @@ typedef const char* blink_UUID;
 typedef uint32_t blink_SR;
 typedef uint8_t blink_BitDepth;
 typedef double blink_Position;
-typedef uint32_t blink_IntPosition;
+typedef int32_t blink_IntPosition;
 typedef int8_t blink_Bool;
 typedef uint32_t blink_Scale;
 
@@ -192,6 +192,7 @@ union blink_ParameterData
 typedef float (*blink_Curve)(void* proc_data, float value);
 typedef float (*blink_InverseCurve)(void* proc_data, float value);
 typedef float (*blink_Stepify)(void* proc_data, float value);
+typedef float (*blink_SnapValue)(void* proc_data, float value, float step_size, float snap_amount);
 typedef float (*blink_Constrain)(void* proc_data, float value);
 typedef float (*blink_Drag)(void* proc_data, float start_value, int amount, bool precise);
 typedef float (*blink_Increment)(void* proc_data, float value, bool precise);
@@ -297,6 +298,7 @@ typedef struct
 	blink_GetGridLine get_gridline;
 	blink_GetStepLine get_stepline;
 	blink_Stepify stepify;
+	blink_SnapValue snap_value;
 } blink_Envelope;
 
 //

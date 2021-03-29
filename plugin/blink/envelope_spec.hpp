@@ -16,6 +16,7 @@ struct EnvelopeSpec : public ParameterSpec
 	std::function<float(int index)> get_gridline;
 	std::function<float(int index, float step_size)> get_stepline;
 	std::function<float(float)> stepify;
+	std::function<float(float, float, float)> snap_value;
 	RangeSpec<float> range;
 	SliderSpec<float> step_size;
 	SliderSpec<float> value_slider;

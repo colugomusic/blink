@@ -72,7 +72,7 @@ public:
 	const ml::DSPVector& get_read_position() const { return read_position_; }
 	const ml::DSPVectorInt& get_resets() const { return reset_; }
 
-	float get_prev_pos() const { return read_position_[kFloatsPerDSPVector - 1]; }
+	float get_last_pos() const { return read_position_[kFloatsPerDSPVector - 1]; }
 
 	void set_reset(int index) { reset_[index] = 1; }
 
@@ -98,7 +98,7 @@ public:
 	{
 		if (ptr != last_ptr_)
 		{
-			traverser->set_reset(0);
+			traverser->set_reset(1);
 		}
 
 		last_ptr_ = ptr;

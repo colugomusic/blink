@@ -166,7 +166,7 @@ class Classic
 public:
 
 	float get_position(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivative = nullptr);
-	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivatives = nullptr);
+	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, float* derivatives = nullptr);
 
 private:
 
@@ -196,7 +196,7 @@ inline float Classic::get_position(float transpose, const blink_EnvelopeData* en
 	return calculator_.calculate(transpose, env_pitch, read_position[0], derivative) - sample_offset;
 }
 
-inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivatives)
+inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, float* derivatives)
 {
 	const auto& read_position = traverser.get_read_position();
 
@@ -213,7 +213,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 
 	ml::DSPVector out;
 
-	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	for (int i = 0; i < count; i++)
 	{
 		if (resets[i] > 0)
 		{
