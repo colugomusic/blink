@@ -260,6 +260,7 @@ enum blink_SliderFlags
 {
 	blink_SliderFlags_None          = 1 << 0,
 	blink_SliderFlags_MovesDisplay  = 1 << 1,
+	blink_SliderFlags_NonGlobal     = 1 << 2,
 };
 
 enum blink_ToggleFlags
@@ -299,6 +300,7 @@ typedef bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
 typedef bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
 typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData* data, float block_position);
 typedef blink_Index (*blink_GetOption)(void* proc_data, blink_Index index);
+typedef blink_Index (*blink_GetSlider)(void* proc_data, blink_Index index);
 
 typedef struct
 {
@@ -309,6 +311,7 @@ typedef struct
 	float default_value;
 	int flags; // blink_EnvelopeFlags
 
+	int sliders_count;
 	int options_count;
 
 	blink_Slider value_slider;
@@ -324,6 +327,7 @@ typedef struct
 	blink_Stepify stepify;
 	blink_SnapValue snap_value;
 	blink_GetOption get_option;
+	blink_GetSlider get_slider;
 } blink_Envelope;
 
 //

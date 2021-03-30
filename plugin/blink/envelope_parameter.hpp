@@ -35,6 +35,8 @@ public:
 	std::optional<float> from_string(const std::string& str) const { return spec_.from_string(str); }
 	int get_options_count() const { return int(options_.size()); }
 	blink_Index get_option(blink_Index index) const { return options_[index]; }
+	int get_sliders_count() const { return int(sliders_.size()); }
+	blink_Index get_slider(blink_Index index) const { return sliders_[index]; }
 
 	// not sure if i need this: float search_ext(const blink_EnvelopePoints* points, blink_Position block_position, int search_beg, int* left);
 	float search(const blink_EnvelopeData* data, blink_Position block_position) const;
@@ -51,6 +53,7 @@ private:
 	EnvelopeRange range_;
 	Slider<float> value_slider_;
 	std::vector<blink_Index> options_;
+	std::vector<blink_Index> sliders_;
 	EnvelopeSnapSettings snap_settings_;
 	mutable std::string display_value_buffer_;
 };
@@ -128,6 +131,11 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 	for (const auto& option_spec : spec.options)
 	{
 		options_.push_back(option_spec);
+	}
+
+	for (const auto& slider_spec : spec.sliders)
+	{
+		sliders_.push_back(slider_spec);
 	}
 }
 

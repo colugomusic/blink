@@ -184,23 +184,52 @@ inline auto display(float v)
 {
 	std::stringstream ss;
 
-	ss << v * 100.0f << "%";
+	ss << stepify(v * 100.0f) << "%";
 
 	return ss.str();
 }
+
+inline auto from_string(const std::string& str) -> std::optional<float>
+{
+	auto value = find_number<float>(str);
+
+	if (!value) return std::optional<float>();
+
+	return (*value / 100.0f);
+};
 
 }
 
 namespace percentage_bipolar {
 
+inline auto stepify(float v) -> float
+{
+	return math::stepify(v, 0.0005f);
+}
+
 inline auto display(float v)
 {
 	std::stringstream ss;
 
-	ss << (v - 0.5f) * 200.0f << "%";
+	ss << percentage::stepify((v - 0.5f) * 200.0f) << "%";
 
 	return ss.str();
 }
+
+inline auto increment(float v, bool precise)
+{
+	return percentage::constrain(stepify(std_params::increment<200, 2000>(v, precise)));
+};
+
+inline auto decrement(float v, bool precise)
+{
+	return percentage::constrain(stepify(std_params::decrement<200, 2000>(v, precise)));
+};
+
+inline auto drag(float v, int amount, bool precise) -> float
+{
+	return percentage::constrain(stepify(std_params::drag<200, 2000>(v, amount / 5, precise)));
+};
 
 }
 
@@ -601,7 +630,7 @@ inline SliderSpec<float> percentage()
 	out.decrement = percentage::decrement;
 	out.drag = percentage::drag;
 	out.display_value = percentage::display;
-	out.from_string = find_positive_number<float>;
+	out.from_string = percentage::from_string;
 	out.default_value = 0;
 
 	return out;
@@ -612,11 +641,11 @@ inline SliderSpec<float> percentage_bipolar()
 	SliderSpec<float> out;
 
 	out.constrain = percentage::constrain;
-	out.increment = percentage::increment;
-	out.decrement = percentage::decrement;
-	out.drag = percentage::drag;
+	out.increment = percentage_bipolar::increment;
+	out.decrement = percentage_bipolar::decrement;
+	out.drag = percentage_bipolar::drag;
 	out.display_value = percentage_bipolar::display;
-	out.from_string = find_number<float>;
+	out.from_string = percentage::from_string;
 	out.default_value = 0;
 
 	return out;
@@ -736,7 +765,7 @@ inline OptionSpec noise_mode()
 	out.default_index = 0;
 	out.options = {
 		"Multiply",
-		"Add",
+		"Mix",
 	};
 
 	return out;
@@ -1070,6 +1099,7 @@ inline EnvelopeSpec noise_color()
 	out.range.max.default_value = 1.0f;
 	out.range.max.display_value = speed::display;
 	out.display_value = percentage_bipolar::display;
+	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }

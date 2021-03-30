@@ -223,12 +223,20 @@ inline blink_Envelope envelope(const EnvelopeParameter& envelope)
 	out.min = slider(envelope.range().min());
 	out.max = slider(envelope.range().max());
 	out.options_count = envelope.get_options_count();
+	out.sliders_count = envelope.get_sliders_count();
 
 	out.get_option = [](void* proc_data, blink_Index index)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
 		return envelope->get_option(index);
+	};
+
+	out.get_slider = [](void* proc_data, blink_Index index)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->get_slider(index);
 	};
 
 	out.get_gridline = [](void* proc_data, int index, float* out)
