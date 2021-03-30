@@ -150,6 +150,7 @@ typedef struct
 {
 	blink_ParameterType type;
 	blink_EnvelopePoints points;
+	blink_Index* options;
 	float min;
 	float max;
 } blink_EnvelopeData;
@@ -157,7 +158,7 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	int value;
+	blink_Index index;
 } blink_OptionData;
 
 typedef struct
@@ -248,7 +249,7 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_None                               = 1 << 0,
 	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1,
 	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
-	blink_EnvelopeFlags_DefaultEnabled                     = 1 << 3,
+	blink_EnvelopeFlags_DefaultDisabled                    = 1 << 3,
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
 	blink_EnvelopeFlags_SnapToDefaultOnly                  = 1 << 5,
 	blink_EnvelopeFlags_NoGridLabels                       = 1 << 6,
@@ -271,12 +272,33 @@ enum blink_ToggleFlags
 };
 
 //
+// Option parameter
+// Will be displayed in Blockhead as a drop-down menu or radio buttons or something
+//
+typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
+
+typedef struct
+{
+	enum blink_ParameterType parameter_type; // blink_ParameterType_Option
+	blink_Index max_index;
+	blink_Index default_index;
+
+	void* proc_data;
+
+	// Returns the display text for the option index
+	blink_Option_GetText get_text;
+} blink_Option;
+
+struct blink_Parameter_;
+
+//
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
 typedef bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
 typedef bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
 typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData* data, float block_position);
+typedef blink_Index (*blink_GetOption)(void* proc_data, blink_Index index);
 
 typedef struct
 {
@@ -286,6 +308,8 @@ typedef struct
 
 	float default_value;
 	int flags; // blink_EnvelopeFlags
+
+	int options_count;
 
 	blink_Slider value_slider;
 	blink_Slider min;
@@ -299,6 +323,7 @@ typedef struct
 	blink_GetStepLine get_stepline;
 	blink_Stepify stepify;
 	blink_SnapValue snap_value;
+	blink_GetOption get_option;
 } blink_Envelope;
 
 //
@@ -310,24 +335,6 @@ typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
 } blink_Chord;
-
-//
-// Option parameter
-// Will be displayed in Blockhead as a drop-down menu or radio buttons or something
-//
-typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index value);
-
-typedef struct
-{
-	enum blink_ParameterType parameter_type; // blink_ParameterType_Option
-	blink_IntRange range;
-	blink_Index default_value;
-
-	void* proc_data;
-
-	// Returns the display text for the option index
-	blink_Option_GetText get_text;
-} blink_Option;
 
 //
 // Slider parameter
@@ -377,7 +384,7 @@ union blink_ParameterObject
 	blink_Toggle toggle;
 };
 
-typedef struct
+typedef struct blink_Parameter_
 {
 	// Generators can share parameter UUIDs to allow the user to switch back and forth
 	// between different generators without losing modulation data (for example the

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include "option_spec.hpp"
 #include "parameter_spec.hpp"
 #include "range_spec.hpp"
 #include <blink.h>
@@ -20,6 +21,7 @@ struct EnvelopeSpec : public ParameterSpec
 	RangeSpec<float> range;
 	SliderSpec<float> step_size;
 	SliderSpec<float> value_slider;
+	std::vector<blink_Index> options;
 	float default_value = 0.0f;
 	float default_snap_amount = 0.0f;
 	int flags = 0;

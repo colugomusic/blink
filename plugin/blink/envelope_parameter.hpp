@@ -5,6 +5,7 @@
 #include "envelope_search.hpp"
 #include "envelope_snap_settings.hpp"
 #include "parameter.hpp"
+#include "option_parameter.hpp"
 #include "traverser.hpp"
 #include "math.hpp"
 
@@ -32,6 +33,8 @@ public:
 	std::optional<float> get_gridline(int index) const;
 	std::optional<float> get_stepline(int index, float step_size) const;
 	std::optional<float> from_string(const std::string& str) const { return spec_.from_string(str); }
+	int get_options_count() const { return int(options_.size()); }
+	blink_Index get_option(blink_Index index) const { return options_[index]; }
 
 	// not sure if i need this: float search_ext(const blink_EnvelopePoints* points, blink_Position block_position, int search_beg, int* left);
 	float search(const blink_EnvelopeData* data, blink_Position block_position) const;
@@ -47,6 +50,7 @@ private:
 	EnvelopeSpec spec_;
 	EnvelopeRange range_;
 	Slider<float> value_slider_;
+	std::vector<blink_Index> options_;
 	EnvelopeSnapSettings snap_settings_;
 	mutable std::string display_value_buffer_;
 };
@@ -121,6 +125,10 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 	, snap_settings_{ spec.step_size, spec.default_snap_amount }
 	, value_slider_(spec.value_slider)
 {
+	for (const auto& option_spec : spec.options)
+	{
+		options_.push_back(option_spec);
+	}
 }
 
 inline const char* EnvelopeParameter::display_value(float value) const

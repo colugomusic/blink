@@ -15,6 +15,8 @@
 namespace blink {
 namespace bind {
 
+blink_Parameter parameter(const Parameter& parameter);
+
 inline blink_IntRange range(const Range<int>& range)
 {
 	blink_IntRange out;
@@ -179,7 +181,7 @@ inline blink_Group group(const Group& group)
 	return out;
 }
 
-inline blink_Chord chord(ChordParameter& chord)
+inline blink_Chord chord(const ChordParameter& chord)
 {
 	blink_Chord out;
 
@@ -188,19 +190,46 @@ inline blink_Chord chord(ChordParameter& chord)
 	return out;
 }
 
-inline blink_Envelope envelope(EnvelopeParameter& envelope)
+inline blink_Option option(const OptionParameter& option)
+{
+	blink_Option out;
+
+	out.parameter_type = option.get_type();
+	out.max_index = option.get_max_index();
+	out.default_index = option.get_default_index();
+	out.proc_data = (void*)(&option);
+
+	out.get_text = [](void* proc_data, blink_Index index)
+	{
+		auto option = (const OptionParameter*)(proc_data);
+
+		return option->get_text(index);
+	};
+
+	return out;
+}
+
+inline blink_Envelope envelope(const EnvelopeParameter& envelope)
 {
 	blink_Envelope out;
 
 	out.parameter_type = blink_ParameterType_Envelope;
 	out.default_value = envelope.get_default_value();
 	out.flags = envelope.get_flags();
-	out.proc_data = &envelope;
+	out.proc_data = (void*)(&envelope);
 	out.snap_settings = envelope_snap_settings(envelope.snap_settings());
 
 	out.value_slider = slider(envelope.value_slider());
 	out.min = slider(envelope.range().min());
 	out.max = slider(envelope.range().max());
+	out.options_count = envelope.get_options_count();
+
+	out.get_option = [](void* proc_data, blink_Index index)
+	{
+		auto envelope = (EnvelopeParameter*)(proc_data);
+
+		return envelope->get_option(index);
+	};
 
 	out.get_gridline = [](void* proc_data, int index, float* out)
 	{
@@ -278,26 +307,7 @@ inline blink_Envelope envelope(EnvelopeParameter& envelope)
 	return out;
 }
 
-inline blink_Option option(OptionParameter& option)
-{
-	blink_Option out;
-
-	out.parameter_type = blink_ParameterType_Option;
-	out.default_value = option.get_default_value();
-	out.proc_data = &option;
-
-	out.get_text = [](void* proc_data, blink_Index index)
-	{
-		auto option = (OptionParameter*)(proc_data);
-
-		return option->get_text(index);
-	};
-
-	return out;
-}
-
-
-inline blink_SliderParameter slider_parameter(SliderParameter<float>& slider_parameter)
+inline blink_SliderParameter slider_parameter(const SliderParameter<float>& slider_parameter)
 {
 	blink_SliderParameter out;
 
@@ -310,7 +320,7 @@ inline blink_SliderParameter slider_parameter(SliderParameter<float>& slider_par
 	return out;
 }
 
-inline blink_IntSliderParameter slider_parameter(SliderParameter<int>& slider_parameter)
+inline blink_IntSliderParameter slider_parameter(const SliderParameter<int>& slider_parameter)
 {
 	blink_IntSliderParameter out;
 
@@ -322,7 +332,7 @@ inline blink_IntSliderParameter slider_parameter(SliderParameter<int>& slider_pa
 	return out;
 }
 
-inline blink_Toggle toggle(ToggleParameter& toggle)
+inline blink_Toggle toggle(const ToggleParameter& toggle)
 {
 	blink_Toggle out;
 
@@ -334,7 +344,7 @@ inline blink_Toggle toggle(ToggleParameter& toggle)
 	return out;
 }
 
-inline blink_Parameter parameter(Parameter& parameter)
+inline blink_Parameter parameter(const Parameter& parameter)
 {
 	blink_Parameter out;
 
@@ -348,37 +358,37 @@ inline blink_Parameter parameter(Parameter& parameter)
 	{
 		case blink_ParameterType_Chord:
 		{
-			out.parameter.chord = chord(*static_cast<ChordParameter*>(&parameter));
+			out.parameter.chord = chord(*static_cast<const ChordParameter*>(&parameter));
 			break;
 		}
 
 		case blink_ParameterType_Envelope:
 		{
-			out.parameter.envelope = envelope(*static_cast<EnvelopeParameter*>(&parameter));
+			out.parameter.envelope = envelope(*static_cast<const EnvelopeParameter*>(&parameter));
 			break;
 		}
 
 		case blink_ParameterType_Option:
 		{
-			out.parameter.option = option(*static_cast<OptionParameter*>(&parameter));
+			out.parameter.option = option(*static_cast<const OptionParameter*>(&parameter));
 			break;
 		}
 
 		case blink_ParameterType_Slider:
 		{
-			out.parameter.slider = slider_parameter(*static_cast<SliderParameter<float>*>(&parameter));
+			out.parameter.slider = slider_parameter(*static_cast<const SliderParameter<float>*>(&parameter));
 			break;
 		}
 
 		case blink_ParameterType_IntSlider:
 		{
-			out.parameter.int_slider = slider_parameter(*static_cast<SliderParameter<int>*>(&parameter));
+			out.parameter.int_slider = slider_parameter(*static_cast<const SliderParameter<int>*>(&parameter));
 			break;
 		}
 
 		case blink_ParameterType_Toggle:
 		{
-			out.parameter.toggle = toggle(*static_cast<ToggleParameter*>(&parameter));
+			out.parameter.toggle = toggle(*static_cast<const ToggleParameter*>(&parameter));
 			break;
 		}
 	}

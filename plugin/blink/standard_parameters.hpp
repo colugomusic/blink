@@ -35,6 +35,17 @@ std::optional<int> find_number<int>(const std::string& str)
 }
 
 template <>
+std::optional<float> find_positive_number<float>(const std::string& str)
+{
+	std::regex r("([\\.\\d]+)");
+	std::smatch match;
+
+	if (!std::regex_search(str, match, r)) return std::optional<float>();
+
+	return std::stof(match[0].str());
+}
+
+template <>
 std::optional<int> find_positive_number<int>(const std::string& str)
 {
 	std::regex r("([\\d]+)");
@@ -93,6 +104,21 @@ inline auto display_number(T v)
 	return ss.str();
 };
 
+inline auto stepify_0_1(float v) -> float
+{
+	return math::stepify(v, 0.1f);
+}
+
+inline auto stepify_0_01(float v) -> float
+{
+	return math::stepify(v, 0.01f);
+}
+
+inline auto stepify_0_001(float v) -> float
+{
+	return math::stepify(v, 0.001f);
+}
+
 inline auto snap_value(float v, float step_size, float snap_amount)
 {
 	if (snap_amount <= 0.0f) return v;
@@ -117,6 +143,65 @@ inline auto snap_value(float v, float step_size, float snap_amount)
 		: 0.5f * (std::pow(t - 1.0f, 1.0f / i) + 1.0f);
 
 	return math::lerp(down, up, curve);
+}
+
+namespace percentage {
+
+inline auto stepify(float v) -> float
+{
+	return stepify_0_001(v);
+}
+
+inline auto snap_value(float v, float step_size, float snap_amount)
+{
+	return stepify(std_params::snap_value(v, step_size, snap_amount));
+}
+
+inline float constrain(float v)
+{
+	if (v < 0.0f) return 0.0f;
+	if (v > 1.0f) return 1.0f;
+
+	return v;
+};
+
+inline auto increment(float v, bool precise)
+{
+	return constrain(stepify(std_params::increment<100, 1000>(v, precise)));
+};
+
+inline auto decrement(float v, bool precise)
+{
+	return constrain(stepify(std_params::decrement<100, 1000>(v, precise)));
+};
+
+inline auto drag(float v, int amount, bool precise) -> float
+{
+	return constrain(stepify(std_params::drag<100, 1000>(v, amount / 5, precise)));
+};
+
+inline auto display(float v)
+{
+	std::stringstream ss;
+
+	ss << v * 100.0f << "%";
+
+	return ss.str();
+}
+
+}
+
+namespace percentage_bipolar {
+
+inline auto display(float v)
+{
+	std::stringstream ss;
+
+	ss << (v - 0.5f) * 200.0f << "%";
+
+	return ss.str();
+}
+
 }
 
 namespace amp
@@ -187,7 +272,7 @@ namespace pan
 {
 	inline auto stepify(float v) -> float
 	{
-		return math::stepify(v, 0.01f);
+		return stepify_0_01(v);
 	}
 
 	inline float constrain(float v)
@@ -255,7 +340,7 @@ namespace pitch
 {
 	inline auto stepify(float v) -> float
 	{
-		return math::stepify(v, 0.1f);
+		return stepify_0_1(v);
 	}
 
 	inline auto snap_value(float v, float step_size, float snap_amount)
@@ -507,6 +592,36 @@ inline SliderSpec<int> sample_offset()
 	return out;
 }
 
+inline SliderSpec<float> percentage()
+{
+	SliderSpec<float> out;
+
+	out.constrain = percentage::constrain;
+	out.increment = percentage::increment;
+	out.decrement = percentage::decrement;
+	out.drag = percentage::drag;
+	out.display_value = percentage::display;
+	out.from_string = find_positive_number<float>;
+	out.default_value = 0;
+
+	return out;
+}
+
+inline SliderSpec<float> percentage_bipolar()
+{
+	SliderSpec<float> out;
+
+	out.constrain = percentage::constrain;
+	out.increment = percentage::increment;
+	out.decrement = percentage::decrement;
+	out.drag = percentage::drag;
+	out.display_value = percentage_bipolar::display;
+	out.from_string = find_number<float>;
+	out.default_value = 0;
+
+	return out;
+}
+
 namespace parameters {
 
 inline SliderParameterSpec<float> amp()
@@ -609,6 +724,25 @@ inline ToggleSpec reverse()
 }
 
 } // toggles
+
+namespace options {
+
+inline OptionSpec noise_mode()
+{
+	OptionSpec out;
+
+	out.uuid = "e426cc55-306d-4561-99bc-003bb7707a93";
+	out.name = "Noise Mode";
+	out.default_index = 0;
+	out.options = {
+		"Multiply",
+		"Add",
+	};
+
+	return out;
+}
+
+}
 
 namespace envelopes {
 
@@ -726,7 +860,7 @@ inline EnvelopeSpec amp()
 	out.range.max.decrement = amp::decrement;
 	out.range.max.drag = amp::drag;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesDisplay;
+	out.flags = blink_EnvelopeFlags_MovesDisplay;
 
 	return out;
 }
@@ -752,7 +886,7 @@ inline EnvelopeSpec pan()
 	out.range.max.default_value = 1.0f;
 	out.range.max.display_value = pan::display;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_SnapToDefaultOnly | blink_EnvelopeFlags_NoGridLabels;
+	out.flags = blink_EnvelopeFlags_SnapToDefaultOnly | blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }
@@ -810,7 +944,7 @@ inline EnvelopeSpec pitch()
 
 	out.default_snap_amount = 1.0f;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesDisplay;
+	out.flags = blink_EnvelopeFlags_MovesDisplay;
 
 	return out;
 }
@@ -850,7 +984,7 @@ inline EnvelopeSpec speed()
 	out.range.max.from_string = speed::from_string;
 	out.range.max.default_value = 2.0f;
 
-	out.flags = blink_EnvelopeFlags_DefaultEnabled | blink_EnvelopeFlags_MovesDisplay;
+	out.flags = blink_EnvelopeFlags_MovesDisplay;
 
 	return out;
 }
@@ -901,34 +1035,18 @@ inline EnvelopeSpec noise_amount()
 	out.uuid = "29d5ecb5-cb5d-4f19-afd3-835dd805682a";
 	out.name = "Noise Amount";
 
-	// TODO:
+	out.default_value = 0.0f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+	out.stepify = percentage::stepify;
 
-	//out.display_value = [](float v)
-	//{
-	//	std::stringstream ss;
+	out.value_slider = sliders::percentage();
 
-	//	ss << v;
-
-	//	return ss.str();
-	//};
-
-	//out.range.min_range.range.min = 0.0f;
-	//out.range.min_range.range.max = 0.0f;
-	//out.range.min_range.value = 0.0f;
-	//out.range.min_range.step_size = 0.0f;
-
-	//out.range.max_range.range.min = 1.0f;
-	//out.range.max_range.range.max = 1.0f;
-	//out.range.max_range.value = 1.0f;
-	//out.range.max_range.step_size = 0.0;
-
-	//out.step_size.range.min = 0.0f;
-	//out.step_size.range.max = 0.0f;
-	//out.step_size.value = 0.0f;
-	//out.step_size.step_size = 0.0f;
-
-	//out.default_value = 0.0f;
-	//out.default_snap_amount = 0.0f;
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = percentage::display;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = speed::display;
+	out.display_value = percentage::display;
 
 	return out;
 }
@@ -940,15 +1058,18 @@ inline EnvelopeSpec noise_color()
 	out.uuid = "30100123-7343-4386-9ed2-f913b9e1e571";
 	out.name = "Noise Color";
 
-	// TODO:
+	out.default_value = 0.5f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+	out.stepify = percentage::stepify;
 
-	//out.step_size.range.min = 1.0f;
-	//out.step_size.range.max = 1.0f;
-	//out.step_size.value = 1.0f;
-	//out.step_size.step_size = 0.0f;
+	out.value_slider = sliders::percentage_bipolar();
 
-	//out.default_value = 0.0f;
-	//out.default_snap_amount = 0.0f;
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = percentage_bipolar::display;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = speed::display;
+	out.display_value = percentage_bipolar::display;
 
 	return out;
 }

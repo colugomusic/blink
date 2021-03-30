@@ -27,6 +27,7 @@ public:
 	static const blink_SliderData* get_slider_data(const blink_ParameterData* data, int index);
 	static const blink_IntSliderData* get_int_slider_data(const blink_ParameterData* data, int index);
 	static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data, int index);
+	static const blink_OptionData* get_option_data(const blink_ParameterData* data, int index);
 
 protected:
 
@@ -65,6 +66,11 @@ inline const blink_IntSliderData* Plugin::get_int_slider_data(const blink_Parame
 inline const blink_ToggleData* Plugin::get_toggle_data(const blink_ParameterData* data, int index)
 {
 	return data ? &data[index].toggle : nullptr;
+}
+
+inline const blink_OptionData* Plugin::get_option_data(const blink_ParameterData* data, int index)
+{
+	return data ? &data[index].option : nullptr;
 }
 
 inline int Plugin::add_group(std::string name)

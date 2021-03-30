@@ -13,50 +13,26 @@ public:
 
 	blink_ParameterType get_type() const override { return blink_ParameterType_Option; }
 
-	blink_Error set(blink_Index value);
-	blink_Index get() const;
-	const char* get_text(blink_Index value) const;
-	blink_Index get_default_value() const;
+	const char* get_text(blink_Index index) const;
+	blink_Index get_max_index() const { return blink_Index(options_.size() - 1); }
+	blink_Index get_default_index() const { return default_index_; }
 
 private:
 
-	std::map<int, std::string> options_;
-	std::atomic<blink_Index> current_value_;
-	blink_Index default_value_;
+	std::vector<std::string> options_;
+	blink_Index default_index_;
 };
 
 inline OptionParameter::OptionParameter(OptionSpec spec)
 	: Parameter(spec)
 	, options_(spec.options)
-	, current_value_(spec.default_value)
-	, default_value_(spec.default_value)
+	, default_index_(spec.default_index)
 {
 }
 
-inline blink_Error OptionParameter::set(blink_Index value)
+inline const char* OptionParameter::get_text(blink_Index index) const
 {
-	current_value_ = value;
-
-	return BLINK_OK;
-}
-
-inline blink_Index OptionParameter::get() const
-{
-	return current_value_;
-}
-
-inline const char* OptionParameter::get_text(blink_Index value) const
-{
-	const auto pos = options_.find(value);
-
-	if (pos == options_.end()) return "";
-
-	return pos->second.c_str();
-}
-
-inline blink_Index OptionParameter::get_default_value() const
-{
-	return default_value_;
+	return options_[index].c_str();
 }
 
 }

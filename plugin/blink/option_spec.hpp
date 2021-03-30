@@ -7,8 +7,8 @@ namespace blink {
 
 struct OptionSpec : public ParameterSpec
 {
-	blink_Index default_value;
-	std::map<int, std::string> options;
+	blink_Index default_index;
+	std::vector<std::string> options;
 };
 
 }
