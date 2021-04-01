@@ -2,23 +2,20 @@
 
 #include "blink.h"
 
-// pos is a buffer of length blink_VECTOR_SIZE containing block positions.
-//
-// Positions will usually be increasing linearly but may jump back in the case of
-// loop events.
-//
-// Be aware that Blockhead supports looping over extremely small regions (less
-// than BLINK_VECTOR_SIZE)
-//
-// The is the only function that is called in the audio thread
-//
-// input and output pointers are aligned on 16-byte boundaries
-typedef blink_Error (*blink_Effect_Process)(void* proc_data, blink_SR song_rate, blink_SR sample_rate, const blink_Position* pos, const float** in, float** out);
+typedef struct
+{
+	blink_SR song_rate;
+	blink_SR sample_rate;
+	int data_offset;
+
+	blink_Position* positions;
+	blink_ParameterData* parameter_data;
+} blink_SamplerBuffer;
+
+typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out);
 
 typedef struct
 {
-	//blink_GeneratorBase generator;
-
 	void* proc_data;
 
 	blink_Effect_Process process;
