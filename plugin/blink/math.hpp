@@ -7,56 +7,6 @@
 namespace blink {
 namespace math {
 
-inline double linear2db(double linear)
-{
-	return std::log(linear) * 8.6858896380650365530225783783321;
-}
-
-inline float linear2db(float linear)
-{
-	return std::log(linear) * 8.6858896380650365530225783783321f;
-}
-
-inline double db2linear(double db)
-{
-	return std::exp(db * 0.11512925464970228420089957273422);
-}
-
-inline float db2linear(float db)
-{
-	return std::exp(db * 0.11512925464970228420089957273422f);
-}
-
-template <class T>
-constexpr inline T linear2speed(T linear)
-{
-	return std::pow(T(0.5), -linear);
-}
-
-template <class T>
-constexpr inline T speed2linear(T speed)
-{
-	return std::log(speed) / std::log(T(2));
-}
-
-template <class T>
-T p_to_ff(T p)
-{
-	return std::pow(T(2), p / T(12));
-}
-
-template <size_t ROWS>
-ml::DSPVectorArray<ROWS> p_to_ff(const ml::DSPVectorArray<ROWS>& p)
-{
-	return ml::pow(2.0f, p / 12.0f);
-}
-
-template <class T>
-T ff_to_p(T ff)
-{
-	return (std::log(ff) / std::log(T(2))) * T(12);
-}
-
 template <class T>
 constexpr T lerp(T a, T b, T x)
 {
@@ -79,6 +29,81 @@ constexpr T stepify(T value, T step)
 
 	return value;
 }
+
+namespace convert {
+
+inline float pitch_to_frequency(float pitch)
+{
+	return 8.1758f * std::pow(2.0f, pitch / 12.0f);
+}
+
+inline float frequency_to_pitch(float frequency)
+{
+	return 12.0f * (std::log(frequency / 8.1758f) / std::log(2.0f));
+}
+
+inline float linear_to_filter_hz(float linear)
+{
+	return pitch_to_frequency(lerp(-8.513f, 135.076f, linear));
+}
+
+inline float filter_hz_to_linear(float hz)
+{
+	return inverse_lerp(-8.513f, 135.076f, frequency_to_pitch(hz));
+}
+
+inline double linear_to_db(double linear)
+{
+	return std::log(linear) * 8.6858896380650365530225783783321;
+}
+
+inline float linear_to_db(float linear)
+{
+	return std::log(linear) * 8.6858896380650365530225783783321f;
+}
+
+inline double db_to_linear(double db)
+{
+	return std::exp(db * 0.11512925464970228420089957273422);
+}
+
+inline float db_to_linear(float db)
+{
+	return std::exp(db * 0.11512925464970228420089957273422f);
+}
+
+template <class T>
+constexpr inline T linear_to_speed(T linear)
+{
+	return std::pow(T(0.5), -linear);
+}
+
+template <class T>
+constexpr inline T speed_to_linear(T speed)
+{
+	return std::log(speed) / std::log(T(2));
+}
+
+template <class T>
+T p_to_ff(T p)
+{
+	return std::pow(T(2), p / T(12));
+}
+
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> p_to_ff(const ml::DSPVectorArray<ROWS>& p)
+{
+	return ml::pow(2.0f, p / 12.0f);
+}
+
+template <class T>
+T ff_to_p(T ff)
+{
+	return (std::log(ff) / std::log(T(2))) * T(12);
+}
+
+}
+
 
 //template <class T, class Curve>
 //constexpr T mod_normalize(Curve curve, T min, T max, T value)

@@ -35,7 +35,7 @@ public:
 
 		for (int i = 0; i < n; i++)
 		{
-			read_position_[i] = float(block_pos[i]) - data_offset;
+			read_position_[i] = float(block_pos[i] - data_offset);
 
 			if (read_position_[i] < position)
 			{
@@ -56,7 +56,7 @@ public:
 
 		blink_Position position = last_read_position_;
 
-		read_position_[0] = float(block_pos) - data_offset;
+		read_position_[0] = float(block_pos - data_offset);
 
 		if (read_position_[0] < last_read_position_)
 		{

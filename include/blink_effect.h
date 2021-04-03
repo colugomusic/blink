@@ -2,6 +2,8 @@
 
 #include "blink.h"
 
+#define BLINK_EFFECT
+
 typedef struct
 {
 	blink_SR song_rate;
@@ -10,15 +12,17 @@ typedef struct
 
 	blink_Position* positions;
 	blink_ParameterData* parameter_data;
-} blink_SamplerBuffer;
+} blink_EffectBuffer;
 
 typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out);
+typedef blink_Error(*blink_Effect_Reset)(void* proc_data);
 
 typedef struct
 {
 	void* proc_data;
 
 	blink_Effect_Process process;
+	blink_Effect_Reset reset;
 } blink_Effect;
 
 #ifdef BLINK_EXPORT

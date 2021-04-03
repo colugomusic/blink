@@ -519,7 +519,6 @@ blink_Error destroy_generator(blink_Generator generator)
 }
 #endif
 
-
 #ifdef BLINK_SAMPLER
 inline blink_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 {
@@ -546,6 +545,37 @@ blink_Sampler make_sampler(Args... args)
 blink_Error destroy_sampler(blink_Sampler sampler)
 {
 	delete (Sampler*)(sampler.proc_data);
+
+	return BLINK_OK;
+}
+#endif
+
+#ifdef BLINK_EFFECT
+inline blink_Effect effect(Effect* effect)
+{
+	blink_Effect out;
+
+	out.proc_data = effect;
+
+	out.process = [](void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out)
+	{
+		auto effect = (Effect*)(proc_data);
+
+		return effect->process(buffer, in, out);
+	};
+
+	return out;
+}
+
+template <class EffectType, class ...Args>
+blink_Effect make_effect(Args... args)
+{
+	return bind::effect(new EffectType(args...));
+}
+
+blink_Error destroy_effect(blink_Effect effect)
+{
+	delete (Effect*)(effect.proc_data);
 
 	return BLINK_OK;
 }

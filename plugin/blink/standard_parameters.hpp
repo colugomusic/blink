@@ -159,10 +159,7 @@ inline auto snap_value(float v, float step_size, float snap_amount)
 
 inline float constrain(float v)
 {
-	if (v < 0.0f) return 0.0f;
-	if (v > 1.0f) return 1.0f;
-
-	return v;
+	return std::clamp(v, 0.0f, 1.0f);
 };
 
 inline auto increment(float v, bool precise)
@@ -233,21 +230,82 @@ inline auto drag(float v, int amount, bool precise) -> float
 
 }
 
+namespace filter_frequency {
+
+inline auto linear2hz(float v)
+{
+	return std::pow(v, 2.0f) * 20000.0f;
+}
+
+inline float constrain(float v)
+{
+	return std::clamp(v, 0.0f, 1.0f);
+};
+
+inline auto stepify(float v) -> float
+{
+	return v;
+}
+
+inline auto display(float v)
+{
+	const auto hz = math::convert::linear_to_filter_hz(v);
+
+	std::stringstream ss;
+
+	if (hz >= 1000.0f)
+	{
+		ss << (v / 1000.0f) << " MHz";
+	}
+	else
+	{
+		ss << v << " Hz";
+	}
+
+	return ss.str();
+}
+
+inline auto from_string(const std::string& str) -> std::optional<float>
+{
+	auto value = find_number<float>(str);
+
+	if (!value) return std::optional<float>();
+
+	return math::convert::filter_hz_to_linear(*value);
+};
+
+inline auto increment(float v, bool precise)
+{
+	return constrain(stepify(std_params::increment<100, 1000>(v, precise)));
+};
+
+inline auto decrement(float v, bool precise)
+{
+	return constrain(stepify(std_params::decrement<100, 1000>(v, precise)));
+};
+
+inline auto drag(float v, int amount, bool precise) -> float
+{
+	return constrain(stepify(std_params::drag<100, 1000>(v, amount / 5, precise)));
+};
+
+}
+
 namespace amp
 {
 	inline auto stepify(float v) -> float
 	{
 		if (v <= 0.00001f) return 0.0f;
 
-		return math::db2linear(math::stepify(math::linear2db(v), 0.1f));
+		return math::convert::db_to_linear(math::stepify(math::convert::linear_to_db(v), 0.1f));
 	}
 
 	inline auto constrain(float v)
 	{
-		const auto db = math::linear2db(v);
+		const auto db = math::convert::linear_to_db(v);
 
 		if (db < -60.0f) return 0.0f;
-		if (db > 12.0f) return math::db2linear(12.0f);
+		if (db > 12.0f) return math::convert::db_to_linear(12.0f);
 
 		return v;
 	};
@@ -258,7 +316,7 @@ namespace amp
 
 		if (!db) return db;
 
-		return math::db2linear(*db);
+		return math::convert::db_to_linear(*db);
 	};
 
 	inline auto display(float v)
@@ -271,7 +329,7 @@ namespace amp
 		}
 		else
 		{
-			ss << math::stepify(float(math::linear2db(v)), 0.1f) << " dB";
+			ss << math::stepify(float(math::convert::linear_to_db(v)), 0.1f) << " dB";
 		}
 
 		return ss.str();
@@ -279,21 +337,21 @@ namespace amp
 
 	inline auto increment(float v, bool precise)
 	{
-		if (v <= 0.0f) return math::db2linear(-60.0f);
+		if (v <= 0.0f) return math::convert::db_to_linear(-60.0f);
 
-		return constrain(stepify(math::db2linear(std_params::increment<1, 10>(math::linear2db(v), precise))));
+		return constrain(stepify(math::convert::db_to_linear(std_params::increment<1, 10>(math::convert::linear_to_db(v), precise))));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(stepify(math::db2linear(std_params::decrement<1, 10>(math::linear2db(v), precise))));
+		return constrain(stepify(math::convert::db_to_linear(std_params::decrement<1, 10>(math::convert::linear_to_db(v), precise))));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		if (v <= 0.0f) v = math::db2linear(-61.0f);
+		if (v <= 0.0f) v = math::convert::db_to_linear(-61.0f);
 
-		return constrain(stepify(math::db2linear(std_params::drag<1, 10>(math::linear2db(v), amount / 5, precise))));
+		return constrain(stepify(math::convert::db_to_linear(std_params::drag<1, 10>(math::convert::linear_to_db(v), amount / 5, precise))));
 	};
 }
 
@@ -413,7 +471,7 @@ namespace speed
 
 	inline auto constrain(float v)
 	{
-		if (v < math::linear2speed(-8.0f)) return FREEZE;
+		if (v < math::convert::linear_to_speed(-8.0f)) return FREEZE;
 		if (v > 32.0f) return 32.0f;
 
 		return v;
@@ -421,21 +479,21 @@ namespace speed
 
 	inline auto increment(float v, bool precise)
 	{
-		if (v <= FREEZE) return math::linear2speed(-8.0f);
+		if (v <= FREEZE) return math::convert::linear_to_speed(-8.0f);
 
-		return constrain(math::linear2speed(std_params::increment<1, 10>(math::speed2linear(v), precise)));
+		return constrain(math::convert::linear_to_speed(std_params::increment<1, 10>(math::convert::speed_to_linear(v), precise)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(math::linear2speed(std_params::decrement<1, 10>(math::speed2linear(v), precise)));
+		return constrain(math::convert::linear_to_speed(std_params::decrement<1, 10>(math::convert::speed_to_linear(v), precise)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		if (v <= FREEZE) v = math::linear2speed(-8.0f);
+		if (v <= FREEZE) v = math::convert::linear_to_speed(-8.0f);
 
-		return constrain(math::linear2speed(std_params::drag<1, 10>(math::speed2linear(v), amount / 5, precise)));
+		return constrain(math::convert::linear_to_speed(std_params::drag<1, 10>(math::convert::speed_to_linear(v), amount / 5, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
@@ -520,7 +578,7 @@ inline auto from_string(const std::string& str) -> std::optional<float>
 
 	if (!db) return db;
 
-	return math::db2linear(*db);
+	return math::convert::db_to_linear(*db);
 };
 
 inline auto increment(int v, bool precise)
@@ -646,6 +704,21 @@ inline SliderSpec<float> percentage_bipolar()
 	out.drag = percentage_bipolar::drag;
 	out.display_value = percentage_bipolar::display;
 	out.from_string = percentage::from_string;
+	out.default_value = 0;
+
+	return out;
+}
+
+inline SliderSpec<float> filter_frequency()
+{
+	SliderSpec<float> out;
+
+	out.constrain = filter_frequency::constrain;
+	out.increment = filter_frequency::increment;
+	out.decrement = filter_frequency::decrement;
+	out.drag = filter_frequency::drag;
+	out.display_value = filter_frequency::display;
+	out.from_string = filter_frequency::from_string;
 	out.default_value = 0;
 
 	return out;
@@ -867,7 +940,7 @@ inline EnvelopeSpec amp()
 
 	out.get_gridline = [](int index) -> float
 	{
-		return math::linear2speed(float(index));
+		return math::convert::linear_to_speed(float(index));
 	};
 
 	out.default_value = 1.0f;
@@ -994,7 +1067,7 @@ inline EnvelopeSpec speed()
 
 	out.get_gridline = [](int index) -> float
 	{
-		return math::linear2speed(float(index));
+		return math::convert::linear_to_speed(float(index));
 	};
 
 	out.range.min.constrain = speed::constrain;
@@ -1100,6 +1173,51 @@ inline EnvelopeSpec noise_color()
 	out.range.max.display_value = speed::display;
 	out.display_value = percentage_bipolar::display;
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
+
+	return out;
+}
+
+inline EnvelopeSpec filter_frequency()
+{
+	EnvelopeSpec out;
+
+	out.uuid = "91181212-7072-41a9-9d11-3a265301a9a3";
+	out.name = "Frequency";
+
+	out.default_value = 0.52833f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+
+	out.value_slider = sliders::filter_frequency();
+
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = filter_frequency::display;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = filter_frequency::display;
+	out.display_value = filter_frequency::display;
+
+	return out;
+}
+
+inline EnvelopeSpec resonance()
+{
+	EnvelopeSpec out;
+
+	out.uuid = "4436fc1c-ae51-4580-b1fa-24b9c41425e3";
+	out.name = "Resonance";
+
+	out.default_value = 0.0f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+	out.stepify = percentage::stepify;
+
+	out.value_slider = sliders::percentage();
+
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = percentage::display;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = speed::display;
+	out.display_value = percentage::display;
 
 	return out;
 }

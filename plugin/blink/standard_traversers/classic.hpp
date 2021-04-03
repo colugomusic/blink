@@ -28,15 +28,15 @@ template <class T> T weird_math_that_i_dont_understand(T min, T max, T distance,
 
 	if (std::abs(T(1) - r) <= T(0))
 	{
-		return n * math::p_to_ff(min);
+		return n * math::convert::p_to_ff(min);
 	}
 
-	return sum_of_geometric_series(math::p_to_ff(min), r, n);
+	return sum_of_geometric_series(math::convert::p_to_ff(min), r, n);
 }
 
 template <class T> T weird_math_that_i_dont_understand_ff(T min, T max, T distance, T n)
 {
-	return math::p_to_ff(min) * std::pow(ratio(min, max, distance), n);
+	return math::convert::p_to_ff(min) * std::pow(ratio(min, max, distance), n);
 }
 
 class ClassicCalculator
@@ -74,7 +74,7 @@ public:
 			{
 				if (!ff_ready_)
 				{
-					ff_ = math::p_to_ff(pitch);
+					ff_ = math::convert::p_to_ff(pitch);
 					ff_ready_ = true;
 				}
 
@@ -179,7 +179,7 @@ inline float Classic::get_position(float transpose, const blink_EnvelopeData* en
 
 	if (!env_pitch || env_pitch->points.count < 1)
 	{
-		const auto ff = math::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
+		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
 
 		if (derivative) *derivative = ff;
 
@@ -202,7 +202,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 
 	if (!env_pitch || env_pitch->points.count < 1)
 	{
-		const auto ff = math::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
+		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
 
 		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 
