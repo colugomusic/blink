@@ -462,6 +462,8 @@ namespace pitch
 namespace speed
 {
 	constexpr auto FREEZE = 0.0f;
+	constexpr auto THIRTYSECOND = 0.03125f;
+	constexpr auto SIXTEENTH = 0.0625f;
 	constexpr auto EIGHTH = 0.125f;
 	constexpr auto QUARTER = 0.25f;
 	constexpr auto HALF = 0.5f;
@@ -531,6 +533,14 @@ namespace speed
 		if (v <= FREEZE)
 		{
 			ss << "Freeze";
+		}
+		else if (milestone_hit(v, THIRTYSECOND))
+		{
+			ss << "1/32";
+		}
+		else if (milestone_hit(v, SIXTEENTH))
+		{
+			ss << "1/16";
 		}
 		else if (milestone_hit(v, EIGHTH))
 		{
@@ -771,7 +781,7 @@ inline SliderParameterSpec<float> speed()
 {
 	SliderParameterSpec<float> out;
 
-	out.uuid = "04293c38-3a64-42b2-80f0-43a4f8190ba7";
+	out.uuid = BLINK_STD_UUID_SLIDER_SPEED;
 	out.name = "Speed";
 
 	out.slider = sliders::speed();
@@ -791,6 +801,18 @@ inline SliderParameterSpec<int> sample_offset()
 
 	out.icon = blink_StdIcon_SampleOffset;
 	out.flags = blink_SliderFlags_MovesDisplay;
+
+	return out;
+}
+
+SliderParameterSpec<float> noise_width()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = BLINK_STD_UUID_SLIDER_NOISE_WIDTH;
+	out.name = "Noise Width";
+
+	out.slider = std_params::sliders::percentage();
 
 	return out;
 }
@@ -833,7 +855,7 @@ inline OptionSpec noise_mode()
 {
 	OptionSpec out;
 
-	out.uuid = "e426cc55-306d-4561-99bc-003bb7707a93";
+	out.uuid = BLINK_STD_UUID_OPTION_NOISE_MODE;
 	out.name = "Noise Mode";
 	out.default_index = 0;
 	out.options = {
@@ -935,7 +957,7 @@ inline EnvelopeSpec amp()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "273e7c30-404b-4db6-ba97-20f33d49fe51";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_AMP;
 	out.name = "Amp";
 
 	out.get_gridline = [](int index) -> float
@@ -971,7 +993,7 @@ inline EnvelopeSpec pan()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "9c312a2c-a1b4-4a8d-ab68-07ea157c4574";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_PAN;
 	out.name = "Pan";
 
 	out.default_value = 0.0f;
@@ -997,7 +1019,7 @@ inline EnvelopeSpec pitch()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "ca2529db-e7bd-4019-9a07-22aee24526d1";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_PITCH;
 	out.name = "Pitch";
 
 	out.default_value = 0.0f;
@@ -1055,7 +1077,7 @@ inline EnvelopeSpec speed()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "02f68738-f54a-4f35-947b-c30e73896aa4";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_SPEED;
 	out.name = "Speed";
 
 	out.default_value = speed::NORMAL;
@@ -1095,7 +1117,7 @@ inline EnvelopeSpec formant()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "7b72dbef-e36d-4dce-958b-b0fa498ae41e";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_FORMANT;
 	out.name = "Formant";
 
 	// TODO:
@@ -1134,7 +1156,7 @@ inline EnvelopeSpec noise_amount()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "29d5ecb5-cb5d-4f19-afd3-835dd805682a";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_NOISE_AMOUNT;
 	out.name = "Noise Amount";
 
 	out.default_value = 0.0f;
@@ -1157,7 +1179,7 @@ inline EnvelopeSpec noise_color()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "30100123-7343-4386-9ed2-f913b9e1e571";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_NOISE_COLOR;
 	out.name = "Noise Color";
 
 	out.default_value = 0.5f;
@@ -1181,7 +1203,7 @@ inline EnvelopeSpec filter_frequency()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "91181212-7072-41a9-9d11-3a265301a9a3";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_FILTER_FREQUENCY;
 	out.name = "Frequency";
 
 	out.default_value = 0.52833f;
@@ -1203,7 +1225,7 @@ inline EnvelopeSpec resonance()
 {
 	EnvelopeSpec out;
 
-	out.uuid = "4436fc1c-ae51-4580-b1fa-24b9c41425e3";
+	out.uuid = BLINK_STD_UUID_ENVELOPE_FILTER_RESONANCE;
 	out.name = "Resonance";
 
 	out.default_value = 0.0f;
