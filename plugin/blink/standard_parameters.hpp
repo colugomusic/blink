@@ -505,6 +505,8 @@ namespace speed
 		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
 
 		if (uppercase.find("FREEZE") != std::string::npos) return FREEZE;
+		if (uppercase.find("1/32") != std::string::npos) return THIRTYSECOND;
+		if (uppercase.find("1/16") != std::string::npos) return SIXTEENTH;
 		if (uppercase.find("1/8") != std::string::npos) return EIGHTH;
 		if (uppercase.find("1/4") != std::string::npos) return QUARTER;
 		if (uppercase.find("1/2") != std::string::npos) return HALF;
