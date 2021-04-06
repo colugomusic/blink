@@ -75,7 +75,8 @@ extern "C"
 
 	EXPORTED blink_Bool blink_sampler_requires_preprocessing();
 
-	// Called by the host once per sample if blink_sampler_requires_preprocessing() returns true
+	// Called by the host once per sample if blink_sampler_requires_preprocessing()
+	// returns true
 	//
 	// This function will be called in a separate thread from everything else.
 	//
@@ -103,6 +104,8 @@ extern "C"
 	// It is the host's responsibility to ensure that this function is not
 	// called until the last call to process() has completed for this sample.
 	EXPORTED blink_Error blink_sampler_sample_deleted(blink_ID sample_id);
+
+	
 
 	// Get the transformed waveform positions and derivatives for the given
 	// n block positions
