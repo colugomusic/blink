@@ -86,6 +86,12 @@ inline float drag(float v, int amount, bool precise)
 	return v + (float(amount) / (precise ? Precise : Normal));
 }
 
+template <int Normal>
+inline float drag(float v, int amount)
+{
+	return v + (float(amount) / Normal);
+}
+
 inline float constrain(float v, float min, float max)
 {
 	if (v < min) return min;
@@ -473,7 +479,7 @@ namespace speed
 
 	inline auto constrain(float v)
 	{
-		if (v < math::convert::linear_to_speed(-8.0f)) return FREEZE;
+		if (v < math::convert::linear_to_speed(-32.0f)) return FREEZE;
 		if (v > 32.0f) return 32.0f;
 
 		return v;
@@ -481,7 +487,7 @@ namespace speed
 
 	inline auto increment(float v, bool precise)
 	{
-		if (v <= FREEZE) return math::convert::linear_to_speed(-8.0f);
+		if (v <= FREEZE) return math::convert::linear_to_speed(-32.0f);
 
 		return constrain(math::convert::linear_to_speed(std_params::increment<1, 10>(math::convert::speed_to_linear(v), precise)));
 	};
@@ -493,7 +499,7 @@ namespace speed
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		if (v <= FREEZE) v = math::convert::linear_to_speed(-8.0f);
+		if (v <= FREEZE) v = math::convert::linear_to_speed(-32.0f);
 
 		return constrain(math::convert::linear_to_speed(std_params::drag<1, 10>(math::convert::speed_to_linear(v), amount / 5, precise)));
 	};
@@ -505,14 +511,17 @@ namespace speed
 		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
 
 		if (uppercase.find("FREEZE") != std::string::npos) return FREEZE;
-		if (uppercase.find("1/32") != std::string::npos) return THIRTYSECOND;
-		if (uppercase.find("1/16") != std::string::npos) return SIXTEENTH;
-		if (uppercase.find("1/8") != std::string::npos) return EIGHTH;
-		if (uppercase.find("1/4") != std::string::npos) return QUARTER;
-		if (uppercase.find("1/2") != std::string::npos) return HALF;
 		if (uppercase.find("NORMAL") != std::string::npos) return NORMAL;
 		if (uppercase.find("DOUBLE") != std::string::npos) return DOUBLE;
 		if (uppercase.find("TRIPLE") != std::string::npos) return TRIPLE;
+
+		std::regex r("1/([\\d]+)");
+		std::smatch match;
+
+		if (std::regex_search(str, match, r))
+		{
+			return 1.0f / std::stoi(match[1]);
+		}
 
 		auto ff = find_number<float>(str);
 
@@ -523,10 +532,10 @@ namespace speed
 
 	inline auto display(float v)
 	{
-		const auto milestone_hit = [](float value, float milestone)
-		{
-			constexpr auto threshold = 0.001f;
+		constexpr auto threshold = 0.001f;
 
+		const auto milestone_hit = [threshold](float value, float milestone)
+		{
 			return value > milestone - threshold && value < milestone + threshold;
 		};
 
@@ -536,25 +545,19 @@ namespace speed
 		{
 			ss << "Freeze";
 		}
-		else if (milestone_hit(v, THIRTYSECOND))
+		else if (v < 1.0f - threshold)
 		{
-			ss << "1/32";
-		}
-		else if (milestone_hit(v, SIXTEENTH))
-		{
-			ss << "1/16";
-		}
-		else if (milestone_hit(v, EIGHTH))
-		{
-			ss << "1/8";
-		}
-		else if (milestone_hit(v, QUARTER))
-		{
-			ss << "1/4";
-		}
-		else if (milestone_hit(v, HALF))
-		{
-			ss << "1/2";
+			const auto recip = 1.0f / v;
+			const auto rounded_recip = std::round(recip);
+
+			if (std::abs(recip - rounded_recip) < threshold)
+			{
+				ss << "1/" << rounded_recip;
+			}
+			else
+			{
+				ss << "x" << v;
+			}
 		}
 		else if (milestone_hit(v, NORMAL))
 		{
