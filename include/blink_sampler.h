@@ -28,6 +28,7 @@ typedef struct
 	blink_FrameCount num_frames;
 	blink_SR SR;
 	blink_BitDepth bit_depth;
+	blink_Bool analysis_ready;
 
 	void* host;
 	blink_GetSampleDataCB get_data;
@@ -43,7 +44,7 @@ typedef struct
 	int data_offset;
 	blink_ChannelMode channel_mode;
 
-	const blink_SampleInfo* sample_info;
+	blink_SampleInfo* sample_info;
 	blink_Position* positions;
 	blink_WarpPoints* warp_points;
 	blink_ParameterData* parameter_data;
@@ -67,8 +68,11 @@ typedef struct
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	// Blockhead will call this twice per sampler block to create a pair of samplers
-	// for the purposes of crossfading between them to avoid clicks.
+	// Blockhead will call this multiple times per sampler block to create a set
+	// synchronized samplers for the purposes of crossfading between them to avoid
+	// clicks.
+	// A crossfade between one or more samplers occurs whenever block data changes
+	// or the song loops back to an earlier position.
 	EXPORTED blink_Sampler blink_make_sampler();
 
 	EXPORTED blink_Error blink_destroy_sampler(blink_Sampler sampler);
@@ -87,25 +91,23 @@ extern "C"
 	// calling the ReportProgress callback with a value between 0 and 1.
 	//
 	// The process() function may be called in the audio thread before
-	// preprocessing has finished so the plugin needs to synchronize this
-	// situation. It is ok to simply return silence until preprocessing has
-	// completed.
+	// preprocessing has finished. Blockhead will pass in BLINK_FALSE for
+	// blink_SampleInfo.analysis_ready until this function returns
+	// BLINK_OK.
 	//
-	// If the plugin allocates any memory for the active sample it should
+	// If the plugin allocates any memory for the sample it should
 	// be freed when the host calls blink_sampler_sample_deleted().
 	EXPORTED blink_Error blink_sampler_preprocess_sample(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info);
 
-	// Called when the sample is deleted by Blockhead. The plugin should free
-	// any data associated to the sample.
+	// Called when a sample is deleted by Blockhead. The plugin should free
+	// any data associated with the sample.
 	//
 	// Note that Blockhead may keep samples in memory after the user requests
 	// their deletion so this function may not be called immediately.
 	//
 	// It is the host's responsibility to ensure that this function is not
-	// called until the last call to process() has completed for this sample.
+	// called while process() is still executing.
 	EXPORTED blink_Error blink_sampler_sample_deleted(blink_ID sample_id);
-
-	
 
 	// Get the transformed waveform positions and derivatives for the given
 	// n block positions
