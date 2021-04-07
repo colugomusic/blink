@@ -99,7 +99,7 @@ inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const
 		{
 			reset = false;
 
-			out[i] = spec_.search_binary(data, spec_.default_value, block_positions[i], left, &left);
+			out[i] = spec_.search_binary(data, spec_.default_value, block_positions[i], 0, &left);
 		}
 		else
 		{

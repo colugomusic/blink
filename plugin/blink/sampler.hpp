@@ -19,7 +19,6 @@ public:
 	virtual ~Sampler() {}
 
 	virtual blink_Error process(const blink_SamplerBuffer* buffer, float* out) = 0;
-	virtual blink_Error preprocess_sample(void* host, blink_PreprocessCallbacks callbacks) const = 0;
 
 private:
 

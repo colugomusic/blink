@@ -78,7 +78,7 @@ public:
 
 private:
 
-	blink_Position last_read_position_ = std::numeric_limits<blink_Position>::min();
+	blink_Position last_read_position_ = std::numeric_limits<blink_Position>::max();
 	DataOffset last_data_offset_ = 0;
 
 	ml::DSPVector read_position_;
@@ -98,7 +98,7 @@ public:
 	{
 		if (ptr != last_ptr_)
 		{
-			traverser->set_reset(1);
+			traverser->set_reset(0);
 		}
 
 		last_ptr_ = ptr;
