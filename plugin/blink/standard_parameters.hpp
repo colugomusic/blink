@@ -5,6 +5,7 @@
 #include <sstream>
 #include "envelope_spec.hpp"
 #include "slider_parameter_spec.hpp"
+#include "toggle_spec.hpp"
 
 namespace blink {
 namespace std_params {
@@ -13,7 +14,7 @@ template <class T> std::optional<T> find_number(const std::string& str);
 template <class T> std::optional<T> find_positive_number(const std::string& str);
 
 template <>
-std::optional<float> find_number<float>(const std::string& str)
+inline std::optional<float> find_number<float>(const std::string& str)
 {
 	std::regex r("(\\-?\\s*[\\.\\d]+)");
 	std::smatch match;
@@ -24,7 +25,7 @@ std::optional<float> find_number<float>(const std::string& str)
 }
 
 template <>
-std::optional<int> find_number<int>(const std::string& str)
+inline std::optional<int> find_number<int>(const std::string& str)
 {
 	std::regex r("(\\-?\\s*[\\d]+)");
 	std::smatch match;
@@ -35,7 +36,7 @@ std::optional<int> find_number<int>(const std::string& str)
 }
 
 template <>
-std::optional<float> find_positive_number<float>(const std::string& str)
+inline std::optional<float> find_positive_number<float>(const std::string& str)
 {
 	std::regex r("([\\.\\d]+)");
 	std::smatch match;
@@ -46,7 +47,7 @@ std::optional<float> find_positive_number<float>(const std::string& str)
 }
 
 template <>
-std::optional<int> find_positive_number<int>(const std::string& str)
+inline std::optional<int> find_positive_number<int>(const std::string& str)
 {
 	std::regex r("([\\d]+)");
 	std::smatch match;
@@ -810,7 +811,7 @@ inline SliderParameterSpec<int> sample_offset()
 	return out;
 }
 
-SliderParameterSpec<float> noise_width()
+inline SliderParameterSpec<float> noise_width()
 {
 	SliderParameterSpec<float> out;
 
