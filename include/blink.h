@@ -263,9 +263,8 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
 	blink_EnvelopeFlags_DefaultDisabled                    = 1 << 3,
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
-	blink_EnvelopeFlags_SnapToDefaultOnly                  = 1 << 5,
-	blink_EnvelopeFlags_NoGridLabels                       = 1 << 6,
-	blink_EnvelopeFlags_MovesDisplay                       = 1 << 7,
+	blink_EnvelopeFlags_NoGridLabels                       = 1 << 5,
+	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6,
 };
 
 enum blink_SliderFlags

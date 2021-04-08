@@ -1016,7 +1016,7 @@ inline EnvelopeSpec pan()
 	out.range.max.default_value = 1.0f;
 	out.range.max.display_value = pan::display;
 
-	out.flags = blink_EnvelopeFlags_SnapToDefaultOnly | blink_EnvelopeFlags_NoGridLabels;
+	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }
