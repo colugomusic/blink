@@ -79,8 +79,8 @@ extern "C"
 
 	EXPORTED blink_Bool blink_sampler_requires_preprocessing();
 
-	// Called by the host once per sample if blink_sampler_requires_preprocessing()
-	// returns true
+	// Called by the host once per sample only if
+	// blink_sampler_requires_preprocessing() returns true
 	//
 	// This function will be called in a separate thread from everything else.
 	//
