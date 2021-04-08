@@ -93,13 +93,19 @@ T p_to_ff(T p)
 template <size_t ROWS>
 ml::DSPVectorArray<ROWS> p_to_ff(const ml::DSPVectorArray<ROWS>& p)
 {
-	return ml::pow(2.0f, p / 12.0f);
+	return ml::pow(ml::DSPVectorArray < ROWS>(2.0f), p / 12.0f);
 }
 
 template <class T>
 T ff_to_p(T ff)
 {
 	return (std::log(ff) / std::log(T(2))) * T(12);
+}
+
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> ff_to_p(const ml::DSPVectorArray<ROWS>& ff)
+{
+	return (ml::log(ff) / ml::log(ml::DSPVectorArray<ROWS>(2.0f))) * ml::DSPVectorArray<ROWS>(12.0f);
 }
 
 }
