@@ -564,6 +564,13 @@ inline blink_Effect effect(Effect* effect)
 		return effect->process(buffer, in, out);
 	};
 
+	out.reset = [](void* proc_data)
+	{
+		auto effect = (Effect*)(proc_data);
+
+		return effect->reset();
+	};
+
 	return out;
 }
 
