@@ -262,11 +262,11 @@ inline auto display(float v)
 
 	if (hz >= 1000.0f)
 	{
-		ss << (v / 1000.0f) << " MHz";
+		ss << (hz / 1000.0f) << " MHz";
 	}
 	else
 	{
-		ss << v << " Hz";
+		ss << hz << " Hz";
 	}
 
 	return ss.str();
