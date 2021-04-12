@@ -404,121 +404,6 @@ inline blink_Parameter parameter(const Parameter& parameter)
 	return out;
 }
 
-#ifdef BLINK_GENERATOR
-inline blink_Generator generator(Generator* generator, const char* name, bool requires_preprocess)
-{
-	blink_Generator out;
-
-	out.proc_data = generator;
-	out.name = name;
-	out.num_channels = generator->get_num_channels();
-	out.num_groups = generator->get_num_groups();
-	out.num_parameters = generator->get_num_parameters();
-	out.requires_preprocess = requires_preprocess;
-
-	out.set_get_warp_point_data_cb = [](void* proc_data, void* host, blink_GetWarpPointDataCB cb)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->set_get_warp_point_data_cb(host, cb);
-	};
-
-	//out.set_get_manipulator_data_cb = [](void* proc_data, void* host, blink_GetManipulatorDataCB cb)
-	//{
-	//	auto generator = (Generator*)(proc_data);
-
-	//	return generator->set_get_manipulator_data_cb(host, cb);
-	//};
-
-	out.get_group = [](void* proc_data, blink_Index index)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return group(generator->get_group(index));
-	};
-
-	out.get_parameter = [](void* proc_data, blink_Index index)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return parameter(generator->get_parameter(index));
-	};
-
-	out.get_parameter_by_id = [](void* proc_data, blink_UUID uuid)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return parameter(generator->get_parameter_by_id(uuid));
-	};
-
-	out.set_data_offset = [](void* proc_data, int offset)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		generator->set_data_offset(offset);
-
-		return BLINK_OK;
-	};
-
-	out.get_error_string = [](void* proc_data, blink_Error error)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->get_error_string(error);
-	};
-
-	out.process = [](void* proc_data, blink_SR song_rate, blink_SR sample_rate, const blink_Position* pos, float** out)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->process(song_rate, sample_rate, pos, out);
-	};
-
-	out.get_waveform_positions = [](void* proc_data, const blink_Position* block_positions, float* out, float* derivatives)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->get_waveform_positions(block_positions, out, derivatives);
-	};
-
-	out.set_get_sample_data_cb = [](void* proc_data, void* host, blink_GetSampleDataCB cb)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->set_get_sample_data_cb(host, cb);
-	};
-
-	out.set_get_sample_info_cb = [](void* proc_data, void* host, blink_GetSampleInfoCB cb)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->set_get_sample_info_cb(host, cb);
-	};
-
-	out.preprocess_sample = [](void* proc_data, void* host, blink_PreprocessCallbacks callbacks)
-	{
-		auto generator = (Generator*)(proc_data);
-
-		return generator->preprocess_sample(host, callbacks);
-	};
-
-	return out;
-}
-
-template <class GeneratorType>
-blink_Generator make_generator()
-{
-	return bind::generator(new GeneratorType(), GeneratorType::NAME, GeneratorType::REQUIRES_PREPROCESS);
-}
-
-blink_Error destroy_generator(blink_Generator generator)
-{
-	delete (Generator*)(generator.proc_data);
-
-	return BLINK_OK;
-}
-#endif
-
 #ifdef BLINK_SAMPLER
 inline blink_Sampler sampler(Sampler* sampler, bool requires_preprocess)
 {
@@ -583,6 +468,44 @@ blink_Effect make_effect(Args... args)
 blink_Error destroy_effect(blink_Effect effect)
 {
 	delete (Effect*)(effect.proc_data);
+
+	return BLINK_OK;
+}
+#endif
+
+#ifdef BLINK_SYNTH
+inline blink_Synth synth(Synth* synth)
+{
+	blink_Synth out;
+
+	out.proc_data = synth;
+
+	out.process = [](void* proc_data, const blink_SynthBuffer* buffer, float* out)
+	{
+		auto synth = (Synth*)(proc_data);
+
+		return synth->process(buffer, out);
+	};
+
+	out.reset = [](void* proc_data)
+	{
+		auto synth = (Synth*)(proc_data);
+
+		return synth->reset();
+	};
+
+	return out;
+}
+
+template <class SynthType, class ...Args>
+blink_Synth make_synth(Args... args)
+{
+	return bind::synth(new SynthType(args...));
+}
+
+blink_Error destroy_synth(blink_Synth synth)
+{
+	delete (Synth*)(synth.proc_data);
 
 	return BLINK_OK;
 }

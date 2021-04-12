@@ -3,6 +3,7 @@
 #include <optional>
 #include <regex>
 #include <sstream>
+#include "math.hpp"
 #include "envelope_spec.hpp"
 #include "slider_parameter_spec.hpp"
 #include "toggle_spec.hpp"

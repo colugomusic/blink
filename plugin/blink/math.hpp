@@ -1,5 +1,8 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
@@ -32,9 +35,20 @@ constexpr T stepify(T value, T step)
 
 namespace convert {
 
+template <class T>
+inline T uni_to_bi(T uni)
+{
+	return (uni * T(2)) - T(1);
+}
+
 inline float pitch_to_frequency(float pitch)
 {
 	return 8.1758f * std::pow(2.0f, pitch / 12.0f);
+}
+
+inline ml::DSPVector pitch_to_frequency(const ml::DSPVector& pitch)
+{
+	return ml::DSPVector(8.1758f) * ml::pow(ml::DSPVector(2.0f), pitch / 12.0f);
 }
 
 inline float frequency_to_pitch(float frequency)
@@ -201,6 +215,30 @@ template <size_t ROWS>
 ml::DSPVectorArrayInt<ROWS> floor(const ml::DSPVectorArray<ROWS>& in)
 {
 	return ml::truncateFloatToInt(in);
+}
+
+namespace window {
+
+template <class T>
+inline T tukey(T x, T r)
+{
+	const auto p0 = r / T(2);
+	const auto p1 = T(1) - (r / T(2));
+
+	if (x < p0)
+	{
+		return T(0.5) * (T(1) + T(std::cos(M_PI * (((T(2) * x) / r) - T(1)))));
+	}
+	else if (x < p1)
+	{
+		return T(1);
+	}
+	else
+	{
+		return T(0.5) * (T(1) + T(std::cos(M_PI * (((T(2) * x) / r) - (T(2) / r) + T(1)))));
+	}
+}
+
 }
 
 namespace ease {
