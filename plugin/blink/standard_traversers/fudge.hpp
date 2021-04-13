@@ -157,7 +157,7 @@ private:
 
 inline float Fudge::get_position(float speed, const blink_EnvelopeData* env_speed, const Traverser& traverser, int sample_offset, float* derivative)
 {
-	const auto& read_position = traverser.get_read_position();
+	const auto& block_positions = traverser.block_positions();
 
 	if (!env_speed || env_speed->points.count < 1)
 	{
@@ -165,7 +165,7 @@ inline float Fudge::get_position(float speed, const blink_EnvelopeData* env_spee
 
 		if (derivative) *derivative = ff;
 
-		return (read_position[0] * ff) - float(sample_offset);
+		return (block_positions.positions[0] * ff) - float(sample_offset);
 	}
 
 	const auto& resets = traverser.get_resets();
@@ -175,12 +175,12 @@ inline float Fudge::get_position(float speed, const blink_EnvelopeData* env_spee
 		calculator_.reset();
 	}
 
-	return calculator_.calculate(speed, env_speed, read_position[0], derivative) - sample_offset;
+	return calculator_.calculate(speed, env_speed, block_positions.positions[0], derivative) - sample_offset;
 }
 
 inline ml::DSPVector Fudge::get_positions(float speed, const blink_EnvelopeData* env_speed, const Traverser& traverser, int sample_offset, int count, float* derivatives)
 {
-	const auto& read_position = traverser.get_read_position();
+	const auto& block_positions = traverser.block_positions();
 
 	if (!env_speed || env_speed->points.count < 1)
 	{
@@ -188,7 +188,7 @@ inline ml::DSPVector Fudge::get_positions(float speed, const blink_EnvelopeData*
 
 		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 
-		return (read_position * ff) - float(sample_offset);
+		return (block_positions.positions * ff) - float(sample_offset);
 	}
 
 	const auto& resets = traverser.get_resets();
@@ -202,7 +202,7 @@ inline ml::DSPVector Fudge::get_positions(float speed, const blink_EnvelopeData*
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(speed, env_speed, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
+		out[i] = calculator_.calculate(speed, env_speed, block_positions.positions[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
 	}
 
 	return out;

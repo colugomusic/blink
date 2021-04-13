@@ -1,5 +1,6 @@
 #pragma once
 
+#include "block_positions.hpp"
 #include "envelope_spec.hpp"
 #include "envelope_range.hpp"
 #include "envelope_search.hpp"
@@ -41,7 +42,8 @@ public:
 	// not sure if i need this: float search_ext(const blink_EnvelopePoints* points, blink_Position block_position, int search_beg, int* left);
 	float search(const blink_EnvelopeData* data, blink_Position block_position) const;
 	float search_vec(const blink_EnvelopeData* data, const float* block_positions, blink_FrameCount n, float prev_pos, float* out) const;
-	ml::DSPVector search_vec(const blink_EnvelopeData* data, const ml::DSPVector& block_positions, float prev_pos) const;
+	float search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const;
+	ml::DSPVector search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions) const;
 
 	EnvelopeRange& range() { return range_; }
 	const EnvelopeRange& range() const { return range_; }
@@ -112,13 +114,18 @@ inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const
 	return prev_pos;
 }
 
-inline ml::DSPVector EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const ml::DSPVector& block_positions, float prev_pos) const
+inline ml::DSPVector EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions) const
 {
 	ml::DSPVector out;
 
-	search_vec(data, block_positions.getConstBuffer(), kFloatsPerDSPVector, prev_pos, out.getBuffer());
+	search_vec(data, block_positions.positions.getConstBuffer(), block_positions.count, block_positions.prev_pos, out.getBuffer());
 
 	return out;
+}
+
+inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const
+{
+	return search_vec(data, block_positions.positions.getConstBuffer(), block_positions.count, block_positions.prev_pos, out);
 }
 
 inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)

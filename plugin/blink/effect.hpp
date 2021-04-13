@@ -20,6 +20,13 @@ public:
 
 	virtual blink_Error process(const blink_EffectBuffer* buffer, const float* in, float* out) = 0;
 	virtual blink_Error reset() = 0;
+
+protected:
+
+	void begin_process(const blink_EffectBuffer* buffer)
+	{
+		GeneratorBase::begin_process(buffer->positions, buffer->data_offset);
+	}
 };
 
 }

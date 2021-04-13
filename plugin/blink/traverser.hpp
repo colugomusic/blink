@@ -1,7 +1,8 @@
 #pragma once
 
-#include <blink.h>
 #include <cstdint>
+#include <blink.h>
+#include "block_positions.hpp"
 
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
@@ -22,68 +23,32 @@ public:
 
 	using DataOffset = std::int32_t;
 
-	Traverser()
+	void generate(const BlockPositions& block_positions, int n)
 	{
-		read_position_[kFloatsPerDSPVector - 1] = std::numeric_limits<float>::max();
-	}
-
-	void generate(const blink_Position* block_pos, int n, DataOffset data_offset)
-	{
+		block_positions_ = &block_positions;
 		reset_ = 0;
 
-		blink_Position position = last_read_position_;
+		auto position = block_positions.prev_pos;
 
 		for (int i = 0; i < n; i++)
 		{
-			read_position_[i] = float(block_pos[i] - data_offset);
-
-			if (read_position_[i] < position)
+			if (block_positions.positions[i] < position)
 			{
 				reset_[i] = 1;
 			}
 
-			position = read_position_[i];
+			position = block_positions.positions[i];
 		}
-
-		last_data_offset_ = data_offset;
-		last_read_position_ = position;
-		is_vector_ = true;
-	}
-	
-	void generate(const blink_Position block_pos, DataOffset data_offset)
-	{
-		reset_[0] = 0;
-
-		blink_Position position = last_read_position_;
-
-		read_position_[0] = float(block_pos - data_offset);
-
-		if (read_position_[0] < last_read_position_)
-		{
-			reset_[0] = 1;
-		}
-
-		last_data_offset_ = data_offset;
-		last_read_position_ = read_position_[0];
-		is_vector_ = false;
 	}
 
-	bool is_vector() const { return is_vector_; }
-	const ml::DSPVector& get_read_position() const { return read_position_; }
+	const BlockPositions& block_positions() const { return *block_positions_; }
 	const ml::DSPVectorInt& get_resets() const { return reset_; }
-
-	float get_last_pos() const { return read_position_[kFloatsPerDSPVector - 1]; }
-
 	void set_reset(int index) { reset_[index] = 1; }
 
 private:
 
-	blink_Position last_read_position_ = std::numeric_limits<blink_Position>::max();
-	DataOffset last_data_offset_ = 0;
-
-	ml::DSPVector read_position_;
+	const BlockPositions* block_positions_;
 	ml::DSPVectorInt reset_;
-	bool is_vector_ = false;
 };
 
 //

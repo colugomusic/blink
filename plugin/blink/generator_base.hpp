@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include "block_positions.hpp"
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "parameter.hpp"
@@ -24,9 +25,23 @@ public:
 		float pan,
 		const EnvelopeParameter& pan_envelope,
 		const blink_EnvelopeData* data,
-		const ml::DSPVector& block_pos,
-		float prev_pos);
+		const BlockPositions& block_positions);
 
+protected:
+
+	void begin_process(const blink_Position* positions, int data_offset)
+	{
+		block_positions_(positions, data_offset, kFloatsPerDSPVector);
+	}
+
+	const BlockPositions& block_positions() const
+	{
+		return block_positions_;
+	}
+
+private:
+
+	BlockPositions block_positions_;
 };
 
 inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(
@@ -34,12 +49,11 @@ inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(
 	float pan,
 	const EnvelopeParameter& pan_envelope,
 	const blink_EnvelopeData* data,
-	const ml::DSPVector& block_pos,
-	float prev_pos)
+	const BlockPositions& block_positions)
 {
 	auto out = in;
 
-	auto env_pan = pan_envelope.search_vec(data, block_pos, prev_pos);
+	auto env_pan = pan_envelope.search_vec(data, block_positions);
 
 	const auto zero = ml::DSPVector(0.0f);
 	const auto one = ml::DSPVector(1.0f);

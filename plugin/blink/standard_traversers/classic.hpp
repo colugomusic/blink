@@ -165,7 +165,6 @@ class Classic
 {
 public:
 
-	float get_position(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivative = nullptr);
 	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, float* derivatives = nullptr);
 
 private:
@@ -173,32 +172,9 @@ private:
 	ClassicCalculator calculator_;
 };
 
-inline float Classic::get_position(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, float* derivative)
-{
-	const auto& read_position = traverser.get_read_position();
-
-	if (!env_pitch || env_pitch->points.count < 1)
-	{
-		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
-
-		if (derivative) *derivative = ff;
-
-		return (read_position[0] * ff) - float(sample_offset);
-	}
-
-	const auto& resets = traverser.get_resets();
-
-	if (resets[0] > 0)
-	{
-		calculator_.reset();
-	}
-
-	return calculator_.calculate(transpose, env_pitch, read_position[0], derivative) - sample_offset;
-}
-
 inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, float* derivatives)
 {
-	const auto& read_position = traverser.get_read_position();
+	const auto& block_positions = traverser.block_positions();
 
 	if (!env_pitch || env_pitch->points.count < 1)
 	{
@@ -206,7 +182,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 
 		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
 
-		return (read_position * ff) - float(sample_offset);
+		return (block_positions.positions * ff) - float(sample_offset);
 	}
 
 	const auto& resets = traverser.get_resets();
@@ -220,7 +196,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(transpose, env_pitch, read_position[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
+		out[i] = calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
 	}
 
 	return out;

@@ -1,5 +1,6 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
 #include <map>
 #include "blink.h"
 #include "envelope_spec.hpp"

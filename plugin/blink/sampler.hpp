@@ -20,6 +20,13 @@ public:
 
 	virtual blink_Error process(const blink_SamplerBuffer* buffer, float* out) = 0;
 
+protected:
+
+	void begin_process(const blink_SamplerBuffer* buffer)
+	{
+		GeneratorBase::begin_process(buffer->positions, buffer->data_offset);
+	}
+
 private:
 
 	std::function<blink_WarpPoints*()> get_warp_point_data_;
