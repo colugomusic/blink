@@ -82,6 +82,12 @@ extern "C"
 	// data between related instances if they need to.
 	EXPORTED blink_Sampler blink_make_sampler(int instance_group);
 
+	// Free all memory associated with this sampler instance.
+	// This will always be called four times per sampler block.
+	//
+	// process() will no longer be called for any other instances in the
+	// instance_group so it is safe to free any shared instance data the first
+	// time this is called for a any member of that instance_group.
 	EXPORTED blink_Error blink_destroy_sampler(blink_Sampler sampler);
 
 	EXPORTED blink_Bool blink_sampler_requires_preprocessing();

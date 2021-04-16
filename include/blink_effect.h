@@ -43,7 +43,12 @@ extern "C"
 	// data between related instances if they need to.
 	EXPORTED blink_Effect blink_make_effect(int instance_group);
 
-	// Free all memory associated with this effect instance
+	// Free all memory associated with this effect instance.
+	// This will always be called four times per effect block.
+	//
+	// process() will no longer be called for any other instances in the
+	// instance_group so it is safe to free any shared instance data the first
+	// time this is called for a any member of that instance_group.
 	EXPORTED blink_Error blink_destroy_effect(blink_Effect effect);
 }
 #endif
