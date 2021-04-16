@@ -1127,34 +1127,19 @@ inline EnvelopeSpec formant()
 	out.uuid = BLINK_STD_UUID_ENVELOPE_FORMANT;
 	out.name = "Formant";
 
-	// TODO:
+	out.default_value = 0.5f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+	out.stepify = percentage_bipolar::stepify;
 
-	//out.display_value = [](float v)
-	//{
-	//	std::stringstream ss;
+	out.value_slider = sliders::percentage_bipolar();
 
-	//	ss << v;
-
-	//	return ss.str();
-	//};
-
-	//out.range.min_range.range.min = -60.0f;
-	//out.range.min_range.range.max = 0.0f;
-	//out.range.min_range.value = -24.0f;
-	//out.range.min_range.step_size = 1.0f;
-
-	//out.range.max_range.range.min = -60.0f;
-	//out.range.max_range.range.max = 60.0f;
-	//out.range.max_range.value = 24.0f;
-	//out.range.max_range.step_size = 1.0;
-
-	//out.step_size.range.min = 0.0f;
-	//out.step_size.range.max = 60.0f;
-	//out.step_size.value = 1.0f;
-	//out.step_size.step_size = 1.0f;
-
-	//out.default_value = 0.0f;
-	//out.default_snap_amount = 1.0f;
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = percentage_bipolar::display;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = percentage_bipolar::display;
+	out.display_value = percentage_bipolar::display;
+	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }
@@ -1192,14 +1177,14 @@ inline EnvelopeSpec noise_color()
 	out.default_value = 0.5f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.stepify = percentage::stepify;
+	out.stepify = percentage_bipolar::stepify;
 
 	out.value_slider = sliders::percentage_bipolar();
 
 	out.range.min.default_value = 0.0f;
 	out.range.min.display_value = percentage_bipolar::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = speed::display;
+	out.range.max.display_value = percentage_bipolar::display;
 	out.display_value = percentage_bipolar::display;
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
 

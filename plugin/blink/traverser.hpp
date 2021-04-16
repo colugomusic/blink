@@ -23,7 +23,7 @@ public:
 
 	using DataOffset = std::int32_t;
 
-	void generate(const BlockPositions& block_positions, int n)
+	void generate(const BlockPositions& block_positions, int n = kFloatsPerDSPVector)
 	{
 		block_positions_ = &block_positions;
 		reset_ = 0;
