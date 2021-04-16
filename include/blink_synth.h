@@ -6,6 +6,7 @@
 
 typedef struct
 {
+	int instance_group;
 	blink_SR song_rate;
 	blink_SR sample_rate;
 	int data_offset;
@@ -29,7 +30,18 @@ typedef struct
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	EXPORTED blink_Synth blink_make_synth();
+	// Blockhead will call this four times per synth block to create a set
+	// synchronized synthesizers for the purposes of crossfading between them to
+	// avoid clicks.
+	//
+	// A crossfade between one or more synthesizers occurs whenever block data changes
+	// or the song loops back to an earlier position. These two sitations may
+	// occur simulataneously therefore Blockhead requires four instances in total.
+	//
+	// Blockhead passes in a different value for instance_group for each set of
+	// four synchronized synthesizers it creates. Plugins can use this id to share
+	// data between related instances if they need to.
+	EXPORTED blink_Synth blink_make_synth(int instance_group);
 	EXPORTED blink_Error blink_destroy_synth(blink_Synth synth);
 }
 #endif

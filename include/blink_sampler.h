@@ -39,6 +39,7 @@ typedef struct
 //
 typedef struct
 {
+	int instance_group;
 	blink_SR song_rate;
 	blink_SR sample_rate;
 	int data_offset;
@@ -68,12 +69,18 @@ typedef struct
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	// Blockhead will call this multiple times per sampler block to create a set
+	// Blockhead will call this four times per sampler block to create a set
 	// synchronized samplers for the purposes of crossfading between them to avoid
 	// clicks.
+	//
 	// A crossfade between one or more samplers occurs whenever block data changes
-	// or the song loops back to an earlier position.
-	EXPORTED blink_Sampler blink_make_sampler();
+	// or the song loops back to an earlier position. These two sitations may
+	// occur simulataneously therefore Blockhead requires four instances in total.
+	//
+	// Blockhead passes in a different value for instance_group for each set of
+	// four synchronized samplers it creates. Plugins can use this id to share
+	// data between related instances if they need to.
+	EXPORTED blink_Sampler blink_make_sampler(int instance_group);
 
 	EXPORTED blink_Error blink_destroy_sampler(blink_Sampler sampler);
 
