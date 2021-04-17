@@ -7,10 +7,12 @@
 #define BLINK_TRUE 1
 #define BLINK_FALSE 0
 
+#define BLINK_STD_UUID_CHORD_SCALE "860166f7-e839-448b-bd3b-a5bccbfe3ac1"
 #define BLINK_STD_UUID_ENVELOPE_AMP "273e7c30-404b-4db6-ba97-20f33d49fe51"
 #define BLINK_STD_UUID_ENVELOPE_FILTER_FREQUENCY "91181212-7072-41a9-9d11-3a265301a9a3"
 #define BLINK_STD_UUID_ENVELOPE_FILTER_RESONANCE "4436fc1c-ae51-4580-b1fa-24b9c41425e3"
 #define BLINK_STD_UUID_ENVELOPE_FORMANT "7b72dbef-e36d-4dce-958b-b0fa498ae41e"
+#define BLINK_STD_UUID_ENVELOPE_MIX "6441d97c-37c9-4670-9049-d22fac68b023"
 #define BLINK_STD_UUID_ENVELOPE_NOISE_AMOUNT "29d5ecb5-cb5d-4f19-afd3-835dd805682a"
 #define BLINK_STD_UUID_ENVELOPE_NOISE_COLOR "30100123-7343-4386-9ed2-f913b9e1e571"
 #define BLINK_STD_UUID_ENVELOPE_PAN "9c312a2c-a1b4-4a8d-ab68-07ea157c4574"
@@ -56,6 +58,7 @@ enum blink_StdIcon
 	blink_StdIcon_Speed = 5,
 	blink_StdIcon_Loop = 6,
 	blink_StdIcon_Reverse = 7,
+	blink_StdIcon_PianoRoll = 8,
 };
 
 // Generators define their own error codes. Blockhead will probably just ignore
@@ -256,22 +259,34 @@ typedef struct
 	float default_snap_amount;
 } blink_EnvelopeSnapSettings;
 
+enum blink_ChordFlags
+{
+	blink_ChordFlags_None                               = 1 << 0,
+	blink_ChordFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1, // Will not appear in modulator tree
+	blink_ChordFlags_DefaultActive                      = 1 << 2,
+	blink_ChordFlags_DefaultDisabled                    = 1 << 3,
+	blink_ChordFlags_IconOnly                           = 1 << 4, // Only show icon in button
+	blink_ChordFlags_MovesDisplay                       = 1 << 5, // Editing should trigger a visual update
+};
+
 enum blink_EnvelopeFlags
 {
 	blink_EnvelopeFlags_None                               = 1 << 0,
-	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1,
+	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1, // Will not appear in modulator tree
 	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
 	blink_EnvelopeFlags_DefaultDisabled                    = 1 << 3,
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
 	blink_EnvelopeFlags_NoGridLabels                       = 1 << 5,
-	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6,
+	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6, // Editing should trigger a visual update
 };
 
 enum blink_SliderFlags
 {
 	blink_SliderFlags_None          = 1 << 0,
-	blink_SliderFlags_MovesDisplay  = 1 << 1,
-	blink_SliderFlags_NonGlobal     = 1 << 2,
+	blink_SliderFlags_MovesDisplay  = 1 << 1, // Editing should trigger a visual update
+	blink_SliderFlags_NonGlobal     = 1 << 2, // Do not create a global control for this slider (can be used
+	                                          // to create sliders which are only visible when an envelope is
+											  // selected)
 };
 
 enum blink_ToggleFlags
@@ -280,7 +295,7 @@ enum blink_ToggleFlags
 	blink_ToggleFlags_ShowButton        = 1 << 1,
 	blink_ToggleFlags_ShowInContextMenu = 1 << 2,
 	blink_ToggleFlags_DefaultEnabled    = 1 << 3,
-	blink_ToggleFlags_MovesDisplay      = 1 << 4,
+	blink_ToggleFlags_MovesDisplay      = 1 << 4, // Editing should trigger a visual update
 };
 
 //
@@ -349,6 +364,8 @@ typedef struct
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
+	blink_StdIcon icon;
+	int flags; // blink_ChordFlags
 } blink_Chord;
 
 //

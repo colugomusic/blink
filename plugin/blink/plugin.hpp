@@ -6,6 +6,7 @@
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "slider_spec.hpp"
+#include "chord_parameter.hpp"
 #include "envelope_parameter.hpp"
 #include "option_parameter.hpp"
 #include "slider_parameter.hpp"
@@ -24,6 +25,7 @@ public:
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
 
+	static const blink_ChordData* get_chord_data(const blink_ParameterData* data, int index);
 	static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data, int index);
 	static const blink_SliderData* get_slider_data(const blink_ParameterData* data, int index);
 	static const blink_IntSliderData* get_int_slider_data(const blink_ParameterData* data, int index);
@@ -33,6 +35,7 @@ public:
 protected:
 
 	int add_group(std::string name);
+	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
 	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeSpec spec);
 	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
 	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
@@ -48,6 +51,11 @@ private:
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
 };
+
+inline const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data, int index)
+{
+	return data ? &data[index].chord : nullptr;
+}
 
 inline const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data, int index)
 {
@@ -85,6 +93,15 @@ inline void Plugin::add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> pa
 {
 	parameters_.push_back(parameter);
 	uuid_parameter_map_[uuid] = parameter.get();
+}
+
+inline std::shared_ptr<ChordParameter> Plugin::add_parameter(ChordSpec spec)
+{
+	const auto param = std::make_shared<ChordParameter>(spec);
+
+	add_parameter(spec.uuid, param);
+
+	return param;
 }
 
 inline std::shared_ptr<EnvelopeParameter> Plugin::add_parameter(EnvelopeSpec spec)

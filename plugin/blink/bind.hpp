@@ -186,6 +186,8 @@ inline blink_Chord chord(const ChordParameter& chord)
 	blink_Chord out;
 
 	out.parameter_type = blink_ParameterType_Chord;
+	out.icon = chord.icon();
+	out.flags = chord.flags();
 
 	return out;
 }
