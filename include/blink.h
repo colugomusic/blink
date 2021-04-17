@@ -158,7 +158,7 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	blink_ChordBlocks* blocks;
+	blink_ChordBlocks blocks;
 } blink_ChordData;
 
 typedef struct
@@ -277,7 +277,8 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_DefaultDisabled                    = 1 << 3,
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
 	blink_EnvelopeFlags_NoGridLabels                       = 1 << 5,
-	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6, // Editing should trigger a visual update
+	blink_EnvelopeFlags_IconOnly                           = 1 << 6, // Only show icon in button
+	blink_EnvelopeFlags_MovesDisplay                       = 1 << 7, // Editing should trigger a visual update
 };
 
 enum blink_SliderFlags
