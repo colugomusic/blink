@@ -4,6 +4,7 @@
 #include <regex>
 #include <sstream>
 #include "math.hpp"
+#include "chord_spec.hpp"
 #include "envelope_spec.hpp"
 #include "slider_parameter_spec.hpp"
 #include "toggle_spec.hpp"
@@ -209,7 +210,7 @@ namespace percentage_bipolar {
 
 inline auto stepify(float v) -> float
 {
-	return math::stepify(v, 0.0005f);
+	return math::stepify(v, 0.005f);
 }
 
 inline auto display(float v)
@@ -1161,7 +1162,7 @@ inline EnvelopeSpec noise_amount()
 	out.range.min.default_value = 0.0f;
 	out.range.min.display_value = percentage::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = speed::display;
+	out.range.max.display_value = percentage::display;
 	out.display_value = percentage::display;
 
 	return out;
@@ -1230,12 +1231,47 @@ inline EnvelopeSpec resonance()
 	out.range.min.default_value = 0.0f;
 	out.range.min.display_value = percentage::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = speed::display;
+	out.range.max.display_value = percentage::display;
+	out.display_value = percentage::display;
+
+	return out;
+}
+
+inline EnvelopeSpec mix()
+{
+	EnvelopeSpec out;
+
+	out.uuid = BLINK_STD_UUID_ENVELOPE_MIX;
+	out.name = "Mix";
+
+	out.default_value = 1.0f;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
+	out.stepify = percentage::stepify;
+	out.value_slider = sliders::percentage();
+	out.range.min.default_value = 0.0f;
+	out.range.min.display_value = percentage::display;
+	out.range.max.default_value = 1.0f;
+	out.range.max.display_value = percentage::display;
 	out.display_value = percentage::display;
 
 	return out;
 }
 
 } // envelopes
+
+namespace chords {
+
+inline ChordSpec scale()
+{
+	ChordSpec out;
+
+	out.uuid = BLINK_STD_UUID_CHORD_SCALE;
+	out.name = "Scale";
+	out.icon = blink_StdIcon_PianoRoll;
+
+	return out;
+}
+}
 
 }}
