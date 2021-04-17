@@ -1258,6 +1258,27 @@ inline EnvelopeSpec mix()
 	return out;
 }
 
+namespace generic
+{
+	inline EnvelopeSpec percentage()
+	{
+		EnvelopeSpec out;
+
+		out.default_value = 0.0f;
+		out.search_binary = generic_search_binary;
+		out.search_forward = generic_search_forward;
+		out.stepify = percentage::stepify;
+		out.value_slider = sliders::percentage();
+		out.range.min.default_value = 0.0f;
+		out.range.min.display_value = percentage::display;
+		out.range.max.default_value = 1.0f;
+		out.range.max.display_value = percentage::display;
+		out.display_value = percentage::display;
+
+		return out;
+	}
+}
+
 } // envelopes
 
 namespace chords {
