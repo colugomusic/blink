@@ -1,7 +1,7 @@
 #pragma once
 
+#include <algorithm>
 #include "../traverser.hpp"
-#include "../cached.hpp"
 #include "../envelope_parameter.hpp"
 #include "../slider_parameter.hpp"
 

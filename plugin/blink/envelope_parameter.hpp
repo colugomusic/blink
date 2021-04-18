@@ -3,7 +3,6 @@
 #include "block_positions.hpp"
 #include "envelope_spec.hpp"
 #include "envelope_range.hpp"
-#include "envelope_search.hpp"
 #include "envelope_snap_settings.hpp"
 #include "parameter.hpp"
 #include "option_parameter.hpp"
