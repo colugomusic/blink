@@ -32,7 +32,7 @@ typedef uint8_t blink_ChannelCount;
 typedef uint32_t blink_FrameCount;
 typedef uint32_t blink_ParamCount;
 typedef uint32_t blink_Index;
-typedef uint32_t blink_ID;
+typedef int32_t blink_ID;
 typedef const char* blink_UUID;
 typedef uint32_t blink_SR;
 typedef uint8_t blink_BitDepth;
