@@ -910,7 +910,7 @@ inline float generic_search(const blink_EnvelopeData* data, float default_value,
 	if (pos == search_end)
 	{
 		// No points to the right so we're at the end of the envelope
-		*left = int(std::distance<const blink_EnvelopePoint*>(data->points.points, (pos - 2)));
+		*left = int(std::distance<const blink_EnvelopePoint*>(data->points.points, (pos - 1)));
 
 		return clamp((pos - 1)->position.y);
 	}
@@ -1283,6 +1283,76 @@ namespace generic
 
 namespace chords {
 
+// returns the scale value at the given block position
+// [search_beg_index] is the index of the scale transition to begin searching from
+// [left] returns the index of the scale transition to the left of the block position,
+//        or zero if there isn't one.
+//        in some scenarios this can be passed as search_beg_index to
+//        speed up the search in the next iteration
+template <class SearchFunc>
+inline int generic_search(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+{
+	*left = 0;
+
+	if (data->blocks.count < 2) return 0;
+
+	auto search_beg = data->blocks.blocks + search_beg_index;
+	auto search_end = data->blocks.blocks + data->blocks.count;
+	const auto pos = search(search_beg, search_end);
+
+	if (pos == search_beg)
+	{
+		// The scale to the right is the first one
+		return 0;
+	}
+
+	*left = int(std::distance<const blink_ChordBlock*>(data->blocks.blocks, (pos - 1)));
+
+	if (pos == search_end)
+	{
+		// Nothing to the right so we're at the end
+		return 0;
+	}
+
+	// We're somewhere in between two scale transitions.
+	// Return the scale on the left
+	return (pos - 1)->scale;
+}
+
+// Use a binary search to locate the envelope position
+inline int generic_search_binary(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left)
+{
+	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end)
+	{
+		const auto less = [](blink_Position position, const blink_ChordBlock& block)
+		{
+			return position < block.position;
+		};
+
+		return std::upper_bound(beg, end, block_position, less);
+	};
+
+	return generic_search(data, block_position, search_beg_index, left, find);
+}
+
+// Use a forward search to locate the envelope position (can be
+// faster when envelope is being traversed forwards)
+inline int generic_search_forward(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left)
+{
+	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end)
+	{
+		const auto greater = [block_position](const blink_ChordBlock& block)
+		{
+			return block.position > block_position;
+		};
+
+		return std::find_if(beg, end, greater);
+	};
+
+	return generic_search(data, block_position, search_beg_index, left, find);
+}
+
+
 inline ChordSpec scale()
 {
 	ChordSpec out;
@@ -1290,6 +1360,8 @@ inline ChordSpec scale()
 	out.uuid = BLINK_STD_UUID_CHORD_SCALE;
 	out.name = "Scale";
 	out.icon = blink_StdIcon_PianoRoll;
+	out.search_binary = generic_search_binary;
+	out.search_forward = generic_search_forward;
 
 	return out;
 }
