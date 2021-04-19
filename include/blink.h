@@ -459,6 +459,11 @@ extern "C"
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID id);
 
+	// Returns true if Blockhead should enable warp markers. From the plugin's
+	// perspective this just means warp data will be passed in to process().
+	// It is up to the plugin to interpret this data.
+	EXPORTED blink_Bool blink_enable_warp_markers();
+
 	// Returned buffer remains valid until the next call to get_error_string or
 	// until the generator is destroyed
 	EXPORTED const char* blink_get_error_string(blink_Error error);

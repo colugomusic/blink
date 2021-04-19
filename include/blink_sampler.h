@@ -86,11 +86,6 @@ extern "C"
 	// time this is called for a any member of that instance_group.
 	EXPORTED blink_Error blink_destroy_sampler(blink_Sampler sampler);
 
-	// Returns true if Blockhead should enable warp markers. From the plugin's
-	// perspective this just means warp data will be passed in via
-	// blink_SamplerBuffer. It is up to the plugin to interpret this data.
-	EXPORTED blink_Bool blink_sampler_enable_warp_markers();
-
 	// Returns true if the plugin needs to preprocess samples in some way.
 	// Preprocessing happens once per sample.
 	EXPORTED blink_Bool blink_sampler_requires_preprocessing();
