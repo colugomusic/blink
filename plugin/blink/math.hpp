@@ -61,6 +61,11 @@ inline float linear_to_filter_hz(float linear)
 	return pitch_to_frequency(lerp(-8.513f, 135.076f, linear));
 }
 
+inline ml::DSPVector linear_to_filter_hz(const ml::DSPVector& linear)
+{
+	return pitch_to_frequency(ml::lerp(ml::DSPVector(-8.513f), ml::DSPVector(135.076f), linear));
+}
+
 inline float filter_hz_to_linear(float hz)
 {
 	return inverse_lerp(-8.513f, 135.076f, frequency_to_pitch(hz));
