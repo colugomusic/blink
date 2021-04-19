@@ -407,11 +407,10 @@ inline blink_Parameter parameter(const Parameter& parameter)
 }
 
 #ifdef BLINK_SAMPLER
-inline blink_Sampler sampler(Sampler* sampler, bool enable_warp_markers)
+inline blink_Sampler sampler(Sampler* sampler)
 {
 	blink_Sampler out;
 
-	out.enable_warp_markers = enable_warp_markers;
 	out.proc_data = sampler;
 
 	out.process = [](void* proc_data, const blink_SamplerBuffer* buffer, float* out)
@@ -427,7 +426,7 @@ inline blink_Sampler sampler(Sampler* sampler, bool enable_warp_markers)
 template <class SamplerType, class ...Args>
 blink_Sampler make_sampler(Args... args)
 {
-	return bind::sampler(new SamplerType(args...), SamplerType::ENABLE_WARP_MARKERS);
+	return bind::sampler(new SamplerType(args...));
 }
 
 blink_Error destroy_sampler(blink_Sampler sampler)

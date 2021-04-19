@@ -10,41 +10,24 @@ class Parameter
 {
 public:
 
-	Parameter(const ParameterSpec& spec);
+	Parameter(const ParameterSpec& spec)
+		: uuid_(spec.uuid)
+		, name_(spec.name)
+	{}
 
-	blink_UUID get_uuid() const;
-	int get_group_index() const;
-	const char* get_name() const;
+	void set_group_index(int group_index) { group_index_ = group_index; }
+
+	blink_UUID get_uuid() const { return uuid_; }
+	int get_group_index() const { return group_index_; }
+	const char* get_name() const { return name_.c_str(); }
 
 	virtual blink_ParameterType get_type() const = 0;
 
 private:
 
 	blink_UUID uuid_;
-	int group_index_;
+	int group_index_ = -1;
 	std::string name_;
 };
-
-inline Parameter::Parameter(const ParameterSpec& spec)
-	: uuid_(spec.uuid)
-	, group_index_(spec.group_index)
-	, name_(spec.name)
-{
-}
-
-inline blink_UUID Parameter::get_uuid() const
-{
-	return uuid_;
-}
-
-inline int Parameter::get_group_index() const
-{
-	return group_index_;
-}
-
-inline const char* Parameter::get_name() const
-{
-	return name_.c_str();
-}
 
 }

@@ -57,8 +57,6 @@ typedef blink_Error(*blink_Sampler_Process)(void* proc_data, const blink_Sampler
 
 typedef struct
 {
-	bool enable_warp_markers;
-
 	void* proc_data;
 
 	blink_Sampler_Process process;
