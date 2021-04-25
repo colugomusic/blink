@@ -84,7 +84,7 @@ typedef struct
 	// equal to the song rate
 	float* sculpted_block_positions;
 
-	// The sample position after time warping has been performed
+	// The block position after time warping has been performed
 	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
 	// This will differ from warped_sample_positions when the sample rate of the sample is not
 	// equal to the song rate
