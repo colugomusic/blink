@@ -165,14 +165,14 @@ class Classic
 {
 public:
 
-	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, float* derivatives = nullptr);
+	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives = nullptr);
 
 private:
 
 	ClassicCalculator calculator_;
 };
 
-inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, float* derivatives)
+inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives)
 {
 	const auto& block_positions = traverser.block_positions();
 
@@ -180,7 +180,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 	{
 		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
 
-		if (derivatives) ml::storeAligned(ml::DSPVector(ff), derivatives);
+		if (derivatives) *derivatives = ff;
 
 		return (block_positions.positions * ff) - float(sample_offset);
 	}
@@ -196,7 +196,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives[i]) : nullptr) - sample_offset;
+		out[i] = calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr) - sample_offset;
 	}
 
 	return out;

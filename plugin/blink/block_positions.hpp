@@ -19,7 +19,7 @@ struct BlockPositions
 		positions[count - 1] = std::numeric_limits<float>::max();
 	}
 
-	BlockPositions(const ml::DSPVector& positions_, float prev_pos_)
+	BlockPositions(const ml::DSPVector& positions_, float prev_pos_ = std::numeric_limits<float>::max())
 		: positions(positions_)
 		, prev_pos(prev_pos_)
 	{
@@ -43,6 +43,15 @@ struct BlockPositions
 			positions[i] = float(blink_positions[i] - offset);
 		}
 		
+		count = count_;
+	}
+
+	void operator()(const ml::DSPVector& vec_positions, int offset, int count_)
+	{
+		prev_pos = positions[count - 1];
+
+		positions = vec_positions - float(offset);
+
 		count = count_;
 	}
 };

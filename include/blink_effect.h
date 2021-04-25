@@ -12,7 +12,6 @@ typedef struct
 	int data_offset;
 
 	blink_Position* positions;
-	blink_WarpPoints* warp_points;
 	blink_ParameterData* parameter_data;
 } blink_EffectBuffer;
 

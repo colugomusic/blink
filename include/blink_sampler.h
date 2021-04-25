@@ -34,8 +34,20 @@ typedef struct
 	blink_GetSampleDataCB get_data;
 } blink_SampleInfo;
 
+typedef struct
+{
+	blink_IntPosition x, y;
+	float value; // currently unused
+} blink_WarpPoint;
+
+typedef struct
+{
+	blink_Index count;
+	blink_WarpPoint* points;
+} blink_WarpPoints;
+
 //
-// Sampler Buffer
+// Sampler Config
 //
 typedef struct
 {
@@ -50,6 +62,43 @@ typedef struct
 	blink_WarpPoints* warp_points;
 	blink_ParameterData* parameter_data;
 } blink_SamplerBuffer;
+
+//
+// Draw Info
+// This is passed in to blink_sampler_draw() as an output argument
+// Blockhead may set any of the pointers to null depending on what data it needs from the plugin.
+//
+typedef struct
+{
+	// The sample position after being transformed by parameter settings but before time warping
+	// has been performed
+	float* sculpted_sample_positions;
+
+	// The sample position after time warping has been performed
+	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
+	float* warped_sample_positions;
+
+	// The block position after being transformed by parameter settings but before time warping
+	// has been performed.
+	// This will differ from sculpted_sample_positions when the sample rate of the sample is not
+	// equal to the song rate
+	float* sculpted_block_positions;
+
+	// The sample position after time warping has been performed
+	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
+	// This will differ from warped_sample_positions when the sample rate of the sample is not
+	// equal to the song rate
+	float* warped_block_positions;
+
+	// The sample position after time warping and other transformations (loop, reverse etc)
+	float* final_sample_positions;
+
+	// The rate of change in the sample position after time warping
+	float* waveform_derivatives;
+
+	// The amplitude after being transformed by parameter settings
+	float* amp;
+} blink_SamplerDrawInfo;
 
 // output pointer is aligned on a 16-byte boundary
 // output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
@@ -85,6 +134,11 @@ extern "C"
 	// instance_group so it is safe to free any shared instance data the first
 	// time this is called for a any member of that instance_group.
 	EXPORTED blink_Error blink_destroy_sampler(blink_Sampler sampler);
+
+	// Returns true if Blockhead should enable warp markers. From the plugin's
+	// perspective this just means warp data will be passed in to process().
+	// It is up to the plugin to interpret this data.
+	EXPORTED blink_Bool blink_sampler_enable_warp_markers();
 
 	// Returns true if the plugin needs to preprocess samples in some way.
 	// Preprocessing happens once per sample.
@@ -122,11 +176,6 @@ extern "C"
 
 	// The host takes care of actually rendering the waveform but relies on
 	// the plugin to calculate the waveform position at each pixel.
-	//
-	// This function returns
-	//	[out]: the transformed waveform positions
-	//  [derivatives]: the rate of change (of the waveform position) at each position
-	//	[amp]: the sample amplitude at each position
-	EXPORTED blink_Error blink_sampler_get_waveform_positions(const blink_SamplerBuffer* buffer, blink_FrameCount n, float* out, float* derivatives, float* amp);
+	EXPORTED blink_Error blink_sampler_draw(const blink_SamplerBuffer* buffer, blink_FrameCount n, blink_SamplerDrawInfo* out);
 }
 #endif

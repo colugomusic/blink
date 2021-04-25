@@ -87,17 +87,6 @@ typedef struct
 
 typedef struct
 {
-	blink_IntPosition x, y;
-} blink_WarpPoint;
-
-typedef struct
-{
-	blink_Index count;
-	blink_WarpPoint* points;
-} blink_WarpPoints;
-
-typedef struct
-{
 	float min;
 	float max;
 } blink_Range;
@@ -458,11 +447,6 @@ extern "C"
 	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID id);
-
-	// Returns true if Blockhead should enable warp markers. From the plugin's
-	// perspective this just means warp data will be passed in to process().
-	// It is up to the plugin to interpret this data.
-	EXPORTED blink_Bool blink_enable_warp_markers();
 
 	// Returned buffer remains valid until the next call to get_error_string or
 	// until the generator is destroyed
