@@ -34,11 +34,13 @@ SliderParameter<T>::SliderParameter(SliderParameterSpec<T> spec)
 {
 }
 
+template <>
 inline blink_ParameterType SliderParameter<float>::get_type() const
 {
 	return blink_ParameterType_Slider;
 }
 
+template <>
 inline blink_ParameterType SliderParameter<int>::get_type() const
 {
 	return blink_ParameterType_IntSlider;

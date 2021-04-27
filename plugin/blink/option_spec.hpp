@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 #include "parameter_spec.hpp"
 
 namespace blink {
