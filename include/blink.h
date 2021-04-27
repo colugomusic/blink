@@ -28,6 +28,8 @@
 #define BLINK_STD_UUID_TOGGLE_LOOP "dfa36d24-3c41-4a13-9b57-dc0116ef19f7"
 #define BLINK_STD_UUID_TOGGLE_REVERSE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
 
+#define BLINK_STD_CATEGORY_FILTERS "Filters"
+
 typedef uint8_t blink_ChannelCount;
 typedef uint32_t blink_FrameCount;
 typedef uint32_t blink_ParamCount;
@@ -440,6 +442,7 @@ extern "C"
 {
 	EXPORTED blink_UUID blink_get_plugin_uuid();
 	EXPORTED const char* blink_get_plugin_name();
+	EXPORTED const char* blink_get_plugin_category();
 	EXPORTED blink_Error blink_init();
 	EXPORTED blink_Error blink_terminate();
 	EXPORTED int blink_get_num_groups();
