@@ -30,7 +30,9 @@ Slider<T>::Slider(SliderSpec<T> spec)
 template <class T>
 const char* Slider<T>::display_value(T value) const
 {
-	return (display_value_buffer_ = spec_.display_value(value)).c_str();
+	display_value_buffer_ = spec_.display_value(value);
+
+	return display_value_buffer_.c_str();
 }
 
 }
