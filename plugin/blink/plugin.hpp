@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <map>
+#include <memory>
 #include "blink.h"
 #include "envelope_spec.hpp"
 #include "group.hpp"

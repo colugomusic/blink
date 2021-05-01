@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 #include <map>
 #include "envelope_spec.hpp"
 #include "group.hpp"
@@ -47,3 +48,4 @@ void Generator::set_data_offset(int offset)
 }
 
 }
+*/
