@@ -264,11 +264,11 @@ inline auto display(float v)
 
 	if (hz >= 1000.0f)
 	{
-		ss << (hz / 1000.0f) << " MHz";
+		ss << math::stepify(hz / 1000.0f, 0.1f) << " MHz";
 	}
 	else
 	{
-		ss << hz << " Hz";
+		ss << math::stepify(hz, 0.1f) << " Hz";
 	}
 
 	return ss.str();
@@ -279,6 +279,15 @@ inline auto from_string(const std::string& str) -> std::optional<float>
 	auto value = find_number<float>(str);
 
 	if (!value) return std::optional<float>();
+
+	std::string uppercase = str;
+
+	std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
+
+	if (uppercase.find("MHZ") != std::string::npos)
+	{
+		return math::convert::filter_hz_to_linear((*value) * 1000.0f);
+	}
 
 	return math::convert::filter_hz_to_linear(*value);
 };
