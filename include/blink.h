@@ -443,6 +443,7 @@ extern "C"
 	EXPORTED blink_UUID blink_get_plugin_uuid();
 	EXPORTED const char* blink_get_plugin_name();
 	EXPORTED const char* blink_get_plugin_category();
+	EXPORTED const char* blink_get_plugin_version();
 	EXPORTED blink_Error blink_init();
 	EXPORTED blink_Error blink_terminate();
 	EXPORTED int blink_get_num_groups();
