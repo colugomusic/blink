@@ -668,8 +668,8 @@ inline SliderSpec<float> pitch()
 	out.increment = pitch::increment;
 	out.decrement = pitch::decrement;
 	out.drag = pitch::drag;
-	out.display_value = &display_number<float>;
-	out.from_string = &find_number<float>;
+	out.display_value = [](float v) { return display_number<float>(v); };
+	out.from_string = [](const std::string& str) { return find_number<float>(str); };
 	out.stepify = pitch::stepify;
 	out.default_value = 0.0f;
 
@@ -699,8 +699,8 @@ inline SliderSpec<int> sample_offset()
 	out.increment = sample_offset::increment;
 	out.decrement = sample_offset::decrement;
 	out.drag = sample_offset::drag;
-	out.display_value = &display_number<int>;
-	out.from_string = &find_number<int>;
+	out.display_value = [](int v) { return display_number<int>(v); };
+	out.from_string = [](const std::string& str) { return find_number<int>(str); };
 	out.default_value = 0;
 
 	return out;
@@ -1047,7 +1047,7 @@ inline EnvelopeSpec pitch()
 
 	out.value_slider = sliders::pitch();
 
-	out.display_value = &display_number<float>;
+	out.display_value = [](float v) { return display_number<float>(v); };
 
 	out.get_gridline = [](int index) -> float
 	{
@@ -1063,25 +1063,25 @@ inline EnvelopeSpec pitch()
 	out.range.min.decrement = pitch::decrement;
 	out.range.min.increment = pitch::increment;
 	out.range.min.default_value = -24.0f;
-	out.range.min.display_value = &display_number<float>;
+	out.range.min.display_value = [](float v) { return display_number<float>(v); };
 	out.range.min.drag = pitch::drag;
-	out.range.min.from_string = &find_number<float>;
+	out.range.min.from_string = [](const std::string& str) { return find_number<float>(str); };
 
 	out.range.max.constrain = pitch::constrain;
 	out.range.max.decrement = pitch::decrement;
 	out.range.max.increment = pitch::increment;
 	out.range.max.default_value = 24.0f;
-	out.range.max.display_value = &display_number<float>;
+	out.range.max.display_value = [](float v) { return display_number<float>(v); };
 	out.range.max.drag = pitch::drag;
-	out.range.max.from_string = &find_number<float>;
+	out.range.max.from_string = [](const std::string& str) { return find_number<float>(str); };
 
 	out.step_size.constrain = [](float v) { return constrain(v, 0.0f, 60.0f); };
 	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(decrement<1, 10>(v, precise)); };
 	out.step_size.increment = [out](float v, bool precise) { return out.step_size.constrain(increment<1, 10>(v, precise)); };
 	out.step_size.default_value = 1.0f;
-	out.step_size.display_value = &display_number<float>;
+	out.step_size.display_value = [](float v) { return display_number<float>(v); };
 	out.step_size.drag = [out](float v, int amount, bool precise) { return out.step_size.constrain(pitch::drag(v, amount, precise)); };
-	out.step_size.from_string = &find_number<float>;
+	out.step_size.from_string = [](const std::string& str) { return find_number<float>(str); };
 
 	out.default_snap_amount = 1.0f;
 
