@@ -31,7 +31,7 @@
 #define BLINK_STD_CATEGORY_FILTERS "Filters"
 
 typedef uint8_t blink_ChannelCount;
-typedef uint32_t blink_FrameCount;
+typedef uint64_t blink_FrameCount;
 typedef uint32_t blink_ParamCount;
 typedef uint32_t blink_Index;
 typedef int32_t blink_ID;
