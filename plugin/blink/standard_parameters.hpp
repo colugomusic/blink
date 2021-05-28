@@ -1,8 +1,6 @@
 #pragma once
 
-#include <optional>
-#include <regex>
-#include <sstream>
+#include <tweak/tweak.hpp>
 #include "math.hpp"
 #include "chord_spec.hpp"
 #include "envelope_spec.hpp"
@@ -12,158 +10,16 @@
 namespace blink {
 namespace std_params {
 
-template <class T> std::optional<T> find_number(const std::string& str);
-template <class T> std::optional<T> find_positive_number(const std::string& str);
-
-template <>
-inline std::optional<float> find_number<float>(const std::string& str)
-{
-	std::regex r("(\\-?\\s*[\\.\\d]+)");
-	std::smatch match;
-
-	if (!std::regex_search(str, match, r)) return std::optional<float>();
-
-	return std::stof(match[0].str());
-}
-
-template <>
-inline std::optional<int> find_number<int>(const std::string& str)
-{
-	std::regex r("(\\-?\\s*[\\d]+)");
-	std::smatch match;
-
-	if (!std::regex_search(str, match, r)) return std::optional<int>();
-
-	return std::stoi(match[0].str());
-}
-
-template <>
-inline std::optional<float> find_positive_number<float>(const std::string& str)
-{
-	std::regex r("([\\.\\d]+)");
-	std::smatch match;
-
-	if (!std::regex_search(str, match, r)) return std::optional<float>();
-
-	return std::stof(match[0].str());
-}
-
-template <>
-inline std::optional<int> find_positive_number<int>(const std::string& str)
-{
-	std::regex r("([\\d]+)");
-	std::smatch match;
-
-	if (!std::regex_search(str, match, r)) return std::optional<int>();
-
-	return std::stoi(match[0].str());
-}
-
-template <int Normal, int Precise>
-inline float increment(float v, bool precise)
-{
-	return v + 1.0f / (precise ? Precise : Normal);
-}
-
-template <int Normal, int Precise>
-inline float decrement(float v, bool precise)
-{
-	return v - 1.0f / (precise ? Precise : Normal);
-}
-
-template <int Normal>
-inline float increment(float v)
-{
-	return v + 1.0f / (Normal);
-}
-
-template <int Normal>
-inline float decrement(float v)
-{
-	return v - 1.0f / (Normal);
-}
-
-template <int Normal, int Precise>
-inline float drag(float v, int amount, bool precise)
-{
-	return v + (float(amount) / (precise ? Precise : Normal));
-}
-
-template <int Normal>
-inline float drag(float v, int amount)
-{
-	return v + (float(amount) / Normal);
-}
-
-inline float constrain(float v, float min, float max)
-{
-	if (v < min) return min;
-	if (v > max) return max;
-
-	return v;
-}
-
-template <class T>
-inline auto display_number(T v)
-{
-	std::stringstream ss;
-
-	ss << v;
-
-	return ss.str();
-};
-
-inline auto stepify_0_1(float v) -> float
-{
-	return math::stepify(v, 0.1f);
-}
-
-inline auto stepify_0_01(float v) -> float
-{
-	return math::stepify(v, 0.01f);
-}
-
-inline auto stepify_0_001(float v) -> float
-{
-	return math::stepify(v, 0.001f);
-}
-
-inline auto snap_value(float v, float step_size, float snap_amount)
-{
-	if (snap_amount <= 0.0f) return v;
-
-	if (snap_amount >= 1.0f)
-	{
-		v /= step_size;
-		v = std::round(v);
-		v *= step_size;
-
-		return v;
-	}
-
-	const auto up = std::ceil((v / step_size) + 0.0001f) * step_size;
-	const auto down = std::floor(v / step_size) * step_size;
-	const auto x = math::inverse_lerp(down, up, v);
-	const auto t = x * 2.0f;
-	const auto i = 1.0f + (std::pow(snap_amount, 4.0f) * 99.0f);
-	const auto curve =
-		t < 1.0f
-		? 1.0f - (0.5f * (std::pow(1.0f - t, 1.0f / i) + 1.0f))
-		: 0.5f * (std::pow(t - 1.0f, 1.0f / i) + 1.0f);
-
-	return math::lerp(down, up, curve);
-}
-
 namespace percentage {
 
 inline auto stepify(float v) -> float
 {
-	return stepify_0_001(v);
+    return tweak::math::stepify<1000>(v);
 }
 
 inline auto snap_value(float v, float step_size, float snap_amount)
 {
-	return stepify(std_params::snap_value(v, step_size, snap_amount));
+	return stepify(tweak::snap_value(v, step_size, snap_amount));
 }
 
 inline float constrain(float v)
@@ -173,17 +29,17 @@ inline float constrain(float v)
 
 inline auto increment(float v, bool precise)
 {
-	return constrain(stepify(std_params::increment<100, 1000>(v, precise)));
+	return constrain(stepify(tweak::increment<100, 1000>(v, precise)));
 };
 
 inline auto decrement(float v, bool precise)
 {
-	return constrain(stepify(std_params::decrement<100, 1000>(v, precise)));
+	return constrain(stepify(tweak::decrement<100, 1000>(v, precise)));
 };
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return constrain(stepify(std_params::drag<100, 1000>(v, amount / 5, precise)));
+	return constrain(stepify(tweak::drag<100, 1000>(v, amount / 5, precise)));
 };
 
 inline auto display(float v)
@@ -197,14 +53,14 @@ inline auto display(float v)
 
 inline auto from_string(const std::string& str) -> std::optional<float>
 {
-	auto value = find_number<float>(str);
+	auto value = tweak::find_number<float>(str);
 
 	if (!value) return std::optional<float>();
 
 	return (*value / 100.0f);
 };
 
-}
+} // percentage
 
 namespace percentage_bipolar {
 
@@ -224,20 +80,20 @@ inline auto display(float v)
 
 inline auto increment(float v, bool precise)
 {
-	return percentage::constrain(stepify(std_params::increment<200, 2000>(v, precise)));
+	return percentage::constrain(stepify(tweak::increment<200, 2000>(v, precise)));
 };
 
 inline auto decrement(float v, bool precise)
 {
-	return percentage::constrain(stepify(std_params::decrement<200, 2000>(v, precise)));
+	return percentage::constrain(stepify(tweak::decrement<200, 2000>(v, precise)));
 };
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return percentage::constrain(stepify(std_params::drag<200, 2000>(v, amount / 5, precise)));
+	return percentage::constrain(stepify(tweak::drag<200, 2000>(v, amount / 5, precise)));
 };
 
-}
+} // percentage_bipolar
 
 namespace filter_frequency {
 
@@ -276,7 +132,7 @@ inline auto display(float v)
 
 inline auto from_string(const std::string& str) -> std::optional<float>
 {
-	auto value = find_number<float>(str);
+	auto value = tweak::find_number<float>(str);
 
 	if (!value) return std::optional<float>();
 
@@ -294,17 +150,17 @@ inline auto from_string(const std::string& str) -> std::optional<float>
 
 inline auto increment(float v, bool precise)
 {
-	return constrain(stepify(std_params::increment<100, 1000>(v, precise)));
+	return constrain(stepify(tweak::increment<100, 1000>(v, precise)));
 };
 
 inline auto decrement(float v, bool precise)
 {
-	return constrain(stepify(std_params::decrement<100, 1000>(v, precise)));
+	return constrain(stepify(tweak::decrement<100, 1000>(v, precise)));
 };
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return constrain(stepify(std_params::drag<100, 1000>(v, amount / 5, precise)));
+	return constrain(stepify(tweak::drag<100, 1000>(v, amount / 5, precise)));
 };
 
 }
@@ -330,7 +186,7 @@ namespace amp
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
 	{
-		auto db = find_number<float>(str);
+		auto db = tweak::find_number<float>(str);
 
 		if (!db) return db;
 
@@ -357,19 +213,19 @@ namespace amp
 	{
 		if (v <= 0.0f) return math::convert::db_to_linear(-60.0f);
 
-		return constrain(stepify(math::convert::db_to_linear(std_params::increment<1, 10>(math::convert::linear_to_db(v), precise))));
+		return constrain(stepify(math::convert::db_to_linear(tweak::increment<1, 10>(math::convert::linear_to_db(v), precise))));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(stepify(math::convert::db_to_linear(std_params::decrement<1, 10>(math::convert::linear_to_db(v), precise))));
+		return constrain(stepify(math::convert::db_to_linear(tweak::decrement<1, 10>(math::convert::linear_to_db(v), precise))));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
 		if (v <= 0.0f) v = math::convert::db_to_linear(-61.0f);
 
-		return constrain(stepify(math::convert::db_to_linear(std_params::drag<1, 10>(math::convert::linear_to_db(v), amount / 5, precise))));
+		return constrain(stepify(math::convert::db_to_linear(tweak::drag<1, 10>(math::convert::linear_to_db(v), amount / 5, precise))));
 	};
 }
 
@@ -377,7 +233,7 @@ namespace pan
 {
 	inline auto stepify(float v) -> float
 	{
-		return stepify_0_01(v);
+		return tweak::math::stepify<100>(v);
 	}
 
 	inline float constrain(float v)
@@ -410,17 +266,17 @@ namespace pan
 	
 	inline auto increment(float v, bool precise)
 	{
-		return constrain(stepify(std_params::increment<100>(v)));
+		return constrain(stepify(tweak::increment<100>(v)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(stepify(std_params::decrement<100>(v)));
+		return constrain(stepify(tweak::decrement<100>(v)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		return constrain(stepify(std_params::drag<500, 5000>(v, amount, precise)));
+		return constrain(stepify(tweak::drag<500, 5000>(v, amount, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
@@ -433,7 +289,7 @@ namespace pan
 
 		const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
 
-		auto value = find_positive_number<int>(str);
+		auto value = tweak::find_positive_number<int>(str);
 
 		if (!value) return std::optional<float>();
 
@@ -445,12 +301,12 @@ namespace pitch
 {
 	inline auto stepify(float v) -> float
 	{
-		return stepify_0_1(v);
+		return tweak::math::stepify<10>(v);
 	}
 
 	inline auto snap_value(float v, float step_size, float snap_amount)
 	{
-		return stepify(std_params::snap_value(v, step_size, snap_amount));
+		return stepify(tweak::snap_value(v, step_size, snap_amount));
 	}
 
 	inline float constrain(float v)
@@ -463,17 +319,17 @@ namespace pitch
 
 	inline auto increment(float v, bool precise)
 	{
-		return constrain(stepify(std_params::increment<1, 10>(v, precise)));
+		return constrain(stepify(tweak::increment<1, 10>(v, precise)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(stepify(std_params::decrement<1, 10>(v, precise)));
+		return constrain(stepify(tweak::decrement<1, 10>(v, precise)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		return constrain(stepify(std_params::drag<1, 10>(v, amount / 5, precise)));
+		return constrain(stepify(tweak::drag<1, 10>(v, amount / 5, precise)));
 	};
 }
 
@@ -501,19 +357,19 @@ namespace speed
 	{
 		if (v <= FREEZE) return math::convert::linear_to_speed(-32.0f);
 
-		return constrain(math::convert::linear_to_speed(std_params::increment<1, 10>(math::convert::speed_to_linear(v), precise)));
+		return constrain(math::convert::linear_to_speed(tweak::increment<1, 10>(math::convert::speed_to_linear(v), precise)));
 	};
 
 	inline auto decrement(float v, bool precise)
 	{
-		return constrain(math::convert::linear_to_speed(std_params::decrement<1, 10>(math::convert::speed_to_linear(v), precise)));
+		return constrain(math::convert::linear_to_speed(tweak::decrement<1, 10>(math::convert::speed_to_linear(v), precise)));
 	};
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
 		if (v <= FREEZE) v = math::convert::linear_to_speed(-32.0f);
 
-		return constrain(math::convert::linear_to_speed(std_params::drag<1, 10>(math::convert::speed_to_linear(v), amount / 5, precise)));
+		return constrain(math::convert::linear_to_speed(tweak::drag<1, 10>(math::convert::speed_to_linear(v), amount / 5, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
@@ -535,7 +391,7 @@ namespace speed
 			return 1.0f / std::stoi(match[1]);
 		}
 
-		auto ff = find_number<float>(str);
+		auto ff = tweak::find_number<float>(str);
 
 		if (!ff) return ff;
 
@@ -601,7 +457,7 @@ inline auto constrain(int v)
 
 inline auto from_string(const std::string& str) -> std::optional<float>
 {
-	auto db = find_number<float>(str);
+	auto db = tweak::find_number<float>(str);
 
 	if (!db) return db;
 
@@ -637,7 +493,7 @@ inline SliderSpec<float> amp()
 	out.decrement = amp::decrement;
 	out.drag = amp::drag;
 	out.from_string = amp::from_string;
-	out.display_value = amp::display;
+	out.to_string = amp::display;
 	out.stepify = amp::stepify;
 	out.default_value = 1.0f;
 
@@ -653,7 +509,7 @@ inline SliderSpec<float> pan()
 	out.decrement = pan::decrement;
 	out.drag = pan::drag;
 	out.from_string = pan::from_string;
-	out.display_value = pan::display;
+	out.to_string = pan::display;
 	out.stepify = pan::stepify;
 	out.default_value = 0.0f;
 
@@ -668,8 +524,8 @@ inline SliderSpec<float> pitch()
 	out.increment = pitch::increment;
 	out.decrement = pitch::decrement;
 	out.drag = pitch::drag;
-	out.display_value = [](float v) { return display_number<float>(v); };
-	out.from_string = [](const std::string& str) { return find_number<float>(str); };
+	out.to_string = [](float v) { return std::to_string(v); };
+	out.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 	out.stepify = pitch::stepify;
 	out.default_value = 0.0f;
 
@@ -684,7 +540,7 @@ inline SliderSpec<float> speed()
 	out.increment = speed::increment;
 	out.decrement = speed::decrement;
 	out.drag = speed::drag;
-	out.display_value = speed::display;
+	out.to_string = speed::display;
 	out.from_string = speed::from_string;
 	out.default_value = 1.0f;
 
@@ -699,8 +555,8 @@ inline SliderSpec<int> sample_offset()
 	out.increment = sample_offset::increment;
 	out.decrement = sample_offset::decrement;
 	out.drag = sample_offset::drag;
-	out.display_value = [](int v) { return display_number<int>(v); };
-	out.from_string = [](const std::string& str) { return find_number<int>(str); };
+	out.to_string = [](int v) { return std::to_string(v); };
+	out.from_string = [](const std::string& str) { return tweak::find_number<int>(str); };
 	out.default_value = 0;
 
 	return out;
@@ -714,7 +570,7 @@ inline SliderSpec<float> percentage()
 	out.increment = percentage::increment;
 	out.decrement = percentage::decrement;
 	out.drag = percentage::drag;
-	out.display_value = percentage::display;
+	out.to_string = percentage::display;
 	out.from_string = percentage::from_string;
 	out.default_value = 0;
 
@@ -729,7 +585,7 @@ inline SliderSpec<float> percentage_bipolar()
 	out.increment = percentage_bipolar::increment;
 	out.decrement = percentage_bipolar::decrement;
 	out.drag = percentage_bipolar::drag;
-	out.display_value = percentage_bipolar::display;
+	out.to_string = percentage_bipolar::display;
 	out.from_string = percentage::from_string;
 	out.default_value = 0;
 
@@ -744,7 +600,7 @@ inline SliderSpec<float> filter_frequency()
 	out.increment = filter_frequency::increment;
 	out.decrement = filter_frequency::decrement;
 	out.drag = filter_frequency::drag;
-	out.display_value = filter_frequency::display;
+	out.to_string = filter_frequency::display;
 	out.from_string = filter_frequency::from_string;
 	out.default_value = 0;
 
@@ -991,10 +847,10 @@ inline EnvelopeSpec amp()
 	out.value_slider = sliders::amp();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = amp::display;
+	out.range.min.to_string = amp::display;
 
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = amp::display;
+	out.range.max.to_string = amp::display;
 	out.range.max.from_string = amp::from_string;
 	out.range.max.constrain = amp::constrain;
 	out.range.max.increment = amp::increment;
@@ -1022,10 +878,10 @@ inline EnvelopeSpec pan()
 	out.value_slider = sliders::pan();
 
 	out.range.min.default_value = -1.0f;
-	out.range.min.display_value = pan::display;
+	out.range.min.to_string = pan::display;
 
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = pan::display;
+	out.range.max.to_string = pan::display;
 
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
@@ -1047,7 +903,7 @@ inline EnvelopeSpec pitch()
 
 	out.value_slider = sliders::pitch();
 
-	out.display_value = [](float v) { return display_number<float>(v); };
+	out.display_value = [](float v) { return std::to_string(v); };
 
 	out.get_gridline = [](int index) -> float
 	{
@@ -1063,25 +919,25 @@ inline EnvelopeSpec pitch()
 	out.range.min.decrement = pitch::decrement;
 	out.range.min.increment = pitch::increment;
 	out.range.min.default_value = -24.0f;
-	out.range.min.display_value = [](float v) { return display_number<float>(v); };
+	out.range.min.to_string = [](float v) { return std::to_string(v); };
 	out.range.min.drag = pitch::drag;
-	out.range.min.from_string = [](const std::string& str) { return find_number<float>(str); };
+	out.range.min.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 
 	out.range.max.constrain = pitch::constrain;
 	out.range.max.decrement = pitch::decrement;
 	out.range.max.increment = pitch::increment;
 	out.range.max.default_value = 24.0f;
-	out.range.max.display_value = [](float v) { return display_number<float>(v); };
+	out.range.max.to_string = [](float v) { return std::to_string(v); };
 	out.range.max.drag = pitch::drag;
-	out.range.max.from_string = [](const std::string& str) { return find_number<float>(str); };
+	out.range.max.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 
-	out.step_size.constrain = [](float v) { return constrain(v, 0.0f, 60.0f); };
-	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(decrement<1, 10>(v, precise)); };
-	out.step_size.increment = [out](float v, bool precise) { return out.step_size.constrain(increment<1, 10>(v, precise)); };
+	out.step_size.constrain = [](float v) { return tweak::constrain(v, 0.0f, 60.0f); };
+	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(tweak::decrement<1, 10>(v, precise)); };
+	out.step_size.increment = [out](float v, bool precise) { return out.step_size.constrain(tweak::increment<1, 10>(v, precise)); };
 	out.step_size.default_value = 1.0f;
-	out.step_size.display_value = [](float v) { return display_number<float>(v); };
+	out.step_size.to_string = [](float v) { return std::to_string(v); };
 	out.step_size.drag = [out](float v, int amount, bool precise) { return out.step_size.constrain(pitch::drag(v, amount, precise)); };
-	out.step_size.from_string = [](const std::string& str) { return find_number<float>(str); };
+	out.step_size.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 
 	out.default_snap_amount = 1.0f;
 
@@ -1112,7 +968,7 @@ inline EnvelopeSpec speed()
 	out.range.min.constrain = speed::constrain;
 	out.range.min.increment = speed::increment;
 	out.range.min.decrement = speed::decrement;
-	out.range.min.display_value = speed::display;
+	out.range.min.to_string = speed::display;
 	out.range.min.drag = speed::drag;
 	out.range.min.from_string = speed::from_string;
 	out.range.min.default_value = speed::FREEZE;
@@ -1120,7 +976,7 @@ inline EnvelopeSpec speed()
 	out.range.max.constrain = speed::constrain;
 	out.range.max.increment = speed::increment;
 	out.range.max.decrement = speed::decrement;
-	out.range.max.display_value = speed::display;
+	out.range.max.to_string = speed::display;
 	out.range.max.drag = speed::drag;
 	out.range.max.from_string = speed::from_string;
 	out.range.max.default_value = 2.0f;
@@ -1145,9 +1001,9 @@ inline EnvelopeSpec formant()
 	out.value_slider = sliders::percentage_bipolar();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = percentage_bipolar::display;
+	out.range.min.to_string = percentage_bipolar::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = percentage_bipolar::display;
+	out.range.max.to_string = percentage_bipolar::display;
 	out.display_value = percentage_bipolar::display;
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
@@ -1169,9 +1025,9 @@ inline EnvelopeSpec noise_amount()
 	out.value_slider = sliders::percentage();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = percentage::display;
+	out.range.min.to_string = percentage::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = percentage::display;
+	out.range.max.to_string = percentage::display;
 	out.display_value = percentage::display;
 
 	return out;
@@ -1192,9 +1048,9 @@ inline EnvelopeSpec noise_color()
 	out.value_slider = sliders::percentage_bipolar();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = percentage_bipolar::display;
+	out.range.min.to_string = percentage_bipolar::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = percentage_bipolar::display;
+	out.range.max.to_string = percentage_bipolar::display;
 	out.display_value = percentage_bipolar::display;
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
@@ -1215,9 +1071,9 @@ inline EnvelopeSpec filter_frequency()
 	out.value_slider = sliders::filter_frequency();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = filter_frequency::display;
+	out.range.min.to_string = filter_frequency::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = filter_frequency::display;
+	out.range.max.to_string = filter_frequency::display;
 	out.display_value = filter_frequency::display;
 
 	return out;
@@ -1238,9 +1094,9 @@ inline EnvelopeSpec resonance()
 	out.value_slider = sliders::percentage();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = percentage::display;
+	out.range.min.to_string = percentage::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = percentage::display;
+	out.range.max.to_string = percentage::display;
 	out.display_value = percentage::display;
 
 	return out;
@@ -1259,9 +1115,9 @@ inline EnvelopeSpec mix()
 	out.stepify = percentage::stepify;
 	out.value_slider = sliders::percentage();
 	out.range.min.default_value = 0.0f;
-	out.range.min.display_value = percentage::display;
+	out.range.min.to_string = percentage::display;
 	out.range.max.default_value = 1.0f;
-	out.range.max.display_value = percentage::display;
+	out.range.max.to_string = percentage::display;
 	out.display_value = percentage::display;
 
 	return out;
@@ -1279,9 +1135,9 @@ namespace generic
 		out.stepify = percentage::stepify;
 		out.value_slider = sliders::percentage();
 		out.range.min.default_value = 0.0f;
-		out.range.min.display_value = percentage::display;
+		out.range.min.to_string = percentage::display;
 		out.range.max.default_value = 1.0f;
-		out.range.max.display_value = percentage::display;
+		out.range.max.to_string = percentage::display;
 		out.display_value = percentage::display;
 
 		return out;

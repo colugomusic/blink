@@ -2,19 +2,13 @@
 
 #include <functional>
 #include <optional>
+#include <tweak/tweak.hpp>
 
 namespace blink {
 
 template <class T>
-struct SliderSpec
+struct SliderSpec : public tweak::Spec<T>
 {
-	std::function<std::string(T)> display_value;
-	std::function<std::optional<T>(const std::string&)> from_string;
-	std::function<T(T)> constrain;
-	std::function<T(T, int, bool)> drag;
-	std::function<T(T, bool)> increment;
-	std::function<T(T, bool)> decrement;
-	std::function<T(T)> stepify;
 	T default_value;
 	int flags = 0;
 };

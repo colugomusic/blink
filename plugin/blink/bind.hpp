@@ -35,7 +35,7 @@ inline blink_Slider slider(const Slider<float>& slider)
 
 	out.default_value = spec.default_value;
 
-	const auto no_control = !spec.constrain || !spec.decrement || !spec.display_value || !spec.drag || !spec.from_string || !spec.increment;
+	const auto no_control = !spec.constrain || !spec.decrement || !spec.to_string || !spec.drag || !spec.from_string || !spec.increment;
 
 	if (!no_control)
 	{
