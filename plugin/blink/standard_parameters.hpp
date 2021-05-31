@@ -39,7 +39,7 @@ inline auto decrement(float v, bool precise)
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return constrain(stepify(tweak::drag<100, 1000>(v, amount / 5, precise)));
+	return constrain(stepify(tweak::drag<float, 100, 1000>(v, amount / 5, precise)));
 };
 
 inline auto display(float v)
@@ -90,7 +90,7 @@ inline auto decrement(float v, bool precise)
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return percentage::constrain(stepify(tweak::drag<200, 2000>(v, amount / 5, precise)));
+	return percentage::constrain(stepify(tweak::drag<float, 200, 2000>(v, amount / 5, precise)));
 };
 
 } // percentage_bipolar
@@ -160,7 +160,7 @@ inline auto decrement(float v, bool precise)
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return constrain(stepify(tweak::drag<100, 1000>(v, amount / 5, precise)));
+	return constrain(stepify(tweak::drag<float, 100, 1000>(v, amount / 5, precise)));
 };
 
 }
@@ -225,7 +225,7 @@ namespace amp
 	{
 		if (v <= 0.0f) v = math::convert::db_to_linear(-61.0f);
 
-		return constrain(stepify(math::convert::db_to_linear(tweak::drag<1, 10>(math::convert::linear_to_db(v), amount / 5, precise))));
+		return constrain(stepify(math::convert::db_to_linear(tweak::drag<float, 1, 10>(math::convert::linear_to_db(v), amount / 5, precise))));
 	};
 }
 
@@ -276,7 +276,7 @@ namespace pan
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		return constrain(stepify(tweak::drag<500, 5000>(v, amount, precise)));
+		return constrain(stepify(tweak::drag<float, 500, 5000>(v, amount, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
@@ -329,7 +329,7 @@ namespace pitch
 
 	inline auto drag(float v, int amount, bool precise) -> float
 	{
-		return constrain(stepify(tweak::drag<1, 10>(v, amount / 5, precise)));
+		return constrain(stepify(tweak::drag<float, 1, 10>(v, amount / 5, precise)));
 	};
 }
 
@@ -369,7 +369,7 @@ namespace speed
 	{
 		if (v <= FREEZE) v = math::convert::linear_to_speed(-32.0f);
 
-		return constrain(math::convert::linear_to_speed(tweak::drag<1, 10>(math::convert::speed_to_linear(v), amount / 5, precise)));
+		return constrain(math::convert::linear_to_speed(tweak::drag<float, 1, 10>(math::convert::speed_to_linear(v), amount / 5, precise)));
 	};
 
 	inline auto from_string(const std::string& str) -> std::optional<float>
