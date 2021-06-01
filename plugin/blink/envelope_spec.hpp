@@ -13,7 +13,7 @@ struct EnvelopeSpec : public ParameterSpec
 {
 	std::function<float(const blink_EnvelopeData* points, float default_value, blink_Position block_pos, int search_beg_index, int* left)> search_binary;
 	std::function<float(const blink_EnvelopeData* points, float default_value, blink_Position block_pos, int search_beg_index, int* left)> search_forward;
-	std::function<std::string(float)> display_value;
+	std::function<std::string(float)> to_string;
 	std::function<std::optional<float>(const std::string&)> from_string;
 	std::function<float(int index)> get_gridline;
 	std::function<float(int index, float step_size)> get_stepline;

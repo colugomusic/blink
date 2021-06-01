@@ -11,90 +11,6 @@
 namespace blink {
 namespace std_params {
 
-namespace percentage {
-
-inline auto stepify(float v) -> float
-{
-    return tweak::math::stepify<1000>(v);
-}
-
-inline auto snap_value(float v, float step_size, float snap_amount)
-{
-	return stepify(tweak::snap_value(v, step_size, snap_amount));
-}
-
-inline float constrain(float v)
-{
-	return std::clamp(v, 0.0f, 1.0f);
-};
-
-inline auto increment(float v, bool precise)
-{
-	return tweak::increment<100, 1000>(v, precise);
-};
-
-inline auto decrement(float v, bool precise)
-{
-	return tweak::decrement<100, 1000>(v, precise);
-};
-
-inline auto drag(float v, int amount, bool precise) -> float
-{
-	return tweak::drag<float, 100, 1000>(v, amount / 5, precise);
-};
-
-inline auto display(float v)
-{
-	std::stringstream ss;
-
-	ss << stepify(v * 100.0f) << "%";
-
-	return ss.str();
-}
-
-inline auto from_string(const std::string& str) -> std::optional<float>
-{
-	auto value = tweak::find_number<float>(str);
-
-	if (!value) return std::optional<float>();
-
-	return (*value / 100.0f);
-};
-
-} // percentage
-
-namespace percentage_bipolar {
-
-inline auto stepify(float v) -> float
-{
-	return math::stepify(v, 0.005f);
-}
-
-inline auto display(float v)
-{
-	std::stringstream ss;
-
-	ss << percentage::stepify((v - 0.5f) * 200.0f) << "%";
-
-	return ss.str();
-}
-
-inline auto increment(float v, bool precise)
-{
-	return tweak::increment<200, 2000>(v, precise);
-};
-
-inline auto decrement(float v, bool precise)
-{
-	return tweak::decrement<200, 2000>(v, precise);
-};
-
-inline auto drag(float v, int amount, bool precise) -> float
-{
-	return tweak::drag<float, 200, 2000>(v, amount / 5, precise);
-};
-
-} // percentage_bipolar
 
 namespace filter_frequency {
 
@@ -252,11 +168,6 @@ namespace pitch {
 inline auto stepify(float v) -> float
 {
 	return tweak::math::stepify<10>(v);
-}
-
-inline auto snap_value(float v, float step_size, float snap_amount)
-{
-	return stepify(tweak::snap_value(v, step_size, snap_amount));
 }
 
 inline float constrain(float v)
@@ -517,12 +428,12 @@ inline SliderSpec<float> percentage()
 {
 	SliderSpec<float> out;
 
-	out.constrain = percentage::constrain;
-	out.increment = percentage::increment;
-	out.decrement = percentage::decrement;
-	out.drag = percentage::drag;
-	out.to_string = percentage::display;
-	out.from_string = percentage::from_string;
+	out.constrain = tweak::std::percentage::constrain;
+	out.increment = tweak::std::percentage::increment;
+	out.decrement = tweak::std::percentage::decrement;
+	out.drag = tweak::std::percentage::drag;
+	out.to_string = tweak::std::percentage::to_string;
+	out.from_string = tweak::std::percentage::from_string;
 	out.default_value = 0;
 
 	return out;
@@ -532,12 +443,12 @@ inline SliderSpec<float> percentage_bipolar()
 {
 	SliderSpec<float> out;
 
-	out.constrain = percentage::constrain;
-	out.increment = percentage_bipolar::increment;
-	out.decrement = percentage_bipolar::decrement;
-	out.drag = percentage_bipolar::drag;
-	out.to_string = percentage_bipolar::display;
-	out.from_string = percentage::from_string;
+	out.constrain = tweak::std::percentage::constrain;
+	out.increment = tweak::std::percentage_bipolar::increment;
+	out.decrement = tweak::std::percentage_bipolar::decrement;
+	out.drag = tweak::std::percentage_bipolar::drag;
+	out.to_string = tweak::std::percentage_bipolar::to_string;
+	out.from_string = tweak::std::percentage_bipolar::from_string;
 	out.default_value = 0;
 
 	return out;
@@ -792,7 +703,7 @@ inline EnvelopeSpec amp()
 	out.default_value = 1.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.display_value = amp::display;
+	out.to_string = amp::display;
 	out.stepify = amp::stepify;
 
 	out.value_slider = sliders::amp();
@@ -825,7 +736,7 @@ inline EnvelopeSpec pan()
 	out.search_forward = generic_search_forward;
 	out.stepify = pan::stepify;
 
-	out.display_value = pan::display;
+	out.to_string = pan::display;
 	out.value_slider = sliders::pan();
 
 	out.range.min.default_value = -1.0f;
@@ -850,11 +761,11 @@ inline EnvelopeSpec pitch()
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
 	out.stepify = pitch::stepify;
-	out.snap_value = pitch::snap_value;
+	out.snap_value = tweak::snap_value;
 
 	out.value_slider = sliders::pitch();
 
-	out.display_value = [](float v) { return tweak::to_string(v); };
+	out.to_string = [](float v) { return tweak::to_string(v); };
 
 	out.get_gridline = [](int index) -> float
 	{
@@ -907,7 +818,7 @@ inline EnvelopeSpec speed()
 	out.default_value = speed::NORMAL;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.display_value = speed::display;
+	out.to_string = speed::display;
 
 	out.value_slider = sliders::speed();
 
@@ -947,15 +858,15 @@ inline EnvelopeSpec formant()
 	out.default_value = 0.5f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.stepify = percentage_bipolar::stepify;
+	out.stepify = tweak::std::percentage_bipolar::stepify;
 
 	out.value_slider = sliders::percentage_bipolar();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.to_string = percentage_bipolar::display;
+	out.range.min.to_string = tweak::std::percentage_bipolar::to_string;
 	out.range.max.default_value = 1.0f;
-	out.range.max.to_string = percentage_bipolar::display;
-	out.display_value = percentage_bipolar::display;
+	out.range.max.to_string = tweak::std::percentage_bipolar::to_string;
+	out.to_string = tweak::std::percentage_bipolar::to_string;
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
@@ -971,15 +882,15 @@ inline EnvelopeSpec noise_amount()
 	out.default_value = 0.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.stepify = percentage::stepify;
+	out.stepify = tweak::std::percentage::stepify;
 
 	out.value_slider = sliders::percentage();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.to_string = percentage::display;
+	out.range.min.to_string = tweak::std::percentage::to_string;
 	out.range.max.default_value = 1.0f;
-	out.range.max.to_string = percentage::display;
-	out.display_value = percentage::display;
+	out.range.max.to_string = tweak::std::percentage::to_string;
+	out.to_string = tweak::std::percentage::to_string;
 
 	return out;
 }
@@ -994,15 +905,15 @@ inline EnvelopeSpec noise_color()
 	out.default_value = 0.5f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.stepify = percentage_bipolar::stepify;
+	out.stepify = tweak::std::percentage_bipolar::stepify;
 
 	out.value_slider = sliders::percentage_bipolar();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.to_string = percentage_bipolar::display;
+	out.range.min.to_string = tweak::std::percentage_bipolar::to_string;
 	out.range.max.default_value = 1.0f;
-	out.range.max.to_string = percentage_bipolar::display;
-	out.display_value = percentage_bipolar::display;
+	out.range.max.to_string = tweak::std::percentage_bipolar::to_string;
+	out.to_string = tweak::std::percentage_bipolar::to_string;
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
@@ -1025,7 +936,7 @@ inline EnvelopeSpec filter_frequency()
 	out.range.min.to_string = filter_frequency::display;
 	out.range.max.default_value = 1.0f;
 	out.range.max.to_string = filter_frequency::display;
-	out.display_value = filter_frequency::display;
+	out.to_string = filter_frequency::display;
 
 	return out;
 }
@@ -1040,15 +951,15 @@ inline EnvelopeSpec resonance()
 	out.default_value = 0.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.stepify = percentage::stepify;
+	out.stepify = tweak::std::percentage::stepify;
 
 	out.value_slider = sliders::percentage();
 
 	out.range.min.default_value = 0.0f;
-	out.range.min.to_string = percentage::display;
+	out.range.min.to_string = tweak::std::percentage::to_string;
 	out.range.max.default_value = 1.0f;
-	out.range.max.to_string = percentage::display;
-	out.display_value = percentage::display;
+	out.range.max.to_string = tweak::std::percentage::to_string;
+	out.to_string = tweak::std::percentage::to_string;
 
 	return out;
 }
@@ -1063,13 +974,13 @@ inline EnvelopeSpec mix()
 	out.default_value = 1.0f;
 	out.search_binary = generic_search_binary;
 	out.search_forward = generic_search_forward;
-	out.stepify = percentage::stepify;
+	out.stepify = tweak::std::percentage::stepify;
 	out.value_slider = sliders::percentage();
 	out.range.min.default_value = 0.0f;
-	out.range.min.to_string = percentage::display;
+	out.range.min.to_string = tweak::std::percentage::to_string;
 	out.range.max.default_value = 1.0f;
-	out.range.max.to_string = percentage::display;
-	out.display_value = percentage::display;
+	out.range.max.to_string = tweak::std::percentage::to_string;
+	out.to_string = tweak::std::percentage::to_string;
 
 	return out;
 }
@@ -1083,13 +994,13 @@ namespace generic
 		out.default_value = 0.0f;
 		out.search_binary = generic_search_binary;
 		out.search_forward = generic_search_forward;
-		out.stepify = percentage::stepify;
+		out.stepify = tweak::std::percentage::stepify;
 		out.value_slider = sliders::percentage();
 		out.range.min.default_value = 0.0f;
-		out.range.min.to_string = percentage::display;
+		out.range.min.to_string = tweak::std::percentage::to_string;
 		out.range.max.default_value = 1.0f;
-		out.range.max.to_string = percentage::display;
-		out.display_value = percentage::display;
+		out.range.max.to_string = tweak::std::percentage::to_string;
+		out.to_string = tweak::std::percentage::to_string;
 
 		return out;
 	}

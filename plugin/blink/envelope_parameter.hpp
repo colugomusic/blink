@@ -153,7 +153,7 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)
 
 inline const char* EnvelopeParameter::display_value(float value) const
 {
-	return (display_value_buffer_ = spec_.display_value(value)).c_str();
+	return (display_value_buffer_ = spec_.to_string(value)).c_str();
 }
 
 }
