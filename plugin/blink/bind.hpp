@@ -45,28 +45,28 @@ inline blink_Slider slider(const Slider<float>& slider)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
-			return slider->spec().constrain(value);
+			return slider->tweaker().constrain(value);
 		};
 
 		out.increment = [](void* proc_data, float value, bool precise)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
-			return slider->spec().increment(value, precise);
+			return slider->tweaker().increment(value, precise);
 		};
 
 		out.decrement = [](void* proc_data, float value, bool precise)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
-			return slider->spec().decrement(value, precise);
+			return slider->tweaker().decrement(value, precise);
 		};
 
 		out.drag = [](void* proc_data, float value, int amount, bool precise)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
-			return slider->spec().drag(value, amount, precise);
+			return slider->tweaker().drag(value, amount, precise);
 		};
 
 		out.display_value = [](void* proc_data, float value)
@@ -80,7 +80,7 @@ inline blink_Slider slider(const Slider<float>& slider)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
-			auto result = slider->spec().from_string(str);
+			auto result = slider->tweaker().from_string(str);
 
 			if (result)
 			{
@@ -95,7 +95,7 @@ inline blink_Slider slider(const Slider<float>& slider)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
-			return slider->spec().stepify ? slider->spec().stepify(value) : value;
+			return slider->tweaker().stepify(value);
 		};
 	}
 
@@ -113,28 +113,28 @@ inline blink_IntSlider slider(const Slider<int>& slider)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
-		return slider->spec().constrain(value);
+		return slider->tweaker().constrain(value);
 	};
 
 	out.increment = [](void* proc_data, int value, bool precise)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
-		return slider->spec().increment(value, precise);
+		return slider->tweaker().increment(value, precise);
 	};
 
 	out.decrement = [](void* proc_data, int value, bool precise)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
-		return slider->spec().decrement(value, precise);
+		return slider->tweaker().decrement(value, precise);
 	};
 
 	out.drag = [](void* proc_data, int value, int amount, bool precise)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
-		return slider->spec().drag(value, amount, precise);
+		return slider->tweaker().drag(value, amount, precise);
 	};
 
 	out.display_value = [](void* proc_data, int value)
@@ -148,7 +148,7 @@ inline blink_IntSlider slider(const Slider<int>& slider)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
-		auto result = slider->spec().from_string(str);
+		auto result = slider->tweaker().from_string(str);
 
 		if (result)
 		{

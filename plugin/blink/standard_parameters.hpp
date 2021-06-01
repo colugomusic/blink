@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tweak/tweak.hpp>
+#include <tweak/std.hpp>
 #include "math.hpp"
 #include "chord_spec.hpp"
 #include "envelope_spec.hpp"
@@ -29,17 +30,17 @@ inline float constrain(float v)
 
 inline auto increment(float v, bool precise)
 {
-	return constrain(stepify(tweak::increment<100, 1000>(v, precise)));
+	return tweak::increment<100, 1000>(v, precise);
 };
 
 inline auto decrement(float v, bool precise)
 {
-	return constrain(stepify(tweak::decrement<100, 1000>(v, precise)));
+	return tweak::decrement<100, 1000>(v, precise);
 };
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return constrain(stepify(tweak::drag<float, 100, 1000>(v, amount / 5, precise)));
+	return tweak::drag<float, 100, 1000>(v, amount / 5, precise);
 };
 
 inline auto display(float v)
@@ -80,17 +81,17 @@ inline auto display(float v)
 
 inline auto increment(float v, bool precise)
 {
-	return percentage::constrain(stepify(tweak::increment<200, 2000>(v, precise)));
+	return tweak::increment<200, 2000>(v, precise);
 };
 
 inline auto decrement(float v, bool precise)
 {
-	return percentage::constrain(stepify(tweak::decrement<200, 2000>(v, precise)));
+	return tweak::decrement<200, 2000>(v, precise);
 };
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return percentage::constrain(stepify(tweak::drag<float, 200, 2000>(v, amount / 5, precise)));
+	return tweak::drag<float, 200, 2000>(v, amount / 5, precise);
 };
 
 } // percentage_bipolar
@@ -150,188 +151,138 @@ inline auto from_string(const std::string& str) -> std::optional<float>
 
 inline auto increment(float v, bool precise)
 {
-	return constrain(stepify(tweak::increment<100, 1000>(v, precise)));
+	return tweak::increment<100, 1000>(v, precise);
 };
 
 inline auto decrement(float v, bool precise)
 {
-	return constrain(stepify(tweak::decrement<100, 1000>(v, precise)));
+	return tweak::decrement<100, 1000>(v, precise);
 };
 
 inline auto drag(float v, int amount, bool precise) -> float
 {
-	return constrain(stepify(tweak::drag<float, 100, 1000>(v, amount / 5, precise)));
+	return tweak::drag<float, 100, 1000>(v, amount / 5, precise);
 };
 
 }
 
-namespace amp
+namespace amp {
+
+inline auto stepify(float v) { return tweak::std::amp::stepify(v); }
+inline auto display(float v) { return tweak::std::amp::to_string(v); }
+inline auto constrain(float v) { return tweak::std::amp::constrain(v); }
+inline auto from_string(const std::string& str) { return tweak::std::amp::from_string(str); }
+inline auto increment(float v, bool precise) { return tweak::std::amp::increment(v, precise); }
+inline auto decrement(float v, bool precise) { return tweak::std::amp::decrement(v, precise); }
+inline auto drag(float v, int amount, bool precise) { return tweak::std::amp::drag(v, amount, precise); }
+
+} // amp
+
+namespace pan {
+
+inline auto stepify(float v) -> float
 {
-	inline auto stepify(float v) -> float
-	{
-		if (v <= 0.00001f) return 0.0f;
-
-		return math::convert::db_to_linear(math::stepify(math::convert::linear_to_db(v), 0.1f));
-	}
-
-	inline auto constrain(float v)
-	{
-		const auto db = math::convert::linear_to_db(v);
-
-		if (db < -60.0f) return 0.0f;
-		if (db > 12.0f) return math::convert::db_to_linear(12.0f);
-
-		return v;
-	};
-
-	inline auto from_string(const std::string& str) -> std::optional<float>
-	{
-		auto db = tweak::find_number<float>(str);
-
-		if (!db) return db;
-
-		return math::convert::db_to_linear(*db);
-	};
-
-	inline auto display(float v)
-	{
-		std::stringstream ss;
-
-		if (v <= 0.0f)
-		{
-			ss << "Silent";
-		}
-		else
-		{
-			ss << math::stepify(float(math::convert::linear_to_db(v)), 0.1f) << " dB";
-		}
-
-		return ss.str();
-	}
-
-	inline auto increment(float v, bool precise)
-	{
-		if (v <= 0.0f) return math::convert::db_to_linear(-60.0f);
-
-		return constrain(stepify(math::convert::db_to_linear(tweak::increment<1, 10>(math::convert::linear_to_db(v), precise))));
-	};
-
-	inline auto decrement(float v, bool precise)
-	{
-		return constrain(stepify(math::convert::db_to_linear(tweak::decrement<1, 10>(math::convert::linear_to_db(v), precise))));
-	};
-
-	inline auto drag(float v, int amount, bool precise) -> float
-	{
-		if (v <= 0.0f) v = math::convert::db_to_linear(-61.0f);
-
-		return constrain(stepify(math::convert::db_to_linear(tweak::drag<float, 1, 10>(math::convert::linear_to_db(v), amount / 5, precise))));
-	};
+	return tweak::math::stepify<100>(v);
 }
 
-namespace pan
+inline float constrain(float v)
 {
-	inline auto stepify(float v) -> float
+	if (v < -1.0f) return -1.0f;
+	if (v > 1.0f) return 1.0f;
+
+	return v;
+};
+
+inline std::string display(float v)
+{
+	std::stringstream ss;
+
+	if (v < 0.0f)
 	{
-		return tweak::math::stepify<100>(v);
+		ss << stepify(std::abs(v * 100)) << "% L";
+	}
+	else if (v > 0.0f)
+	{
+		ss << stepify(v * 100) << "% R";
+	}
+	else
+	{
+		ss << "Center";
 	}
 
-	inline float constrain(float v)
-	{
-		if (v < -1.0f) return -1.0f;
-		if (v > 1.0f) return 1.0f;
-
-		return v;
-	};
-
-	inline std::string display(float v)
-	{
-		std::stringstream ss;
-
-		if (v < 0.0f)
-		{
-			ss << stepify(std::abs(v * 100)) << "% L";
-		}
-		else if (v > 0.0f)
-		{
-			ss << stepify(v * 100) << "% R";
-		}
-		else
-		{
-			ss << "Center";
-		}
-
-		return ss.str();
-	}
+	return ss.str();
+}
 	
-	inline auto increment(float v, bool precise)
-	{
-		return constrain(stepify(tweak::increment<100>(v)));
-	};
-
-	inline auto decrement(float v, bool precise)
-	{
-		return constrain(stepify(tweak::decrement<100>(v)));
-	};
-
-	inline auto drag(float v, int amount, bool precise) -> float
-	{
-		return constrain(stepify(tweak::drag<float, 500, 5000>(v, amount, precise)));
-	};
-
-	inline auto from_string(const std::string& str) -> std::optional<float>
-	{
-		std::string uppercase = str;
-
-		std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
-
-		if (uppercase.find("CENTER") != std::string::npos) return 0.0f;
-
-		const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
-
-		auto value = tweak::find_positive_number<int>(str);
-
-		if (!value) return std::optional<float>();
-
-		return (float(*value) / 100) * (negative ? -1 : 1);
-	};
-}
-
-namespace pitch
+inline auto increment(float v, bool precise)
 {
-	inline auto stepify(float v) -> float
-	{
-		return tweak::math::stepify<10>(v);
-	}
+	return tweak::increment<100>(v);
+};
 
-	inline auto snap_value(float v, float step_size, float snap_amount)
-	{
-		return stepify(tweak::snap_value(v, step_size, snap_amount));
-	}
+inline auto decrement(float v, bool precise)
+{
+	return tweak::decrement<100>(v);
+};
 
-	inline float constrain(float v)
-	{
-		if (v < -60.0f) return -60.0f;
-		if (v > 60.0f) return 60.0f;
+inline auto drag(float v, int amount, bool precise) -> float
+{
+	return tweak::drag<float, 500, 5000>(v, amount, precise);
+};
 
-		return v;
-	};
+inline auto from_string(const std::string& str) -> std::optional<float>
+{
+	std::string uppercase = str;
 
-	inline auto increment(float v, bool precise)
-	{
-		return constrain(stepify(tweak::increment<1, 10>(v, precise)));
-	};
+	std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
 
-	inline auto decrement(float v, bool precise)
-	{
-		return constrain(stepify(tweak::decrement<1, 10>(v, precise)));
-	};
+	if (uppercase.find("CENTER") != std::string::npos) return 0.0f;
 
-	inline auto drag(float v, int amount, bool precise) -> float
-	{
-		return constrain(stepify(tweak::drag<float, 1, 10>(v, amount / 5, precise)));
-	};
+	const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
+
+	auto value = tweak::find_positive_number<int>(str);
+
+	if (!value) return std::optional<float>();
+
+	return (float(*value) / 100) * (negative ? -1 : 1);
+};
+
+} // pan
+
+namespace pitch {
+
+inline auto stepify(float v) -> float
+{
+	return tweak::math::stepify<10>(v);
 }
+
+inline auto snap_value(float v, float step_size, float snap_amount)
+{
+	return stepify(tweak::snap_value(v, step_size, snap_amount));
+}
+
+inline float constrain(float v)
+{
+	if (v < -60.0f) return -60.0f;
+	if (v > 60.0f) return 60.0f;
+
+	return v;
+};
+
+inline auto increment(float v, bool precise)
+{
+	return tweak::increment<1, 10>(v, precise);
+};
+
+inline auto decrement(float v, bool precise)
+{
+	return tweak::decrement<1, 10>(v, precise);
+};
+
+inline auto drag(float v, int amount, bool precise) -> float
+{
+	return tweak::drag<float, 1, 10>(v, amount / 5, precise);
+};
+
+} // pitch
 
 namespace speed
 {
@@ -524,7 +475,7 @@ inline SliderSpec<float> pitch()
 	out.increment = pitch::increment;
 	out.decrement = pitch::decrement;
 	out.drag = pitch::drag;
-	out.to_string = [](float v) { return std::to_string(v); };
+	out.to_string = [](float v) { return tweak::to_string(v); };
 	out.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 	out.stepify = pitch::stepify;
 	out.default_value = 0.0f;
@@ -555,7 +506,7 @@ inline SliderSpec<int> sample_offset()
 	out.increment = sample_offset::increment;
 	out.decrement = sample_offset::decrement;
 	out.drag = sample_offset::drag;
-	out.to_string = [](int v) { return std::to_string(v); };
+	out.to_string = [](int v) { return tweak::to_string(v); };
 	out.from_string = [](const std::string& str) { return tweak::find_number<int>(str); };
 	out.default_value = 0;
 
@@ -903,7 +854,7 @@ inline EnvelopeSpec pitch()
 
 	out.value_slider = sliders::pitch();
 
-	out.display_value = [](float v) { return std::to_string(v); };
+	out.display_value = [](float v) { return tweak::to_string(v); };
 
 	out.get_gridline = [](int index) -> float
 	{
@@ -919,7 +870,7 @@ inline EnvelopeSpec pitch()
 	out.range.min.decrement = pitch::decrement;
 	out.range.min.increment = pitch::increment;
 	out.range.min.default_value = -24.0f;
-	out.range.min.to_string = [](float v) { return std::to_string(v); };
+	out.range.min.to_string = [](float v) { return tweak::to_string(v); };
 	out.range.min.drag = pitch::drag;
 	out.range.min.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 
@@ -927,7 +878,7 @@ inline EnvelopeSpec pitch()
 	out.range.max.decrement = pitch::decrement;
 	out.range.max.increment = pitch::increment;
 	out.range.max.default_value = 24.0f;
-	out.range.max.to_string = [](float v) { return std::to_string(v); };
+	out.range.max.to_string = [](float v) { return tweak::to_string(v); };
 	out.range.max.drag = pitch::drag;
 	out.range.max.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 
@@ -935,7 +886,7 @@ inline EnvelopeSpec pitch()
 	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(tweak::decrement<1, 10>(v, precise)); };
 	out.step_size.increment = [out](float v, bool precise) { return out.step_size.constrain(tweak::increment<1, 10>(v, precise)); };
 	out.step_size.default_value = 1.0f;
-	out.step_size.to_string = [](float v) { return std::to_string(v); };
+	out.step_size.to_string = [](float v) { return tweak::to_string(v); };
 	out.step_size.drag = [out](float v, int amount, bool precise) { return out.step_size.constrain(pitch::drag(v, amount, precise)); };
 	out.step_size.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
 
