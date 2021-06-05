@@ -56,7 +56,7 @@ public:
 	// the mathematics involved in calculating the resulting sample
 	// position.
 	//
-	float calculate(float transpose, const blink_EnvelopeData* envelope, blink_Position block_position, float* derivative = nullptr)
+	blink_Position calculate(float transpose, const blink_EnvelopeData* envelope, blink_Position block_position, float* derivative = nullptr)
 	{
 		struct PitchPoint
 		{
@@ -99,7 +99,7 @@ public:
 
 					if (derivative) *derivative = p1.get_ff();
 
-					return float(block_position * p1.get_ff()) + segment_start_;
+					return (block_position * p1.get_ff()) + segment_start_;
 				}
 
 				PitchPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, transpose);
@@ -113,7 +113,7 @@ public:
 
 					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0.pitch), double(p1.pitch), segment_size, n));
 
-					return float(weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, n)) + segment_start_;
+					return (weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, n)) + segment_start_;
 				}
 			}
 			else
@@ -122,7 +122,7 @@ public:
 				{
 					point_search_index_ = 1;
 
-					segment_start_ += float(p1.x * p1.get_ff()) + segment_start_;
+					segment_start_ += (p1.x * p1.get_ff()) + segment_start_;
 				}
 				else
 				{
@@ -134,7 +134,7 @@ public:
 
 					if (segment_size > 0.0f)
 					{
-						segment_start_ = float(weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, segment_size)) + segment_start_;
+						segment_start_ = (weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, segment_size)) + segment_start_;
 					}
 				}
 			}
@@ -146,7 +146,7 @@ public:
 
 		if (derivative) *derivative = p0.get_ff();
 
-		return float(n * p0.get_ff()) + segment_start_;
+		return (n * p0.get_ff()) + segment_start_;
 	}
 
 	void reset()
@@ -157,7 +157,7 @@ public:
 
 private:
 
-	float segment_start_ = 0.0f;
+	blink_Position segment_start_ = 0.0f;
 	int point_search_index_ = 0;
 };
 
@@ -165,14 +165,14 @@ class Classic
 {
 public:
 
-	ml::DSPVector get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives = nullptr);
+	snd::transport::DSPVectorFramePosition get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives = nullptr);
 
 private:
 
 	ClassicCalculator calculator_;
 };
 
-inline ml::DSPVector Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives)
+inline snd::transport::DSPVectorFramePosition Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives)
 {
 	const auto& block_positions = traverser.block_positions();
 
@@ -187,7 +187,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 
 	const auto& resets = traverser.get_resets();
 
-	ml::DSPVector out;
+	snd::transport::DSPVectorFramePosition out;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -196,7 +196,7 @@ inline ml::DSPVector Classic::get_positions(float transpose, const blink_Envelop
 			calculator_.reset();
 		}
 
-		out[i] = calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr) - sample_offset;
+		out.set(i, calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr) - sample_offset);
 	}
 
 	return out;

@@ -19,10 +19,10 @@ public:
 	float read_frame(blink_ChannelCount channel, int pos) const;
 	float read_frame_interp(blink_ChannelCount channel, float pos, bool loop = false) const;
 	ml::DSPVector read_frames(blink_ChannelCount channel, const ml::DSPVectorInt& pos) const;
-	ml::DSPVector read_frames_interp(blink_ChannelCount channel, const ml::DSPVector& pos, bool loop) const;
+	ml::DSPVector read_frames_interp(blink_ChannelCount channel, const snd::transport::DSPVectorFramePosition& pos, bool loop) const;
 
 	template <std::size_t ROWS>
-	ml::DSPVectorArray<ROWS> read_frames_interp(const ml::DSPVector& pos, bool loop) const;
+	ml::DSPVectorArray<ROWS> read_frames_interp(const snd::transport::DSPVectorFramePosition& pos, bool loop) const;
 
 	blink_ChannelMode get_channel_mode() const { return channel_mode_; }
 
@@ -43,7 +43,7 @@ private:
 	};
 
 	InterpPos get_interp_pos(float pos, bool loop = false) const;
-	InterpVectorPos get_interp_pos(ml::DSPVector pos, bool loop) const;
+	InterpVectorPos get_interp_pos(snd::transport::DSPVectorFramePosition pos, bool loop) const;
 
 	const blink_SampleInfo* info_;
 	blink_ChannelMode channel_mode_;
@@ -111,7 +111,7 @@ inline auto SampleData::get_interp_pos(float pos, bool loop) const -> InterpPos
 	return out;
 }
 
-inline auto SampleData::get_interp_pos(ml::DSPVector pos, bool loop) const -> InterpVectorPos
+inline auto SampleData::get_interp_pos(snd::transport::DSPVectorFramePosition pos, bool loop) const -> InterpVectorPos
 {
 	InterpVectorPos out;
 
@@ -120,7 +120,7 @@ inline auto SampleData::get_interp_pos(ml::DSPVector pos, bool loop) const -> In
 	out.next = math::ceil(pos);
 	out.prev = math::floor(pos);
 
-	out.x = pos - ml::intToFloat(out.prev);
+	out.x = pos.fract;
 
 	return out;
 }
@@ -135,7 +135,7 @@ inline float SampleData::read_frame_interp(blink_ChannelCount channel, float pos
 	return (interp_pos.x * (next_value - prev_value)) + prev_value;
 }
 
-inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, const ml::DSPVector& pos, bool loop) const
+inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, const snd::transport::DSPVectorFramePosition& pos, bool loop) const
 {
 	const auto interp_pos = get_interp_pos(pos, loop);
 
@@ -146,7 +146,7 @@ inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, 
 }
 
 template <std::size_t ROWS>
-inline ml::DSPVectorArray<ROWS> SampleData::read_frames_interp(const ml::DSPVector& pos, bool loop) const
+inline ml::DSPVectorArray<ROWS> SampleData::read_frames_interp(const snd::transport::DSPVectorFramePosition& pos, bool loop) const
 {
 	ml::DSPVectorArray<ROWS> out;
 

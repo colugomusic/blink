@@ -40,9 +40,8 @@ public:
 
 	// not sure if i need this: float search_ext(const blink_EnvelopePoints* points, blink_Position block_position, int search_beg, int* left);
 	float search(const blink_EnvelopeData* data, blink_Position block_position) const;
-	float search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, blink_FrameCount n, float* out) const;
-	float search_vec(const blink_EnvelopeData* data, const float* block_positions, blink_FrameCount n, float prev_pos, float* out) const;
-	float search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const;
+	void search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, int n, float* out) const;
+	void search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const;
 	ml::DSPVector search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions) const;
 
 	EnvelopeRange& range() { return range_; }
@@ -81,19 +80,20 @@ inline float EnvelopeParameter::search(const blink_EnvelopeData* data, blink_Pos
 	return spec_.search_binary(data, spec_.default_value, block_position, 0, &left);
 }
 
-inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, blink_FrameCount n, float* out) const
+inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const
 {
-	return search_vec(data, block_positions.positions.getConstBuffer(), n, block_positions.prev_pos, out);
+	search_vec(data, block_positions, block_positions.count, out);
 }
 
-inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const float* block_positions, blink_FrameCount n, float prev_pos, float* out) const
+inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, int n, float* out) const
 {
 	int left = 0;
 	bool reset = false;
+	auto prev_pos = block_positions.prev_pos;
 
-	for (blink_FrameCount i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 	{
-		const auto pos = block_positions[i];
+		const auto pos = block_positions.positions[i];
 
 		if (pos < prev_pos)
 		{
@@ -106,31 +106,24 @@ inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const
 		{
 			reset = false;
 
-			out[i] = spec_.search_binary(data, spec_.default_value, block_positions[i], 0, &left);
+			out[i] = spec_.search_binary(data, spec_.default_value, block_positions.positions[i], 0, &left);
 		}
 		else
 		{
-			out[i] = spec_.search_forward(data, spec_.default_value, block_positions[i], left, &left);
+			out[i] = spec_.search_forward(data, spec_.default_value, block_positions.positions[i], left, &left);
 		}
 
 		prev_pos = pos;
 	}
-
-	return prev_pos;
 }
 
 inline ml::DSPVector EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions) const
 {
 	ml::DSPVector out;
 
-	search_vec(data, block_positions.positions.getConstBuffer(), block_positions.count, block_positions.prev_pos, out.getBuffer());
+	search_vec(data, block_positions, out.getBuffer());
 
 	return out;
-}
-
-inline float EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const
-{
-	return search_vec(data, block_positions.positions.getConstBuffer(), block_positions.count, block_positions.prev_pos, out);
 }
 
 inline EnvelopeParameter::EnvelopeParameter(EnvelopeSpec spec)

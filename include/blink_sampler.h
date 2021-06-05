@@ -16,7 +16,7 @@ typedef struct
 	blink_Preprocess_ReportProgress report_progress;
 } blink_PreprocessCallbacks;
 
-typedef blink_FrameCount(*blink_GetSampleDataCB)(void* host, blink_ChannelCount channel, blink_Index index, blink_FrameCount size, float* buffer);
+typedef blink_FrameCount(*blink_GetSampleDataCB)(void* host, blink_ChannelCount channel, blink_FrameCount index, blink_FrameCount size, float* buffer);
 
 //
 // Sample Info
@@ -72,26 +72,26 @@ typedef struct
 {
 	// The sample position after being transformed by parameter settings but before time warping
 	// has been performed
-	float* sculpted_sample_positions;
+	double* sculpted_sample_positions;
 
 	// The sample position after time warping has been performed
 	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
-	float* warped_sample_positions;
+	double* warped_sample_positions;
 
 	// The block position after being transformed by parameter settings but before time warping
 	// has been performed.
 	// This will differ from sculpted_sample_positions when the sample rate of the sample is not
 	// equal to the song rate
-	float* sculpted_block_positions;
+	double* sculpted_block_positions;
 
 	// The block position after time warping has been performed
 	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
 	// This will differ from warped_sample_positions when the sample rate of the sample is not
 	// equal to the song rate
-	float* warped_block_positions;
+	double* warped_block_positions;
 
 	// The sample position after time warping and other transformations (loop, reverse etc)
-	float* final_sample_positions;
+	double* final_sample_positions;
 
 	// The rate of change in the sample position after time warping
 	float* waveform_derivatives;

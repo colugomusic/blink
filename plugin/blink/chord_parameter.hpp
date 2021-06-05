@@ -23,7 +23,8 @@ public:
 	}
 
 	ml::DSPVectorInt search_vec(const blink_ChordData* data, const BlockPositions& block_positions) const;
-	float search_vec(const blink_ChordData* data, const float* block_positions, blink_FrameCount n, float prev_pos, int* out) const;
+	void search_vec(const blink_ChordData* data, const BlockPositions& block_positions, int n, int* out) const;
+	void search_vec(const blink_ChordData* data, const BlockPositions& block_positions, int* out) const;
 
 	blink_StdIcon icon() const { return spec_.icon; }
 	int flags() const { return spec_.flags; }
@@ -38,19 +39,25 @@ inline ml::DSPVectorInt ChordParameter::search_vec(const blink_ChordData* data, 
 {
 	ml::DSPVectorInt out;
 
-	search_vec(data, block_positions.positions.getConstBuffer(), block_positions.count, block_positions.prev_pos, out.getBufferInt());
+	search_vec(data, block_positions, out.getBufferInt());
 
 	return out;
 }
 
-inline float ChordParameter::search_vec(const blink_ChordData* data, const float* block_positions, blink_FrameCount n, float prev_pos, int* out) const
+inline void ChordParameter::search_vec(const blink_ChordData* data, const BlockPositions& block_positions, int* out) const
+{
+	search_vec(data, block_positions, block_positions.count, out);
+}
+
+inline void ChordParameter::search_vec(const blink_ChordData* data, const BlockPositions& block_positions, int n, int* out) const
 {
 	int left = 0;
 	bool reset = false;
+	auto prev_pos = block_positions.prev_pos;
 
-	for (blink_FrameCount i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 	{
-		const auto pos = block_positions[i];
+		const auto pos = block_positions.positions[i];
 
 		if (pos < prev_pos)
 		{
@@ -63,17 +70,15 @@ inline float ChordParameter::search_vec(const blink_ChordData* data, const float
 		{
 			reset = false;
 
-			out[i] = spec_.search_binary(data, block_positions[i], 0, &left);
+			out[i] = spec_.search_binary(data, block_positions.positions[i], 0, &left);
 		}
 		else
 		{
-			out[i] = spec_.search_forward(data, block_positions[i], left, &left);
+			out[i] = spec_.search_forward(data, block_positions.positions[i], left, &left);
 		}
 
 		prev_pos = pos;
 	}
-
-	return prev_pos;
 }
 
 }

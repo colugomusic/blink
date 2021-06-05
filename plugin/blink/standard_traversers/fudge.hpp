@@ -226,8 +226,8 @@ public:
 		const Traverser& traverser,
 		int sample_offset,
 		int count,
-		ml::DSPVector* sculpted_positions,
-		ml::DSPVector* warped_positions,
+		snd::transport::DSPVectorFramePosition* sculpted_positions,
+		snd::transport::DSPVectorFramePosition* warped_positions,
 		ml::DSPVector* derivatives = nullptr);
 
 private:
@@ -237,14 +237,14 @@ private:
 		const blink_EnvelopeData* env_speed,
 		const Traverser& traverser,
 		int count,
-		ml::DSPVector* positions,
+		snd::transport::DSPVectorFramePosition* positions,
 		ml::DSPVector* derivatives = nullptr);
 
 	void get_warp_positions(
 		const blink_WarpPoints* warp_points,
 		const Traverser& traverser,
 		int count,
-		ml::DSPVector* positions,
+		snd::transport::DSPVectorFramePosition* positions,
 		ml::DSPVector* derivatives = nullptr);
 
 	FudgeCalculator calculator_;
@@ -258,7 +258,7 @@ inline void Fudge::get_sculpted_positions(
 	const blink_EnvelopeData* env_speed,
 	const Traverser& traverser,
 	int count,
-	ml::DSPVector* positions,
+	snd::transport::DSPVectorFramePosition *positions,
 	ml::DSPVector* derivatives)
 {
 	const auto& block_positions = traverser.block_positions();
@@ -283,7 +283,7 @@ inline void Fudge::get_sculpted_positions(
 			calculator_.reset();
 		}
 
-		(*positions)[i] = calculator_.calculate(speed, env_speed, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr);
+		positions->set(i, calculator_.calculate(speed, env_speed, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr));
 	}
 }
 
@@ -291,7 +291,7 @@ inline void Fudge::get_warp_positions(
 	const blink_WarpPoints* warp_points,
 	const Traverser& traverser,
 	int count,
-	ml::DSPVector* positions,
+	snd::transport::DSPVectorFramePosition* positions,
 	ml::DSPVector* derivatives)
 {
 	const auto& block_positions = traverser.block_positions();
@@ -314,7 +314,7 @@ inline void Fudge::get_warp_positions(
 			warp_calculator_.reset();
 		}
 
-		(*positions)[i] = warp_calculator_.calculate(warp_points, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr);
+		positions->set(i, warp_calculator_.calculate(warp_points, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr));
 	}
 }
 
@@ -325,18 +325,18 @@ inline void Fudge::get_positions(
 	const Traverser& traverser,
 	int sample_offset,
 	int count,
-	ml::DSPVector* out_sculpted_positions,
-	ml::DSPVector* out_warped_positions,
+	snd::transport::DSPVectorFramePosition* out_sculpted_positions,
+	snd::transport::DSPVectorFramePosition* out_warped_positions,
 	ml::DSPVector* out_derivatives)
 {
-	ml::DSPVector sculpted_positions;
+	snd::transport::DSPVectorFramePosition sculpted_positions;
+	snd::transport::DSPVectorFramePosition warped_positions;
 	ml::DSPVector sculpted_derivatives;
-	ml::DSPVector warped_positions;
 	ml::DSPVector warped_derivatives;
 
 	get_sculpted_positions(speed, env_speed, traverser, count, &sculpted_positions, out_derivatives ? &sculpted_derivatives : nullptr);
 
-	sculpted_positions -= float(sample_offset);
+	sculpted_positions -= sample_offset;
 
 	sculpted_block_positions_(sculpted_positions, 0, count);
 

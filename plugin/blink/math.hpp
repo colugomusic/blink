@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <snd/transport/frame_position.hpp>
+
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
@@ -193,6 +195,33 @@ inline int wrap(int x, int y)
 	if (x < 0) x += y;
 
 	return x;
+}
+
+template <size_t ROWS>
+snd::transport::DSPVectorArrayFramePosition<ROWS> wrap(const snd::transport::DSPVectorArrayFramePosition<ROWS>& x, float y)
+{
+	snd::transport::DSPVectorArrayFramePosition<ROWS> out;
+
+	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	{
+		out.set(i, std::fmod(double(x[i]), double(y)));
+
+		if (out[i] < 0) out.set(i, out[i] + y);
+	}
+
+	return out;
+}
+
+template <size_t ROWS>
+ml::DSPVectorArrayInt<ROWS> ceil(const snd::transport::DSPVectorArrayFramePosition<ROWS>& in)
+{
+	return (in + 1).pos;
+}
+
+template <size_t ROWS>
+ml::DSPVectorArrayInt<ROWS> floor(const snd::transport::DSPVectorArrayFramePosition<ROWS>& in)
+{
+	return in.pos;
 }
 
 template <size_t ROWS>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <snd/transport/frame_position.hpp>
 
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
@@ -10,16 +11,17 @@ namespace blink {
 
 struct BlockPositions
 {
-	ml::DSPVector positions;
+	snd::transport::DSPVectorFramePosition positions;
+	snd::transport::FramePosition prev_pos = std::numeric_limits<std::int32_t>::max();
+
 	int count = kFloatsPerDSPVector;
-	float prev_pos = std::numeric_limits<float>::max();
 
 	BlockPositions()
 	{
-		positions[count - 1] = std::numeric_limits<float>::max();
+		positions[count - 1] = std::numeric_limits<std::int32_t>::max();
 	}
 
-	BlockPositions(const ml::DSPVector& positions_, float prev_pos_ = std::numeric_limits<float>::max())
+	BlockPositions(const snd::transport::DSPVectorFramePosition& positions_, snd::transport::FramePosition prev_pos_ = std::numeric_limits<std::int32_t>::max())
 		: positions(positions_)
 		, prev_pos(prev_pos_)
 	{
@@ -30,7 +32,7 @@ struct BlockPositions
 	{
 		for (int i = 0; i < count_; i++)
 		{
-			positions[i] = float(blink_positions[i] - offset);
+			positions.set(i, blink_positions[i] - offset);
 		}
 	}
 
@@ -40,13 +42,13 @@ struct BlockPositions
 
 		for (int i = 0; i < count_; i++)
 		{
-			positions[i] = float(blink_positions[i] - offset);
+			positions.set(i, blink_positions[i] - offset);
 		}
 		
 		count = count_;
 	}
 
-	void operator()(const ml::DSPVector& vec_positions, int offset, int count_)
+	void operator()(const snd::transport::DSPVectorFramePosition& vec_positions, int offset, int count_)
 	{
 		prev_pos = positions[count - 1];
 
