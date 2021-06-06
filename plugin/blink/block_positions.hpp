@@ -18,7 +18,7 @@ struct BlockPositions
 
 	BlockPositions()
 	{
-		positions[count - 1] = std::numeric_limits<std::int32_t>::max();
+		positions.set(count - 1, std::numeric_limits<std::int32_t>::max());
 	}
 
 	BlockPositions(const snd::transport::DSPVectorFramePosition& positions_, snd::transport::FramePosition prev_pos_ = std::numeric_limits<std::int32_t>::max())
