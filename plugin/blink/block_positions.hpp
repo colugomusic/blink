@@ -15,6 +15,7 @@ struct BlockPositions
 	snd::transport::FramePosition prev_pos = std::numeric_limits<std::int32_t>::max();
 
 	int count = kFloatsPerDSPVector;
+	std::int64_t data_offset = 0;
 
 	BlockPositions()
 	{
@@ -27,8 +28,9 @@ struct BlockPositions
 	{
 	}
 
-	BlockPositions(const blink_Position* blink_positions, int offset, int count_)
+	BlockPositions(const blink_Position* blink_positions, std::int64_t offset, int count_)
 		: count(count_)
+		, data_offset(offset)
 	{
 		for (int i = 0; i < count_; i++)
 		{
@@ -36,7 +38,7 @@ struct BlockPositions
 		}
 	}
 
-	void operator()(const blink_Position* blink_positions, int offset, int count_)
+	void operator()(const blink_Position* blink_positions, std::int64_t offset, int count_)
 	{
 		prev_pos = positions[count - 1];
 
@@ -46,15 +48,17 @@ struct BlockPositions
 		}
 		
 		count = count_;
+		data_offset = offset;
 	}
 
-	void operator()(const snd::transport::DSPVectorFramePosition& vec_positions, int offset, int count_)
+	void operator()(const snd::transport::DSPVectorFramePosition& vec_positions, std::int64_t offset, int count_)
 	{
 		prev_pos = positions[count - 1];
 
-		positions = vec_positions - float(offset);
+		positions = vec_positions - std::int32_t(offset);
 
 		count = count_;
+		data_offset = offset;
 	}
 };
 
