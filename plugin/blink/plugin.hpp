@@ -33,7 +33,11 @@ public:
 	static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data, int index);
 	static const blink_OptionData* get_option_data(const blink_ParameterData* data, int index);
 
+	void begin_process(std::uint64_t buffer_id, int instance_group);
+
 protected:
+
+	void initialize_instance_group(int instance_group);
 
 	int add_group(std::string name);
 	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
@@ -46,12 +50,48 @@ protected:
 
 private:
 
+	virtual void hard_reset(int instance_group) {}
+
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
 
 	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
+
+	struct InstanceGroupData
+	{
+		std::uint64_t buffer_id = 0;
+		int active_buffer_instances = 0;
+	};
+
+	std::map<int, InstanceGroupData> instance_group_data_;
 };
+
+inline void Plugin::initialize_instance_group(int instance_group)
+{
+	if (instance_group_data_.find(instance_group) == instance_group_data_.end())
+	{
+		instance_group_data_[instance_group] = InstanceGroupData();
+	}
+}
+
+inline void Plugin::begin_process(std::uint64_t buffer_id, int instance_group)
+{
+	auto& instance_group_data = instance_group_data_[instance_group];
+
+	if (buffer_id > instance_group_data.buffer_id)
+	{
+		if (buffer_id > instance_group_data.buffer_id + 1 || instance_group_data.active_buffer_instances == 0)
+		{
+			hard_reset(instance_group);
+		}
+
+		instance_group_data.buffer_id = buffer_id;
+		instance_group_data.active_buffer_instances = 0;
+	}
+
+	instance_group_data.active_buffer_instances++;
+}
 
 inline const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data, int index)
 {

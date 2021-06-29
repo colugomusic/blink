@@ -8,6 +8,7 @@
 #include "sample_data.hpp"
 #include "slider_spec.hpp"
 #include "generator_base.hpp"
+#include "plugin.hpp"
 
 namespace blink {
 
@@ -16,17 +17,28 @@ class Effect : public GeneratorBase
 
 public:
 
+	Effect(Plugin* plugin, int instance_group)
+		: GeneratorBase(instance_group)
+		, plugin_(plugin)
+	{
+	}
+
 	virtual ~Effect() {}
 
-	virtual blink_Error process(const blink_EffectBuffer* buffer, const float* in, float* out) = 0;
-	virtual blink_Error reset() = 0;
-
-protected:
-
-	void begin_process(const blink_EffectBuffer* buffer)
+	blink_Error effect_process(const blink_EffectBuffer* buffer, const float* in, float* out)
 	{
-		GeneratorBase::begin_process(buffer->positions, buffer->data_offset);
+		plugin_->begin_process(buffer->buffer_id, get_instance_group());
+
+		GeneratorBase::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
+
+		return process(buffer, in, out);
 	}
+
+private:
+
+	virtual blink_Error process(const blink_EffectBuffer* buffer, const float* in, float* out) = 0;
+
+	Plugin* plugin_;
 };
 
 }

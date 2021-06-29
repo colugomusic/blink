@@ -16,9 +16,15 @@ class GeneratorBase
 
 public:
 
+	GeneratorBase(int instance_group)
+		: instance_group_(instance_group)
+	{
+	}
+
 	virtual ~GeneratorBase() {}
 
 	int get_num_channels() const { return 2; }
+	int get_instance_group() const { return instance_group_; }
 
 	static ml::DSPVectorArray<2> stereo_pan(
 		const ml::DSPVectorArray<2> in,
@@ -29,8 +35,15 @@ public:
 
 protected:
 
-	void begin_process(const blink_Position* positions, int data_offset)
+	void begin_process(std::uint64_t buffer_id, const blink_Position* positions, int data_offset)
 	{
+		if (buffer_id > buffer_id_ + 1)
+		{
+			reset();
+		}
+
+		buffer_id_ = buffer_id;
+
 		block_positions_(positions, data_offset, kFloatsPerDSPVector);
 	}
 
@@ -41,7 +54,11 @@ protected:
 
 private:
 
+	virtual void reset() = 0;
+
 	BlockPositions block_positions_;
+	int instance_group_ = 0;
+	std::uint64_t buffer_id_ = 0;
 };
 
 inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(

@@ -6,6 +6,7 @@
 
 typedef struct
 {
+	uint64_t buffer_id;
 	int instance_group;
 	blink_SR song_rate;
 	blink_SR sample_rate;
@@ -23,7 +24,6 @@ typedef struct
 	void* proc_data;
 
 	blink_Effect_Process process;
-	blink_Effect_Reset reset;
 } blink_Effect;
 
 #ifdef BLINK_EXPORT

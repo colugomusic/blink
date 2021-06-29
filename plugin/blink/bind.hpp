@@ -417,7 +417,7 @@ inline blink_Sampler sampler(Sampler* sampler)
 	{
 		auto sampler = (Sampler*)(proc_data);
 
-		return sampler->process(buffer, out);
+		return sampler->sampler_process(buffer, out);
 	};
 
 	return out;
@@ -448,14 +448,7 @@ inline blink_Effect effect(Effect* effect)
 	{
 		auto effect = (Effect*)(proc_data);
 
-		return effect->process(buffer, in, out);
-	};
-
-	out.reset = [](void* proc_data)
-	{
-		auto effect = (Effect*)(proc_data);
-
-		return effect->reset();
+		return effect->effect_process(buffer, in, out);
 	};
 
 	return out;
@@ -486,14 +479,7 @@ inline blink_Synth synth(Synth* synth)
 	{
 		auto synth = (Synth*)(proc_data);
 
-		return synth->process(buffer, out);
-	};
-
-	out.reset = [](void* proc_data)
-	{
-		auto synth = (Synth*)(proc_data);
-
-		return synth->reset();
+		return synth->synth_process(buffer, out);
 	};
 
 	return out;

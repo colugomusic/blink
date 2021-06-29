@@ -51,6 +51,7 @@ typedef struct
 //
 typedef struct
 {
+	uint64_t buffer_id;
 	int instance_group;
 	blink_SR song_rate;
 	blink_SR sample_rate;
