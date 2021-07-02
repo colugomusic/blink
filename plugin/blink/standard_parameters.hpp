@@ -469,6 +469,25 @@ inline SliderSpec<float> filter_frequency()
 	return out;
 }
 
+namespace generic {
+
+inline SliderSpec<float> linear(float min, float max, float default_value, float precision)
+{
+	SliderSpec<float> out;
+
+	out.constrain = [min, max](float v) { return std::clamp(v, min, max); };
+	out.increment = [min, max, precision](float v, bool precise) { return v + (precise ? precision * 0.1f : precision); };
+	out.decrement = [min, max, precision](float v, bool precise) { return v - (precise ? precision * 0.1f : precision); };
+	out.drag = [min, max, precision](float v, int amount, bool precise) { return v + (amount * (precise ? precision * 0.1f : precision)); };
+	out.to_string = [](float v) { return tweak::to_string(v); };
+	out.from_string = [](const std::string& s) { return tweak::find_number<float>(s); };
+	out.default_value = default_value;
+
+	return out;
+}
+
+}  // generic
+
 namespace parameters {
 
 inline SliderParameterSpec<float> amp()
@@ -1001,6 +1020,41 @@ namespace generic
 		out.range.max.default_value = 1.0f;
 		out.range.max.to_string = tweak::std::percentage::to_string;
 		out.to_string = tweak::std::percentage::to_string;
+
+		return out;
+	}
+
+	inline EnvelopeSpec percentage_bipolar()
+	{
+		EnvelopeSpec out;
+
+		out.default_value = 0.5f;
+		out.search_binary = generic_search_binary;
+		out.search_forward = generic_search_forward;
+		out.stepify = tweak::std::percentage_bipolar::stepify;
+		out.value_slider = sliders::percentage_bipolar();
+		out.range.min.default_value = 0.0f;
+		out.range.min.to_string = tweak::std::percentage_bipolar::to_string;
+		out.range.max.default_value = 1.0f;
+		out.range.max.to_string = tweak::std::percentage_bipolar::to_string;
+		out.to_string = tweak::std::percentage_bipolar::to_string;
+
+		return out;
+	}
+
+	inline EnvelopeSpec linear(float min, float max, float default_value)
+	{
+		EnvelopeSpec out;
+
+		out.default_value = default_value;
+		out.search_binary = generic_search_binary;
+		out.search_forward = generic_search_forward;
+		out.value_slider = sliders::generic::linear(min, max, default_value, 1.0f);
+		out.range.min.default_value = min;
+		out.range.min.to_string = [](float v){ return tweak::to_string(v); };
+		out.range.max.default_value = max;
+		out.range.max.to_string = [](float v) { return tweak::to_string(v); };
+		out.to_string = [](float v) { return tweak::to_string(v); };
 
 		return out;
 	}
