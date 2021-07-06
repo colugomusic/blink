@@ -197,6 +197,15 @@ inline int wrap(int x, int y)
 	return x;
 }
 
+inline std::int64_t wrap(std::int64_t x, std::int64_t y)
+{
+	x = x % y;
+
+	if (x < 0) x += y;
+
+	return x;
+}
+
 template <size_t ROWS>
 snd::transport::DSPVectorArrayFramePosition<ROWS> wrap(const snd::transport::DSPVectorArrayFramePosition<ROWS>& x, float y)
 {
