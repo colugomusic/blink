@@ -22,9 +22,20 @@ public:
 	int get_num_groups() const;
 	int get_num_parameters() const;
 
+	int add_group(std::string name);
+	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
+	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeSpec spec);
+	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
+	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
+
+	template <class T>
+	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
+
 	const Group& get_group(int index) const;
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
+
+	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
 
 	static const blink_ChordData* get_chord_data(const blink_ParameterData* data, int index);
 	static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data, int index);
@@ -38,15 +49,6 @@ public:
 protected:
 
 	void initialize_instance_group(int instance_group);
-
-	int add_group(std::string name);
-	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
-	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeSpec spec);
-	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
-	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
-
-	template <class T>
-	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
 
 private:
 
@@ -91,6 +93,11 @@ inline void Plugin::begin_process(std::uint64_t buffer_id, int instance_group)
 	}
 
 	instance_group_data.active_buffer_instances++;
+}
+
+template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)
+{
+	return data ? &data[Index].envelope : nullptr;
 }
 
 inline const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data, int index)
