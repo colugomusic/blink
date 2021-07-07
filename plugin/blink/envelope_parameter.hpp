@@ -38,7 +38,6 @@ public:
 	int get_sliders_count() const { return int(sliders_.size()); }
 	blink_Index get_slider(blink_Index index) const { return sliders_[index]; }
 
-	// not sure if i need this: float search_ext(const blink_EnvelopePoints* points, blink_Position block_position, int search_beg, int* left);
 	float search(const blink_EnvelopeData* data, blink_Position block_position) const;
 	void search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, int n, float* out) const;
 	void search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const;
@@ -57,6 +56,7 @@ private:
 	std::vector<blink_Index> sliders_;
 	EnvelopeSnapSettings snap_settings_;
 	mutable std::string display_value_buffer_;
+	mutable int left_ = 0;
 };
 
 inline std::optional<float> EnvelopeParameter::get_gridline(int index) const
@@ -75,9 +75,7 @@ inline std::optional<float> EnvelopeParameter::get_stepline(int index, float ste
 
 inline float EnvelopeParameter::search(const blink_EnvelopeData* data, blink_Position block_position) const
 {
-	int left;
-
-	return spec_.search_binary(data, spec_.default_value, block_position, 0, &left);
+	return spec_.search_binary(data, spec_.default_value, block_position, 0, &left_);
 }
 
 inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, float* out) const
@@ -87,7 +85,6 @@ inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const 
 
 inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const BlockPositions& block_positions, int n, float* out) const
 {
-	int left = 0;
 	bool reset = false;
 	auto prev_pos = block_positions.prev_pos;
 
@@ -106,11 +103,11 @@ inline void EnvelopeParameter::search_vec(const blink_EnvelopeData* data, const 
 		{
 			reset = false;
 
-			out[i] = spec_.search_binary(data, spec_.default_value, block_positions.positions[i], 0, &left);
+			out[i] = spec_.search_binary(data, spec_.default_value, block_positions.positions[i], 0, &left_);
 		}
 		else
 		{
-			out[i] = spec_.search_forward(data, spec_.default_value, block_positions.positions[i], left, &left);
+			out[i] = spec_.search_forward(data, spec_.default_value, block_positions.positions[i], left_, &left_);
 		}
 
 		prev_pos = pos;
