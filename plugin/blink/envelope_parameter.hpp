@@ -32,7 +32,6 @@ public:
 
 	std::optional<float> get_gridline(int index) const;
 	std::optional<float> get_stepline(int index, float step_size) const;
-	std::optional<float> from_string(const std::string& str) const { return spec_.from_string(str); }
 	int get_options_count() const { return int(options_.size()); }
 	blink_Index get_option(blink_Index index) const { return options_[index]; }
 	int get_sliders_count() const { return int(sliders_.size()); }

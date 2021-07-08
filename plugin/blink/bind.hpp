@@ -285,21 +285,6 @@ inline blink_Envelope envelope(const EnvelopeParameter& envelope)
 		return envelope->display_value(value);
 	};
 
-	out.from_string = [](void* proc_data, const char* str, float* value)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		auto result = envelope->from_string(str);
-
-		if (result)
-		{
-			*value = *result;
-			return true;
-		}
-
-		return false;
-	};
-
 	out.stepify = [](void* proc_data, float value)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
@@ -361,6 +346,7 @@ inline blink_Parameter parameter(const Parameter& parameter)
 	out.uuid = parameter.get_uuid();
 	out.group_index = parameter.get_group_index();
 	out.name = parameter.get_name();
+	out.long_desc = parameter.get_long_desc();
 
 	const auto type = parameter.get_type();
 

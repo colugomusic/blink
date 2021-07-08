@@ -287,8 +287,7 @@ enum blink_ToggleFlags
 	blink_ToggleFlags_None              = 1 << 0,
 	blink_ToggleFlags_ShowButton        = 1 << 1,
 	blink_ToggleFlags_ShowInContextMenu = 1 << 2,
-	blink_ToggleFlags_DefaultEnabled    = 1 << 3,
-	blink_ToggleFlags_MovesDisplay      = 1 << 4, // Editing should trigger a visual update
+	blink_ToggleFlags_MovesDisplay      = 1 << 3, // Editing should trigger a visual update
 };
 
 //
@@ -422,6 +421,9 @@ typedef struct blink_Parameter_
 
 	// User-friendly parameter name
 	const char* name;
+
+	// Long description of the parameter. Can be null
+	const char* long_desc;
 
 	union blink_ParameterObject parameter;
 } blink_Parameter;

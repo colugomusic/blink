@@ -424,11 +424,12 @@ inline SliderSpec<int> sample_offset()
 	return out;
 }
 
+template <int MIN = 0, int MAX = 100>
 inline SliderSpec<float> percentage()
 {
 	SliderSpec<float> out;
 
-	out.constrain = tweak::std::percentage::constrain;
+	out.constrain = [](float v) { return std::clamp(v, float(MIN) / 100.0f, float(MAX) / 100.0f); };
 	out.increment = tweak::std::percentage::increment;
 	out.decrement = tweak::std::percentage::decrement;
 	out.drag = tweak::std::percentage::drag;
@@ -449,7 +450,7 @@ inline SliderSpec<float> percentage_bipolar()
 	out.drag = tweak::std::percentage_bipolar::drag;
 	out.to_string = tweak::std::percentage_bipolar::to_string;
 	out.from_string = tweak::std::percentage_bipolar::from_string;
-	out.default_value = 0;
+	out.default_value = 0.5;
 
 	return out;
 }
@@ -1006,6 +1007,7 @@ inline EnvelopeSpec mix()
 
 namespace generic
 {
+	template <int MIN = 0, int MAX = 100>
 	inline EnvelopeSpec percentage()
 	{
 		EnvelopeSpec out;
@@ -1014,10 +1016,10 @@ namespace generic
 		out.search_binary = generic_search_binary;
 		out.search_forward = generic_search_forward;
 		out.stepify = tweak::std::percentage::stepify;
-		out.value_slider = sliders::percentage();
-		out.range.min.default_value = 0.0f;
+		out.value_slider = sliders::percentage<MIN, MAX>();
+		out.range.min.default_value = float(MIN) / 100.0f;
 		out.range.min.to_string = tweak::std::percentage::to_string;
-		out.range.max.default_value = 1.0f;
+		out.range.max.default_value = float(MAX) / 100.0f;
 		out.range.max.to_string = tweak::std::percentage::to_string;
 		out.to_string = tweak::std::percentage::to_string;
 
