@@ -16,14 +16,23 @@ typedef struct
 	blink_ParameterData* parameter_data;
 } blink_EffectBuffer;
 
+typedef struct
+{
+	int exact_delay;
+	int max_delay;
+	int approximate_delay;
+} blink_EffectInstanceInfo;
+
 typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out);
 typedef blink_Error(*blink_Effect_Reset)(void* proc_data);
+typedef blink_EffectInstanceInfo(*blink_Effect_GetInfo)(void* proc_data);
 
 typedef struct
 {
 	void* proc_data;
 
 	blink_Effect_Process process;
+	blink_Effect_GetInfo get_info;
 } blink_Effect;
 
 #ifdef BLINK_EXPORT
