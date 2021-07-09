@@ -82,6 +82,11 @@ private:
 
 inline void Plugin::register_instance(GeneratorBase* instance)
 {
+	if (SR_ > 0)
+	{
+		instance->stream_init(SR_);
+	}
+
 	instances_.insert(instance);
 }
 

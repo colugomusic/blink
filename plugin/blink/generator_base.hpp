@@ -22,7 +22,11 @@ public:
 	}
 
 	// Called in UI thread
-	virtual void stream_init(blink_SR SR) {}
+	void stream_init(blink_SR SR)
+	{
+		SR_ = SR;
+		stream_init();
+	}
 
 	virtual ~GeneratorBase() {}
 
@@ -37,6 +41,8 @@ public:
 		const BlockPositions& block_positions);
 
 protected:
+
+	blink_SR SR() const { return SR_; }
 
 	void begin_process(std::uint64_t buffer_id, const blink_Position* positions, int data_offset)
 	{
@@ -58,8 +64,10 @@ protected:
 private:
 
 	virtual void reset() = 0;
+	virtual void stream_init() {};
 
 	BlockPositions block_positions_;
+	blink_SR SR_;
 	int instance_group_ = 0;
 	std::uint64_t buffer_id_ = 0;
 };
