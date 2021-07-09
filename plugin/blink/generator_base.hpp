@@ -21,6 +21,9 @@ public:
 	{
 	}
 
+	// Called in UI thread
+	virtual void stream_init(blink_SR SR) {}
+
 	virtual ~GeneratorBase() {}
 
 	int get_num_channels() const { return 2; }

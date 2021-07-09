@@ -449,6 +449,7 @@ extern "C"
 	EXPORTED const char* blink_get_plugin_version();
 	EXPORTED blink_Error blink_init();
 	EXPORTED blink_Error blink_terminate();
+	EXPORTED blink_Error blink_stream_init(blink_SR SR);
 	EXPORTED int blink_get_num_groups();
 	EXPORTED int blink_get_num_parameters();
 	EXPORTED blink_Group blink_get_group(blink_Index index);

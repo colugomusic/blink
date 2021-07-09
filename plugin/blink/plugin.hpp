@@ -3,7 +3,9 @@
 #define _USE_MATH_DEFINES
 #include <map>
 #include <memory>
+#include <set>
 #include "blink.h"
+#include "generator_base.hpp"
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "slider_spec.hpp"
@@ -18,6 +20,11 @@ namespace blink {
 class Plugin
 {
 public:
+
+	void register_instance(GeneratorBase* instance);
+	void unregister_instance(GeneratorBase* instance);
+
+	void stream_init(blink_SR SR);
 
 	int get_num_groups() const;
 	int get_num_parameters() const;
@@ -36,6 +43,8 @@ public:
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
 
 	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
+	template <int Index> static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data);
+	template <int Index, bool Default = false> static bool get_toggle_value(const blink_ParameterData* data);
 
 	static const blink_ChordData* get_chord_data(const blink_ParameterData* data, int index);
 	static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data, int index);
@@ -56,9 +65,11 @@ private:
 
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
 
+	blink_SR SR_ = 0;
 	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
+	std::set<GeneratorBase*> instances_;
 
 	struct InstanceGroupData
 	{
@@ -68,6 +79,26 @@ private:
 
 	std::map<int, InstanceGroupData> instance_group_data_;
 };
+
+inline void Plugin::register_instance(GeneratorBase* instance)
+{
+	instances_.insert(instance);
+}
+
+inline void Plugin::unregister_instance(GeneratorBase* instance)
+{
+	instances_.erase(instance);
+}
+
+inline void Plugin::stream_init(blink_SR SR)
+{
+	SR_ = SR;
+
+	for (auto instance : instances_)
+	{
+		instance->stream_init(SR);
+	}
+}
 
 inline void Plugin::initialize_instance_group(int instance_group)
 {
@@ -98,6 +129,18 @@ inline void Plugin::begin_process(std::uint64_t buffer_id, int instance_group)
 template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)
 {
 	return data ? &data[Index].envelope : nullptr;
+}
+
+template <int Index> const blink_ToggleData* Plugin::get_toggle_data(const blink_ParameterData* data)
+{
+	return data ? &data[Index].toggle : nullptr;
+}
+
+template <int Index, bool Default> bool Plugin::get_toggle_value(const blink_ParameterData* data)
+{
+	const auto toggle = get_toggle_data<Index>(data);
+
+	return toggle ? toggle->value : Default;
 }
 
 inline const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data, int index)
