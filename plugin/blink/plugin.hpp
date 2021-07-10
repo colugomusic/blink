@@ -5,7 +5,7 @@
 #include <memory>
 #include <set>
 #include "blink.h"
-#include "generator_base.hpp"
+#include "instance.hpp"
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "slider_spec.hpp"
@@ -21,8 +21,8 @@ class Plugin
 {
 public:
 
-	void register_instance(GeneratorBase* instance);
-	void unregister_instance(GeneratorBase* instance);
+	void register_instance(Instance* instance);
+	void unregister_instance(Instance* instance);
 
 	void stream_init(blink_SR SR);
 
@@ -53,15 +53,7 @@ public:
 	static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data, int index);
 	static const blink_OptionData* get_option_data(const blink_ParameterData* data, int index);
 
-	void begin_process(std::uint64_t buffer_id, int instance_group);
-
-protected:
-
-	void initialize_instance_group(int instance_group);
-
 private:
-
-	virtual void hard_reset(int instance_group) {}
 
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
 
@@ -69,18 +61,10 @@ private:
 	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
-	std::set<GeneratorBase*> instances_;
-
-	struct InstanceGroupData
-	{
-		std::uint64_t buffer_id = 0;
-		int active_buffer_instances = 0;
-	};
-
-	std::map<int, InstanceGroupData> instance_group_data_;
+	std::set<Instance*> instances_;
 };
 
-inline void Plugin::register_instance(GeneratorBase* instance)
+inline void Plugin::register_instance(Instance* instance)
 {
 	if (SR_ > 0)
 	{
@@ -90,7 +74,7 @@ inline void Plugin::register_instance(GeneratorBase* instance)
 	instances_.insert(instance);
 }
 
-inline void Plugin::unregister_instance(GeneratorBase* instance)
+inline void Plugin::unregister_instance(Instance* instance)
 {
 	instances_.erase(instance);
 }
@@ -103,32 +87,6 @@ inline void Plugin::stream_init(blink_SR SR)
 	{
 		instance->stream_init(SR);
 	}
-}
-
-inline void Plugin::initialize_instance_group(int instance_group)
-{
-	if (instance_group_data_.find(instance_group) == instance_group_data_.end())
-	{
-		instance_group_data_[instance_group] = InstanceGroupData();
-	}
-}
-
-inline void Plugin::begin_process(std::uint64_t buffer_id, int instance_group)
-{
-	auto& instance_group_data = instance_group_data_[instance_group];
-
-	if (buffer_id > instance_group_data.buffer_id)
-	{
-		if (buffer_id > instance_group_data.buffer_id + 1 || instance_group_data.active_buffer_instances == 0)
-		{
-			hard_reset(instance_group);
-		}
-
-		instance_group_data.buffer_id = buffer_id;
-		instance_group_data.active_buffer_instances = 0;
-	}
-
-	instance_group_data.active_buffer_instances++;
 }
 
 template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)

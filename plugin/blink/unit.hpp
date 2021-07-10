@@ -5,33 +5,32 @@
 #include "envelope_spec.hpp"
 #include "group.hpp"
 #include "parameter.hpp"
-#include "sample_data.hpp"
 #include "slider_spec.hpp"
 #include "envelope_parameter.hpp"
 
 namespace blink {
 
-class GeneratorBase
+class Instance;
+
+extern blink_SR get_SR(Instance*);
+
+class Unit
 {
 
 public:
 
-	GeneratorBase(int instance_group)
-		: instance_group_(instance_group)
+	Unit(Instance* instance)
+		: instance_(instance)
 	{
 	}
+
+	virtual ~Unit() {}
 
 	// Called in UI thread
-	void stream_init(blink_SR SR)
-	{
-		SR_ = SR;
-		stream_init();
-	}
-
-	virtual ~GeneratorBase() {}
+	virtual void stream_init() {};
 
 	int get_num_channels() const { return 2; }
-	int get_instance_group() const { return instance_group_; }
+	Instance* get_instance() const { return instance_; }
 
 	static ml::DSPVectorArray<2> stereo_pan(
 		const ml::DSPVectorArray<2> in,
@@ -42,10 +41,15 @@ public:
 
 protected:
 
-	blink_SR SR() const { return SR_; }
+	blink_SR SR() const { return get_SR(instance_); }
 
 	void begin_process(std::uint64_t buffer_id, const blink_Position* positions, int data_offset)
 	{
+		//
+		// Unit::reset() is called at the start of the buffer if we have gone
+		// at least one buffer without processing this unit
+		//
+
 		if (buffer_id > buffer_id_ + 1)
 		{
 			reset();
@@ -64,15 +68,13 @@ protected:
 private:
 
 	virtual void reset() = 0;
-	virtual void stream_init() {};
 
 	BlockPositions block_positions_;
-	blink_SR SR_;
-	int instance_group_ = 0;
+	Instance* instance_;
 	std::uint64_t buffer_id_ = 0;
 };
 
-inline ml::DSPVectorArray<2> GeneratorBase::stereo_pan(
+inline ml::DSPVectorArray<2> Unit::stereo_pan(
 	const ml::DSPVectorArray<2> in,
 	float pan,
 	const EnvelopeParameter& pan_envelope,

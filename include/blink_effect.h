@@ -7,7 +7,6 @@
 typedef struct
 {
 	uint64_t buffer_id;
-	int instance_group;
 	blink_SR song_rate;
 	int data_offset;
 
@@ -17,45 +16,58 @@ typedef struct
 
 typedef struct
 {
-	int exact_delay;
-	int max_delay;
-	int approximate_delay;
+	// Blockhead uses these values to inform the user of any latency introduced
+	// by the block due to buffering or whatever. Latency compensation is
+	// dealt with manually by the end user (for now)
+	// 
+	// A value of -1 means "unknown"
+	// If all values are -1, it means the block does not introduce any latency
+	// 
+	// Not all of these need to be filled. Blockhead will use:
+	//  - exact_delay if it is set, otherwise
+	//  - the (min/max)_delay pair if they are both set, otherwise
+	//  - min_delay, otherwise
+	//  - max_delay, otherwise
+	// 	- approximate_delay
+	// 
+	int exact_delay;       // Exact latency (in frames) introduced by the block
+	int min_delay;         // Minimum latency (in frames)
+	int max_delay;         // Maximum latency (in frames)
+	int approximate_delay; // Approximate latency (in frames)
 } blink_EffectInstanceInfo;
 
 typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out);
-typedef blink_Error(*blink_Effect_Reset)(void* proc_data);
-typedef blink_EffectInstanceInfo(*blink_Effect_GetInfo)(void* proc_data);
 
 typedef struct
 {
 	void* proc_data;
 
 	blink_Effect_Process process;
-	blink_Effect_GetInfo get_info;
-} blink_Effect;
+} blink_EffectUnit;
+
+typedef blink_EffectInstanceInfo(*blink_EffectInstance_GetInfo)(void* proc_data);
+typedef blink_EffectUnit(*blink_EffectInstance_AddUnit)(void* proc_data);
+
+typedef struct
+{
+	void* proc_data;
+
+	blink_EffectInstance_GetInfo get_info;
+
+	// Blockhead will call add_unit() four times per effect block to create a set
+	// synchronized effects for the purposes of crossfading between them to
+	// avoid clicks.
+	//
+	// A crossfade between one or more units occurs whenever block data changes
+	// or the song loops back to an earlier position. These two sitations may
+	// occur simulataneously therefore Blockhead requires four units in total.
+	blink_EffectInstance_AddUnit add_unit;
+} blink_EffectInstance;
 
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	// Blockhead will call this four times per effect block to create a set
-	// synchronized effects for the purposes of crossfading between them to
-	// avoid clicks.
-	//
-	// A crossfade between one or more effects occurs whenever block data changes
-	// or the song loops back to an earlier position. These two sitations may
-	// occur simulataneously therefore Blockhead requires four instances in total.
-	//
-	// Blockhead passes in a different value for instance_group for each set of
-	// four synchronized effects it creates. Plugins can use this id to share
-	// data between related instances if they need to.
-	EXPORTED blink_Effect blink_make_effect(int instance_group);
-
-	// Free all memory associated with this effect instance.
-	// This will always be called four times per effect block.
-	//
-	// process() will no longer be called for any other instances in the
-	// instance_group so it is safe to free any shared instance data the first
-	// time this is called for a any member of that instance_group.
-	EXPORTED blink_Error blink_destroy_effect(blink_Effect effect);
+	EXPORTED blink_EffectInstance blink_make_effect_instance();
+	EXPORTED blink_Error blink_destroy_effect_instance(blink_EffectInstance instance);
 }
 #endif

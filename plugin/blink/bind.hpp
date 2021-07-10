@@ -8,8 +8,6 @@
 #include "slider_parameter.hpp"
 #include "slider_parameter_spec.hpp"
 #include "toggle_parameter.hpp"
-#include "generator.hpp"
-#include "sampler.hpp"
 #include "group.hpp"
 
 namespace blink {
@@ -393,15 +391,15 @@ inline blink_Parameter parameter(const Parameter& parameter)
 }
 
 #ifdef BLINK_SAMPLER
-inline blink_Sampler sampler(Sampler* sampler)
+inline blink_SamplerUnit sampler_unit(SamplerUnit* sampler)
 {
-	blink_Sampler out;
+	blink_SamplerUnit out;
 
 	out.proc_data = sampler;
 
 	out.process = [](void* proc_data, const blink_SamplerBuffer* buffer, float* out)
 	{
-		auto sampler = (Sampler*)(proc_data);
+		auto sampler = (SamplerUnit*)(proc_data);
 
 		return sampler->sampler_process(buffer, out);
 	};
@@ -409,61 +407,75 @@ inline blink_Sampler sampler(Sampler* sampler)
 	return out;
 }
 
-template <class SamplerType, class ...Args>
-blink_Sampler make_sampler(Args... args)
+inline blink_SamplerInstance sampler_instance(SamplerInstance* instance)
 {
-	return bind::sampler(new SamplerType(args...));
-}
+	blink_SamplerInstance out;
 
-blink_Error destroy_sampler(blink_Sampler sampler)
-{
-	delete (Sampler*)(sampler.proc_data);
+	out.proc_data = instance;
 
-	return BLINK_OK;
-}
-#endif
-
-#ifdef BLINK_EFFECT
-inline blink_Effect effect(Effect* effect)
-{
-	blink_Effect out;
-
-	out.proc_data = effect;
-
-	out.process = [](void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out)
+	out.add_unit = [](void* proc_data)
 	{
-		auto effect = (Effect*)(proc_data);
+		auto instance = (SamplerInstance*)(proc_data);
 
-		return effect->effect_process(buffer, in, out);
+		return sampler_unit(instance->add_unit());
 	};
 
 	return out;
 }
 
-template <class EffectType, class ...Args>
-blink_Effect make_effect(Args... args)
+#endif
+
+#ifdef BLINK_EFFECT
+inline blink_EffectUnit effect_unit(EffectUnit* unit)
 {
-	return bind::effect(new EffectType(args...));
+	blink_EffectUnit out;
+
+	out.proc_data = unit;
+
+	out.process = [](void* proc_data, const blink_EffectBuffer* buffer, const float* in, float* out)
+	{
+		auto unit = (EffectUnit*)(proc_data);
+
+		return unit->effect_process(buffer, in, out);
+	};
+
+	return out;
 }
 
-blink_Error destroy_effect(blink_Effect effect)
+inline blink_EffectInstance effect_instance(EffectInstance* instance)
 {
-	delete (Effect*)(effect.proc_data);
+	blink_EffectInstance out;
 
-	return BLINK_OK;
+	out.proc_data = instance;
+
+	out.get_info = [](void* proc_data)
+	{
+		auto instance = (EffectInstance*)(proc_data);
+
+		return instance->get_info();
+	};
+
+	out.add_unit = [](void* proc_data)
+	{
+		auto instance = (EffectInstance*)(proc_data);
+
+		return effect_unit(instance->add_unit());
+	};
+
+	return out;
 }
 #endif
 
 #ifdef BLINK_SYNTH
-inline blink_Synth synth(Synth* synth)
+inline blink_SynthUnit synth_unit(SynthUnit* synth)
 {
-	blink_Synth out;
+	blink_SynthUnit out;
 
 	out.proc_data = synth;
 
 	out.process = [](void* proc_data, const blink_SynthBuffer* buffer, float* out)
 	{
-		auto synth = (Synth*)(proc_data);
+		auto synth = (SynthUnit*)(proc_data);
 
 		return synth->synth_process(buffer, out);
 	};
@@ -471,17 +483,20 @@ inline blink_Synth synth(Synth* synth)
 	return out;
 }
 
-template <class SynthType, class ...Args>
-blink_Synth make_synth(Args... args)
+inline blink_SynthInstance synth_instance(SynthInstance* instance)
 {
-	return bind::synth(new SynthType(args...));
-}
+	blink_SynthInstance out;
 
-blink_Error destroy_synth(blink_Synth synth)
-{
-	delete (Synth*)(synth.proc_data);
+	out.proc_data = instance;
 
-	return BLINK_OK;
+	out.add_unit = [](void* proc_data)
+	{
+		auto instance = (SynthInstance*)(proc_data);
+
+		return synth_unit(instance->add_unit());
+	};
+
+	return out;
 }
 #endif
 

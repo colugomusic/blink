@@ -7,29 +7,28 @@
 #include "parameter.hpp"
 #include "sample_data.hpp"
 #include "slider_spec.hpp"
-#include "generator_base.hpp"
-#include "plugin.hpp"
+#include "instance.hpp"
+#include "unit.hpp"
 
 namespace blink {
 
-class Sampler : public GeneratorBase
+class SamplerUnit : public Unit
 {
 
 public:
 
-	Sampler(Plugin* plugin, int instance_group)
-		: GeneratorBase(instance_group)
-		, plugin_(plugin)
+	SamplerUnit(Instance* instance)
+		: Unit(instance)
 	{
 	}
 
-	virtual ~Sampler() {}
+	virtual ~SamplerUnit() {}
 
 	blink_Error sampler_process(const blink_SamplerBuffer* buffer, float* out)
 	{
-		plugin_->begin_process(buffer->buffer_id, get_instance_group());
+		get_instance()->begin_process(buffer->buffer_id);
 
-		GeneratorBase::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
+		Unit::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
 
 		return process(buffer, out);
 	}
@@ -41,7 +40,6 @@ protected:
 private:
 
 	std::function<blink_WarpPoints*()> get_warp_point_data_;
-	Plugin* plugin_;
 };
 
 }

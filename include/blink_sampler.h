@@ -52,7 +52,6 @@ typedef struct
 typedef struct
 {
 	uint64_t buffer_id;
-	int instance_group;
 	blink_SR song_rate;
 	int data_offset;
 	blink_ChannelMode channel_mode;
@@ -109,31 +108,31 @@ typedef struct
 	void* proc_data;
 
 	blink_Sampler_Process process;
-} blink_Sampler;
+} blink_SamplerUnit;
+
+typedef blink_SamplerUnit(*blink_SamplerInstance_AddUnit)(void* proc_data);
+
+typedef struct
+{
+	void* proc_data;
+
+	// Blockhead will call add_unit() four times per effect block to create a set
+	// synchronized samplers for the purposes of crossfading between them to
+	// avoid clicks.
+	//
+	// A crossfade between one or more units occurs whenever block data changes
+	// or the song loops back to an earlier position. These two sitations may
+	// occur simulataneously therefore Blockhead requires four units in total.
+	blink_SamplerInstance_AddUnit add_unit;
+} blink_SamplerInstance;
 
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	// Blockhead will call this four times per sampler block to create a set
-	// synchronized samplers for the purposes of crossfading between them to avoid
-	// clicks.
-	//
-	// A crossfade between one or more samplers occurs whenever block data changes
-	// or the song loops back to an earlier position. These two sitations may
-	// occur simulataneously therefore Blockhead requires four instances in total.
-	//
-	// Blockhead passes in a different value for instance_group for each set of
-	// four synchronized samplers it creates. Plugins can use this id to share
-	// data between related instances if they need to.
-	EXPORTED blink_Sampler blink_make_sampler(int instance_group);
+	EXPORTED blink_SamplerInstance blink_make_sampler_instance();
 
 	// Free all memory associated with this sampler instance.
-	// This will always be called four times per sampler block.
-	//
-	// process() will no longer be called for any other instances in the
-	// instance_group so it is safe to free any shared instance data the first
-	// time this is called for a any member of that instance_group.
-	EXPORTED blink_Error blink_destroy_sampler(blink_Sampler sampler);
+	EXPORTED blink_Error blink_destroy_sampler_instance(blink_SamplerInstance instance);
 
 	// Returns true if Blockhead should enable warp markers. From the plugin's
 	// perspective this just means warp data will be passed in to process().

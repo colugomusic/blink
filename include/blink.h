@@ -64,9 +64,18 @@ enum blink_StdIcon
 	blink_StdIcon_PianoRoll = 8,
 };
 
-// Generators define their own error codes. Blockhead will probably just ignore
+// Plugins define their own error codes. Blockhead will probably just ignore
 // any errors but this might be useful for future proofing
 typedef int blink_Error;
+
+// Some shared error codes. Plugin-specific error codes should be > 0
+enum blink_StdError
+{
+	blink_StdError_None = 0,
+	blink_StdError_AlreadyInitialized = -1,
+	blink_StdError_NotInitialized = -2,
+	blink_StdError_NotImplemented = -3,
+};
 
 typedef struct
 {
