@@ -35,6 +35,7 @@ inline SamplerInstance* SamplerPlugin::add_instance()
 	const auto instance = make_instance();
 
 	instances_.insert(instance);
+	register_instance(instance);
 
 	return instance;
 }
@@ -42,6 +43,7 @@ inline SamplerInstance* SamplerPlugin::add_instance()
 inline void SamplerPlugin::destroy_instance(SamplerInstance* instance)
 {
 	instances_.erase(instance);
+	unregister_instance(instance);
 	delete instance;
 }
 

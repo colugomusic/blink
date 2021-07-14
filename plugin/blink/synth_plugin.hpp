@@ -35,6 +35,7 @@ inline SynthInstance* SynthPlugin::add_instance()
 	const auto instance = make_instance();
 
 	instances_.insert(instance);
+	register_instance(instance);
 
 	return instance;
 }
@@ -42,6 +43,7 @@ inline SynthInstance* SynthPlugin::add_instance()
 inline void SynthPlugin::destroy_instance(SynthInstance* instance)
 {
 	instances_.erase(instance);
+	unregister_instance(instance);
 	delete instance;
 }
 
