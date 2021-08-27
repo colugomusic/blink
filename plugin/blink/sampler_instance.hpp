@@ -41,6 +41,8 @@ inline SamplerUnit* SamplerInstance::add_unit()
 {
 	const auto unit = make_unit();
 
+	unit->stream_init();
+
 	units_.push_back(unit);
 
 	register_unit(unit.get());
