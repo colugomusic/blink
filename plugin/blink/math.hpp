@@ -35,6 +35,12 @@ constexpr T stepify(T value, T step)
 	return value;
 }
 
+template <size_t ROWS>
+constexpr ml::DSPVectorArray<ROWS> stepify(const ml::DSPVectorArray<ROWS>& value, const ml::DSPVectorArray<ROWS>& step)
+{
+	return ml::select(ml::intToFloat(ml::truncateFloatToInt((value / step) + 0.5f)) * step, value, ml::greaterThan(step, ml::DSPVectorArray<ROWS>(0.0f)));
+}
+
 namespace convert {
 
 template <class T>
@@ -295,6 +301,12 @@ template <class T> T in(T x)
 template <class T> T out(T x)
 {
 	return (x * (x - T(2))) * T(-1);
+}
+
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> out(const ml::DSPVectorArray<ROWS>& x)
+{
+	return (x * (x - 2.0f)) * -1.0f;
 }
 
 template <class T> T in_out(T x)
