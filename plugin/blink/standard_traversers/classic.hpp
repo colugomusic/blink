@@ -4,6 +4,7 @@
 #include "../traverser.hpp"
 #include "../envelope_parameter.hpp"
 #include "../slider_parameter.hpp"
+#include "warp.hpp"
 
 namespace blink {
 namespace std_traversers {
@@ -165,14 +166,47 @@ class Classic
 {
 public:
 
-	snd::transport::DSPVectorFramePosition get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives = nullptr);
+	void get_positions(
+		float transpose,
+		const blink_EnvelopeData* env_pitch,
+		const blink_WarpPoints* warp_points,
+		const Traverser& traverser,
+		int sample_offset,
+		int count,
+		snd::transport::DSPVectorFramePosition* out_sculpted_positions,
+		snd::transport::DSPVectorFramePosition* out_warped_positions,
+		ml::DSPVector* out_derivatives = nullptr);
 
 private:
+	
+	void get_sculpted_positions(
+		float transpose,
+		const blink_EnvelopeData* env_pitch,
+		const Traverser& traverser,
+		int count,
+		snd::transport::DSPVectorFramePosition* positions,
+		ml::DSPVector* derivatives = nullptr);
+
+	void get_warp_positions(
+		const blink_WarpPoints* warp_points,
+		const Traverser& traverser,
+		int count,
+		snd::transport::DSPVectorFramePosition* positions,
+		ml::DSPVector* derivatives = nullptr);
 
 	ClassicCalculator calculator_;
+	BlockPositions sculpted_block_positions_;
+	Traverser warp_traverser_;
+	WarpCalculator warp_calculator_;
 };
 
-inline snd::transport::DSPVectorFramePosition Classic::get_positions(float transpose, const blink_EnvelopeData* env_pitch, const Traverser& traverser, int sample_offset, int count, ml::DSPVector* derivatives)
+inline void Classic::get_sculpted_positions(
+	float transpose,
+	const blink_EnvelopeData* env_pitch,
+	const Traverser& traverser,
+	int count,
+	snd::transport::DSPVectorFramePosition *positions,
+	ml::DSPVector* derivatives)
 {
 	const auto& block_positions = traverser.block_positions();
 
@@ -180,14 +214,14 @@ inline snd::transport::DSPVectorFramePosition Classic::get_positions(float trans
 	{
 		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
 
+		*positions = block_positions.positions * ff;
+
 		if (derivatives) *derivatives = ff;
 
-		return (block_positions.positions * ff) - float(sample_offset);
+		return;
 	}
 
 	const auto& resets = traverser.get_resets();
-
-	snd::transport::DSPVectorFramePosition out;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -196,10 +230,70 @@ inline snd::transport::DSPVectorFramePosition Classic::get_positions(float trans
 			calculator_.reset();
 		}
 
-		out.set(i, calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr) - sample_offset);
+		positions->set(i, calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr));
+	}
+}
+
+inline void Classic::get_warp_positions(
+	const blink_WarpPoints* warp_points,
+	const Traverser& traverser,
+	int count,
+	snd::transport::DSPVectorFramePosition* positions,
+	ml::DSPVector* derivatives)
+{
+	const auto& block_positions = traverser.block_positions();
+
+	if (!warp_points || warp_points->count < 1)
+	{
+		*positions = block_positions.positions;
+
+		if (derivatives) *derivatives = 1.0f;
+
+		return;
 	}
 
-	return out;
+	const auto& resets = traverser.get_resets();
+
+	for (int i = 0; i < count; i++)
+	{
+		if (resets[i] > 0)
+		{
+			warp_calculator_.reset();
+		}
+
+		positions->set(i, warp_calculator_.calculate(warp_points, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr));
+	}
+}
+
+inline void Classic::get_positions(
+	float transpose,
+	const blink_EnvelopeData* env_pitch,
+	const blink_WarpPoints* warp_points,
+	const Traverser& traverser,
+	int sample_offset,
+	int count,
+	snd::transport::DSPVectorFramePosition* out_sculpted_positions,
+	snd::transport::DSPVectorFramePosition* out_warped_positions,
+	ml::DSPVector* out_derivatives)
+{
+	snd::transport::DSPVectorFramePosition sculpted_positions;
+	snd::transport::DSPVectorFramePosition warped_positions;
+	ml::DSPVector sculpted_derivatives;
+	ml::DSPVector warped_derivatives;
+
+	get_sculpted_positions(transpose, env_pitch, traverser, count, &sculpted_positions, out_derivatives ? &sculpted_derivatives : nullptr);
+
+	sculpted_positions -= sample_offset;
+
+	sculpted_block_positions_(sculpted_positions, 0, count);
+
+	warp_traverser_.generate(sculpted_block_positions_, count);
+
+	get_warp_positions(warp_points, warp_traverser_, count, &warped_positions, out_derivatives ? &warped_derivatives : nullptr);
+
+	if (out_sculpted_positions) *out_sculpted_positions = sculpted_positions;
+	if (out_warped_positions) *out_warped_positions = warped_positions;
+	if (out_derivatives) *out_derivatives = sculpted_derivatives * warped_derivatives;
 }
 
 }}
