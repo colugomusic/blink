@@ -28,8 +28,9 @@
 #define BLINK_STD_UUID_TOGGLE_LOOP "dfa36d24-3c41-4a13-9b57-dc0116ef19f7"
 #define BLINK_STD_UUID_TOGGLE_REVERSE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
 
-#define BLINK_STD_CATEGORY_FILTERS "Filters"
 #define BLINK_STD_CATEGORY_DESTRUCTION "Destruction"
+#define BLINK_STD_CATEGORY_FILTERS "Filters"
+#define BLINK_STD_CATEGORY_SPACE "Space"
 
 typedef uint8_t blink_ChannelCount;
 typedef uint64_t blink_FrameCount;
