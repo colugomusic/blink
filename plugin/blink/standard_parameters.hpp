@@ -487,6 +487,17 @@ inline SliderSpec<float> linear(float min, float max, float default_value, float
 	return out;
 }
 
+inline SliderSpec<float> ms(float min, float max, float default_value, float precision)
+{
+	SliderSpec<float> out = linear(min, max, default_value, precision);
+
+	out.stepify = [](float v) { return tweak::std::ms::stepify(v); };
+	out.to_string = [](float v) { return tweak::std::ms::to_string(v); };
+	out.from_string = [](const std::string& s) { return tweak::std::ms::from_string(s); };
+
+	return out;
+}
+
 }  // generic
 
 namespace parameters {
@@ -1057,6 +1068,24 @@ namespace generic
 		out.range.max.default_value = max;
 		out.range.max.to_string = [](float v) { return tweak::to_string(v); };
 		out.to_string = [](float v) { return tweak::to_string(v); };
+
+		return out;
+	}
+
+	inline EnvelopeSpec ms(float min, float max, float default_value)
+	{
+		EnvelopeSpec out;
+
+		out.default_value = default_value;
+		out.search_binary = generic_search_binary;
+		out.search_forward = generic_search_forward;
+		out.stepify = tweak::std::ms::stepify;
+		out.value_slider = sliders::generic::ms(min, max, default_value, 1.0f);
+		out.range.min.default_value = min;
+		out.range.min.to_string = [](float v){ return tweak::std::ms::to_string(v); };
+		out.range.max.default_value = max;
+		out.range.max.to_string = [](float v) { return tweak::std::ms::to_string(v); };
+		out.to_string = [](float v) { return tweak::std::ms::to_string(v); };
 
 		return out;
 	}
