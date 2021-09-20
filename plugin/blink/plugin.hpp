@@ -43,6 +43,7 @@ public:
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
 
 	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
+	template <int Index> static const blink_OptionData* get_option_data(const blink_ParameterData* data);
 	template <int Index> static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data);
 	template <int Index, bool Default = false> static bool get_toggle_value(const blink_ParameterData* data);
 
@@ -92,6 +93,11 @@ inline void Plugin::stream_init(blink_SR SR)
 template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)
 {
 	return data ? &data[Index].envelope : nullptr;
+}
+
+template <int Index> const blink_OptionData* Plugin::get_option_data(const blink_ParameterData* data)
+{
+	return data ? &data[Index].option : nullptr;
 }
 
 template <int Index> const blink_ToggleData* Plugin::get_toggle_data(const blink_ParameterData* data)
