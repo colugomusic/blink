@@ -13,6 +13,12 @@ namespace blink {
 namespace math {
 
 template <class T>
+constexpr T midpoint(T a, T b)
+{
+	return (a + b) / T(2);
+}
+
+template <class T>
 constexpr T lerp(T a, T b, T x)
 {
 	return (x * (b - a)) + a;
