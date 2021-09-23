@@ -213,17 +213,17 @@ typedef float (*blink_InverseCurve)(void* proc_data, float value);
 typedef float (*blink_Stepify)(void* proc_data, float value);
 typedef float (*blink_SnapValue)(void* proc_data, float value, float step_size, float snap_amount);
 typedef float (*blink_Constrain)(void* proc_data, float value);
-typedef float (*blink_Drag)(void* proc_data, float start_value, int amount, bool precise);
-typedef float (*blink_Increment)(void* proc_data, float value, bool precise);
-typedef float (*blink_Decrement)(void* proc_data, float value, bool precise);
+typedef float (*blink_Drag)(void* proc_data, float start_value, int amount, blink_Bool precise);
+typedef float (*blink_Increment)(void* proc_data, float value, blink_Bool precise);
+typedef float (*blink_Decrement)(void* proc_data, float value, blink_Bool precise);
 typedef const char* (*blink_DisplayValue)(void* proc_data, float value);
-typedef bool (*blink_FromString)(void* proc_data, const char* str, float* value);
+typedef blink_Bool (*blink_FromString)(void* proc_data, const char* str, float* value);
 typedef int (*blink_IntConstrain)(void* proc_data, int value);
-typedef int (*blink_IntDrag)(void* proc_data, int start_value, int amount, bool precise);
-typedef int (*blink_IntIncrement)(void* proc_data, int value, bool precise);
-typedef int (*blink_IntDecrement)(void* proc_data, int value, bool precise);
+typedef int (*blink_IntDrag)(void* proc_data, int start_value, int amount, blink_Bool precise);
+typedef int (*blink_IntIncrement)(void* proc_data, int value, blink_Bool precise);
+typedef int (*blink_IntDecrement)(void* proc_data, int value, blink_Bool precise);
 typedef const char* (*blink_IntDisplayValue)(void* proc_data, int value);
-typedef bool (*blink_IntFromString)(void* proc_data, const char* str, int* value);
+typedef blink_Bool (*blink_IntFromString)(void* proc_data, const char* str, int* value);
 
 typedef struct
 {
@@ -325,8 +325,8 @@ struct blink_Parameter_;
 // Envelope parameter
 // Can be manipulated in Blockhead using the envelope editor
 //
-typedef bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
-typedef bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
+typedef blink_Bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
+typedef blink_Bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
 typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData* data, float block_position);
 typedef blink_Index (*blink_GetOption)(void* proc_data, blink_Index index);
 typedef blink_Index (*blink_GetSlider)(void* proc_data, blink_Index index);
@@ -450,6 +450,17 @@ typedef struct
 	const char* data;
 } blink_ResourceData;
 
+typedef struct
+{
+	blink_UUID uuid;
+	const char* name;
+	const char* category; // May be null
+	const char* version;
+
+	// If this is true, Blockhead will try to find an icon resource at res/icon.png
+	// If there isn't one, a default icon will be used
+	blink_Bool has_icon;
+} blink_PluginInfo;
 
 #ifdef BLINK_EXPORT
 
@@ -461,10 +472,7 @@ typedef struct
 
 extern "C"
 {
-	EXPORTED blink_UUID blink_get_plugin_uuid();
-	EXPORTED const char* blink_get_plugin_name();
-	EXPORTED const char* blink_get_plugin_category();
-	EXPORTED const char* blink_get_plugin_version();
+	EXPORTED blink_PluginInfo blink_get_plugin_info();
 	EXPORTED blink_Error blink_init();
 	EXPORTED blink_Error blink_terminate();
 	EXPORTED blink_Error blink_stream_init(blink_SR SR);

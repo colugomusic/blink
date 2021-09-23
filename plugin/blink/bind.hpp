@@ -46,21 +46,21 @@ inline blink_Slider slider(const Slider<float>& slider)
 			return slider->tweaker().constrain(value);
 		};
 
-		out.increment = [](void* proc_data, float value, bool precise)
+		out.increment = [](void* proc_data, float value, blink_Bool precise)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
 			return slider->tweaker().increment(value, precise);
 		};
 
-		out.decrement = [](void* proc_data, float value, bool precise)
+		out.decrement = [](void* proc_data, float value, blink_Bool precise)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
 			return slider->tweaker().decrement(value, precise);
 		};
 
-		out.drag = [](void* proc_data, float value, int amount, bool precise)
+		out.drag = [](void* proc_data, float value, int amount, blink_Bool precise)
 		{
 			auto slider = (Slider<float>*)(proc_data);
 
@@ -83,10 +83,10 @@ inline blink_Slider slider(const Slider<float>& slider)
 			if (result)
 			{
 				*value = *result;
-				return true;
+				return blink_Bool(BLINK_TRUE);
 			}
 
-			return false;
+			return blink_Bool(BLINK_FALSE);
 		};
 
 		out.stepify = [](void* proc_data, float value)
@@ -114,21 +114,21 @@ inline blink_IntSlider slider(const Slider<int>& slider)
 		return slider->tweaker().constrain(value);
 	};
 
-	out.increment = [](void* proc_data, int value, bool precise)
+	out.increment = [](void* proc_data, int value, blink_Bool precise)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
 		return slider->tweaker().increment(value, precise);
 	};
 
-	out.decrement = [](void* proc_data, int value, bool precise)
+	out.decrement = [](void* proc_data, int value, blink_Bool precise)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
 		return slider->tweaker().decrement(value, precise);
 	};
 
-	out.drag = [](void* proc_data, int value, int amount, bool precise)
+	out.drag = [](void* proc_data, int value, int amount, blink_Bool precise)
 	{
 		auto slider = (Slider<int>*)(proc_data);
 
@@ -151,10 +151,10 @@ inline blink_IntSlider slider(const Slider<int>& slider)
 		if (result)
 		{
 			*value = *result;
-			return true;
+			return blink_Bool(BLINK_TRUE);
 		}
 
-		return false;
+		return blink_Bool(BLINK_FALSE);
 	};
 
 	return out;
@@ -248,10 +248,10 @@ inline blink_Envelope envelope(const EnvelopeParameter& envelope)
 		if (result)
 		{
 			*out = *result;
-			return true;
+			return blink_Bool(BLINK_TRUE);
 		}
 
-		return false;
+		return blink_Bool(BLINK_FALSE);
 	};
 
 	out.get_stepline = [](void* proc_data, int index, float step_size, float* out)
@@ -263,10 +263,10 @@ inline blink_Envelope envelope(const EnvelopeParameter& envelope)
 		if (result)
 		{
 			*out = *result;
-			return true;
+			return blink_Bool(BLINK_TRUE);
 		}
 
-		return false;
+		return blink_Bool(BLINK_FALSE);
 	};
 
 	out.search = [](void* proc_data, const blink_EnvelopeData* data, float block_position)
