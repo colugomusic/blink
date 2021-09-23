@@ -14,6 +14,7 @@
 #include "option_parameter.hpp"
 #include "slider_parameter.hpp"
 #include "toggle_parameter.hpp"
+#include "resource_store.hpp"
 
 namespace blink {
 
@@ -54,6 +55,8 @@ public:
 	static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data, int index);
 	static const blink_OptionData* get_option_data(const blink_ParameterData* data, int index);
 
+	auto& resources() { return resources_; }
+
 private:
 
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
@@ -63,6 +66,7 @@ private:
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
 	std::set<Instance*> instances_;
+	ResourceStore resources_;
 };
 
 inline void Plugin::register_instance(Instance* instance)
