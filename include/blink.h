@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define BLINK_VECTOR_SIZE 64
@@ -452,12 +453,28 @@ typedef struct
 
 typedef struct
 {
+	// Unique identifier for this plugin
 	blink_UUID uuid;
+
+	// The name of the plugin
 	const char* name;
-	const char* category; // May be null
+
+	// The plugin category as a list of strings delimited by '|'
+	//
+	// e.g. 
+	//	"Destruction"
+	//  "Filters|Butterworth"
+	//	"Space|Reverbs"
+	// 	"Developer Name|Phasers"
+
+	// May be null for no category
+	const char* category;
+
+	// The plugin version string
+	// Usual format is something like v0.0.0
 	const char* version;
 
-	// If this is true, Blockhead will try to find an icon resource at res/icon.png
+	// If this is true, the host will try to find an icon resource at res/icon.png
 	// If there isn't one, a default icon will be used
 	blink_Bool has_icon;
 } blink_PluginInfo;
