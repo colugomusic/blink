@@ -498,7 +498,7 @@ extern "C"
 	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID id);
-	EXPORTED blink_ResourceData blink_get_resource_data(const char* path);
+	EXPORTED blink_ResourceData blink_get_resource_data(const char* path); // optional
 
 	// Returned buffer remains valid until the next call to get_error_string or
 	// until the generator is destroyed
