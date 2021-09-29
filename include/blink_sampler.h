@@ -26,6 +26,11 @@ typedef struct
 	blink_ID id;
 	blink_ChannelCount num_channels;
 	blink_FrameCount num_frames;
+
+	// Array of 2 positions for the start and end of the loop.
+	// Or null if no loop
+	blink_FrameCount* loop_points;
+
 	blink_SR SR;
 	blink_BitDepth bit_depth;
 	blink_Bool analysis_ready;
