@@ -33,7 +33,6 @@ typedef struct
 
 	blink_SR SR;
 	blink_BitDepth bit_depth;
-	blink_Bool analysis_ready;
 
 	void* host;
 	blink_GetSampleDataCB get_data;
@@ -62,6 +61,7 @@ typedef struct
 	blink_ChannelMode channel_mode;
 
 	blink_SampleInfo* sample_info;
+	blink_Bool analysis_ready;
 	blink_Position* positions;
 	blink_WarpPoints* warp_points;
 	blink_ParameterData* parameter_data;
