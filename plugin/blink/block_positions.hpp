@@ -60,6 +60,13 @@ struct BlockPositions
 		count = count_;
 		data_offset = offset;
 	}
+
+	snd::transport::FramePosition operator[](int index) const
+	{
+		if (index == -1) return prev_pos;
+
+		return positions.at(index);
+	}
 };
 
 }
