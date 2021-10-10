@@ -25,8 +25,6 @@ public:
 	void register_instance(Instance* instance);
 	void unregister_instance(Instance* instance);
 
-	void stream_init(blink_SR SR);
-
 	int get_num_groups() const;
 	int get_num_parameters() const;
 
@@ -61,7 +59,6 @@ private:
 
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
 
-	blink_SR SR_ = 0;
 	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
@@ -71,27 +68,12 @@ private:
 
 inline void Plugin::register_instance(Instance* instance)
 {
-	if (SR_ > 0)
-	{
-		instance->stream_init(SR_);
-	}
-
 	instances_.insert(instance);
 }
 
 inline void Plugin::unregister_instance(Instance* instance)
 {
 	instances_.erase(instance);
-}
-
-inline void Plugin::stream_init(blink_SR SR)
-{
-	SR_ = SR;
-
-	for (auto instance : instances_)
-	{
-		instance->stream_init(SR);
-	}
 }
 
 template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)

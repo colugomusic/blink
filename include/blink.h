@@ -479,6 +479,8 @@ typedef struct
 	blink_Bool has_icon;
 } blink_PluginInfo;
 
+typedef blink_Error(*blink_Instance_StreamInit)(void* proc_data, blink_SR SR);
+
 #ifdef BLINK_EXPORT
 
 #ifdef _WIN32
@@ -492,7 +494,6 @@ extern "C"
 	EXPORTED blink_PluginInfo blink_get_plugin_info();
 	EXPORTED blink_Error blink_init();
 	EXPORTED blink_Error blink_terminate();
-	EXPORTED blink_Error blink_stream_init(blink_SR SR);
 	EXPORTED int blink_get_num_groups();
 	EXPORTED int blink_get_num_parameters();
 	EXPORTED blink_Group blink_get_group(blink_Index index);

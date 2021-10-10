@@ -121,6 +121,8 @@ typedef struct
 {
 	void* proc_data;
 
+	blink_Instance_StreamInit stream_init;
+
 	// Blockhead will call add_unit() four times per effect block to create a set
 	// synchronized samplers for the purposes of crossfading between them to
 	// avoid clicks.

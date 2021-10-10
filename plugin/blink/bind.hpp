@@ -420,6 +420,15 @@ inline blink_SamplerInstance sampler_instance(SamplerInstance* instance)
 		return sampler_unit(instance->add_unit());
 	};
 
+	out.stream_init = [](void* proc_data, blink_SR SR)
+	{
+		auto instance = (SamplerInstance*)(proc_data);
+
+		instance->stream_init(SR);
+
+		return BLINK_OK;
+	};
+
 	return out;
 }
 
@@ -461,6 +470,15 @@ inline blink_EffectInstance effect_instance(EffectInstance* instance)
 
 		return effect_unit(instance->add_unit());
 	};
+	
+	out.stream_init = [](void* proc_data, blink_SR SR)
+	{
+		auto instance = (EffectInstance*)(proc_data);
+
+		instance->stream_init(SR);
+
+		return BLINK_OK;
+	};
 
 	return out;
 }
@@ -494,6 +512,15 @@ inline blink_SynthInstance synth_instance(SynthInstance* instance)
 		auto instance = (SynthInstance*)(proc_data);
 
 		return synth_unit(instance->add_unit());
+	};
+	
+	out.stream_init = [](void* proc_data, blink_SR SR)
+	{
+		auto instance = (SynthInstance*)(proc_data);
+
+		instance->stream_init(SR);
+
+		return BLINK_OK;
 	};
 
 	return out;

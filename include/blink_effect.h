@@ -53,6 +53,7 @@ typedef struct
 	void* proc_data;
 
 	blink_EffectInstance_GetInfo get_info;
+	blink_Instance_StreamInit stream_init;
 
 	// Blockhead will call add_unit() four times per effect block to create a set
 	// synchronized effects for the purposes of crossfading between them to
