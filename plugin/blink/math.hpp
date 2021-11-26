@@ -322,6 +322,7 @@ ml::DSPVectorArray<ROWS> in(const ml::DSPVectorArray<ROWS>& x)
 {
 	return ml::pow({2.0f}, ml::DSPVectorArray<ROWS>{10.0f} * (x - 1.0f));
 }
+
 template <size_t ROWS>
 ml::DSPVectorArray<ROWS> out(const ml::DSPVectorArray<ROWS>& x)
 {
