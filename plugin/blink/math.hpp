@@ -70,6 +70,18 @@ inline float frequency_to_pitch(float frequency)
 	return 12.0f * (std::log(frequency / 8.1758f) / std::log(2.0f));
 }
 
+template <int FREQ_MIN, int FREQ_MAX>
+inline float linear_to_filter_hz(float linear)
+{
+	return pitch_to_frequency(lerp(frequency_to_pitch(float(FREQ_MIN)), frequency_to_pitch(float(FREQ_MAX)), linear));
+}
+
+template <int FREQ_MIN, int FREQ_MAX>
+inline ml::DSPVector linear_to_filter_hz(const ml::DSPVector& linear)
+{
+	return pitch_to_frequency(lerp({frequency_to_pitch(float(FREQ_MIN))}, {frequency_to_pitch(float(FREQ_MAX))}, linear));
+}
+
 inline float linear_to_filter_hz(float linear)
 {
 	return pitch_to_frequency(lerp(-8.513f, 135.076f, linear));
@@ -139,6 +151,12 @@ template <size_t ROWS>
 ml::DSPVectorArray<ROWS> ff_to_p(const ml::DSPVectorArray<ROWS>& ff)
 {
 	return (ml::log(ff) / ml::log(ml::DSPVectorArray<ROWS>(2.0f))) * ml::DSPVectorArray<ROWS>(12.0f);
+}
+
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> p_to_t(int SR, const ml::DSPVectorArray<ROWS>& p)
+{
+	return float(SR) / pitch_to_frequency(p + 60.0f);
 }
 
 }
@@ -297,6 +315,21 @@ inline T tukey(T x, T r)
 }
 
 namespace ease {
+namespace exponential {
+
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> in(const ml::DSPVectorArray<ROWS>& x)
+{
+	return ml::pow({2.0f}, ml::DSPVectorArray<ROWS>{10.0f} * (x - 1.0f));
+}
+template <size_t ROWS>
+ml::DSPVectorArray<ROWS> out(const ml::DSPVectorArray<ROWS>& x)
+{
+	return ml::DSPVectorArray<ROWS>{1.0f} - (ml::pow({2.0f}, ml::DSPVectorArray<ROWS>{-10.0f} * x));
+}
+
+} // exponential
+
 namespace quadratic {
 
 template <class T> T in(T x)
