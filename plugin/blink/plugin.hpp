@@ -41,6 +41,7 @@ public:
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
 
+	template <int Index> static const blink_ChordData* get_chord_data(const blink_ParameterData* data);
 	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
 	template <int Index> static const blink_OptionData* get_option_data(const blink_ParameterData* data);
 	template <int Index> static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data);
@@ -74,6 +75,11 @@ inline void Plugin::register_instance(Instance* instance)
 inline void Plugin::unregister_instance(Instance* instance)
 {
 	instances_.erase(instance);
+}
+
+template <int Index> const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data)
+{
+	return data ? &data[Index].chord : nullptr;
 }
 
 template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)
