@@ -344,6 +344,7 @@ inline blink_Parameter parameter(const Parameter& parameter)
 	out.uuid = parameter.get_uuid();
 	out.group_index = parameter.get_group_index();
 	out.name = parameter.get_name();
+	out.short_name = parameter.get_short_name();
 	out.long_desc = parameter.get_long_desc();
 
 	const auto type = parameter.get_type();

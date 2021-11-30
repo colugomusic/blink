@@ -909,6 +909,7 @@ inline EnvelopeSpec noise_amount()
 
 	out.uuid = BLINK_STD_UUID_ENVELOPE_NOISE_AMOUNT;
 	out.name = "Noise Amount";
+	out.short_name = "Amount";
 
 	out.default_value = 0.0f;
 	out.search_binary = generic_search_binary;
@@ -932,6 +933,7 @@ inline EnvelopeSpec noise_color()
 
 	out.uuid = BLINK_STD_UUID_ENVELOPE_NOISE_COLOR;
 	out.name = "Noise Color";
+	out.short_name = "Color";
 
 	out.default_value = 0.5f;
 	out.search_binary = generic_search_binary;

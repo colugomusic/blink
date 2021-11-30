@@ -431,8 +431,11 @@ typedef struct blink_Parameter_
 	// < 0 if the parameter does not belong to a group
 	blink_ID group_index;
 
-	// User-friendly parameter name
+	// Full parameter name e.g. "Noise Amount"
 	const char* name;
+
+	// Short parameter name to use in the context of a group, e.g. "Amount". Can be null
+	const char* short_name;
 
 	// Long description of the parameter. Can be null
 	const char* long_desc;
