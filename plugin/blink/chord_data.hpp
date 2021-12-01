@@ -16,15 +16,15 @@ public:
 	{
 	}
 
-	float search(blink_Position block_position) const
-	{
-		return param_->search(data_, block_position);
-	}
+	//float search(blink_Position block_position) const
+	//{
+	//	return param_->search(data_, block_position);
+	//}
 
-	float search(const BlockPositions& block_positions) const
-	{
-		return search(block_positions.positions[0]);
-	}
+	//float search(const BlockPositions& block_positions) const
+	//{
+	//	return search(block_positions.positions[0]);
+	//}
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
