@@ -52,6 +52,7 @@ enum blink_ChannelMode
 	blink_ChannelMode_Left = 0,
 	blink_ChannelMode_Right = 1,
 	blink_ChannelMode_Stereo = 2,
+	blink_ChannelMode_StereoSwap = 3,
 };
 
 enum blink_StdIcon
@@ -300,6 +301,7 @@ enum blink_ToggleFlags
 	blink_ToggleFlags_ShowButton        = 1 << 1,
 	blink_ToggleFlags_ShowInContextMenu = 1 << 2,
 	blink_ToggleFlags_MovesDisplay      = 1 << 3, // Editing should trigger a visual update
+	blink_ToggleFlags_IconOnly          = 1 << 4, // Only show icon in toggle
 };
 
 //
