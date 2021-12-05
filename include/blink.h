@@ -292,7 +292,7 @@ enum blink_SliderFlags
 	blink_SliderFlags_MovesDisplay  = 1 << 1, // Editing should trigger a visual update
 	blink_SliderFlags_NonGlobal     = 1 << 2, // Do not create a global control for this slider (can be used
 	                                          // to create sliders which are only visible when an envelope is
-											  // selected)
+	                                          // selected)
 };
 
 enum blink_ToggleFlags
@@ -366,7 +366,6 @@ typedef struct
 // Chord parameter
 // Can be manipulated in Blockhead using the chord/scale/harmonics editor thing
 //
-
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
@@ -378,7 +377,6 @@ typedef struct
 // Slider parameter
 // Will be displayed in Blockhead as a slider or spinbox control
 //
-
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Slider
@@ -399,7 +397,6 @@ typedef struct
 // Toggle parameter
 // On/off value
 //
-
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Toggle
@@ -468,7 +465,7 @@ typedef struct
 	//
 	// e.g. 
 	//	"Destruction"
-	//  "Filters|Butterworth"
+	//	"Filters|Butterworth"
 	//	"Space|Reverbs"
 	// 	"Developer Name|Phasers"
 
