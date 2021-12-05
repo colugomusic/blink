@@ -44,7 +44,7 @@ While a unit is being processed, the host passes the unit a sequence of 64 block
 
 Block positions are not aligned to the audio buffer i.e. they do not have to (and probably don't) start at 0, 64, 128, 192, etc... This is because Blockhead supports loop regions of arbitrary frame length (sorry!)
 
-If a unit goes more than one audio buffer without being processed, the host requests a reset.
+Units should reset themselves any time they go at least one audio buffer without being processed, e.g. filters should be reset, delay buffers should be cleared, etc. Likewise the instance should reset itself if it goes at least one audio buffer without any of its units being processed. The C++ companion library (see below) provides an interface for performing these resets at the correct times.
 
 ## This repository
 
