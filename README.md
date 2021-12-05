@@ -19,8 +19,8 @@ Blink plugin instances are very lightweight entities which can be sliced and cop
 A blink plugin has full access to a block's modulation data (it knows what an envelope is going to do in the future, for example). This is because the host just passes the plugin a pointer to the entire block data every audio buffer, instead of continuously sending MIDI events (or whatever) to emulate parameter changes. The pointer that the host passes to the plugin is guaranteed to be valid for the duration of the audio buffer, and is guaranteed to not change.
 
 Blockhead tries to eliminate clicking artifacts that occur during loops and block data changes by crossfading between different versions of the same blocks. A "block data change" is anything that changes the way the block sounds (including moving the block backwards and forwards in time).
- - Any time the block data changes a crossfade occurs (if the block is currently being played)
- - Any time the song playback loops back to an earlier point in time a crossfade happens (if the block is currently being played)
+ - Any time the block data changes, a crossfade occurs (if the block is currently being played)
+ - Any time the song playback loops back to an earlier point in time, a crossfade occurs (if the block is currently being played)
  - In blockhead a loop region can be shorter than the length of an audio buffer! (64 frames)
 
 If the block data changes and a loop occurs at the same time then a block may have to simulataneously crossfade between 4 versions of itself! This sounds wasteful but 99% of the time only one version of the plugin is actually being processed, and the others are completely turned off. To facilitate this nonsense, Blink plugins have a hierarchical structure:
