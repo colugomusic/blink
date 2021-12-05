@@ -55,6 +55,15 @@ It's a C API. There are 4 headers, [blink.h](/include/blink.h) which defines the
 
 If you produce a dynamic link library which correctly implements one of these three interfaces then you have a valid Blink plugin.
 
+Blockhead searches the `./blink/` directory (`/Frameworks/blink/` on macOS) for plugins matching the following filename format:
+
+`(effect|sampler|synth).(plugin_name).(plugin_version).(linux|macos|win64).blink`
+
+ - `plugin_name` can be anything
+ - `plugin_version` is the letter 'v' followed by any number of digits and points e.g. 'v0.1.2.3'
+ - `linux|macos|win64` should match the current platform
+ - `.blink` replaces the usual dynamic library extension for the current platform (i.e. '.dll', '.so' or '.dylib')
+
 ### [/plugin](/plugin):
 This is a C++ library to aid in writing Blink plugins. There is no requirement to use this library. [Blockhead's stock plugins](https://github.com/colugomusic/blockhead_generators) are all implemented using this library.
 
