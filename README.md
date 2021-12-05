@@ -23,7 +23,7 @@ Blockhead tries to eliminate clicking artifacts that occur during loops and bloc
  - Any time the song playback loops back to an earlier point in time, a crossfade occurs (if the block is currently being played)
  - In blockhead a loop region can be shorter than the length of an audio buffer! (64 frames)
 
-If the block data changes and a loop occurs at the same time then a block may have to simulataneously crossfade between 4 versions of itself! This sounds wasteful but 99% of the time only one version of the plugin is actually being processed, and the others are completely turned off. To facilitate this nonsense, Blink plugins have a hierarchical structure:
+If the block data changes and a loop occurs at the same time then a block may have to simulataneously crossfade between 4 versions of itself! This sounds wasteful but 99% of the time only one version of the block is actually being processed, and the others are completely turned off. To facilitate this nonsense, Blink plugins have a hierarchical structure:
 
 ### Plugin
 A dynamic link library which implements the blink C API (see below.)
