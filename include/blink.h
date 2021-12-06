@@ -33,6 +33,7 @@
 #define BLINK_STD_CATEGORY_DYNAMICS "Dynamics"
 #define BLINK_STD_CATEGORY_FILTERS "Filters"
 #define BLINK_STD_CATEGORY_SPACE "Space"
+#define BLINK_STD_CATEGORY_TONAL "Tonal"
 
 typedef uint8_t blink_ChannelCount;
 typedef uint64_t blink_FrameCount;
@@ -210,8 +211,6 @@ union blink_ParameterData
 	blink_ToggleData toggle;
 };
 
-typedef float (*blink_Curve)(void* proc_data, float value);
-typedef float (*blink_InverseCurve)(void* proc_data, float value);
 typedef float (*blink_Stepify)(void* proc_data, float value);
 typedef float (*blink_SnapValue)(void* proc_data, float value, float step_size, float snap_amount);
 typedef float (*blink_Constrain)(void* proc_data, float value);
