@@ -503,7 +503,7 @@ extern "C"
 	EXPORTED blink_ResourceData blink_get_resource_data(const char* path); // optional
 
 	// Returned buffer remains valid until the next call to get_error_string or
-	// until the generator is destroyed
+	// until the plugin is destroyed
 	EXPORTED const char* blink_get_error_string(blink_Error error);
 }
 
