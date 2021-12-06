@@ -46,6 +46,30 @@ Block positions are not aligned to the audio buffer i.e. they do not have to (an
 
 Units should reset themselves any time they go at least one audio buffer without being processed, e.g. filters should be reset, delay buffers should be cleared, etc. Likewise the instance should reset itself if it goes at least one audio buffer without any of its units being processed. The C++ companion library (see below) provides an interface for performing these resets at the correct times.
 
+## About parameters
+
+There are currently five types of plugin parameter: Chord, Envelope, Option, Slider and Toggle. Plugins define their parameters declaratively and the host automatically generates UI controls for them. (In the distant future it could be possible for plugins to provide custom parameter controls in the form of packaged Godot scenes, but this is not currently the case.) Some parameters can have sub-parameters, for example an envelope might show extra controls in the block footer while it is being edited. Parameters can be grouped together.
+
+In Blockhead you can use the plugin selector menu in the top-right corner of a block to hotswitch between plugins. You'll notice that if you select, for example, the Lowpass filter plugin, add some points to the filter frequency envelope and then hotswitch to the Highpass filter plugin, the filter frequency envelope data is not lost, despite the fact that the Lowpass filter and the Highpass filter are defined in completely separate DLLs.
+
+This is because every Blink plugin has to have a UUID associated with it, and the host stores user-entered data against that UUID inside the block (all data is stored in the block, not the plugin. In fact plugins are completely immutable outside of their audio processing).
+
+The Lowpass and Highpass plugins both declare a filter frequency parameter with the same UUID, so the data is automatically shared between them without the plugins having to communicate with each other in any other way.
+
+Blink defines some standard UUIDs for plugins to use for common parameters such as "pitch", "mix", etc. at the top of the `blink.h` header. There is no requirement to use these standard UUIDs if you don't want to.
+
+The only point of coordination between plugins effected by the API is the UUID, so parameters which share UUIDs could have a different names, min/max values etc. For example the "Frequency" parameter of the Highpass plugin could be changed to "My Incredible Filter Frequency" and as long as the UUID doesn't change, everything will still work the same.
+
+Envelope and slider values are always stored in a linear format. For example an amplitude parameter ranging from (-INF dB) to (0 dB) would be stored as a value from (0.0) to (1.0). So in the stored representation, (0.5) would be the half-way point, not (-6.0206) or whatever. The host always deals with values in a linear format and the plugin is responsible for providing functions for:
+ - Converting linear values to/from their on-screen string representation.
+ - Incrementing/decrementing values in steps at two different precision levels
+ - Incrementing/decrementing values in response to a mouse-drag operation at two different precision levels
+ - Clamping values to their min/max
+ - "Stepifying" values i.e. rounding off numbers to a certain number of decimal places
+ - Snapping values according to a given step size and amount
+
+The C++ companion library (see below) already implements these operations for most of the standard UUID parameters.
+
 ## This repository
 
 Consists of two directories:
