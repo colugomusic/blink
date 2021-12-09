@@ -16,24 +16,14 @@ public:
 	{
 	}
 
-	//float search(blink_Position block_position) const
-	//{
-	//	return param_->search(data_, block_position);
-	//}
-
-	//float search(const BlockPositions& block_positions) const
-	//{
-	//	return search(block_positions.positions[0]);
-	//}
-
-	void search_vec(const BlockPositions& block_positions, int n, float* out) const
+	void search_vec(const BlockPositions& block_positions, int n, int* out) const
 	{
-		return param_->search_vec(data_, block_positions, n, out);
+		param_->search_vec(data_, block_positions, n, out);
 	}
 
-	void search_vec(const BlockPositions& block_positions, float* out) const
+	void search_vec(const BlockPositions& block_positions, int* out) const
 	{
-		return param_->search_vec(data_, block_positions, out);
+		param_->search_vec(data_, block_positions, out);
 	}
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const

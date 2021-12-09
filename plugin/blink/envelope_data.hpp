@@ -28,12 +28,12 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		return param_->search_vec(data_, block_positions, n, out);
+		param_->search_vec(data_, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		return param_->search_vec(data_, block_positions, out);
+		param_->search_vec(data_, block_positions, out);
 	}
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
