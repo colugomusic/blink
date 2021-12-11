@@ -136,31 +136,6 @@ typedef struct
 	blink_ChordBlock* blocks;
 } blink_ChordBlocks;
 
-// Manipulators
-//
-// This will be a future Blockhead feature, not sure how it is going
-// to look. Plugins don't need to worry about it yet.
-typedef struct
-{
-	blink_UUID uuid;
-	blink_ID local_id;
-	const char* name;
-} blink_ManipulatorTarget;
-
-typedef struct
-{
-	blink_ID local_id;
-	float value;
-	float glide_in;
-	float glide_out;
-} blink_ManipulatorPoint;
-
-typedef struct
-{
-	blink_Index count;
-	blink_ManipulatorPoint* points;
-} blink_ManipulatorData;
-
 typedef struct
 {
 	blink_ParameterType type;
