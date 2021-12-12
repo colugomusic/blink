@@ -651,11 +651,11 @@ inline float generic_search(const blink_EnvelopeData* data, float default_value,
 
 	const auto clamp = [data](float value)
 	{
-		return std::clamp(value, data->min, data->max);
+		return std::clamp(value, data->points.min, data->points.max);
 	};
 
 	if (data->points.count < 1) return clamp(default_value);
-	if (data->points.count == 1) return clamp(data->points.points[0].position.y);
+	if (data->points.count == 1) return clamp(data->points.points[0].y);
 
 	auto search_beg = data->points.points + search_beg_index;
 	auto search_end = data->points.points + data->points.count;
@@ -664,26 +664,26 @@ inline float generic_search(const blink_EnvelopeData* data, float default_value,
 	if (pos == search_beg)
 	{
 		// It's the first point
-		return clamp(pos->position.y);
+		return clamp(pos->y);
 	}
 
 	if (pos == search_end)
 	{
 		// No points to the right so we're at the end of the envelope
-		*left = int(std::distance<const blink_EnvelopePoint*>(data->points.points, (pos - 1)));
+		*left = int(std::distance<const blink_FloatPoint*>(data->points.points, (pos - 1)));
 
-		return clamp((pos - 1)->position.y);
+		return clamp((pos - 1)->y);
 	}
 
 	// We're somewhere in between two envelope points. Linear interpolate
 	// between them.
-	const auto p0 = (pos - 1)->position;
-	const auto p1 = pos->position;
+	const auto p0 = *(pos - 1);
+	const auto p1 = *pos;
 
 	const auto segment_size = p1.x - p0.x;	// Should never be zero
 	const auto r = (block_position - p0.x) / segment_size;
 
-	*left = int(std::distance<const blink_EnvelopePoint*>(data->points.points, (pos - 1)));
+	*left = int(std::distance<const blink_FloatPoint*>(data->points.points, (pos - 1)));
 
 	return math::lerp(clamp(p0.y), clamp(p1.y), float(r));
 }
@@ -691,11 +691,11 @@ inline float generic_search(const blink_EnvelopeData* data, float default_value,
 // Use a binary search to locate the envelope position
 inline float generic_search_binary(const blink_EnvelopeData* data, float default_value, blink_Position block_position, int search_beg_index, int* left)
 {
-	const auto find = [block_position](const blink_EnvelopePoint* beg, const blink_EnvelopePoint* end)
+	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
 	{
-		const auto less = [](blink_Position position, const blink_EnvelopePoint& point)
+		const auto less = [](blink_Position position, const blink_FloatPoint& point)
 		{
-			return position < point.position.x;
+			return position < point.x;
 		};
 
 		return std::upper_bound(beg, end, block_position, less);
@@ -708,11 +708,11 @@ inline float generic_search_binary(const blink_EnvelopeData* data, float default
 // faster when envelope is being traversed forwards)
 inline float generic_search_forward(const blink_EnvelopeData* data, float default_value, blink_Position block_position, int search_beg_index, int* left)
 {
-	const auto find = [block_position](const blink_EnvelopePoint* beg, const blink_EnvelopePoint* end)
+	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
 	{
-		const auto greater = [block_position](const blink_EnvelopePoint& point)
+		const auto greater = [block_position](const blink_FloatPoint& point)
 		{
-			return point.position.x > block_position;
+			return point.x > block_position;
 		};
 
 		return std::find_if(beg, end, greater);

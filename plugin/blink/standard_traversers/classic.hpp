@@ -64,9 +64,9 @@ public:
 			int x;
 			float pitch;
 
-			PitchPoint(const blink_EnvelopePoint& p, float min, float max, float transpose)
-				: x(p.position.x)
-				, pitch(std::clamp(p.position.y, min, max) + transpose)
+			PitchPoint(const blink_FloatPoint& p, float min, float max, float transpose)
+				: x(p.x)
+				, pitch(std::clamp(p.y, min, max) + transpose)
 				, ff_(1.0f)
 			{
 			}
@@ -90,7 +90,7 @@ public:
 
 		for (blink_Index i = point_search_index_; i < envelope->points.count; i++)
 		{
-			const PitchPoint p1(envelope->points.points[i], envelope->min, envelope->max, transpose);
+			const PitchPoint p1(envelope->points.points[i], envelope->points.min, envelope->points.max, transpose);
 
 			if (block_position < p1.x)
 			{
@@ -103,7 +103,7 @@ public:
 					return (block_position * p1.get_ff()) + segment_start_;
 				}
 
-				PitchPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, transpose);
+				PitchPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, transpose);
 
 				auto n = block_position - p0.x;
 				auto segment_size = double(p1.x) - p0.x;
@@ -129,7 +129,7 @@ public:
 				{
 					point_search_index_ = i + 1;
 
-					PitchPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, transpose);
+					PitchPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, transpose);
 
 					auto segment_size = double(p1.x) - p0.x;
 
@@ -141,7 +141,7 @@ public:
 			}
 		}
 
-		PitchPoint p0(envelope->points.points[envelope->points.count - 1], envelope->min, envelope->max, transpose);
+		PitchPoint p0(envelope->points.points[envelope->points.count - 1], envelope->points.min, envelope->points.max, transpose);
 
 		auto n = block_position - p0.x;
 
@@ -212,7 +212,7 @@ inline void Classic::get_sculpted_positions(
 
 	if (!env_pitch || env_pitch->points.count < 1)
 	{
-		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->min, env_pitch->max) : 0.0f) + transpose);
+		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->points.min, env_pitch->points.max) : 0.0f) + transpose);
 
 		*positions = block_positions.positions * ff;
 

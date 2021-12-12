@@ -47,17 +47,17 @@ public:
 			float y;
 			double ff;
 
-			FFPoint(const blink_EnvelopePoint& p, float min, float max, float speed)
-				: x(p.position.x)
-				, y(p.position.y)
-				, ff(double(std::clamp(p.position.y, min, max)) * speed)
+			FFPoint(const blink_FloatPoint& p, float min, float max, float speed)
+				: x(p.x)
+				, y(p.y)
+				, ff(double(std::clamp(p.y, min, max)) * speed)
 			{
 			}
 		};
 
 		for (blink_Index i = point_search_index_; i < envelope->points.count; i++)
 		{
-			const FFPoint p1(envelope->points.points[i], envelope->min, envelope->max, speed);
+			const FFPoint p1(envelope->points.points[i], envelope->points.min, envelope->points.max, speed);
 
 			if (block_position < p1.x)
 			{
@@ -70,7 +70,7 @@ public:
 					return float(spooky_maths(p1.ff, p1.ff, 1.0, block_position, double(segment_start_)));
 				}
 
-				FFPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, speed);
+				FFPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, speed);
 
 				auto n = block_position - p0.x;
 				auto segment_size = double(p1.x) - p0.x;
@@ -101,7 +101,7 @@ public:
 				{
 					point_search_index_ = i + 1;
 
-					FFPoint p0(envelope->points.points[i - 1], envelope->min, envelope->max, speed);
+					FFPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, speed);
 
 					auto segment_size = double(p1.x) - p0.x;
 
@@ -119,7 +119,7 @@ public:
 			}
 		}
 
-		FFPoint p0(envelope->points.points[envelope->points.count - 1], envelope->min, envelope->max, speed);
+		FFPoint p0(envelope->points.points[envelope->points.count - 1], envelope->points.min, envelope->points.max, speed);
 
 		auto n = block_position - p0.x;
 
@@ -196,7 +196,7 @@ inline void Fudge::get_sculpted_positions(
 
 	if (!env_speed || env_speed->points.count < 1)
 	{
-		const auto ff = (env_speed ? std::clamp(1.0f, env_speed->min, env_speed->max) : 1.0f) * speed;
+		const auto ff = (env_speed ? std::clamp(1.0f, env_speed->points.min, env_speed->points.max) : 1.0f) * speed;
 
 		*positions = block_positions.positions * ff;
 

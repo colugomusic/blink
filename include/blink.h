@@ -86,21 +86,27 @@ typedef struct
 {
 	blink_IntPosition x;
 	float y;
-} blink_EnvelopePointPosition;
+} blink_FloatPoint;
 
 typedef struct
 {
-	blink_EnvelopePointPosition position;
-
-	// Not currently used.
-	float curve;
-} blink_EnvelopePoint;
+	blink_IntPosition x;
+	int32_t y;
+} blink_IntPoint;
 
 typedef struct
 {
 	blink_Index count;
-	blink_EnvelopePoint* points;
-} blink_EnvelopePoints;
+	blink_FloatPoint* points;
+	float min;
+	float max;
+} blink_FloatPoints;
+
+typedef struct
+{
+	blink_Index count;
+	blink_IntPoint* points;
+} blink_IntPoints;
 
 typedef struct
 {
@@ -145,10 +151,7 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	blink_EnvelopePoints points;
-	blink_Index* options;
-	float min;
-	float max;
+	blink_FloatPoints points;
 } blink_EnvelopeData;
 
 typedef struct
@@ -166,7 +169,7 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	int value;
+	int32_t value;
 } blink_IntSliderData;
 
 typedef struct
@@ -258,15 +261,17 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_NoGridLabels                       = 1 << 5,
 	blink_EnvelopeFlags_IconOnly                           = 1 << 6, // Only show icon in button
 	blink_EnvelopeFlags_MovesDisplay                       = 1 << 7, // Editing should trigger a visual update
+	blink_EnvelopeFlags_AllowManipulators                  = 1 << 8,
 };
 
 enum blink_SliderFlags
 {
-	blink_SliderFlags_None          = 1 << 0,
-	blink_SliderFlags_MovesDisplay  = 1 << 1, // Editing should trigger a visual update
-	blink_SliderFlags_NonGlobal     = 1 << 2, // Do not create a global control for this slider (can be used
-	                                          // to create sliders which are only visible when an envelope is
-	                                          // selected)
+	blink_SliderFlags_None              = 1 << 0,
+	blink_SliderFlags_MovesDisplay      = 1 << 1, // Editing should trigger a visual update
+	blink_SliderFlags_NonGlobal         = 1 << 2, // Do not create a global control for this slider (can be used
+	                                              // to create sliders which are only visible when an envelope is
+	                                              // selected)
+	blink_SliderFlags_AllowManipulators = 1 << 3,
 };
 
 enum blink_ToggleFlags
@@ -308,7 +313,7 @@ typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData*
 typedef blink_Index (*blink_GetOption)(void* proc_data, blink_Index index);
 typedef blink_Index (*blink_GetSlider)(void* proc_data, blink_Index index);
 
-typedef struct
+typedef struct blink_Envelope_
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
 
@@ -421,6 +426,153 @@ typedef struct
 	const char* name;
 } blink_Group;
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Manipulators
+// This section is a work-in-progress :-)
+// The prefix "MT" is short for "Manipulator Target"
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+enum blink_ManipulatorType
+{
+	blink_ManipulatorType_Chord,
+	blink_ManipulatorType_Envelope,
+	blink_ManipulatorType_Option,
+	blink_ManipulatorType_Slider,
+	blink_ManipulatorType_Toggle,
+};
+
+enum blink_MT_Type
+{
+	blink_MT_Type_Chord,
+	blink_MT_Type_Option,
+	blink_MT_Type_Slider,
+	blink_MT_Type_Toggle,
+};
+
+typedef struct
+{
+	blink_ManipulatorType type;
+	blink_IntPosition position;
+	blink_FrameCount size;
+	blink_ChordBlocks blocks;
+} blink_ChordManipulatorData;
+
+typedef struct
+{
+	blink_ManipulatorType type;
+	blink_IntPosition position;
+	blink_FrameCount size;
+	blink_FloatPoints points;
+} blink_EnvelopeManipulatorData;
+
+typedef struct
+{
+	blink_ManipulatorType type;
+	blink_IntPosition position;
+	blink_FrameCount size;
+	blink_Index index;
+} blink_OptionManipulatorData;
+
+typedef struct
+{
+	blink_ManipulatorType type;
+	blink_IntPosition position;
+	blink_FrameCount size;
+	float value;
+} blink_SliderManipulatorData;
+
+typedef struct
+{
+	blink_ManipulatorType type;
+	blink_IntPosition position;
+	blink_FrameCount size;
+	blink_Bool value;
+} blink_ToggleManipulatorData;
+
+typedef union
+{
+	blink_ManipulatorType type;
+	blink_ChordManipulatorData chord;
+	blink_EnvelopeManipulatorData envelope;
+	blink_OptionManipulatorData option;
+	blink_SliderManipulatorData slider;
+	blink_ToggleManipulatorData toggle;
+} blink_ManipulatorData;
+
+// MT-chord can only be manipulated by a chord override control
+typedef struct
+{
+	enum blink_MT_Type type; // blink_MT_Type_Chord
+} blink_MT_Chord;
+
+// MT-option can only be manipulated by an option override control
+typedef struct
+{
+	enum blink_MT_Type type; // blink_MT_Type_Option
+	blink_Index max_index;
+	blink_Index default_index;
+
+	void* proc_data;
+
+	// Returns the display text for the option index
+	blink_Option_GetText get_text;
+} blink_MT_Option;
+
+// MT-sliders can be manipulated by both envelope and slider controls, in either override or offset mode
+typedef struct
+{
+	enum blink_MT_Type type; // blink_MT_Type_Slider
+
+	void* proc_data;
+
+	float default_value;
+
+	blink_Slider value_slider;
+	blink_Slider min;
+	blink_Slider max;
+	blink_EnvelopeSnapSettings snap_settings;
+
+	blink_DisplayValue display_value;
+	blink_FromString from_string;
+	blink_EnvelopeSearch search;
+	blink_GetGridLine get_gridline;
+	blink_GetStepLine get_stepline;
+	blink_Stepify stepify;
+	blink_SnapValue snap_value;
+} blink_MT_Slider;
+
+// MT-toggles can be manipulated by toggle override controls
+typedef struct
+{
+	enum blink_MT_Type type; // blink_MT_Type_Toggle
+	blink_Bool default_value;
+} blink_MT_Toggle;
+
+union blink_MT_Object
+{
+	enum blink_MT_Type type;
+	blink_MT_Chord chord;
+	blink_MT_Option option;
+	blink_MT_Slider slider;
+	blink_MT_Toggle toggle;
+};
+
+typedef struct
+{
+	blink_UUID uuid;
+
+	// Target name
+	const char* name;
+
+	// Long description of the target. Can be null
+	const char* long_desc;
+
+	union blink_MT_Object target;
+} blink_ManipulatorTarget;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Manipulators END
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 typedef struct
 {
 	size_t size;
@@ -472,9 +624,12 @@ extern "C"
 	EXPORTED blink_Error blink_terminate();
 	EXPORTED int blink_get_num_groups();
 	EXPORTED int blink_get_num_parameters();
+	EXPORTED int blink_get_num_manipulator_targets();
 	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID id);
+	EXPORTED blink_Parameter blink_get_manipulator_target(blink_Index index);
+	EXPORTED blink_Parameter blink_get_manipulator_target_by_uuid(blink_UUID id);
 	EXPORTED blink_ResourceData blink_get_resource_data(const char* path); // optional
 
 	// Returned buffer remains valid until the next call to get_error_string or
