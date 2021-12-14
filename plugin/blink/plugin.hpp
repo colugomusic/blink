@@ -8,7 +8,7 @@
 #include "instance.hpp"
 #include "envelope_spec.hpp"
 #include "group.hpp"
-#include "slider_spec.hpp"
+#include <blink/slider_spec.hpp>
 #include "chord_parameter.hpp"
 #include "envelope_parameter.hpp"
 #include "option_parameter.hpp"
@@ -30,7 +30,7 @@ public:
 
 	int add_group(std::string name);
 	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
-	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeSpec spec);
+	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeParameterSpec spec);
 	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
 	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
 
@@ -156,7 +156,7 @@ inline std::shared_ptr<ChordParameter> Plugin::add_parameter(ChordSpec spec)
 	return param;
 }
 
-inline std::shared_ptr<EnvelopeParameter> Plugin::add_parameter(EnvelopeSpec spec)
+inline std::shared_ptr<EnvelopeParameter> Plugin::add_parameter(EnvelopeParameterSpec spec)
 {
 	const auto param = std::make_shared<EnvelopeParameter>(spec);
 

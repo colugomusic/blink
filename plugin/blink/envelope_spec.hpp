@@ -9,7 +9,7 @@
 
 namespace blink {
 
-struct EnvelopeSpec : public ParameterSpec
+struct EnvelopeSpec
 {
 	std::function<float(const blink_EnvelopeData* points, float default_value, blink_Position block_pos, int search_beg_index, int* left)> search_binary;
 	std::function<float(const blink_EnvelopeData* points, float default_value, blink_Position block_pos, int search_beg_index, int* left)> search_forward;
@@ -34,11 +34,8 @@ struct EnvelopeSpec : public ParameterSpec
 	RangeSpec<float> range;
 	SliderSpec<float> step_size;
 	SliderSpec<float> value_slider;
-	std::vector<blink_Index> options;
-	std::vector<blink_Index> sliders;
 	float default_value = 0.0f;
 	float default_snap_amount = 0.0f;
-	int flags = 0;
 };
 
 }

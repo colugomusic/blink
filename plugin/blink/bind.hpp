@@ -6,7 +6,7 @@
 #include "envelope_range_attribute.hpp"
 #include "option_parameter.hpp"
 #include "slider_parameter.hpp"
-#include "slider_parameter_spec.hpp"
+#include <blink/slider_parameter_spec.hpp>
 #include "toggle_parameter.hpp"
 #include "group.hpp"
 
@@ -209,21 +209,87 @@ inline blink_Option option(const OptionParameter& option)
 	return out;
 }
 
-inline blink_Envelope envelope(const EnvelopeParameter& envelope)
+inline blink_Envelope envelope(const Envelope& envelope)
 {
 	blink_Envelope out;
 
-	out.parameter_type = blink_ParameterType_Envelope;
 	out.default_value = envelope.get_default_value();
-	out.flags = envelope.get_flags();
 	out.proc_data = (void*)(&envelope);
 	out.snap_settings = envelope_snap_settings(envelope.snap_settings());
-
 	out.value_slider = slider(envelope.value_slider());
 	out.min = slider(envelope.range().min());
 	out.max = slider(envelope.range().max());
-	out.options_count = envelope.get_options_count();
-	out.sliders_count = envelope.get_sliders_count();
+
+	out.get_gridline = [](void* proc_data, int index, float* out)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		auto result = envelope->get_gridline(index);
+
+		if (result)
+		{
+			*out = *result;
+			return blink_Bool(BLINK_TRUE);
+		}
+
+		return blink_Bool(BLINK_FALSE);
+	};
+
+	out.get_stepline = [](void* proc_data, int index, float step_size, float* out)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		auto result = envelope->get_stepline(index, step_size);
+
+		if (result)
+		{
+			*out = *result;
+			return blink_Bool(BLINK_TRUE);
+		}
+
+		return blink_Bool(BLINK_FALSE);
+	};
+
+	out.search = [](void* proc_data, const blink_EnvelopeData* data, float block_position)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->search(data, block_position);
+	};
+
+	out.display_value = [](void* proc_data, float value)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->display_value(value);
+	};
+
+	out.stepify = [](void* proc_data, float value)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->stepify(value);
+	};
+
+	out.snap_value = [](void* proc_data, float value, float step_size, float snap_amount)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->snap_value(value, step_size, snap_amount);
+	};
+
+	return out;
+}
+
+inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envelope_parameter)
+{
+	blink_EnvelopeParameter out;
+
+	out.parameter_type = blink_ParameterType_Envelope;
+	out.flags = envelope_parameter.get_flags();
+
+	out.options_count = envelope_parameter.get_options_count();
+	out.sliders_count = envelope_parameter.get_sliders_count();
 
 	out.get_option = [](void* proc_data, blink_Index index)
 	{
@@ -239,63 +305,7 @@ inline blink_Envelope envelope(const EnvelopeParameter& envelope)
 		return envelope->get_slider(index);
 	};
 
-	out.get_gridline = [](void* proc_data, int index, float* out)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		auto result = envelope->get_gridline(index);
-
-		if (result)
-		{
-			*out = *result;
-			return blink_Bool(BLINK_TRUE);
-		}
-
-		return blink_Bool(BLINK_FALSE);
-	};
-
-	out.get_stepline = [](void* proc_data, int index, float step_size, float* out)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		auto result = envelope->get_stepline(index, step_size);
-
-		if (result)
-		{
-			*out = *result;
-			return blink_Bool(BLINK_TRUE);
-		}
-
-		return blink_Bool(BLINK_FALSE);
-	};
-
-	out.search = [](void* proc_data, const blink_EnvelopeData* data, float block_position)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->search(data, block_position);
-	};
-
-	out.display_value = [](void* proc_data, float value)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->display_value(value);
-	};
-
-	out.stepify = [](void* proc_data, float value)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->stepify(value);
-	};
-
-	out.snap_value = [](void* proc_data, float value, float step_size, float snap_amount)
-	{
-		auto envelope = (EnvelopeParameter*)(proc_data);
-
-		return envelope->snap_value(value, step_size, snap_amount);
-	};
+	out.envelope = envelope(envelope_parameter.envelope());
 
 	return out;
 }
@@ -359,7 +369,7 @@ inline blink_Parameter parameter(const Parameter& parameter)
 
 		case blink_ParameterType_Envelope:
 		{
-			out.parameter.envelope = envelope(*static_cast<const EnvelopeParameter*>(&parameter));
+			out.parameter.envelope = envelope_parameter(*static_cast<const EnvelopeParameter*>(&parameter));
 			break;
 		}
 

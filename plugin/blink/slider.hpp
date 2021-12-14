@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tweak/tweak.hpp>
-#include "slider_spec.hpp"
+#include <blink/slider_spec.hpp>
 
 namespace blink {
 

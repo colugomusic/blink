@@ -313,17 +313,11 @@ typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData*
 typedef blink_Index (*blink_GetOption)(void* proc_data, blink_Index index);
 typedef blink_Index (*blink_GetSlider)(void* proc_data, blink_Index index);
 
-typedef struct blink_Envelope_
+typedef struct
 {
-	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
-
 	void* proc_data;
 
 	float default_value;
-	int flags; // blink_EnvelopeFlags
-
-	int sliders_count;
-	int options_count;
 
 	blink_Slider value_slider;
 	blink_Slider min;
@@ -337,9 +331,22 @@ typedef struct blink_Envelope_
 	blink_GetStepLine get_stepline;
 	blink_Stepify stepify;
 	blink_SnapValue snap_value;
+} blink_Envelope;
+
+typedef struct
+{
+	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
+
+	int flags; // blink_EnvelopeFlags
+
+	int sliders_count;
+	int options_count;
+
 	blink_GetOption get_option;
 	blink_GetSlider get_slider;
-} blink_Envelope;
+
+	blink_Envelope envelope;
+} blink_EnvelopeParameter;
 
 //
 // Chord parameter
@@ -391,7 +398,7 @@ union blink_ParameterObject
 {
 	enum blink_ParameterType type;
 	blink_Chord chord;
-	blink_Envelope envelope;
+	blink_EnvelopeParameter envelope;
 	blink_Option option;
 	blink_SliderParameter slider;
 	blink_IntSliderParameter int_slider;
@@ -522,22 +529,7 @@ typedef struct
 {
 	enum blink_MT_Type type; // blink_MT_Type_Slider
 
-	void* proc_data;
-
-	float default_value;
-
-	blink_Slider value_slider;
-	blink_Slider min;
-	blink_Slider max;
-	blink_EnvelopeSnapSettings snap_settings;
-
-	blink_DisplayValue display_value;
-	blink_FromString from_string;
-	blink_EnvelopeSearch search;
-	blink_GetGridLine get_gridline;
-	blink_GetStepLine get_stepline;
-	blink_Stepify stepify;
-	blink_SnapValue snap_value;
+	blink_Envelope offset_envelope;
 } blink_MT_Slider;
 
 // MT-toggles can be manipulated by toggle override controls

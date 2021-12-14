@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <blink_sampler.h>
-#include "math.hpp"
+#include <blink/math.hpp>
 
 namespace blink {
 

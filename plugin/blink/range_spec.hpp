@@ -1,6 +1,6 @@
 #pragma once
 
-#include "slider_spec.hpp"
+#include <blink/slider_spec.hpp>
 
 namespace blink {
 

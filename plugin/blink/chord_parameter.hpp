@@ -4,7 +4,7 @@
 #include "parameter.hpp"
 #include "chord_spec.hpp"
 #include "block_positions.hpp"
-#include "math.hpp"
+#include <blink/math.hpp>
 
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>

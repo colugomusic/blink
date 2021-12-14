@@ -6,7 +6,7 @@
 #include "group.hpp"
 #include "parameter.hpp"
 #include "sample_data.hpp"
-#include "slider_spec.hpp"
+#include <blink/slider_spec.hpp>
 #include "instance.hpp"
 #include "unit.hpp"
 

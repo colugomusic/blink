@@ -1,24 +1,23 @@
 #pragma once
 
 #include <blink/plugin.hpp>
-#include <blink/envelope_parameter.hpp>
+#include <blink/envelope.hpp>
 
 namespace blink {
 
-template <int Index>
-class EnvelopeData
+class EnvelopeIndexData
 {
 public:
 
-	EnvelopeData(const blink::Plugin* plugin, const blink_ParameterData* param_data, const blink::EnvelopeParameter* param)
-		: data_(plugin->get_envelope_data<Index>(param_data))
-		, param_(param)
+	EnvelopeIndexData(const blink::Plugin* plugin, const blink::Envelope& envelope, const blink_ParameterData* param_data, blink_Index index)
+		: data_(plugin->get_envelope_data(param_data, index))
+		, envelope_(&envelope)
 	{
 	}
 
 	float search(blink_Position block_position) const
 	{
-		return param_->search(data_, block_position);
+		return envelope_->search(data_, block_position);
 	}
 
 	float search(const BlockPositions& block_positions) const
@@ -28,23 +27,36 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		param_->search_vec(data_, block_positions, n, out);
+		envelope_->search_vec(data_, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		param_->search_vec(data_, block_positions, out);
+		envelope_->search_vec(data_, block_positions, out);
 	}
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
-		return param_->search_vec(data_, block_positions);
+		return envelope_->search_vec(data_, block_positions);
 	}
+
+	const auto& data() const { return *data_; }
 
 private:
 
 	const blink_EnvelopeData* data_;
-	const blink::EnvelopeParameter* param_;
+	const blink::Envelope* envelope_;
+};
+
+template <int Index>
+class EnvelopeData : public EnvelopeIndexData
+{
+public:
+
+	EnvelopeData(const blink::Plugin* plugin, const blink::Envelope& envelope, const blink_ParameterData* param_data)
+		: EnvelopeIndexData(plugin, envelope, param_data, Index)
+	{
+	}
 };
 
 } // blink
