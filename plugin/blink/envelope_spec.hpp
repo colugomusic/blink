@@ -24,7 +24,8 @@ struct EnvelopeSpec
 
 	The host calls this repeatedly in both directions until the returned grid
 	line falls off the top or bottom of the envelope editor, or until two grid
-	lines are generated which are too close together on the screen
+	lines are generated which are too close together on the screen, or until
+	and empty value is returned
 	*/
 	std::function<std::optional<float>(int index)> get_gridline;
 
