@@ -337,6 +337,7 @@ typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
 
+	void* proc_data;
 	int flags; // blink_EnvelopeFlags
 
 	int sliders_count;

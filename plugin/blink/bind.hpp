@@ -285,6 +285,7 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 {
 	blink_EnvelopeParameter out;
 
+	out.proc_data = (void*)(&envelope_parameter);
 	out.parameter_type = blink_ParameterType_Envelope;
 	out.flags = envelope_parameter.get_flags();
 
