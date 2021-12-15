@@ -1,7 +1,7 @@
 #pragma once
 
 #include <blink/plugin.hpp>
-#include <blink/option_parameter.hpp>
+#include <blink/parameters/option_parameter.hpp>
 
 namespace blink {
 

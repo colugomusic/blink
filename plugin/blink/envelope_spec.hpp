@@ -2,9 +2,7 @@
 
 #include <functional>
 #include <vector>
-#include "option_spec.hpp"
-#include "parameter_spec.hpp"
-#include "range_spec.hpp"
+#include <blink/range_spec.hpp>
 #include <blink.h>
 
 namespace blink {

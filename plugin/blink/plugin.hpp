@@ -6,14 +6,15 @@
 #include <set>
 #include "blink.h"
 #include "instance.hpp"
-#include "envelope_spec.hpp"
-#include "group.hpp"
+#include <blink/envelope_spec.hpp>
 #include <blink/slider_spec.hpp>
-#include "chord_parameter.hpp"
-#include "envelope_parameter.hpp"
-#include "option_parameter.hpp"
-#include "slider_parameter.hpp"
-#include "toggle_parameter.hpp"
+#include <blink/manipulators/manipulator_slider_target.hpp>
+#include <blink/parameters/group.hpp>
+#include <blink/parameters/chord_parameter.hpp>
+#include <blink/parameters/envelope_parameter.hpp>
+#include <blink/parameters/option_parameter.hpp>
+#include <blink/parameters/slider_parameter.hpp>
+#include <blink/parameters/toggle_parameter.hpp>
 #include "resource_store.hpp"
 
 namespace blink {
@@ -40,6 +41,8 @@ public:
 	const Group& get_group(int index) const;
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
+	ManipulatorTarget& get_manipulator_target(blink_Index index);
+	ManipulatorTarget& get_manipulator_target_by_uuid(blink_UUID uuid);
 
 	template <int Index> static const blink_ChordData* get_chord_data(const blink_ParameterData* data);
 	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
@@ -62,7 +65,9 @@ private:
 
 	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
+	std::vector<std::shared_ptr<ManipulatorTarget>> manipulator_targets_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
+	std::map<blink_UUID, ManipulatorTarget*> uuid_mt_map_;
 	std::set<Instance*> instances_;
 	ResourceStore resources_;
 };
@@ -216,6 +221,18 @@ inline Parameter& Plugin::get_parameter(blink_Index index)
 inline Parameter& Plugin::get_parameter_by_uuid(blink_UUID uuid)
 {
 	auto pos = uuid_parameter_map_.find(uuid);
+
+	return *pos->second;
+}
+
+inline ManipulatorTarget& Plugin::get_manipulator_target(blink_Index index)
+{
+	return *(manipulator_targets_[index]);
+}
+
+inline ManipulatorTarget& Plugin::get_manipulator_target_by_uuid(blink_UUID uuid)
+{
+	auto pos = uuid_mt_map_.find(uuid);
 
 	return *pos->second;
 }

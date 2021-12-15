@@ -13,7 +13,7 @@ inline SliderParameterSpec<float> slider_parameter()
 {
 	SliderParameterSpec<float> out;
 
-	out.uuid = BLINK_STD_UUID_SLIDER_NOISE_WIDTH;
+	out.uuid = BLINK_STD_UUID_NOISE_WIDTH;
 	out.name = "Noise Width";
 
 	out.slider = percentage::slider();

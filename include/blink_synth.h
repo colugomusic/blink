@@ -13,6 +13,7 @@ typedef struct
 
 	blink_Position* positions;
 	blink_ParameterData* parameter_data;
+	blink_ManipulatorTargetData* manipulator_target_data;
 } blink_SynthBuffer;
 
 typedef blink_Error(*blink_Synth_Process)(void* proc_data, const blink_SynthBuffer* buffer, float* out);

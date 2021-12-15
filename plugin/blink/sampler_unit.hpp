@@ -2,11 +2,6 @@
 
 #include <map>
 #include <blink_sampler.h>
-#include "envelope_spec.hpp"
-#include "group.hpp"
-#include "parameter.hpp"
-#include "sample_data.hpp"
-#include <blink/slider_spec.hpp>
 #include "instance.hpp"
 #include "unit.hpp"
 

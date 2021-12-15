@@ -3,7 +3,7 @@
 #include <tweak/tweak.hpp>
 #include <tweak/std.hpp>
 #include <blink/math.hpp>
-#include <blink/envelope_parameter_spec.hpp>
+#include <blink/parameters/envelope_parameter_spec.hpp>
 #include "percentage.hpp"
 
 namespace blink {
@@ -14,7 +14,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_ENVELOPE_FILTER_RESONANCE;
+	out.uuid = BLINK_STD_UUID_FILTER_RESONANCE;
 	out.name = "Resonance";
 	out.envelope = percentage::envelope();
 

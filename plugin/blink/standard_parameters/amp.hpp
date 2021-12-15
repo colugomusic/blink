@@ -3,8 +3,8 @@
 #include <tweak/tweak.hpp>
 #include <tweak/std.hpp>
 #include <blink/math.hpp>
-#include <blink/envelope_parameter_spec.hpp>
-#include <blink/slider_parameter_spec.hpp>
+#include <blink/parameters/envelope_parameter_spec.hpp>
+#include <blink/parameters/slider_parameter_spec.hpp>
 #include "search.hpp"
 
 namespace blink {
@@ -39,7 +39,7 @@ inline SliderParameterSpec<float> slider_parameter()
 {
 	SliderParameterSpec<float> out;
 
-	out.uuid = BLINK_STD_UUID_SLIDER_AMP;
+	out.uuid = BLINK_STD_UUID_AMP;
 	out.name = "Amp";
 
 	out.slider = slider();
@@ -84,7 +84,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_ENVELOPE_AMP;
+	out.uuid = BLINK_STD_UUID_AMP;
 	out.name = "Amp";
 
     out.envelope = envelope();

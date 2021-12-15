@@ -2,10 +2,6 @@
 
 #include <map>
 #include <blink_effect.h>
-#include "envelope_spec.hpp"
-#include "group.hpp"
-#include "parameter.hpp"
-#include <blink/slider_spec.hpp>
 #include "unit.hpp"
 #include "instance.hpp"
 

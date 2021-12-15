@@ -3,7 +3,7 @@
 #include <tweak/tweak.hpp>
 #include <tweak/std.hpp>
 #include "percentage.hpp"
-#include <blink/envelope_parameter_spec.hpp>
+#include <blink/parameters/envelope_parameter_spec.hpp>
 
 namespace blink {
 namespace std_params {
@@ -33,7 +33,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_ENVELOPE_FORMANT;
+	out.uuid = BLINK_STD_UUID_FORMANT;
 	out.name = "Formant";
 
 	out.envelope = envelope();

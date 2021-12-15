@@ -2,7 +2,7 @@
 
 #include <tweak/tweak.hpp>
 #include <tweak/std.hpp>
-#include <blink/envelope_parameter_spec.hpp>
+#include <blink/parameters/envelope_parameter_spec.hpp>
 #include <blink/math.hpp>
 
 namespace blink {
@@ -113,7 +113,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_ENVELOPE_FILTER_FREQUENCY;
+	out.uuid = BLINK_STD_UUID_FILTER_FREQUENCY;
 	out.name = "Frequency";
 
 	out.envelope = envelope();

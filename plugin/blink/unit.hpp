@@ -2,10 +2,6 @@
 
 #include <map>
 #include "block_positions.hpp"
-#include "envelope_spec.hpp"
-#include "group.hpp"
-#include "parameter.hpp"
-#include <blink/slider_spec.hpp>
 
 namespace blink {
 

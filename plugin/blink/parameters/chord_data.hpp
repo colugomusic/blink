@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blink/chord_parameter.hpp>
+#include <blink/parameters/chord_parameter.hpp>
 #include <blink/plugin.hpp>
 
 namespace blink {

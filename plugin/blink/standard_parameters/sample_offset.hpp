@@ -4,7 +4,7 @@
 #include <tweak/std.hpp>
 #include <blink/math.hpp>
 #include <blink/slider_spec.hpp>
-#include <blink/slider_parameter_spec.hpp>
+#include <blink/parameters/slider_parameter_spec.hpp>
 
 namespace blink {
 namespace std_params {
@@ -58,7 +58,7 @@ inline SliderParameterSpec<int> slider_parameter()
 {
 	SliderParameterSpec<int> out;
 
-	out.uuid = BLINK_STD_UUID_SLIDER_SAMPLE_OFFSET;
+	out.uuid = BLINK_STD_UUID_SAMPLE_OFFSET;
 	out.name = "Sample Offset";
 
 	out.slider = slider();

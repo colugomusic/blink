@@ -1,18 +1,23 @@
 #pragma once
 
-#include "chord_parameter.hpp"
-#include "envelope_parameter.hpp"
+#include <blink/parameters/chord_parameter.hpp>
+#include <blink/parameters/envelope_parameter.hpp>
+#include <blink/envelope_range.hpp>
 #include "envelope_range.hpp"
-#include "envelope_range_attribute.hpp"
-#include "option_parameter.hpp"
-#include "slider_parameter.hpp"
-#include <blink/slider_parameter_spec.hpp>
-#include "toggle_parameter.hpp"
-#include "group.hpp"
+#include <blink/parameters/option_parameter.hpp>
+#include <blink/parameters/slider_parameter.hpp>
+#include <blink/parameters/slider_parameter_spec.hpp>
+#include <blink/parameters/toggle_parameter.hpp>
+#include <blink/parameters/group.hpp>
+#include <blink/manipulators/manipulator_chord_target.hpp>
+#include <blink/manipulators/manipulator_option_target.hpp>
+#include <blink/manipulators/manipulator_slider_target.hpp>
+#include <blink/manipulators/manipulator_toggle_target.hpp>
 
 namespace blink {
 namespace bind {
 
+blink_Envelope envelope(const Envelope& envelope);
 blink_Parameter parameter(const Parameter& parameter);
 
 inline blink_IntRange range(const Range<int>& range)
@@ -160,6 +165,17 @@ inline blink_IntSlider slider(const Slider<int>& slider)
 	return out;
 }
 
+inline blink_MT_Slider slider(const ManipulatorSliderTarget& target)
+{
+	blink_MT_Slider out;
+
+	out.type = blink_MT_Type_Slider;
+	out.offset_envelope = envelope(target.offset_envelope());
+	out.override_envelope = envelope(target.override_envelope());
+
+	return out;
+}
+
 inline blink_EnvelopeSnapSettings envelope_snap_settings(const EnvelopeSnapSettings& snap_settings)
 {
 	blink_EnvelopeSnapSettings out;
@@ -190,6 +206,15 @@ inline blink_Chord chord(const ChordParameter& chord)
 	return out;
 }
 
+inline blink_MT_Chord chord(const ManipulatorChordTarget& target)
+{
+	blink_MT_Chord out;
+
+	out.type = blink_MT_Type_Chord;
+
+	return out;
+}
+
 inline blink_Option option(const OptionParameter& option)
 {
 	blink_Option out;
@@ -204,6 +229,25 @@ inline blink_Option option(const OptionParameter& option)
 		auto option = (const OptionParameter*)(proc_data);
 
 		return option->get_text(index);
+	};
+
+	return out;
+}
+
+inline blink_MT_Option option(const ManipulatorOptionTarget& target)
+{
+	blink_MT_Option out;
+
+	out.type = target.get_type();
+	out.max_index = target.get_max_index();
+	out.default_index = target.get_default_index();
+	out.proc_data = (void*)(&target);
+
+	out.get_text = [](void* proc_data, blink_Index index)
+	{
+		auto target = (const ManipulatorOptionTarget*)(proc_data);
+
+		return target->get_text(index);
 	};
 
 	return out;
@@ -348,6 +392,16 @@ inline blink_Toggle toggle(const ToggleParameter& toggle)
 	return out;
 }
 
+inline blink_MT_Toggle toggle(const ManipulatorToggleTarget& target)
+{
+	blink_MT_Toggle out;
+
+	out.type = blink_MT_Type_Toggle;
+	out.default_value = target.get_default_value() ? BLINK_TRUE : BLINK_FALSE;
+
+	return out;
+}
+
 inline blink_Parameter parameter(const Parameter& parameter)
 {
 	blink_Parameter out;
@@ -395,6 +449,48 @@ inline blink_Parameter parameter(const Parameter& parameter)
 		case blink_ParameterType_Toggle:
 		{
 			out.parameter.toggle = toggle(*static_cast<const ToggleParameter*>(&parameter));
+			break;
+		}
+	}
+
+	return out;
+}
+
+inline blink_ManipulatorTarget manipulator_target(const ManipulatorTarget& target)
+{
+	blink_ManipulatorTarget out;
+
+	out.uuid = target.get_uuid();
+	out.group_index = target.get_group_index();
+	out.name = target.get_name();
+	out.short_name = target.get_short_name();
+	out.long_desc = target.get_long_desc();
+
+	const auto type = target.get_type();
+
+	switch (type)
+	{
+		case blink_MT_Type_Chord:
+		{
+			out.target.chord = chord(*static_cast<const ManipulatorChordTarget*>(&target));
+			break;
+		}
+
+		case blink_MT_Type_Option:
+		{
+			out.target.option = option(*static_cast<const ManipulatorOptionTarget*>(&target));
+			break;
+		}
+
+		case blink_MT_Type_Slider:
+		{
+			out.target.slider = slider(*static_cast<const ManipulatorSliderTarget*>(&target));
+			break;
+		}
+
+		case blink_MT_Type_Toggle:
+		{
+			out.target.toggle = toggle(*static_cast<const ManipulatorToggleTarget*>(&target));
 			break;
 		}
 	}

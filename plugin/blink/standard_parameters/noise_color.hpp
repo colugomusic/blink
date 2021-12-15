@@ -13,7 +13,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_ENVELOPE_NOISE_COLOR;
+	out.uuid = BLINK_STD_UUID_NOISE_COLOR;
 	out.name = "Noise Color";
 	out.short_name = "Color";
 	out.envelope = percentage::bipolar::envelope();

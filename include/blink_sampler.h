@@ -65,6 +65,7 @@ typedef struct
 	blink_Position* positions;
 	blink_WarpPoints* warp_points;
 	blink_ParameterData* parameter_data;
+	blink_ManipulatorTargetData* manipulator_target_data;
 } blink_SamplerBuffer;
 
 //

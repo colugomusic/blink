@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include "../traverser.hpp"
-#include "../envelope_parameter.hpp"
-#include "../slider_parameter.hpp"
+#include <blink/parameters/envelope_parameter.hpp>
+#include <blink/parameters/slider_parameter.hpp>
 #include "warp.hpp"
 
 namespace blink {

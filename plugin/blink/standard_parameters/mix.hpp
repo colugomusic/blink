@@ -31,7 +31,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_ENVELOPE_MIX;
+	out.uuid = BLINK_STD_UUID_MIX;
 	out.name = "Mix";
 
 	out.envelope = envelope();

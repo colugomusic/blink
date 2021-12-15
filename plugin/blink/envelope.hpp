@@ -4,9 +4,6 @@
 #include "envelope_spec.hpp"
 #include "envelope_range.hpp"
 #include "envelope_snap_settings.hpp"
-#include "parameter.hpp"
-#include "option_parameter.hpp"
-#include "traverser.hpp"
 #include <blink/math.hpp>
 
 namespace blink {

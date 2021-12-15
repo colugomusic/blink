@@ -8,26 +8,22 @@
 #define BLINK_TRUE 1
 #define BLINK_FALSE 0
 
-#define BLINK_STD_UUID_CHORD_SCALE "860166f7-e839-448b-bd3b-a5bccbfe3ac1"
-#define BLINK_STD_UUID_ENVELOPE_AMP "273e7c30-404b-4db6-ba97-20f33d49fe51"
-#define BLINK_STD_UUID_ENVELOPE_FILTER_FREQUENCY "91181212-7072-41a9-9d11-3a265301a9a3"
-#define BLINK_STD_UUID_ENVELOPE_FILTER_RESONANCE "4436fc1c-ae51-4580-b1fa-24b9c41425e3"
-#define BLINK_STD_UUID_ENVELOPE_FORMANT "7b72dbef-e36d-4dce-958b-b0fa498ae41e"
-#define BLINK_STD_UUID_ENVELOPE_MIX "6441d97c-37c9-4670-9049-d22fac68b023"
-#define BLINK_STD_UUID_ENVELOPE_NOISE_AMOUNT "29d5ecb5-cb5d-4f19-afd3-835dd805682a"
-#define BLINK_STD_UUID_ENVELOPE_NOISE_COLOR "30100123-7343-4386-9ed2-f913b9e1e571"
-#define BLINK_STD_UUID_ENVELOPE_PAN "9c312a2c-a1b4-4a8d-ab68-07ea157c4574"
-#define BLINK_STD_UUID_ENVELOPE_PITCH "ca2529db-e7bd-4019-9a07-22aee24526d1"
-#define BLINK_STD_UUID_ENVELOPE_SPEED "02f68738-f54a-4f35-947b-c30e73896aa4"
-#define BLINK_STD_UUID_OPTION_NOISE_MODE "e426cc55-306d-4561-99bc-003bb7707a93"
-#define BLINK_STD_UUID_SLIDER_AMP "a6ae4ad0-2965-448c-ab04-ee378e0c4ab5"
-#define BLINK_STD_UUID_SLIDER_NOISE_WIDTH "84e18fd3-03f1-49c2-a713-12e7e24dc03f"
-#define BLINK_STD_UUID_SLIDER_PAN "b5bf03f3-17e2-4546-8cc2-e29790ea02a2"
-#define BLINK_STD_UUID_SLIDER_PITCH "00859eeb-ce9e-43cd-9994-bff881a9d32d"
-#define BLINK_STD_UUID_SLIDER_SAMPLE_OFFSET "88373752-7656-4d0e-8da2-a18c05af0106"
-#define BLINK_STD_UUID_SLIDER_SPEED "04293c38-3a64-42b2-80f0-43a4f8190ba7"
-#define BLINK_STD_UUID_TOGGLE_LOOP "dfa36d24-3c41-4a13-9b57-dc0116ef19f7"
-#define BLINK_STD_UUID_TOGGLE_REVERSE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
+#define BLINK_STD_UUID_AMP "273e7c30-404b-4db6-ba97-20f33d49fe51"
+#define BLINK_STD_UUID_SCALE "860166f7-e839-448b-bd3b-a5bccbfe3ac1"
+#define BLINK_STD_UUID_FILTER_FREQUENCY "91181212-7072-41a9-9d11-3a265301a9a3"
+#define BLINK_STD_UUID_FILTER_RESONANCE "4436fc1c-ae51-4580-b1fa-24b9c41425e3"
+#define BLINK_STD_UUID_FORMANT "7b72dbef-e36d-4dce-958b-b0fa498ae41e"
+#define BLINK_STD_UUID_LOOP "dfa36d24-3c41-4a13-9b57-dc0116ef19f7"
+#define BLINK_STD_UUID_MIX "6441d97c-37c9-4670-9049-d22fac68b023"
+#define BLINK_STD_UUID_NOISE_AMOUNT "29d5ecb5-cb5d-4f19-afd3-835dd805682a"
+#define BLINK_STD_UUID_NOISE_COLOR "30100123-7343-4386-9ed2-f913b9e1e571"
+#define BLINK_STD_UUID_NOISE_MODE "e426cc55-306d-4561-99bc-003bb7707a93"
+#define BLINK_STD_UUID_NOISE_WIDTH "84e18fd3-03f1-49c2-a713-12e7e24dc03f"
+#define BLINK_STD_UUID_PAN "9c312a2c-a1b4-4a8d-ab68-07ea157c4574"
+#define BLINK_STD_UUID_PITCH "ca2529db-e7bd-4019-9a07-22aee24526d1"
+#define BLINK_STD_UUID_REVERSE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
+#define BLINK_STD_UUID_SAMPLE_OFFSET "88373752-7656-4d0e-8da2-a18c05af0106"
+#define BLINK_STD_UUID_SPEED "04293c38-3a64-42b2-80f0-43a4f8190ba7"
 
 #define BLINK_STD_CATEGORY_DESTRUCTION "Destruction"
 #define BLINK_STD_CATEGORY_DYNAMICS "Dynamics"
@@ -456,9 +452,16 @@ enum blink_MT_Type
 	blink_MT_Type_Toggle,
 };
 
+enum blink_Manipulator_Mode
+{
+	blink_Manipulator_Mode_Offset,
+	blink_Manipulator_Mode_Override,
+};
+
 typedef struct
 {
 	blink_ManipulatorType type;
+	blink_Manipulator_Mode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_ChordBlocks blocks;
@@ -467,6 +470,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
+	blink_Manipulator_Mode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_FloatPoints points;
@@ -475,6 +479,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
+	blink_Manipulator_Mode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_Index index;
@@ -483,6 +488,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
+	blink_Manipulator_Mode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	float value;
@@ -491,6 +497,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
+	blink_Manipulator_Mode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_Bool value;
@@ -505,6 +512,12 @@ typedef union
 	blink_SliderManipulatorData slider;
 	blink_ToggleManipulatorData toggle;
 } blink_ManipulatorData;
+
+typedef struct
+{
+	blink_ManipulatorData* manipulators;
+	blink_Index manipulator_count;
+} blink_ManipulatorTargetData;
 
 // MT-chord can only be manipulated by a chord override control
 typedef struct
@@ -531,6 +544,7 @@ typedef struct
 	enum blink_MT_Type type; // blink_MT_Type_Slider
 
 	blink_Envelope offset_envelope;
+	blink_Envelope override_envelope;
 } blink_MT_Slider;
 
 // MT-toggles can be manipulated by toggle override controls
@@ -553,8 +567,14 @@ typedef struct
 {
 	blink_UUID uuid;
 
-	// Target name
+	// < 0 if the parameter does not belong to a group
+	blink_ID group_index;
+
+	// Full target name e.g. "Noise Amount"
 	const char* name;
+
+	// Short target name to use in the context of a group, e.g. "Amount". Can be null
+	const char* short_name;
 
 	// Long description of the target. Can be null
 	const char* long_desc;
@@ -620,9 +640,9 @@ extern "C"
 	EXPORTED int blink_get_num_manipulator_targets();
 	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
-	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID id);
-	EXPORTED blink_Parameter blink_get_manipulator_target(blink_Index index);
-	EXPORTED blink_Parameter blink_get_manipulator_target_by_uuid(blink_UUID id);
+	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID uuid);
+	EXPORTED blink_ManipulatorTarget blink_get_manipulator_target(blink_Index index);
+	EXPORTED blink_ManipulatorTarget blink_get_manipulator_target_by_uuid(blink_UUID uuid);
 	EXPORTED blink_ResourceData blink_get_resource_data(const char* path); // optional
 
 	// Returned buffer remains valid until the next call to get_error_string or

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "envelope_spec.hpp"
+#include <blink/envelope_spec.hpp>
+#include <blink/parameters/parameter_spec.hpp>
 
 namespace blink {
 
