@@ -452,16 +452,16 @@ enum blink_MT_Type
 	blink_MT_Type_Toggle,
 };
 
-enum blink_Manipulator_Mode
+enum blink_ManipulatorMode
 {
-	blink_Manipulator_Mode_Offset,
-	blink_Manipulator_Mode_Override,
+	blink_ManipulatorMode_Offset,
+	blink_ManipulatorMode_Override,
 };
 
 typedef struct
 {
 	blink_ManipulatorType type;
-	blink_Manipulator_Mode mode;
+	blink_ManipulatorMode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_ChordBlocks blocks;
@@ -470,7 +470,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
-	blink_Manipulator_Mode mode;
+	blink_ManipulatorMode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_FloatPoints points;
@@ -479,7 +479,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
-	blink_Manipulator_Mode mode;
+	blink_ManipulatorMode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_Index index;
@@ -488,7 +488,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
-	blink_Manipulator_Mode mode;
+	blink_ManipulatorMode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	float value;
@@ -497,7 +497,7 @@ typedef struct
 typedef struct
 {
 	blink_ManipulatorType type;
-	blink_Manipulator_Mode mode;
+	blink_ManipulatorMode mode;
 	blink_IntPosition position;
 	blink_FrameCount size;
 	blink_Bool value;

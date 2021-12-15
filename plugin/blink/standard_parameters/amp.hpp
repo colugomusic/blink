@@ -3,8 +3,10 @@
 #include <tweak/tweak.hpp>
 #include <tweak/std.hpp>
 #include <blink/math.hpp>
+#include <blink/manipulators/manipulator_slider_target_spec.hpp>
 #include <blink/parameters/envelope_parameter_spec.hpp>
 #include <blink/parameters/slider_parameter_spec.hpp>
+#include "percentage.hpp"
 #include "search.hpp"
 
 namespace blink {
@@ -31,20 +33,6 @@ inline SliderSpec<float> slider()
 	out.to_string = amp::display;
 	out.stepify = amp::stepify;
 	out.default_value = 1.0f;
-
-	return out;
-}
-
-inline SliderParameterSpec<float> slider_parameter()
-{
-	SliderParameterSpec<float> out;
-
-	out.uuid = BLINK_STD_UUID_AMP;
-	out.name = "Amp";
-
-	out.slider = slider();
-	out.icon = blink_StdIcon_Amp;
-	out.flags = blink_SliderFlags_MovesDisplay;
 
 	return out;
 }
@@ -80,6 +68,20 @@ inline EnvelopeSpec envelope()
 	return out;
 }
 
+inline SliderParameterSpec<float> slider_parameter()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = BLINK_STD_UUID_AMP;
+	out.name = "Amp";
+
+	out.slider = slider();
+	out.icon = blink_StdIcon_Amp;
+	out.flags = blink_SliderFlags_MovesDisplay;
+
+	return out;
+}
+
 inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
@@ -89,6 +91,19 @@ inline EnvelopeParameterSpec envelope_parameter()
 
     out.envelope = envelope();
 	out.flags = blink_EnvelopeFlags_MovesDisplay;
+
+	return out;
+}
+
+inline ManipulatorSliderTargetSpec manipulator_target()
+{
+	ManipulatorSliderTargetSpec out;
+
+	out.uuid = BLINK_STD_UUID_AMP;
+	out.name = "Amp";
+
+	out.offset_envelope = percentage::bipolar::envelope();
+	out.override_envelope = envelope();
 
 	return out;
 }

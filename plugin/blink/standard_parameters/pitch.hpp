@@ -133,6 +133,19 @@ inline EnvelopeParameterSpec envelope_parameter()
 	return out;
 }
 
+inline ManipulatorSliderTargetSpec manipulator_target()
+{
+	ManipulatorSliderTargetSpec out;
+
+	out.uuid = BLINK_STD_UUID_PITCH;
+	out.name = "Pitch";
+
+	out.offset_envelope = envelope();
+	out.override_envelope = envelope();
+
+	return out;
+}
+
 } // pitch
 } // blink
 } // std_params

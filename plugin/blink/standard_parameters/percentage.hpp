@@ -4,6 +4,7 @@
 #include <tweak/std.hpp>
 #include <blink/math.hpp>
 #include <blink/slider_spec.hpp>
+#include "search.hpp"
 
 namespace blink {
 namespace std_params {

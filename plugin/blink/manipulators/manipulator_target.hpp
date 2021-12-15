@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+#include <string>
 #include "manipulator_target_spec.hpp"
 
 namespace blink {
