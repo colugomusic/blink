@@ -3,6 +3,7 @@
 #include <functional>
 #include <optional>
 #include <tweak/tweak.hpp>
+#include <blink/searcher_spec.hpp>
 
 namespace blink {
 
@@ -11,6 +12,7 @@ struct SliderSpec : public tweak::Spec<T>
 {
 	T default_value;
 	int flags = 0;
+	FloatSearcherSpec searcher;
 };
 
 }

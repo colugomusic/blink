@@ -73,8 +73,8 @@ inline EnvelopeSpec envelope()
 	EnvelopeSpec out;
 
 	out.default_value = 0.0f;
-	out.search_binary = search::envelope_binary;
-	out.search_forward = search::envelope_forward;
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.stepify = pitch::stepify;
 	out.snap_value = tweak::snap_value;
 
@@ -129,19 +129,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Pitch";
 	out.envelope = envelope();
 	out.flags = blink_EnvelopeFlags_MovesDisplay;
-
-	return out;
-}
-
-inline ManipulatorSliderTargetSpec manipulator_target()
-{
-	ManipulatorSliderTargetSpec out;
-
-	out.uuid = BLINK_STD_UUID_PITCH;
-	out.name = "Pitch";
-
-	out.offset_envelope = envelope();
-	out.override_envelope = envelope();
 
 	return out;
 }

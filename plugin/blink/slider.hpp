@@ -2,6 +2,7 @@
 
 #include <tweak/tweak.hpp>
 #include <blink/slider_spec.hpp>
+#include <blink/searcher.hpp>
 
 namespace blink {
 
@@ -17,10 +18,13 @@ public:
 	const SliderSpec<T>& spec() const { return spec_; }
 	const tweak::Tweaker<T>& tweaker() const { return tweaker_; }
 
+	const auto& search() const { return searcher_; }
+
 private:
 
 	SliderSpec<T> spec_;
 	tweak::Tweaker<T> tweaker_;
+	FloatSearcher searcher_;
 	mutable std::string display_value_buffer_;
 };
 
@@ -28,6 +32,7 @@ template <class T>
 Slider<T>::Slider(SliderSpec<T> spec)
 	: spec_(spec)
 	, tweaker_(tweak::Spec<T>(spec))
+	, searcher_(spec.searcher)
 {
 }
 

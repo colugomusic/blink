@@ -109,8 +109,8 @@ inline EnvelopeSpec envelope()
 	EnvelopeSpec out;
 
 	out.default_value = 0.0f;
-	out.search_binary = search::envelope_binary;
-	out.search_forward = search::envelope_forward;
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.stepify = pan::stepify;
 
 	out.to_string = pan::display;
@@ -133,19 +133,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Pan";
 	out.envelope = envelope();
 	out.flags = blink_EnvelopeFlags_NoGridLabels;
-
-	return out;
-}
-
-inline ManipulatorSliderTargetSpec manipulator_target()
-{
-	ManipulatorSliderTargetSpec out;
-
-	out.uuid = BLINK_STD_UUID_PAN;
-	out.name = "Pan";
-
-	out.offset_envelope = envelope();
-	out.override_envelope = envelope();
 
 	return out;
 }

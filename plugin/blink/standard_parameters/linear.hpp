@@ -31,8 +31,8 @@ inline EnvelopeSpec envelope(float min, float max, float default_value)
     EnvelopeSpec out;
 
     out.default_value = default_value;
-    out.search_binary = search::envelope_binary;
-    out.search_forward = search::envelope_forward;
+    out.searcher.binary = search::float_points_binary;
+    out.searcher.forward = search::float_points_forward;
     out.value_slider = slider(min, max, default_value, 1.0f);
     out.range.min.default_value = min;
     out.range.min.to_string = [](float v){ return tweak::to_string(v); };

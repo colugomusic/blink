@@ -155,8 +155,8 @@ inline EnvelopeSpec envelope()
 	EnvelopeSpec out;
 
 	out.default_value = speed::NORMAL;
-	out.search_binary = search::envelope_binary;
-	out.search_forward = search::envelope_forward;
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.to_string = speed::display;
 
 	out.value_slider = slider();

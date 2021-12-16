@@ -8,10 +8,6 @@
 #include "instance.hpp"
 #include <blink/envelope_spec.hpp>
 #include <blink/slider_spec.hpp>
-#include <blink/manipulators/manipulator_chord_target.hpp>
-#include <blink/manipulators/manipulator_option_target.hpp>
-#include <blink/manipulators/manipulator_slider_target.hpp>
-#include <blink/manipulators/manipulator_toggle_target.hpp>
 #include <blink/parameters/group.hpp>
 #include <blink/parameters/chord_parameter.hpp>
 #include <blink/parameters/envelope_parameter.hpp>
@@ -41,16 +37,9 @@ public:
 	template <class T>
 	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
 
-	std::shared_ptr<ManipulatorChordTarget> add_manipulator_target(ManipulatorChordTargetSpec spec);
-	std::shared_ptr<ManipulatorOptionTarget> add_manipulator_target(ManipulatorOptionTargetSpec spec);
-	std::shared_ptr<ManipulatorToggleTarget> add_manipulator_target(ManipulatorToggleTargetSpec spec);
-	std::shared_ptr<ManipulatorSliderTarget> add_manipulator_target(ManipulatorSliderTargetSpec spec);
-
 	const Group& get_group(int index) const;
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
-	ManipulatorTarget& get_manipulator_target(blink_Index index);
-	ManipulatorTarget& get_manipulator_target_by_uuid(blink_UUID uuid);
 
 	template <int Index> static const blink_ChordData* get_chord_data(const blink_ParameterData* data);
 	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
@@ -70,13 +59,10 @@ public:
 private:
 
 	void add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter);
-	void add_manipulator_target(blink_UUID uuid, std::shared_ptr<ManipulatorTarget> target);
 
 	std::vector<Group> groups_;
 	std::vector<std::shared_ptr<Parameter>> parameters_;
-	std::vector<std::shared_ptr<ManipulatorTarget>> manipulator_targets_;
 	std::map<blink_UUID, Parameter*> uuid_parameter_map_;
-	std::map<blink_UUID, ManipulatorTarget*> uuid_mt_map_;
 	std::set<Instance*> instances_;
 	ResourceStore resources_;
 };
@@ -207,48 +193,6 @@ inline std::shared_ptr<ToggleParameter> Plugin::add_parameter(ToggleSpec spec)
 	return param;
 }
 
-inline void Plugin::add_manipulator_target(blink_UUID uuid, std::shared_ptr<ManipulatorTarget> target)
-{
-	manipulator_targets_.push_back(target);
-	uuid_mt_map_[uuid] = target.get();
-}
-
-inline std::shared_ptr<ManipulatorChordTarget> Plugin::add_manipulator_target(ManipulatorChordTargetSpec spec)
-{
-	const auto param = std::make_shared<ManipulatorChordTarget>(spec);
-
-	add_manipulator_target(spec.uuid, param);
-
-	return param;
-}
-
-inline std::shared_ptr<ManipulatorOptionTarget> Plugin::add_manipulator_target(ManipulatorOptionTargetSpec spec)
-{
-	const auto param = std::make_shared<ManipulatorOptionTarget>(spec);
-
-	add_manipulator_target(spec.uuid, param);
-
-	return param;
-}
-
-inline std::shared_ptr<ManipulatorToggleTarget> Plugin::add_manipulator_target(ManipulatorToggleTargetSpec spec)
-{
-	const auto param = std::make_shared<ManipulatorToggleTarget>(spec);
-
-	add_manipulator_target(spec.uuid, param);
-
-	return param;
-}
-
-inline std::shared_ptr<ManipulatorSliderTarget> Plugin::add_manipulator_target(ManipulatorSliderTargetSpec spec)
-{
-	const auto param = std::make_shared<ManipulatorSliderTarget>(spec);
-
-	add_manipulator_target(spec.uuid, param);
-
-	return param;
-}
-
 inline int Plugin::get_num_groups() const
 {
 	return int(groups_.size());
@@ -272,18 +216,6 @@ inline Parameter& Plugin::get_parameter(blink_Index index)
 inline Parameter& Plugin::get_parameter_by_uuid(blink_UUID uuid)
 {
 	auto pos = uuid_parameter_map_.find(uuid);
-
-	return *pos->second;
-}
-
-inline ManipulatorTarget& Plugin::get_manipulator_target(blink_Index index)
-{
-	return *(manipulator_targets_[index]);
-}
-
-inline ManipulatorTarget& Plugin::get_manipulator_target_by_uuid(blink_UUID uuid)
-{
-	auto pos = uuid_mt_map_.find(uuid);
 
 	return *pos->second;
 }

@@ -3,14 +3,13 @@
 #include <functional>
 #include <vector>
 #include <blink/range_spec.hpp>
+#include <blink/searcher_spec.hpp>
 #include <blink.h>
 
 namespace blink {
 
 struct EnvelopeSpec
 {
-	std::function<float(const blink_EnvelopeData* points, float default_value, blink_Position block_pos, int search_beg_index, int* left)> search_binary;
-	std::function<float(const blink_EnvelopeData* points, float default_value, blink_Position block_pos, int search_beg_index, int* left)> search_forward;
 	std::function<std::string(float)> to_string;
 
 	/*
@@ -33,6 +32,7 @@ struct EnvelopeSpec
 	RangeSpec<float> range;
 	SliderSpec<float> step_size;
 	SliderSpec<float> value_slider;
+	FloatSearcherSpec searcher;
 	float default_value = 0.0f;
 	float default_snap_amount = 0.0f;
 };

@@ -32,8 +32,8 @@ inline EnvelopeSpec envelope()
     EnvelopeSpec out;
 
     out.default_value = 0.0f;
-    out.search_binary = search::envelope_binary;
-    out.search_forward = search::envelope_forward;
+    out.searcher.binary = search::float_points_binary;
+    out.searcher.forward = search::float_points_forward;
     out.stepify = tweak::std::percentage::stepify;
     out.value_slider = percentage::slider<MIN, MAX>();
     out.range.min.default_value = float(MIN) / 100.0f;
@@ -67,8 +67,8 @@ inline EnvelopeSpec envelope()
     EnvelopeSpec out;
 
     out.default_value = 0.5f;
-    out.search_binary = search::envelope_binary;
-    out.search_forward = search::envelope_forward;
+    out.searcher.binary = search::float_points_binary;
+    out.searcher.forward = search::float_points_forward;
     out.stepify = tweak::std::percentage_bipolar::stepify;
     out.value_slider = slider();
     out.range.min.default_value = 0.0f;
