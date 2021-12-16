@@ -15,6 +15,11 @@ public:
 	{
 	}
 
+	float value() const
+	{
+		return data_->data.count > 0 ? data_->data.points[0].y : slider_->spec().default_value;
+	}
+
 	float search(blink_Position block_position) const
 	{
 		return slider_->search().search(data_->data, slider_->spec().default_value, block_position);
