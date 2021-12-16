@@ -20,3 +20,11 @@
 #include "scale.hpp"
 #include "search.hpp"
 #include "speed.hpp"
+
+template <class Spec, class Flags>
+auto add_flags(Spec spec, Flags flags)
+{
+	spec.flags |= flags;
+
+	return spec;
+}
