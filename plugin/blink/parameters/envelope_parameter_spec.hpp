@@ -11,6 +11,13 @@ struct EnvelopeParameterSpec : public ParameterSpec
 	std::vector<blink_Index> options;
 	std::vector<blink_Index> sliders;
 	int flags = 0;
+
+	EnvelopeParameterSpec& operator|(int add_flags)
+	{
+		flags |= add_flags;
+
+		return *this;
+	}
 };
 
 }

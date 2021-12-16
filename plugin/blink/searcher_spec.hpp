@@ -1,5 +1,7 @@
 #pragma once
 
+#include <blink.h>
+
 namespace blink {
 
 struct FloatSearcherSpec
