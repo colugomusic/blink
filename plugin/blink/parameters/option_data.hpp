@@ -16,7 +16,7 @@ public:
 	{
 	}
 
-	blink_Index get() const { return data_->index; }
+	blink_Index get() const { return blink_Index(data_->data.points[0].y); }
 
 private:
 
