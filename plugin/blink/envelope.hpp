@@ -63,7 +63,7 @@ inline Envelope::Envelope(EnvelopeSpec spec)
 	, range_(spec.range)
 	, snap_settings_{ spec.step_size, spec.default_snap_amount }
 	, value_slider_(spec.value_slider)
-	, searcher_(spec.searcher)
+	, searcher_(spec.searcher, spec.default_value)
 {
 }
 

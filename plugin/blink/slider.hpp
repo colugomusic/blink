@@ -32,7 +32,7 @@ template <class T>
 Slider<T>::Slider(SliderSpec<T> spec)
 	: spec_(spec)
 	, tweaker_(tweak::Spec<T>(spec))
-	, searcher_(spec.searcher)
+	, searcher_(spec.searcher, float(spec.default_value))
 {
 }
 

@@ -22,7 +22,7 @@ public:
 
 	float search(blink_Position block_position) const
 	{
-		return slider_->search().search(data_->data, slider_->spec().default_value, block_position);
+		return slider_->search().search(data_->data, block_position);
 	}
 
 	float search(const BlockPositions& block_positions) const
@@ -32,17 +32,17 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		slider_->search().search_vec(data_->data, slider_->spec().default_value, block_positions, n, out);
+		slider_->search().search_vec(data_->data, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		slider_->search().search_vec(data_->data, slider_->spec().default_value, block_positions, out);
+		slider_->search().search_vec(data_->data, block_positions, out);
 	}
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
-		return slider_->search().search_vec(data_->data, slider_->spec().default_value, block_positions);
+		return slider_->search().search_vec_(data_->data, block_positions);
 	}
 
 	const auto& data() const { return *data_; }

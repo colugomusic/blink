@@ -255,7 +255,7 @@ inline blink_Envelope envelope(const Envelope& envelope)
 	{
 		auto envelope = (Envelope*)(proc_data);
 
-		return envelope->search().search(data->points, envelope->get_default_value(), block_position);
+		return envelope->search().search(data->points, block_position);
 	};
 
 	out.display_value = [](void* proc_data, float value)

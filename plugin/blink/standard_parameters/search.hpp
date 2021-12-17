@@ -61,7 +61,7 @@ inline float float_points_binary(const blink_FloatPoints* data, float default_va
 {
 	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
 	{
-		const auto less = [](blink_Position position, const blink_FloatPoint& point)
+		const auto less = [](blink_Position position, blink_FloatPoint point)
 		{
 			return position < point.x;
 		};
@@ -78,7 +78,7 @@ inline float float_points_forward(const blink_FloatPoints* data, float default_v
 {
 	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
 	{
-		const auto greater = [block_position](const blink_FloatPoint& point)
+		const auto greater = [block_position](blink_FloatPoint point)
 		{
 			return point.x > block_position;
 		};
@@ -125,12 +125,12 @@ inline int chord(const blink_ChordData* data, blink_Position block_position, int
 	return (pos - 1)->scale;
 }
 
-// Use a binary search to locate the envelope position
+// Use a binary search to locate the scale at the block position
 inline int chord_binary(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left)
 {
 	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end)
 	{
-		const auto less = [](blink_Position position, const blink_ChordBlock& block)
+		const auto less = [](blink_Position position, blink_ChordBlock block)
 		{
 			return position < block.position;
 		};
@@ -141,13 +141,13 @@ inline int chord_binary(const blink_ChordData* data, blink_Position block_positi
 	return chord(data, block_position, search_beg_index, left, find);
 }
 
-// Use a forward search to locate the envelope position (can be
-// faster when envelope is being traversed forwards)
+// Use a forward search to locate the scale at the block position (can be
+// faster when block is being traversed forwards)
 inline int chord_forward(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left)
 {
 	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end)
 	{
-		const auto greater = [block_position](const blink_ChordBlock& block)
+		const auto greater = [block_position](blink_ChordBlock block)
 		{
 			return block.position > block_position;
 		};
@@ -156,6 +156,75 @@ inline int chord_forward(const blink_ChordData* data, blink_Position block_posit
 	};
 
 	return chord(data, block_position, search_beg_index, left, find);
+}
+
+// returns the bool value at the given block position
+// [search_beg_index] is the index of the bool transition to begin searching from
+// [left] returns the index of the bool transition to the left of the block position,
+//        or zero if there isn't one.
+//        in some scenarios this can be passed as search_beg_index to
+//        speed up the search in the next iteration
+template <class SearchFunc>
+inline bool toggle(const blink_BoolPoints* data, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+{
+	*left = 0;
+
+	if (data->count < 2) return 0;
+
+	auto search_beg = data->points + search_beg_index;
+	auto search_end = data->points + data->count;
+	const auto pos = search(search_beg, search_end);
+
+	if (pos == search_beg)
+	{
+		// The bool to the right is the first one
+		return false;
+	}
+
+	*left = int(std::distance<const blink_BoolPoint*>(data->points, (pos - 1)));
+
+	if (pos == search_end)
+	{
+		// Nothing to the right so we're at the end
+		return false;
+	}
+
+	// We're somewhere in between two bool transitions.
+	// Return the bool on the left
+	return (pos - 1)->value;
+}
+
+// Use a binary search to locate the block position
+inline bool toggle_binary(const blink_BoolPoints* data, blink_Position block_position, int search_beg_index, int* left)
+{
+	const auto find = [block_position](const blink_BoolPoint* beg, const blink_BoolPoint* end)
+	{
+		const auto less = [](blink_Position position, blink_BoolPoint point)
+		{
+			return position < point.x;
+		};
+
+		return std::upper_bound(beg, end, block_position, less);
+	};
+
+	return toggle(data, block_position, search_beg_index, left, find);
+}
+
+// Use a forward search to locate the block position (can be
+// faster when block is being traversed forwards)
+inline bool toggle_forward(const blink_BoolPoints* data, blink_Position block_position, int search_beg_index, int* left)
+{
+	const auto find = [block_position](const blink_BoolPoint* beg, const blink_BoolPoint* end)
+	{
+		const auto greater = [block_position](blink_BoolPoint point)
+		{
+			return point.x > block_position;
+		};
+
+		return std::find_if(beg, end, greater);
+	};
+
+	return toggle(data, block_position, search_beg_index, left, find);
 }
 
 } // search

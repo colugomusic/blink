@@ -18,17 +18,17 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, int* out) const
 	{
-		param_->search_vec(data_, block_positions, n, out);
+		param_->search().search_vec(*data_, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, int* out) const
 	{
-		param_->search_vec(data_, block_positions, out);
+		param_->search().search_vec(*data_, block_positions, out);
 	}
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const
 	{
-		return param_->search_vec(data_, block_positions);
+		return param_->search().search_vec_(*data_, block_positions);
 	}
 
 private:

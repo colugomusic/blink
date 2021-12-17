@@ -79,6 +79,8 @@ inline SliderSpec<float> slider()
 {
 	SliderSpec<float> out;
 
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.constrain = filter_frequency::constrain;
 	out.increment = filter_frequency::increment;
 	out.decrement = filter_frequency::decrement;

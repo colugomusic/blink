@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <optional>
+#include <blink.h>
 #include <snd/transport/frame_position.hpp>
 
 #pragma warning(push, 0)

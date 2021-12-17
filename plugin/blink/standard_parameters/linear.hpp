@@ -15,6 +15,8 @@ inline SliderSpec<float> slider(float min, float max, float default_value, float
 {
 	SliderSpec<float> out;
 
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.constrain = [min, max](float v) { return std::clamp(v, min, max); };
 	out.increment = [min, max, precision](float v, bool precise) { return v + (precise ? precision * 0.1f : precision); };
 	out.decrement = [min, max, precision](float v, bool precise) { return v - (precise ? precision * 0.1f : precision); };

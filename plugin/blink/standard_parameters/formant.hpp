@@ -13,6 +13,8 @@ inline EnvelopeSpec envelope()
 {
 	EnvelopeSpec out;
 
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.default_value = 0.5f;
 	out.searcher.binary = search::float_points_binary;
 	out.searcher.forward = search::float_points_forward;

@@ -5,78 +5,161 @@
 
 namespace blink {
 
-class FloatSearcher
+template <class T, class Data>
+class Searcher
 {
 public:
 
-	FloatSearcher(FloatSearcherSpec spec);
+	auto search(const Data& data, blink_Position block_position) const
+	{
+		int left;
 
-	float search(const blink_FloatPoints& data, float default_value, blink_Position block_position) const;
-	void search_vec(const blink_FloatPoints& data, float default_value, const BlockPositions& block_positions, int n, float* out) const;
-	void search_vec(const blink_FloatPoints& data, float default_value, const BlockPositions& block_positions, float* out) const;
-	ml::DSPVector search_vec(const blink_FloatPoints& data, float default_value, const BlockPositions& block_positions) const;
+		return binary_search(data, block_position, 0, &left);
+	}
+
+	void search_vec(const Data& data, const BlockPositions& block_positions, T* out) const
+	{
+		search_vec(data, block_positions, block_positions.count, out);
+	}
+
+	void search_vec(const Data& data, const BlockPositions& block_positions, int n, T* out) const
+	{
+		int left = 0;
+		bool reset = false;
+		auto prev_pos = block_positions.prev_pos;
+
+		for (int i = 0; i < n; i++)
+		{
+			const auto pos = block_positions.positions[i];
+
+			if (pos < prev_pos)
+			{
+				// This occurs when Blockhead loops back to an earlier song position.
+				// We perform a binary search to get back on track
+				reset = true;
+			}
+
+			if (reset)
+			{
+				reset = false;
+
+				out[i] = binary_search(data, block_positions.positions[i], 0, &left);
+			}
+			else
+			{
+				out[i] = forward_search(data, block_positions.positions[i], left, &left);
+			}
+
+			prev_pos = pos;
+		}
+	}
+
+private:
+
+	virtual T binary_search(const Data& data, blink_Position position, int search_beg_index, int* left) const = 0;
+	virtual T forward_search(const Data& data, blink_Position position, int search_beg_index, int* left) const = 0;
+};
+
+class FloatSearcher : public Searcher<float, blink_FloatPoints>
+{
+public:
+
+	FloatSearcher(FloatSearcherSpec spec, float default_value) : spec_(spec), default_value_(default_value) {}
+
+	float binary_search(const blink_FloatPoints& data, blink_Position position, int search_beg_index, int* left) const override
+	{
+		return spec_.binary(&data, default_value_, position, search_beg_index, left);
+	}
+
+	float forward_search(const blink_FloatPoints& data, blink_Position position, int search_beg_index, int* left) const override
+	{
+		return spec_.forward(&data, default_value_, position, search_beg_index, left);
+	}
+
+	auto search_vec_(const blink_FloatPoints& data, const BlockPositions& block_positions) const
+	{
+		ml::DSPVector out;
+
+		Searcher::search_vec(data, block_positions, out.getBuffer());
+
+		return out;
+	}
 
 private:
 
 	FloatSearcherSpec spec_;
+	float default_value_;
 };
 
-inline float FloatSearcher::search(const blink_FloatPoints& data, float default_value, blink_Position block_position) const
+class ChordSearcher : public Searcher<blink_Scale, blink_ChordData>
 {
-	int left;
+public:
 
-	return spec_.binary(&data, default_value, block_position, 0, &left);
-}
+	ChordSearcher(ChordSearcherSpec spec) : spec_(spec) {}
 
-inline void FloatSearcher::search_vec(const blink_FloatPoints& data, float default_value, const BlockPositions& block_positions, float* out) const
-{
-	search_vec(data, default_value, block_positions, block_positions.count, out);
-}
-
-inline void FloatSearcher::search_vec(const blink_FloatPoints& data, float default_value, const BlockPositions& block_positions, int n, float* out) const
-{
-	int left = 0;
-	bool reset = false;
-	auto prev_pos = block_positions.prev_pos;
-
-	for (int i = 0; i < n; i++)
+	blink_Scale binary_search(const blink_ChordData& data, blink_Position position, int search_beg_index, int* left) const override
 	{
-		const auto pos = block_positions.positions[i];
-
-		if (pos < prev_pos)
-		{
-			// This occurs when Blockhead loops back to an earlier song position.
-			// We perform a binary search to get back on track
-			reset = true;
-		}
-
-		if (reset)
-		{
-			reset = false;
-
-			out[i] = spec_.binary(&data, default_value, block_positions.positions[i], 0, &left);
-		}
-		else
-		{
-			out[i] = spec_.forward(&data, default_value, block_positions.positions[i], left, &left);
-		}
-
-		prev_pos = pos;
+		return spec_.binary(&data, position, search_beg_index, left);
 	}
-}
 
-inline ml::DSPVector FloatSearcher::search_vec(const blink_FloatPoints& data, float default_value, const BlockPositions& block_positions) const
+	blink_Scale forward_search(const blink_ChordData& data, blink_Position position, int search_beg_index, int* left) const override
+	{
+		return spec_.forward(&data, position, search_beg_index, left);
+	}
+
+	auto search_vec_(const blink_ChordData& data, const BlockPositions& block_positions) const
+	{
+		ml::DSPVectorInt out;
+		std::array<blink_Scale, kFloatsPerDSPVector> buffer;
+
+		Searcher::search_vec(data, block_positions, buffer.data());
+
+		for (int i = 0; i < kFloatsPerDSPVector; i++)
+		{
+			out[i] = buffer[i];
+		}
+
+		return out;
+	}
+
+private:
+
+	ChordSearcherSpec spec_;
+};
+
+class BoolSearcher : public Searcher<bool, blink_BoolPoints>
 {
-	ml::DSPVector out;
+public:
 
-	search_vec(data, default_value, block_positions, out.getBuffer());
+	BoolSearcher(BoolSearcherSpec spec) : spec_(spec) {}
 
-	return out;
-}
+	bool binary_search(const blink_BoolPoints& points, blink_Position position, int search_beg_index, int* left) const override
+	{
+		return spec_.binary(&points, position, search_beg_index, left);
+	}
 
-inline FloatSearcher::FloatSearcher(FloatSearcherSpec spec)
-	: spec_(spec)
-{
-}
+	bool forward_search(const blink_BoolPoints& points, blink_Position position, int search_beg_index, int* left) const override
+	{
+		return spec_.forward(&points, position, search_beg_index, left);
+	}
 
+	auto search_vec_(const blink_BoolPoints& data, const BlockPositions& block_positions) const
+	{
+		ml::DSPVectorInt out;
+		std::array<bool, kFloatsPerDSPVector> buffer;
+
+		Searcher::search_vec(data, block_positions, buffer.data());
+
+		for (int i = 0; i < kFloatsPerDSPVector; i++)
+		{
+			out[i] = buffer[i] ? 1 : 0;
+		}
+
+		return out;
+	}
+
+private:
+
+	BoolSearcherSpec spec_;
+};
 }

@@ -43,6 +43,8 @@ inline SliderSpec<int> slider()
 {
 	SliderSpec<int> out;
 
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.constrain = sample_offset::constrain;
 	out.increment = sample_offset::increment;
 	out.decrement = sample_offset::decrement;

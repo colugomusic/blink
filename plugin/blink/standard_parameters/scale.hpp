@@ -14,8 +14,8 @@ inline ChordSpec chord()
 	out.uuid = BLINK_STD_UUID_SCALE;
 	out.name = "Scale";
 	out.icon = blink_StdIcon_PianoRoll;
-	out.search_binary = search::chord_binary;
-	out.search_forward = search::chord_forward;
+	out.searcher.binary = search::chord_binary;
+	out.searcher.forward = search::chord_forward;
 
 	return out;
 }

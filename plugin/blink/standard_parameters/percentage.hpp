@@ -15,6 +15,8 @@ inline SliderSpec<float> slider()
 {
 	SliderSpec<float> out;
 
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.constrain = [](float v) { return std::clamp(v, float(MIN) / 100.0f, float(MAX) / 100.0f); };
 	out.increment = tweak::std::percentage::increment;
 	out.decrement = tweak::std::percentage::decrement;

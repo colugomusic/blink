@@ -24,6 +24,8 @@ inline SliderSpec<float> slider()
 {
 	SliderSpec<float> out;
 
+	out.searcher.binary = search::float_points_binary;
+	out.searcher.forward = search::float_points_forward;
 	out.constrain = amp::constrain;
 	out.increment = amp::increment;
 	out.decrement = amp::decrement;
