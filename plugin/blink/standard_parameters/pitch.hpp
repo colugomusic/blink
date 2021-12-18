@@ -5,6 +5,7 @@
 #include <blink/math.hpp>
 #include <blink/slider_spec.hpp>
 #include <blink/parameters/slider_parameter_spec.hpp>
+#include <blink/parameters/manipulator_envelope_target_spec.hpp>
 
 namespace blink {
 namespace std_params {
@@ -131,6 +132,16 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Pitch";
 	out.envelope = envelope();
 	out.flags = blink_EnvelopeFlags_MovesDisplay;
+
+	return out;
+}
+
+inline ManipulatorEnvelopeTargetSpec manipulator_envelope_target()
+{
+	ManipulatorEnvelopeTargetSpec out;
+
+	out.offset_envelope = envelope();
+	out.override_envelope = envelope();
 
 	return out;
 }

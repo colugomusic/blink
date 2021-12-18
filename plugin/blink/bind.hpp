@@ -9,11 +9,12 @@
 #include <blink/parameters/slider_parameter_spec.hpp>
 #include <blink/parameters/toggle_parameter.hpp>
 #include <blink/parameters/group.hpp>
+#include <blink/parameters/manipulator_envelope_target.hpp>
+#include <blink/parameters/manipulator_slider_target.hpp>
 
 namespace blink {
 namespace bind {
 
-blink_Envelope envelope(const Envelope& envelope);
 blink_Parameter parameter(const Parameter& parameter);
 
 inline blink_IntRange range(const Range<int>& range)
@@ -22,151 +23,6 @@ inline blink_IntRange range(const Range<int>& range)
 
 	out.min = range.min;
 	out.max = range.max;
-
-	return out;
-}
-
-inline blink_Slider slider(const Slider<float>& slider)
-{
-	blink_Slider out = { 0 };
-
-	const auto& spec = slider.spec();
-
-	out.default_value = spec.default_value;
-
-	const auto no_control = !spec.constrain || !spec.decrement || !spec.to_string || !spec.drag || !spec.from_string || !spec.increment;
-
-	if (!no_control)
-	{
-		out.proc_data = (void*)(&slider);
-
-		out.constrain = [](void* proc_data, float value)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			return slider->tweaker().constrain(value);
-		};
-
-		out.increment = [](void* proc_data, float value, blink_Bool precise)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			return slider->tweaker().increment(value, precise);
-		};
-
-		out.decrement = [](void* proc_data, float value, blink_Bool precise)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			return slider->tweaker().decrement(value, precise);
-		};
-
-		out.drag = [](void* proc_data, float value, int amount, blink_Bool precise)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			return slider->tweaker().drag(value, amount, precise);
-		};
-
-		out.display_value = [](void* proc_data, float value)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			return slider->display_value(value);
-		};
-
-		out.from_string = [](void* proc_data, const char* str, float* value)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			auto result = slider->tweaker().from_string(str);
-
-			if (result)
-			{
-				*value = *result;
-				return blink_Bool(BLINK_TRUE);
-			}
-
-			return blink_Bool(BLINK_FALSE);
-		};
-
-		out.stepify = [](void* proc_data, float value)
-		{
-			auto slider = (Slider<float>*)(proc_data);
-
-			return slider->tweaker().stepify(value);
-		};
-	}
-
-	return out;
-}
-
-inline blink_IntSlider slider(const Slider<int>& slider)
-{
-	blink_IntSlider out;
-
-	out.proc_data = (void*)(&slider);
-	out.default_value = slider.spec().default_value;
-
-	out.constrain = [](void* proc_data, int value)
-	{
-		auto slider = (Slider<int>*)(proc_data);
-
-		return slider->tweaker().constrain(value);
-	};
-
-	out.increment = [](void* proc_data, int value, blink_Bool precise)
-	{
-		auto slider = (Slider<int>*)(proc_data);
-
-		return slider->tweaker().increment(value, precise);
-	};
-
-	out.decrement = [](void* proc_data, int value, blink_Bool precise)
-	{
-		auto slider = (Slider<int>*)(proc_data);
-
-		return slider->tweaker().decrement(value, precise);
-	};
-
-	out.drag = [](void* proc_data, int value, int amount, blink_Bool precise)
-	{
-		auto slider = (Slider<int>*)(proc_data);
-
-		return slider->tweaker().drag(value, amount, precise);
-	};
-
-	out.display_value = [](void* proc_data, int value)
-	{
-		auto slider = (Slider<int>*)(proc_data);
-
-		return slider->display_value(value);
-	};
-
-	out.from_string = [](void* proc_data, const char* str, int* value)
-	{
-		auto slider = (Slider<int>*)(proc_data);
-
-		auto result = slider->tweaker().from_string(str);
-
-		if (result)
-		{
-			*value = *result;
-			return blink_Bool(BLINK_TRUE);
-		}
-
-		return blink_Bool(BLINK_FALSE);
-	};
-
-	return out;
-}
-
-inline blink_EnvelopeSnapSettings envelope_snap_settings(const EnvelopeSnapSettings& snap_settings)
-{
-	blink_EnvelopeSnapSettings out;
-
-	out.step_size = slider(snap_settings.step_size);
-	out.default_snap_amount = snap_settings.default_snap_amount;
 
 	return out;
 }
@@ -210,78 +66,6 @@ inline blink_Option option(const OptionParameter& option)
 	return out;
 }
 
-inline blink_Envelope envelope(const Envelope& envelope)
-{
-	blink_Envelope out;
-
-	out.default_value = envelope.get_default_value();
-	out.proc_data = (void*)(&envelope);
-	out.snap_settings = envelope_snap_settings(envelope.snap_settings());
-	out.value_slider = slider(envelope.value_slider());
-	out.min = slider(envelope.range().min());
-	out.max = slider(envelope.range().max());
-
-	out.get_gridline = [](void* proc_data, int index, float* out)
-	{
-		auto envelope = (Envelope*)(proc_data);
-
-		auto result = envelope->get_gridline(index);
-
-		if (result)
-		{
-			*out = *result;
-			return blink_Bool(BLINK_TRUE);
-		}
-
-		return blink_Bool(BLINK_FALSE);
-	};
-
-	out.get_stepline = [](void* proc_data, int index, float step_size, float* out)
-	{
-		auto envelope = (Envelope*)(proc_data);
-
-		auto result = envelope->get_stepline(index, step_size);
-
-		if (result)
-		{
-			*out = *result;
-			return blink_Bool(BLINK_TRUE);
-		}
-
-		return blink_Bool(BLINK_FALSE);
-	};
-
-	out.search = [](void* proc_data, const blink_EnvelopeData* data, float block_position)
-	{
-		auto envelope = (Envelope*)(proc_data);
-
-		return envelope->search().search(data->points, block_position);
-	};
-
-	out.display_value = [](void* proc_data, float value)
-	{
-		auto envelope = (Envelope*)(proc_data);
-
-		return envelope->display_value(value);
-	};
-
-	out.stepify = [](void* proc_data, float value)
-	{
-		auto envelope = (Envelope*)(proc_data);
-
-		return envelope->stepify(value);
-	};
-
-	out.snap_value = [](void* proc_data, float value, float step_size, float snap_amount)
-	{
-		auto envelope = (Envelope*)(proc_data);
-
-		return envelope->snap_value(value, step_size, snap_amount);
-	};
-
-	return out;
-}
-
 inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envelope_parameter)
 {
 	blink_EnvelopeParameter out;
@@ -290,6 +74,7 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 	out.parameter_type = blink_ParameterType_Envelope;
 	out.flags = envelope_parameter.get_flags();
 
+	out.manipulator_target = const_cast<blink_ManipulatorEnvelopeTarget*>(envelope_parameter.get_manipulator_target_api());
 	out.options_count = envelope_parameter.get_options_count();
 	out.sliders_count = envelope_parameter.get_sliders_count();
 
@@ -307,7 +92,7 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 		return envelope->get_slider(index);
 	};
 
-	out.envelope = envelope(envelope_parameter.envelope());
+	out.envelope = envelope_parameter.envelope().bind();
 
 	return out;
 }
@@ -318,7 +103,8 @@ inline blink_SliderParameter slider_parameter(const SliderParameter<float>& slid
 
 	out.parameter_type = blink_ParameterType_Slider;
 
-	out.slider = slider(slider_parameter.slider());
+	out.manipulator_target = const_cast<blink_ManipulatorSliderTarget*>(slider_parameter.get_manipulator_target_api());
+	out.slider = Slider<float>::bind(slider_parameter.slider());
 	out.icon = slider_parameter.spec().icon;
 	out.flags = slider_parameter.spec().flags;
 
@@ -330,7 +116,7 @@ inline blink_IntSliderParameter slider_parameter(const SliderParameter<int>& sli
 	blink_IntSliderParameter out;
 
 	out.parameter_type = blink_ParameterType_IntSlider;
-	out.slider = slider(slider_parameter.slider());
+	out.slider = Slider<float>::bind(slider_parameter.slider());
 	out.icon = slider_parameter.spec().icon;
 	out.flags = slider_parameter.spec().flags;
 

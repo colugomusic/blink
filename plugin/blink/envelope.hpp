@@ -34,6 +34,8 @@ public:
 	const EnvelopeRange& range() const { return range_; }
 	const EnvelopeSnapSettings& snap_settings() const { return snap_settings_; }
 
+	blink_Envelope bind() const;
+
 private:
 
 	EnvelopeSpec spec_;
@@ -70,6 +72,78 @@ inline Envelope::Envelope(EnvelopeSpec spec)
 inline const char* Envelope::display_value(float value) const
 {
 	return (display_value_buffer_ = spec_.to_string(value)).c_str();
+}
+
+inline blink_Envelope Envelope::bind() const
+{
+	blink_Envelope out;
+
+	out.default_value = get_default_value();
+	out.proc_data = (void*)(this);
+	out.snap_settings = snap_settings_.bind();
+	out.value_slider = Slider<float>::bind(value_slider_);
+	out.min = Slider<float>::bind(range_.min());
+	out.max = Slider<float>::bind(range_.max());
+
+	out.get_gridline = [](void* proc_data, int index, float* out)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		auto result = envelope->get_gridline(index);
+
+		if (result)
+		{
+			*out = *result;
+			return blink_Bool(BLINK_TRUE);
+		}
+
+		return blink_Bool(BLINK_FALSE);
+	};
+
+	out.get_stepline = [](void* proc_data, int index, float step_size, float* out)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		auto result = envelope->get_stepline(index, step_size);
+
+		if (result)
+		{
+			*out = *result;
+			return blink_Bool(BLINK_TRUE);
+		}
+
+		return blink_Bool(BLINK_FALSE);
+	};
+
+	out.search = [](void* proc_data, const blink_EnvelopeData* data, float block_position)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->search().search(data->points, block_position);
+	};
+
+	out.display_value = [](void* proc_data, float value)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->display_value(value);
+	};
+
+	out.stepify = [](void* proc_data, float value)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->stepify(value);
+	};
+
+	out.snap_value = [](void* proc_data, float value, float step_size, float snap_amount)
+	{
+		auto envelope = (Envelope*)(proc_data);
+
+		return envelope->snap_value(value, step_size, snap_amount);
+	};
+
+	return out;
 }
 
 }
