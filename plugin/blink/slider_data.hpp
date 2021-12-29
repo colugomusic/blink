@@ -10,19 +10,19 @@ class SliderIndexData
 public:
 
 	SliderIndexData(const blink::Plugin& plugin, const blink::Slider<float>& slider, const blink_ParameterData* param_data, blink_Index index)
-		: data_(&plugin.get_slider_data(param_data, index))
+		: data_(param_data ? &plugin.get_slider_data(param_data, index) : nullptr)
 		, slider_(&slider)
 	{
 	}
 
 	float value() const
 	{
-		return data_->data.count > 0 ? data_->data.points[0].y : slider_->spec().default_value;
+		return data_ && data_->data.count > 0 ? data_->data.points[0].y : slider_->spec().default_value;
 	}
 
 	float search(blink_Position block_position) const
 	{
-		return slider_->search().search(data_->data, block_position);
+		return data_ ? slider_->search().search(data_->data, block_position) : slider_->spec().default_value;
 	}
 
 	float search(const BlockPositions& block_positions) const
@@ -32,16 +32,30 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
+		if (!data_)
+		{
+			std::fill(out, out + n, slider_->spec().default_value);
+			return;
+		}
+
 		slider_->search().search_vec(data_->data, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
+		if (!data_)
+		{
+			std::fill(out, out + block_positions.count, slider_->spec().default_value);
+			return;
+		}
+
 		slider_->search().search_vec(data_->data, block_positions, out);
 	}
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
+		if (!data_) return { slider_->spec().default_value };
+
 		return slider_->search().search_vec_(data_->data, block_positions);
 	}
 
