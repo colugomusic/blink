@@ -57,13 +57,9 @@ typedef struct
 {
 	uint64_t buffer_id;
 	blink_SR song_rate;
-	int data_offset;
-	blink_ChannelMode channel_mode;
-
 	blink_SampleInfo* sample_info;
 	blink_Bool analysis_ready;
 	blink_Position* positions;
-	blink_WarpPoints* warp_points;
 } blink_SamplerBuffer;
 
 //
@@ -103,9 +99,17 @@ typedef struct
 	float* amp;
 } blink_SamplerDrawInfo;
 
+struct blink_SamplerUnitState
+{
+	int data_offset;
+	blink_ChannelMode channel_mode;
+	blink_WarpPoints* warp_points;
+	blink_ParameterData* parameter_data;
+};
+
 // output pointer is aligned on a 16-byte boundary
 // output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
-typedef blink_Error(*blink_Sampler_Process)(void* proc_data, const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, float* out);
+typedef blink_Error(*blink_Sampler_Process)(void* proc_data, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
 
 typedef struct
 {
@@ -181,6 +185,6 @@ extern "C"
 
 	// The host takes care of actually rendering the waveform but relies on
 	// the plugin to calculate the waveform position at each pixel.
-	EXPORTED blink_Error blink_sampler_draw(const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, blink_FrameCount n, blink_SamplerDrawInfo* out);
+	EXPORTED blink_Error blink_sampler_draw(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out);
 }
 #endif

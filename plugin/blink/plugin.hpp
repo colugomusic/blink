@@ -41,18 +41,18 @@ public:
 	Parameter& get_parameter(blink_Index index);
 	Parameter& get_parameter_by_uuid(blink_UUID uuid);
 
-	template <int Index> static const blink_ChordData* get_chord_data(const blink_ParameterData* data);
-	template <int Index> static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data);
-	template <int Index> static const blink_OptionData* get_option_data(const blink_ParameterData* data);
-	template <int Index> static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data);
-	template <int Index, bool Default = false> static bool get_toggle_value(const blink_ParameterData* data);
+	template <int Index> static const blink_ChordData& get_chord_data(const blink_ParameterData* data);
+	template <int Index> static const blink_EnvelopeData& get_envelope_data(const blink_ParameterData* data);
+	template <int Index> static const blink_OptionData& get_option_data(const blink_ParameterData* data);
+	template <int Index> static const blink_ToggleData& get_toggle_data(const blink_ParameterData* data);
+	//template <int Index, bool Default = false> static bool get_toggle_value(const blink_ParameterData& data);
 
-	static const blink_ChordData* get_chord_data(const blink_ParameterData* data, int index);
-	static const blink_EnvelopeData* get_envelope_data(const blink_ParameterData* data, int index);
-	static const blink_SliderData* get_slider_data(const blink_ParameterData* data, int index);
-	static const blink_IntSliderData* get_int_slider_data(const blink_ParameterData* data, int index);
-	static const blink_ToggleData* get_toggle_data(const blink_ParameterData* data, int index);
-	static const blink_OptionData* get_option_data(const blink_ParameterData* data, int index);
+	static const blink_ChordData& get_chord_data(const blink_ParameterData* data, int index);
+	static const blink_EnvelopeData& get_envelope_data(const blink_ParameterData* data, int index);
+	static const blink_SliderData& get_slider_data(const blink_ParameterData* data, int index);
+	static const blink_IntSliderData& get_int_slider_data(const blink_ParameterData* data, int index);
+	static const blink_ToggleData& get_toggle_data(const blink_ParameterData* data, int index);
+	static const blink_OptionData& get_option_data(const blink_ParameterData* data, int index);
 
 	auto& resources() { return resources_; }
 
@@ -77,61 +77,61 @@ inline void Plugin::unregister_instance(Instance* instance)
 	instances_.erase(instance);
 }
 
-template <int Index> const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data)
+template <int Index> const blink_ChordData& Plugin::get_chord_data(const blink_ParameterData* data)
 {
-	return data ? &data[Index].chord : nullptr;
+	return data[Index].chord;
 }
 
-template <int Index> const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data)
+template <int Index> const blink_EnvelopeData& Plugin::get_envelope_data(const blink_ParameterData* data)
 {
-	return data ? &data[Index].envelope : nullptr;
+	return data[Index].envelope;
 }
 
-template <int Index> const blink_OptionData* Plugin::get_option_data(const blink_ParameterData* data)
+template <int Index> const blink_OptionData& Plugin::get_option_data(const blink_ParameterData* data)
 {
-	return data ? &data[Index].option : nullptr;
+	return data[Index].option;
 }
 
-template <int Index> const blink_ToggleData* Plugin::get_toggle_data(const blink_ParameterData* data)
+template <int Index> const blink_ToggleData& Plugin::get_toggle_data(const blink_ParameterData* data)
 {
-	return data ? &data[Index].toggle : nullptr;
+	return data[Index].toggle;
 }
 
-template <int Index, bool Default> bool Plugin::get_toggle_value(const blink_ParameterData* data)
-{
-	const auto toggle = get_toggle_data<Index>(data);
+//template <int Index, bool Default> bool Plugin::get_toggle_value(const blink_ParameterData& data)
+//{
+//	const auto toggle = get_toggle_data<Index>(data);
+//
+//	return toggle ? toggle->value : Default;
+//}
 
-	return toggle ? toggle->value : Default;
+inline const blink_ChordData& Plugin::get_chord_data(const blink_ParameterData* data, int index)
+{
+	return data[index].chord;
 }
 
-inline const blink_ChordData* Plugin::get_chord_data(const blink_ParameterData* data, int index)
+inline const blink_EnvelopeData& Plugin::get_envelope_data(const blink_ParameterData* data, int index)
 {
-	return data ? &data[index].chord : nullptr;
+	return data[index].envelope;
 }
 
-inline const blink_EnvelopeData* Plugin::get_envelope_data(const blink_ParameterData* data, int index)
+inline const blink_SliderData& Plugin::get_slider_data(const blink_ParameterData* data, int index)
 {
-	return data ? &data[index].envelope : nullptr;
+	return data[index].slider;
 }
 
-inline const blink_SliderData* Plugin::get_slider_data(const blink_ParameterData* data, int index)
+inline const blink_IntSliderData& Plugin::get_int_slider_data(const blink_ParameterData* data, int index)
 {
-	return data ? &data[index].slider : nullptr;
+	return data[index].int_slider;
 }
 
-inline const blink_IntSliderData* Plugin::get_int_slider_data(const blink_ParameterData* data, int index)
+inline const blink_ToggleData& Plugin::get_toggle_data(const blink_ParameterData* data, int index)
 {
-	return data ? &data[index].int_slider : nullptr;
+	return data[index].toggle;
 }
 
-inline const blink_ToggleData* Plugin::get_toggle_data(const blink_ParameterData* data, int index)
+inline const blink_OptionData& Plugin::get_option_data(const blink_ParameterData* data, int index)
 {
-	return data ? &data[index].toggle : nullptr;
-}
-
-inline const blink_OptionData* Plugin::get_option_data(const blink_ParameterData* data, int index)
-{
-	return data ? &data[index].option : nullptr;
+	return data[index].option;
 }
 
 inline int Plugin::add_group(std::string name)

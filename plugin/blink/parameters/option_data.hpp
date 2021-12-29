@@ -10,9 +10,9 @@ class OptionData
 {
 public:
 
-	OptionData(const blink::Plugin* plugin, const blink_ParameterData* param_data, const blink::OptionParameter* param)
-		: data_(plugin->get_option_data<Index>(param_data))
-		, param_(param)
+	OptionData(const blink::Plugin& plugin, const blink_ParameterData* param_data, const blink::OptionParameter& param)
+		: data_(&plugin.get_option_data<Index>(param_data))
+		, param_(&param)
 	{
 	}
 

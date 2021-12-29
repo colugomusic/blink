@@ -7,14 +7,17 @@
 typedef struct
 {
 	uint64_t buffer_id;
-	int instance_group;
 	blink_SR song_rate;
-	int data_offset;
-
 	blink_Position* positions;
 } blink_SynthBuffer;
 
-typedef blink_Error(*blink_Synth_Process)(void* proc_data, const blink_SynthBuffer* buffer, const blink_ParameterData* parameters, float* out);
+struct blink_SynthUnitState
+{
+	int data_offset;
+	blink_ParameterData* parameter_data;
+};
+
+typedef blink_Error(*blink_Synth_Process)(void* proc_data, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
 
 typedef struct
 {

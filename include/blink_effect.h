@@ -8,8 +8,6 @@ typedef struct
 {
 	uint64_t buffer_id;
 	blink_SR song_rate;
-	int data_offset;
-
 	blink_Position* positions;
 } blink_EffectBuffer;
 
@@ -35,7 +33,13 @@ typedef struct
 	int approximate_delay; // Approximate latency (in frames)
 } blink_EffectInstanceInfo;
 
-typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const blink_ParameterData* parameters, const float* in, float* out);
+struct blink_EffectUnitState
+{
+	int data_offset;
+	blink_ParameterData* parameter_data;
+};
+
+typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
 
 typedef struct
 {

@@ -19,18 +19,18 @@ public:
 
 	virtual ~SamplerUnit() {}
 
-	blink_Error sampler_process(const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, float* out)
+	blink_Error sampler_process(const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, float* out)
 	{
-		get_instance()->begin_process(buffer->buffer_id);
+		get_instance()->begin_process(buffer.buffer_id);
 
-		Unit::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
+		Unit::begin_process(buffer.buffer_id, buffer.positions, unit_state.data_offset);
 
-		return process(buffer, parameter_data, out);
+		return process(buffer, unit_state, out);
 	}
 
 protected:
 
-	virtual blink_Error process(const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, float* out) = 0;
+	virtual blink_Error process(const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, float* out) = 0;
 };
 
 }

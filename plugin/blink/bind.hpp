@@ -196,11 +196,11 @@ inline blink_SamplerUnit sampler_unit(SamplerUnit* sampler)
 
 	out.proc_data = sampler;
 
-	out.process = [](void* proc_data, const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, float* out)
+	out.process = [](void* proc_data, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out)
 	{
 		auto sampler = (SamplerUnit*)(proc_data);
 
-		return sampler->sampler_process(buffer, parameter_data, out);
+		return sampler->sampler_process(*buffer, *unit_state, out);
 	};
 
 	return out;
@@ -240,11 +240,11 @@ inline blink_EffectUnit effect_unit(EffectUnit* unit)
 
 	out.proc_data = unit;
 
-	out.process = [](void* proc_data, const blink_EffectBuffer* buffer, const blink_ParameterData* parameter_data, const float* in, float* out)
+	out.process = [](void* proc_data, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out)
 	{
 		auto unit = (EffectUnit*)(proc_data);
 
-		return unit->effect_process(buffer, parameter_data, in, out);
+		return unit->effect_process(*buffer, *unit_state, in, out);
 	};
 
 	return out;
@@ -290,11 +290,11 @@ inline blink_SynthUnit synth_unit(SynthUnit* synth)
 
 	out.proc_data = synth;
 
-	out.process = [](void* proc_data, const blink_SynthBuffer* buffer, const blink_ParameterData* parameter_data, float* out)
+	out.process = [](void* proc_data, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out)
 	{
 		auto synth = (SynthUnit*)(proc_data);
 
-		return synth->synth_process(buffer, parameter_data, out);
+		return synth->synth_process(*buffer, *unit_state, out);
 	};
 
 	return out;

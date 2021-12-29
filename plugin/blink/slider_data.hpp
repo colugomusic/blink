@@ -9,8 +9,8 @@ class SliderIndexData
 {
 public:
 
-	SliderIndexData(const blink::Plugin* plugin, const blink::Slider<float>& slider, const blink_ParameterData* param_data, blink_Index index)
-		: data_(plugin->get_slider_data(param_data, index))
+	SliderIndexData(const blink::Plugin& plugin, const blink::Slider<float>& slider, const blink_ParameterData* param_data, blink_Index index)
+		: data_(&plugin.get_slider_data(param_data, index))
 		, slider_(&slider)
 	{
 	}
@@ -58,7 +58,7 @@ class SliderData : public SliderIndexData
 {
 public:
 
-	SliderData(const blink::Plugin* plugin, const blink::Slider<float>& slider, const blink_ParameterData* param_data)
+	SliderData(const blink::Plugin& plugin, const blink::Slider<float>& slider, const blink_ParameterData* param_data)
 		: SliderIndexData(plugin, slider, param_data, Index)
 	{
 	}
