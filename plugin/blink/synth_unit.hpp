@@ -18,18 +18,18 @@ public:
 
 	virtual ~SynthUnit() {}
 
-	blink_Error synth_process(const blink_SynthBuffer* buffer, float* out)
+	blink_Error synth_process(const blink_SynthBuffer* buffer, const blink_ParameterData* parameter_data, float* out)
 	{
 		get_instance()->begin_process(buffer->buffer_id);
 
 		Unit::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
 
-		return process(buffer, out);
+		return process(buffer, parameter_data, out);
 	}
 
 private:
 
-	virtual blink_Error process(const blink_SynthBuffer* buffer, float* out) = 0;
+	virtual blink_Error process(const blink_SynthBuffer* buffer, const blink_ParameterData* parameter_data, float* out) = 0;
 };
 
 }

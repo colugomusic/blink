@@ -12,10 +12,9 @@ typedef struct
 	int data_offset;
 
 	blink_Position* positions;
-	blink_ParameterData* parameter_data;
 } blink_SynthBuffer;
 
-typedef blink_Error(*blink_Synth_Process)(void* proc_data, const blink_SynthBuffer* buffer, float* out);
+typedef blink_Error(*blink_Synth_Process)(void* proc_data, const blink_SynthBuffer* buffer, const blink_ParameterData* parameters, float* out);
 
 typedef struct
 {

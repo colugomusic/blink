@@ -19,13 +19,13 @@ public:
 
 	virtual ~EffectUnit() {}
 
-	blink_Error effect_process(const blink_EffectBuffer* buffer, const float* in, float* out)
+	blink_Error effect_process(const blink_EffectBuffer* buffer, const blink_ParameterData* parameter_data, const float* in, float* out)
 	{
 		get_instance()->begin_process(buffer->buffer_id);
 
 		Unit::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
 
-		return process(buffer, in, out);
+		return process(buffer, parameter_data, in, out);
 	}
 
 	// Called by UI thread
@@ -45,7 +45,7 @@ public:
 
 private:
 
-	virtual blink_Error process(const blink_EffectBuffer* buffer, const float* in, float* out) = 0;
+	virtual blink_Error process(const blink_EffectBuffer* buffer, const blink_ParameterData* parameter_data, const float* in, float* out) = 0;
 };
 
 }

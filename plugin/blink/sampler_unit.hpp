@@ -19,22 +19,18 @@ public:
 
 	virtual ~SamplerUnit() {}
 
-	blink_Error sampler_process(const blink_SamplerBuffer* buffer, float* out)
+	blink_Error sampler_process(const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, float* out)
 	{
 		get_instance()->begin_process(buffer->buffer_id);
 
 		Unit::begin_process(buffer->buffer_id, buffer->positions, buffer->data_offset);
 
-		return process(buffer, out);
+		return process(buffer, parameter_data, out);
 	}
 
 protected:
 
-	virtual blink_Error process(const blink_SamplerBuffer* buffer, float* out) = 0;
-
-private:
-
-	std::function<blink_WarpPoints*()> get_warp_point_data_;
+	virtual blink_Error process(const blink_SamplerBuffer* buffer, const blink_ParameterData* parameter_data, float* out) = 0;
 };
 
 }
