@@ -103,8 +103,8 @@ struct blink_SamplerUnitState
 {
 	int data_offset;
 	blink_ChannelMode channel_mode;
-	blink_WarpPoints* warp_points;
-	blink_ParameterData* parameter_data;
+	const blink_WarpPoints* warp_points;
+	const blink_ParameterData* parameter_data;
 };
 
 // output pointer is aligned on a 16-byte boundary
