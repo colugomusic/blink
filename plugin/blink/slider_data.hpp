@@ -17,12 +17,14 @@ public:
 
 	float value() const
 	{
-		return data_ && data_->data.count > 0 ? data_->data.points[0].y : slider_->spec().default_value;
+		return data_->data.points[0].y;
 	}
 
 	float search(blink_Position block_position) const
 	{
-		return data_ ? slider_->search().search(data_->data, block_position) : slider_->spec().default_value;
+		if (data_->data.count == 1) return value();
+
+		return slider_->search().search(data_->data, block_position);
 	}
 
 	float search(const BlockPositions& block_positions) const
@@ -32,9 +34,9 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		if (!data_)
+		if (data_->data.count == 1)
 		{
-			std::fill(out, out + n, slider_->spec().default_value);
+			std::fill(out, out + n, value());
 			return;
 		}
 
@@ -43,9 +45,9 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		if (!data_)
+		if (data_->data.count == 1)
 		{
-			std::fill(out, out + block_positions.count, slider_->spec().default_value);
+			std::fill(out, out + block_positions.count, value());
 			return;
 		}
 
@@ -54,7 +56,7 @@ public:
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
-		if (!data_) return { slider_->spec().default_value };
+		if (data_->data.count == 1) return value();
 
 		return slider_->search().search_vec_(data_->data, block_positions);
 	}

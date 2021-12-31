@@ -17,11 +17,13 @@ public:
 
 	bool value() const
 	{
-		return data_->data.count > 0 ? data_->data.points[0].value : toggle->get_default_value();
+		return data_->data.points[0].value;
 	}
 
 	bool search(blink_Position block_position) const
 	{
+		if (data_->data.count == 1) return data_->data.points[0].value;
+
 		return toggle->search().search(data_->data, block_position);
 	}
 
@@ -32,11 +34,23 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, bool* out) const
 	{
+		if (data_->data.count == 1)
+		{
+			std::fill(out, out + n, value());
+			return;
+		}
+
 		toggle->search().search_vec(data_->data, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, bool* out) const
 	{
+		if (data_->data.count == 1)
+		{
+			std::fill(out, out + block_positions.count, value());
+			return;
+		}
+
 		toggle->search().search_vec(data_->data, block_positions, out);
 	}
 
