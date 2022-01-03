@@ -10,8 +10,8 @@ class ChordData
 {
 public:
 
-	ChordData(const blink::Plugin& plugin, const blink_ParameterData* param_data, const blink::ChordParameter* param)
-		: data_(&plugin.get_chord_data<Index>(param_data))
+	ChordData(const blink_ParameterData* param_data, const blink::ChordParameter* param)
+		: data_(&param_data[Index].chord)
 		, param_(param)
 	{
 	}

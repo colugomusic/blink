@@ -9,8 +9,8 @@ class EnvelopeIndexData
 {
 public:
 
-	EnvelopeIndexData(const blink::Plugin& plugin, const blink::Envelope& envelope, const blink_ParameterData* param_data, blink_Index index)
-		: data_(&plugin.get_envelope_data(param_data, index))
+	EnvelopeIndexData(const blink::Envelope& envelope, const blink_ParameterData* param_data, blink_Index index)
+		: data_(&param_data[index].envelope)
 		, envelope_(&envelope)
 	{
 	}
@@ -53,8 +53,8 @@ class EnvelopeData : public EnvelopeIndexData
 {
 public:
 
-	EnvelopeData(const blink::Plugin& plugin, const blink::Envelope& envelope, const blink_ParameterData* param_data)
-		: EnvelopeIndexData(plugin, envelope, param_data, Index)
+	EnvelopeData(const blink::Envelope& envelope, const blink_ParameterData* param_data)
+		: EnvelopeIndexData(envelope, param_data, Index)
 	{
 	}
 };

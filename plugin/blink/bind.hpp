@@ -9,8 +9,7 @@
 #include <blink/parameters/slider_parameter_spec.hpp>
 #include <blink/parameters/toggle_parameter.hpp>
 #include <blink/parameters/group.hpp>
-#include <blink/parameters/manipulator_envelope_target.hpp>
-#include <blink/parameters/manipulator_slider_target.hpp>
+#include <blink/parameters/envelope_manipulator_target.hpp>
 
 namespace blink {
 namespace bind {
@@ -74,7 +73,6 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 	out.parameter_type = blink_ParameterType_Envelope;
 	out.flags = envelope_parameter.get_flags();
 
-	out.manipulator_target = const_cast<blink_ManipulatorEnvelopeTarget*>(envelope_parameter.get_manipulator_target_api());
 	out.options_count = envelope_parameter.get_options_count();
 	out.sliders_count = envelope_parameter.get_sliders_count();
 
@@ -103,7 +101,6 @@ inline blink_SliderParameter slider_parameter(const SliderParameter<float>& slid
 
 	out.parameter_type = blink_ParameterType_Slider;
 
-	out.manipulator_target = const_cast<blink_ManipulatorSliderTarget*>(slider_parameter.get_manipulator_target_api());
 	out.slider = Slider<float>::bind(slider_parameter.slider());
 	out.icon = slider_parameter.spec().icon;
 	out.flags = slider_parameter.spec().flags;
@@ -131,6 +128,16 @@ inline blink_Toggle toggle(const ToggleParameter& toggle)
 	out.default_value = toggle.get_default_value() ? BLINK_TRUE : BLINK_FALSE;
 	out.icon = toggle.get_icon();
 	out.flags = toggle.get_flags();
+
+	return out;
+}
+
+inline blink_EnvelopeManipulatorTarget envelope_manipulator_target(const EnvelopeManipulatorTarget& target)
+{
+	blink_EnvelopeManipulatorTarget out;
+
+	out.offset_envelope = target.api()->offset_envelope;
+	out.override_envelope = target.api()->override_envelope;
 
 	return out;
 }

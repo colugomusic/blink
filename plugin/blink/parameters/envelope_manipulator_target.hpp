@@ -1,15 +1,15 @@
 #pragma once
 
 #include <blink/envelope.hpp>
-#include "manipulator_envelope_target_spec.hpp"
+#include "envelope_manipulator_target_spec.hpp"
 
 namespace blink {
 
-class ManipulatorEnvelopeTarget
+class EnvelopeManipulatorTarget
 {
 public:
 
-	ManipulatorEnvelopeTarget(ManipulatorEnvelopeTargetSpec spec)
+	EnvelopeManipulatorTarget(EnvelopeManipulatorTargetSpec spec)
 		: offset_(spec.offset_envelope)
 		, override_(spec.override_envelope)
 	{
@@ -24,7 +24,7 @@ private:
 
 	Envelope offset_;
 	Envelope override_;
-	blink_ManipulatorEnvelopeTarget api_;
+	blink_EnvelopeManipulatorTarget api_;
 };
 
 }

@@ -4,7 +4,7 @@
 
 namespace blink {
 
-struct ManipulatorSliderTargetSpec
+struct EnvelopeManipulatorTargetSpec
 {
 	EnvelopeSpec offset_envelope;
 	EnvelopeSpec override_envelope;

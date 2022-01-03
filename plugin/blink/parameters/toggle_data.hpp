@@ -9,8 +9,8 @@ class ToggleIndexData
 {
 public:
 
-	ToggleIndexData(const blink::Plugin& plugin, const blink::ToggleParameter& toggle, const blink_ParameterData* param_data, blink_Index index)
-		: data_(&plugin.get_toggle_data(param_data, index))
+	ToggleIndexData(const blink::ToggleParameter& toggle, const blink_ParameterData* param_data, blink_Index index)
+		: data_(&param_data[index].toggle)
 		, toggle(&toggle)
 	{
 	}
@@ -72,8 +72,8 @@ class ToggleData : public ToggleIndexData
 {
 public:
 
-	ToggleData(const blink::Plugin& plugin, const blink::ToggleParameter& toggle, const blink_ParameterData* param_data)
-		: ToggleIndexData(plugin, toggle, param_data, Index)
+	ToggleData(const blink::ToggleParameter& toggle, const blink_ParameterData* param_data)
+		: ToggleIndexData(toggle, param_data, Index)
 	{
 	}
 };

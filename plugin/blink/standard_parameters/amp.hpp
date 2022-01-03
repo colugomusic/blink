@@ -4,7 +4,7 @@
 #include <tweak/std.hpp>
 #include <blink/math.hpp>
 #include <blink/parameters/envelope_parameter_spec.hpp>
-#include <blink/parameters/manipulator_envelope_target_spec.hpp>
+#include <blink/parameters/envelope_manipulator_target_spec.hpp>
 #include <blink/parameters/slider_parameter_spec.hpp>
 #include "percentage.hpp"
 #include "search.hpp"
@@ -97,9 +97,9 @@ inline EnvelopeParameterSpec envelope_parameter()
 	return out;
 }
 
-inline ManipulatorEnvelopeTargetSpec manipulator_envelope_target()
+inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
 {
-	ManipulatorEnvelopeTargetSpec out;
+	EnvelopeManipulatorTargetSpec out;
 
 	out.offset_envelope = envelope();
 	out.override_envelope = envelope();

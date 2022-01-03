@@ -76,6 +76,7 @@ enum blink_StdError
 	blink_StdError_AlreadyInitialized = -1,
 	blink_StdError_NotInitialized = -2,
 	blink_StdError_NotImplemented = -3,
+	blink_StdError_ManipulatorTargetDoesNotExist = -4,
 };
 
 typedef struct
@@ -359,13 +360,7 @@ typedef struct
 {
 	blink_Envelope offset_envelope;
 	blink_Envelope override_envelope;
-} blink_ManipulatorEnvelopeTarget;
-
-typedef struct
-{
-	blink_Envelope offset_envelope;
-	blink_Envelope override_envelope;
-} blink_ManipulatorSliderTarget;
+} blink_EnvelopeManipulatorTarget;
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Manipulators END
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -384,10 +379,6 @@ typedef struct
 	blink_GetSlider get_slider;
 
 	blink_Envelope envelope;
-
-	// Must be set if blink_EnvelopeFlags_AllowManipulators is set,
-	// otherwise can be null
-	blink_ManipulatorEnvelopeTarget* manipulator_target;
 } blink_EnvelopeParameter;
 
 //
@@ -412,10 +403,6 @@ typedef struct
 	int flags; // blink_SliderFlags
 	blink_StdIcon icon;
 	blink_Slider slider;
-
-	// Must be set if blink_SliderFlags_AllowManipulators is set,
-	// otherwise can be null
-	blink_ManipulatorSliderTarget* manipulator_target;
 } blink_SliderParameter;
 
 typedef struct
@@ -531,11 +518,15 @@ extern "C"
 	EXPORTED blink_Error blink_terminate();
 	EXPORTED int blink_get_num_groups();
 	EXPORTED int blink_get_num_parameters();
-	EXPORTED int blink_get_num_manipulator_targets();
 	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID uuid);
-	EXPORTED blink_ResourceData blink_get_resource_data(const char* path); // optional
+
+	// Optional, but required if manipulators are enabled
+	EXPORTED blink_Error blink_get_envelope_manipulator_target(blink_UUID uuid, blink_EnvelopeManipulatorTarget* out);
+
+	// Optional
+	EXPORTED blink_ResourceData blink_get_resource_data(const char* path);
 
 	// Returned buffer remains valid until the next call to get_error_string or
 	// until the plugin is destroyed

@@ -6,7 +6,6 @@
 #include "parameter.hpp"
 #include <blink/envelope.hpp>
 #include "envelope_parameter_spec.hpp"
-#include "manipulator_envelope_target.hpp"
 
 namespace blink {
 
@@ -27,15 +26,10 @@ public:
 
 	const Envelope& envelope() const { return envelope_; }
 
-	void add_manipulator_target(ManipulatorEnvelopeTargetSpec spec);
-
-	auto get_manipulator_target_api() const { return manipulator_target_ ? manipulator_target_->api() : nullptr; }
-
 private:
 
 	EnvelopeParameterSpec spec_;
 	Envelope envelope_;
-	std::optional<ManipulatorEnvelopeTarget> manipulator_target_;
 	std::vector<blink_Index> options_;
 	std::vector<blink_Index> sliders_;
 };
@@ -54,13 +48,6 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeParameterSpec spec)
 	{
 		sliders_.push_back(slider_spec);
 	}
-}
-
-inline void EnvelopeParameter::add_manipulator_target(ManipulatorEnvelopeTargetSpec spec)
-{
-	assert(!manipulator_target_);
-
-	manipulator_target_ = ManipulatorEnvelopeTarget(spec);
 }
 
 }
