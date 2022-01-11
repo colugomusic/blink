@@ -252,6 +252,20 @@ typedef struct
 	float default_snap_amount;
 } blink_EnvelopeSnapSettings;
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Parameter Flags
+//
+// If a parameter is flagged with 'CanManipulate' it just means that a manipulator
+// can be created for the associated UUID through the UI for that parameter.
+//
+// If a parameter is flagged with 'IsManipulatorTarget' then if a manipulator is
+// acting on the associated UUID then this parameter will be the one whose data
+// is actually transformed by the host.
+//
+// Different parameters may share the same UUID within the same plugin (for example
+// a Pitch envelope and a Pitch slider which work together), but only one parameter
+// per-UUID may be flagged as 'IsManipulatorTarget'.
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 enum blink_ChordFlags
 {
 	blink_ChordFlags_None                               = 1 << 0,
@@ -260,7 +274,8 @@ enum blink_ChordFlags
 	blink_ChordFlags_DefaultDisabled                    = 1 << 3,
 	blink_ChordFlags_IconOnly                           = 1 << 4, // Only show icon in button
 	blink_ChordFlags_MovesDisplay                       = 1 << 5, // Editing should trigger a visual update
-	blink_ChordFlags_AllowManipulators                  = 1 << 6,
+	blink_ChordFlags_CanManipulate                      = 1 << 6,
+	blink_ChordFlags_IsManipulatorTarget                = 1 << 7,
 };
 
 enum blink_EnvelopeFlags
@@ -273,34 +288,42 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_NoGridLabels                       = 1 << 5,
 	blink_EnvelopeFlags_IconOnly                           = 1 << 6, // Only show icon in button
 	blink_EnvelopeFlags_MovesDisplay                       = 1 << 7, // Editing should trigger a visual update
-	blink_EnvelopeFlags_AllowManipulators                  = 1 << 8,
+	blink_EnvelopeFlags_CanManipulate                      = 1 << 8,
+	blink_EnvelopeFlags_IsManipulatorTarget                = 1 << 9,
 };
 
 enum blink_OptionFlags
 {
-	blink_OptionFlags_None              = 1 << 0,
-	blink_OptionFlags_AllowManipulators = 1 << 1,
+	blink_OptionFlags_None                = 1 << 0,
+	blink_OptionFlags_CanManipulate       = 1 << 1,
+	blink_OptionFlags_IsManipulatorTarget = 1 << 2,
 };
 
 enum blink_SliderFlags
 {
-	blink_SliderFlags_None              = 1 << 0,
-	blink_SliderFlags_MovesDisplay      = 1 << 1, // Editing should trigger a visual update
-	blink_SliderFlags_NonGlobal         = 1 << 2, // Do not create a global control for this slider (can be used
-	                                              // to create sliders which are only visible when an envelope is
-	                                              // selected)
-	blink_SliderFlags_AllowManipulators = 1 << 3, // Has no effect for int sliders
+	blink_SliderFlags_None                = 1 << 0,
+	blink_SliderFlags_MovesDisplay        = 1 << 1, // Editing should trigger a visual update
+	blink_SliderFlags_NonGlobal           = 1 << 2, // Do not create a global control for this slider (can be used
+	                                                // to create sliders which are only visible when an envelope is
+	                                                // selected)
+	blink_SliderFlags_CanManipulate       = 1 << 3, // Has no effect for int sliders
+	blink_SliderFlags_IsManipulatorTarget = 1 << 4,
 };
 
 enum blink_ToggleFlags
 {
-	blink_ToggleFlags_None              = 1 << 0,
-	blink_ToggleFlags_ShowButton        = 1 << 1,
-	blink_ToggleFlags_ShowInContextMenu = 1 << 2,
-	blink_ToggleFlags_MovesDisplay      = 1 << 3, // Editing should trigger a visual update
-	blink_ToggleFlags_IconOnly          = 1 << 4, // Only show icon in toggle
-	blink_ToggleFlags_AllowManipulators = 1 << 5,
+	blink_ToggleFlags_None                = 1 << 0,
+	blink_ToggleFlags_ShowButton          = 1 << 1,
+	blink_ToggleFlags_ShowInContextMenu   = 1 << 2,
+	blink_ToggleFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
+	blink_ToggleFlags_IconOnly            = 1 << 4, // Only show icon in toggle
+	blink_ToggleFlags_CanManipulate       = 1 << 5,
+	blink_ToggleFlags_IsManipulatorTarget = 1 << 6,
 };
+
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// Parameter Flags END
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 //
 // Option parameter
