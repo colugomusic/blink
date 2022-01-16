@@ -285,11 +285,10 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
 	blink_EnvelopeFlags_DefaultDisabled                    = 1 << 3,
 	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
-	blink_EnvelopeFlags_NoGridLabels                       = 1 << 5,
-	blink_EnvelopeFlags_IconOnly                           = 1 << 6, // Only show icon in button
-	blink_EnvelopeFlags_MovesDisplay                       = 1 << 7, // Editing should trigger a visual update
-	blink_EnvelopeFlags_CanManipulate                      = 1 << 8,
-	blink_EnvelopeFlags_IsManipulatorTarget                = 1 << 9,
+	blink_EnvelopeFlags_IconOnly                           = 1 << 5, // Only show icon in button
+	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6, // Editing should trigger a visual update
+	blink_EnvelopeFlags_CanManipulate                      = 1 << 7,
+	blink_EnvelopeFlags_IsManipulatorTarget                = 1 << 8,
 };
 
 enum blink_OptionFlags
@@ -360,6 +359,7 @@ typedef struct
 	void* proc_data;
 
 	float default_value;
+	bool show_grid_labels;
 
 	blink_Slider value_slider;
 	blink_Slider min;

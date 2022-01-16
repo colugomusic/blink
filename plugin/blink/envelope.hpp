@@ -79,6 +79,7 @@ inline blink_Envelope Envelope::bind() const
 	blink_Envelope out;
 
 	out.default_value = get_default_value();
+	out.show_grid_labels = spec_.show_grid_labels;
 	out.proc_data = (void*)(this);
 	out.snap_settings = snap_settings_.bind();
 	out.value_slider = Slider<float>::bind(value_slider_);

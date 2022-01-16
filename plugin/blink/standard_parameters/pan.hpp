@@ -115,6 +115,7 @@ inline EnvelopeSpec envelope()
 	out.searcher.forward = search::float_points_forward;
 	out.stepify = pan::stepify;
 
+	out.show_grid_labels = false;
 	out.to_string = pan::display;
 	out.value_slider = slider();
 
@@ -134,7 +135,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.uuid = BLINK_STD_UUID_PAN;
 	out.name = "Pan";
 	out.envelope = envelope();
-	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }

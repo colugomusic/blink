@@ -35,6 +35,7 @@ struct EnvelopeSpec
 	FloatSearcherSpec searcher;
 	float default_value = 0.0f;
 	float default_snap_amount = 0.0f;
+	bool show_grid_labels = true;
 };
 
 }

@@ -27,6 +27,7 @@ inline EnvelopeSpec envelope()
 	out.range.max.default_value = 1.0f;
 	out.range.max.to_string = tweak::std::percentage_bipolar::to_string;
 	out.to_string = tweak::std::percentage_bipolar::to_string;
+	out.show_grid_labels = false;
 
 	return out;
 }
@@ -39,7 +40,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Formant";
 
 	out.envelope = envelope();
-	out.flags = blink_EnvelopeFlags_NoGridLabels;
 
 	return out;
 }

@@ -17,7 +17,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Noise Color";
 	out.short_name = "Color";
 	out.envelope = percentage::bipolar::envelope();
-	out.flags = blink_EnvelopeFlags_NoGridLabels;
+	out.envelope.show_grid_labels = false;
 
 	return out;
 }
