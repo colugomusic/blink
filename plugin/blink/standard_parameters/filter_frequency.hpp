@@ -1,7 +1,6 @@
 #pragma once
 
 #include <tweak/tweak.hpp>
-#include <tweak/std.hpp>
 #include <blink/parameters/envelope_parameter_spec.hpp>
 #include <blink/math.hpp>
 
@@ -119,6 +118,19 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Frequency";
 
 	out.envelope = envelope();
+
+	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
+
+	return out;
+}
+
+inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
+{
+	EnvelopeManipulatorTargetSpec out;
+
+	out.offset_envelope = percentage::bipolar::envelope();
+	out.override_envelope = envelope();
 
 	return out;
 }

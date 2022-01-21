@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tweak/tweak.hpp>
-#include <tweak/std.hpp>
+#include <tweak/std/percentage.hpp>
 #include <blink/math.hpp>
 #include "percentage.hpp"
 

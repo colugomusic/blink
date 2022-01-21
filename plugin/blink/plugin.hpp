@@ -46,18 +46,6 @@ public:
 
 	std::optional<const EnvelopeManipulatorTarget*> get_envelope_manipulator_target(blink_UUID uuid) const;
 
-	//template <int Index> static const blink_ChordData& get_chord_data(const blink_ParameterData* data);
-	//template <int Index> static const blink_EnvelopeData& get_envelope_data(const blink_ParameterData* data);
-	//template <int Index> static const blink_OptionData& get_option_data(const blink_ParameterData* data);
-	//template <int Index> static const blink_ToggleData& get_toggle_data(const blink_ParameterData* data);
-
-	//static const blink_ChordData& get_chord_data(const blink_ParameterData* data, int index);
-	//static const blink_EnvelopeData& get_envelope_data(const blink_ParameterData* data, int index);
-	//static const blink_SliderData& get_slider_data(const blink_ParameterData* data, int index);
-	//static const blink_IntSliderData& get_int_slider_data(const blink_ParameterData* data, int index);
-	//static const blink_ToggleData& get_toggle_data(const blink_ParameterData* data, int index);
-	//static const blink_OptionData& get_option_data(const blink_ParameterData* data, int index);
-
 	auto& resources() { return resources_; }
 
 private:
@@ -90,56 +78,6 @@ inline void Plugin::unregister_instance(Instance* instance)
 {
 	instances_.erase(instance);
 }
-
-//template <int Index> const blink_ChordData& Plugin::get_chord_data(const blink_ParameterData* data)
-//{
-//	return data[Index].chord;
-//}
-//
-//template <int Index> const blink_EnvelopeData& Plugin::get_envelope_data(const blink_ParameterData* data)
-//{
-//	return data[Index].envelope;
-//}
-//
-//template <int Index> const blink_OptionData& Plugin::get_option_data(const blink_ParameterData* data)
-//{
-//	return data[Index].option;
-//}
-//
-//template <int Index> const blink_ToggleData& Plugin::get_toggle_data(const blink_ParameterData* data)
-//{
-//	return data[Index].toggle;
-//}
-//
-//inline const blink_ChordData& Plugin::get_chord_data(const blink_ParameterData* data, int index)
-//{
-//	return data[index].chord;
-//}
-//
-//inline const blink_EnvelopeData& Plugin::get_envelope_data(const blink_ParameterData* data, int index)
-//{
-//	return data[index].envelope;
-//}
-//
-//inline const blink_SliderData& Plugin::get_slider_data(const blink_ParameterData* data, int index)
-//{
-//	return data[index].slider;
-//}
-//
-//inline const blink_IntSliderData& Plugin::get_int_slider_data(const blink_ParameterData* data, int index)
-//{
-//	return data[index].int_slider;
-//}
-//
-//inline const blink_ToggleData& Plugin::get_toggle_data(const blink_ParameterData* data, int index)
-//{
-//	return data[index].toggle;
-//}
-
-//inline const blink_OptionData& Plugin::get_option_data(const blink_ParameterData* data, int index)
-//{
-//	return data[index].option;
-//}
 
 inline int Plugin::add_group(std::string name)
 {

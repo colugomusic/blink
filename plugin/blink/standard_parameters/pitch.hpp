@@ -1,7 +1,6 @@
 #pragma once
 
 #include <tweak/tweak.hpp>
-#include <tweak/std.hpp>
 #include <blink/math.hpp>
 #include <blink/slider_spec.hpp>
 #include <blink/parameters/slider_parameter_spec.hpp>
@@ -131,7 +130,9 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.uuid = BLINK_STD_UUID_PITCH;
 	out.name = "Pitch";
 	out.envelope = envelope();
-	out.flags = blink_EnvelopeFlags_MovesDisplay;
+	out.flags |= blink_EnvelopeFlags_MovesDisplay;
+	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 
 	return out;
 }

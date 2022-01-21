@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tweak/tweak.hpp>
-#include <tweak/std.hpp>
+#include <tweak/std/amp.hpp>
 #include <blink/math.hpp>
 #include <blink/parameters/envelope_parameter_spec.hpp>
 #include <blink/parameters/envelope_manipulator_target_spec.hpp>
@@ -93,6 +93,8 @@ inline EnvelopeParameterSpec envelope_parameter()
 
     out.envelope = envelope();
 	out.flags = blink_EnvelopeFlags_MovesDisplay;
+	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 
 	return out;
 }

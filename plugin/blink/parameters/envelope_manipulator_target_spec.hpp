@@ -6,8 +6,9 @@ namespace blink {
 
 struct EnvelopeManipulatorTargetSpec
 {
-	EnvelopeSpec offset_envelope;
-	EnvelopeSpec override_envelope;
+	// At least one must be given
+	std::optional<EnvelopeSpec> offset_envelope;
+	std::optional<EnvelopeSpec> override_envelope;
 };
 
 }

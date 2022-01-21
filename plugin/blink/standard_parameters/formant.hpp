@@ -1,7 +1,6 @@
 #pragma once
 
-#include <tweak/tweak.hpp>
-#include <tweak/std.hpp>
+#include <tweak/std/percentage.hpp>
 #include "percentage.hpp"
 #include <blink/parameters/envelope_parameter_spec.hpp>
 
@@ -15,18 +14,18 @@ inline EnvelopeSpec envelope()
 
 	out.searcher.binary = search::float_points_binary;
 	out.searcher.forward = search::float_points_forward;
-	out.default_value = 0.5f;
+	out.default_value = 0.0f;
 	out.searcher.binary = search::float_points_binary;
 	out.searcher.forward = search::float_points_forward;
-	out.stepify = tweak::std::percentage_bipolar::stepify;
+	out.stepify = tweak::std::percentage::stepify;
 
 	out.value_slider = percentage::bipolar::slider();
 
-	out.range.min.default_value = 0.0f;
-	out.range.min.to_string = tweak::std::percentage_bipolar::to_string;
+	out.range.min.default_value = -1.0f;
+	out.range.min.to_string = tweak::std::percentage::to_string;
 	out.range.max.default_value = 1.0f;
-	out.range.max.to_string = tweak::std::percentage_bipolar::to_string;
-	out.to_string = tweak::std::percentage_bipolar::to_string;
+	out.range.max.to_string = tweak::std::percentage::to_string;
+	out.to_string = tweak::std::percentage::to_string;
 	out.show_grid_labels = false;
 
 	return out;
@@ -40,6 +39,19 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Formant";
 
 	out.envelope = envelope();
+
+	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
+
+	return out;
+}
+
+inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
+{
+	EnvelopeManipulatorTargetSpec out;
+
+	out.offset_envelope = envelope();
+	out.override_envelope = envelope();
 
 	return out;
 }

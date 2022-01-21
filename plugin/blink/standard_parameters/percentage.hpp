@@ -1,7 +1,6 @@
 #pragma once
 
-#include <tweak/tweak.hpp>
-#include <tweak/std.hpp>
+#include <tweak/std/percentage.hpp>
 #include <blink/math.hpp>
 #include <blink/slider_spec.hpp>
 #include "search.hpp"
@@ -53,13 +52,13 @@ inline SliderSpec<float> slider()
 {
 	SliderSpec<float> out;
 
-	out.constrain = tweak::std::percentage::constrain;
-	out.increment = tweak::std::percentage_bipolar::increment;
-	out.decrement = tweak::std::percentage_bipolar::decrement;
-	out.drag = tweak::std::percentage_bipolar::drag;
-	out.to_string = tweak::std::percentage_bipolar::to_string;
-	out.from_string = tweak::std::percentage_bipolar::from_string;
-	out.default_value = 0.5;
+	out.constrain = tweak::std::percentage::bipolar::constrain;
+	out.increment = tweak::std::percentage::increment;
+	out.decrement = tweak::std::percentage::decrement;
+	out.drag = tweak::std::percentage::drag;
+	out.to_string = tweak::std::percentage::to_string;
+	out.from_string = tweak::std::percentage::from_string;
+	out.default_value = 0.0;
 
 	return out;
 }
@@ -68,16 +67,16 @@ inline EnvelopeSpec envelope()
 {
     EnvelopeSpec out;
 
-    out.default_value = 0.5f;
+    out.default_value = 0.0f;
     out.searcher.binary = search::float_points_binary;
     out.searcher.forward = search::float_points_forward;
-    out.stepify = tweak::std::percentage_bipolar::stepify;
+    out.stepify = tweak::std::percentage::stepify;
     out.value_slider = slider();
-    out.range.min.default_value = 0.0f;
-    out.range.min.to_string = tweak::std::percentage_bipolar::to_string;
+    out.range.min.default_value = -1.0f;
+    out.range.min.to_string = tweak::std::percentage::to_string;
     out.range.max.default_value = 1.0f;
-    out.range.max.to_string = tweak::std::percentage_bipolar::to_string;
-    out.to_string = tweak::std::percentage_bipolar::to_string;
+    out.range.max.to_string = tweak::std::percentage::to_string;
+    out.to_string = tweak::std::percentage::to_string;
 
     return out;
 }

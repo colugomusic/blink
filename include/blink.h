@@ -296,6 +296,7 @@ enum blink_OptionFlags
 	blink_OptionFlags_None                = 1 << 0,
 	blink_OptionFlags_CanManipulate       = 1 << 1,
 	blink_OptionFlags_IsManipulatorTarget = 1 << 2,
+	blink_OptionFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
 };
 
 enum blink_SliderFlags
@@ -381,8 +382,9 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
-	blink_Envelope offset_envelope;
-	blink_Envelope override_envelope;
+	// Either of these can be null, but at least one must be defined
+	blink_Envelope* offset_envelope;
+	blink_Envelope* override_envelope;
 } blink_EnvelopeManipulatorTarget;
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Manipulators END
@@ -395,8 +397,8 @@ typedef struct
 	void* proc_data;
 	int flags; // blink_EnvelopeFlags
 
-	int sliders_count;
-	int options_count;
+	blink_Index sliders_count;
+	blink_Index options_count;
 
 	blink_GetOption get_option;
 	blink_GetSlider get_slider;
