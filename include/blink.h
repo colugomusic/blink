@@ -380,11 +380,21 @@ typedef struct
 // Manipulators
 // WIP
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+typedef float (*blink_ApplyOffset)(void* proc_data, float value, float offset);
+
 typedef struct
 {
+	void* proc_data;
+
 	// Either of these can be null, but at least one must be defined
 	blink_Envelope* offset_envelope;
 	blink_Envelope* override_envelope;
+
+	// Can be null, even if offset_envelope is set, in which case
+	// the host will default to applying offset values by simple
+	// addition
+	blink_ApplyOffset apply_offset;
+
 } blink_EnvelopeManipulatorTarget;
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Manipulators END

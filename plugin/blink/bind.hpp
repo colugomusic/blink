@@ -136,8 +136,10 @@ inline blink_EnvelopeManipulatorTarget envelope_manipulator_target(const Envelop
 {
 	blink_EnvelopeManipulatorTarget out;
 
+	out.proc_data = target.api()->proc_data;
 	out.offset_envelope = target.api()->offset_envelope;
 	out.override_envelope = target.api()->override_envelope;
+	out.apply_offset = target.api()->apply_offset;
 
 	return out;
 }

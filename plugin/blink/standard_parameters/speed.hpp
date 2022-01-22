@@ -80,7 +80,26 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.uuid = BLINK_STD_UUID_SPEED;
 	out.name = "Speed";
 	out.envelope = envelope();
-	out.flags = blink_EnvelopeFlags_MovesDisplay;
+	out.flags |= blink_EnvelopeFlags_MovesDisplay;
+	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
+
+	return out;
+}
+
+inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
+{
+	EnvelopeManipulatorTargetSpec out;
+
+	out.offset_envelope = percentage::envelope<0, 200>();
+	out.offset_envelope->default_value = 1.0f;
+
+	out.override_envelope = envelope();
+
+	out.apply_offset = [](float value, float offset) -> float
+	{
+		return value * offset;
+	};
 
 	return out;
 }
