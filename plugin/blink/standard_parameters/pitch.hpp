@@ -10,6 +10,8 @@ namespace blink {
 namespace std_params {
 namespace pitch {
 
+static constexpr auto UUID { BLINK_STD_UUID_PITCH };
+
 inline auto stepify(float v) -> float
 {
 	return tweak::math::stepify<10>(v);

@@ -72,6 +72,8 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 	out.proc_data = (void*)(&envelope_parameter);
 	out.parameter_type = blink_ParameterType_Envelope;
 	out.flags = envelope_parameter.get_flags();
+	out.clamp_range = envelope_parameter.get_clamp_range();
+	out.icon = blink_StdIcon_None; // TODO
 
 	out.options_count = envelope_parameter.get_options_count();
 	out.sliders_count = envelope_parameter.get_sliders_count();

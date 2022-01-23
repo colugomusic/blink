@@ -289,6 +289,8 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6, // Editing should trigger a visual update
 	blink_EnvelopeFlags_CanManipulate                      = 1 << 7,
 	blink_EnvelopeFlags_IsManipulatorTarget                = 1 << 8,
+	blink_EnvelopeFlags_HostClamp                          = 1 << 9, // Host will clamp values to clamp_range,
+	                                                                 // after applying manipulator offsets
 };
 
 enum blink_OptionFlags
@@ -363,8 +365,8 @@ typedef struct
 	bool show_grid_labels;
 
 	blink_Slider value_slider;
-	blink_Slider min;
-	blink_Slider max;
+	blink_Slider min_slider;
+	blink_Slider max_slider;
 	blink_EnvelopeSnapSettings snap_settings;
 
 	blink_DisplayValue display_value;
@@ -406,6 +408,10 @@ typedef struct
 
 	void* proc_data;
 	int flags; // blink_EnvelopeFlags
+	blink_StdIcon icon;
+
+	// Only used if blink_EnvelopeFlags_HostClamp is set
+	blink_Range clamp_range;
 
 	blink_Index sliders_count;
 	blink_Index options_count;

@@ -83,8 +83,8 @@ inline blink_Envelope Envelope::bind() const
 	out.proc_data = (void*)(this);
 	out.snap_settings = snap_settings_.bind();
 	out.value_slider = Slider<float>::bind(value_slider_);
-	out.min = Slider<float>::bind(range_.min());
-	out.max = Slider<float>::bind(range_.max());
+	out.min_slider = Slider<float>::bind(range_.min());
+	out.max_slider = Slider<float>::bind(range_.max());
 
 	out.get_gridline = [](void* proc_data, int index, float* out)
 	{

@@ -13,6 +13,8 @@ namespace blink {
 namespace std_params {
 namespace amp {
 
+static constexpr auto UUID { BLINK_STD_UUID_AMP };
+
 inline auto stepify(float v) { return tweak::std::amp::stepify(v); }
 inline auto display(float v) { return tweak::std::amp::to_string(v); }
 inline auto constrain(float v) { return tweak::std::amp::constrain(v); }
