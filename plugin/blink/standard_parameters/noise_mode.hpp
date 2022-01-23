@@ -6,6 +6,8 @@ namespace blink {
 namespace std_params {
 namespace noise_mode {
 
+static constexpr auto UUID { BLINK_STD_UUID_NOISE_MODE };
+
 inline OptionSpec option()
 {
 	OptionSpec out;

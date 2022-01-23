@@ -9,14 +9,28 @@ namespace blink {
 namespace std_params {
 namespace noise_width {
 
+static constexpr auto UUID { BLINK_STD_UUID_NOISE_WIDTH };
+
 inline SliderParameterSpec<float> slider_parameter()
 {
 	SliderParameterSpec<float> out;
 
 	out.uuid = BLINK_STD_UUID_NOISE_WIDTH;
 	out.name = "Noise Width";
-
 	out.slider = percentage::slider();
+
+	out.clamp_range = { 0.0f, 1.0f };
+	out.flags |= blink_SliderFlags_HostClamp;
+
+	return out;
+}
+
+inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
+{
+	EnvelopeManipulatorTargetSpec out;
+
+	out.offset_envelope = percentage::bipolar::envelope();
+	out.override_envelope = percentage::envelope();
 
 	return out;
 }

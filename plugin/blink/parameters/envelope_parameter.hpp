@@ -13,44 +13,27 @@ class EnvelopeParameter : public Parameter
 {
 public:
 
-	EnvelopeParameter(EnvelopeParameterSpec spec);
+	const EnvelopeParameterSpec spec;
+	const Envelope envelope;
+	const blink_Range clamp_range;
+	const std::vector<blink_Index> options;
+	const std::vector<blink_Index> sliders;
+	const int flags;
+
+	EnvelopeParameter(EnvelopeParameterSpec spec_);
 
 	blink_ParameterType get_type() const override { return blink_ParameterType_Envelope; }
-
-	int get_flags() const { return spec_.flags; }
-
-	int get_options_count() const { return int(options_.size()); }
-	blink_Index get_option(blink_Index index) const { return options_[index]; }
-	int get_sliders_count() const { return int(sliders_.size()); }
-	blink_Index get_slider(blink_Index index) const { return sliders_[index]; }
-	blink_Range get_clamp_range() const { return clamp_range_; }
-
-	const Envelope& envelope() const { return envelope_; }
-
-private:
-
-	EnvelopeParameterSpec spec_;
-	Envelope envelope_;
-	blink_Range clamp_range_;
-	std::vector<blink_Index> options_;
-	std::vector<blink_Index> sliders_;
 };
 
-inline EnvelopeParameter::EnvelopeParameter(EnvelopeParameterSpec spec)
-	: Parameter(spec)
-	, spec_(spec)
-	, envelope_(spec.envelope)
-	, clamp_range_(spec.clamp_range)
+inline EnvelopeParameter::EnvelopeParameter(EnvelopeParameterSpec spec_)
+	: Parameter(spec_)
+	, spec(spec_)
+	, envelope(spec.envelope)
+	, clamp_range(spec.clamp_range)
+	, options(spec.options)
+	, sliders(spec.sliders)
+	, flags(spec.flags)
 {
-	for (const auto& option_spec : spec.options)
-	{
-		options_.push_back(option_spec);
-	}
-
-	for (const auto& slider_spec : spec.sliders)
-	{
-		sliders_.push_back(slider_spec);
-	}
 }
 
 }

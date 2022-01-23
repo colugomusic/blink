@@ -9,6 +9,7 @@ struct SliderParameterSpec : public ParameterSpec
 {
 	SliderSpec<T> slider;
 	blink_StdIcon icon = blink_StdIcon_None;
+	blink_Range clamp_range;
 };
 
 }

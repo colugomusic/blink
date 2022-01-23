@@ -24,7 +24,7 @@ public:
 	{
 		if (data_->data.count == 1) return data_->data.points[0].value;
 
-		return toggle->search().search(data_->data, block_position);
+		return toggle->searcher.search(data_->data, block_position);
 	}
 
 	bool search(const BlockPositions& block_positions) const
@@ -40,7 +40,7 @@ public:
 			return;
 		}
 
-		toggle->search().search_vec(data_->data, block_positions, n, out);
+		toggle->searcher.search_vec(data_->data, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, bool* out) const
@@ -51,12 +51,12 @@ public:
 			return;
 		}
 
-		toggle->search().search_vec(data_->data, block_positions, out);
+		toggle->searcher.search_vec(data_->data, block_positions, out);
 	}
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const
 	{
-		return toggle->search().search_vec_(data_->data, block_positions);
+		return toggle->searcher.search_vec_(data_->data, block_positions);
 	}
 
 	const auto& data() const { return *data_; }

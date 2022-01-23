@@ -9,6 +9,8 @@ namespace blink {
 namespace std_params {
 namespace pan {
 
+static constexpr auto UUID { BLINK_STD_UUID_PAN };
+
 inline auto stepify(float v) -> float
 {
 	return tweak::math::stepify<100>(v);

@@ -9,6 +9,8 @@ namespace blink {
 namespace std_params {
 namespace noise_color {
 
+static constexpr auto UUID { BLINK_STD_UUID_NOISE_COLOR };
+
 inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
@@ -18,7 +20,9 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.short_name = "Color";
 	out.envelope = percentage::bipolar::envelope();
 	out.envelope.show_grid_labels = false;
+	out.clamp_range = { -1.0f, 1.0f };
 
+	out.flags |= blink_EnvelopeFlags_HostClamp;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 
@@ -30,7 +34,7 @@ inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
 	EnvelopeManipulatorTargetSpec out;
 
 	out.offset_envelope = percentage::bipolar::envelope();
-	out.override_envelope = percentage::envelope();
+	out.override_envelope = percentage::bipolar::envelope();
 
 	return out;
 }

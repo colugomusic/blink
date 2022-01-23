@@ -7,6 +7,8 @@ namespace blink {
 namespace std_params {
 namespace loop {
 
+static constexpr auto UUID { BLINK_STD_UUID_LOOP };
+
 inline ToggleSpec toggle()
 {
 	ToggleSpec out;

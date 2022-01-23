@@ -17,24 +17,21 @@ class ChordParameter : public Parameter
 {
 public:
 
+	const ChordSpec spec;
+	const ChordSearcher searcher;
+	const blink_StdIcon icon;
+	const int flags;
+
 	blink_ParameterType get_type() const override { return blink_ParameterType_Chord; }
 
-	ChordParameter(const ChordSpec& spec)
-		: Parameter(spec)
-		, spec_(spec)
-		, searcher_(spec.searcher)
+	ChordParameter(const ChordSpec& spec_)
+		: Parameter(spec_)
+		, spec(spec_)
+		, searcher(spec.searcher)
+		, icon(spec.icon)
+		, flags(spec.flags)
 	{
 	}
-
-	const auto& search() const { return searcher_; }
-
-	blink_StdIcon icon() const { return spec_.icon; }
-	int flags() const { return spec_.flags; }
-
-private:
-
-	ChordSpec spec_;
-	ChordSearcher searcher_;
 };
 
 }

@@ -9,6 +9,8 @@ namespace blink {
 namespace std_params {
 namespace noise_amount {
 
+static constexpr auto UUID { BLINK_STD_UUID_NOISE_AMOUNT };
+
 inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
@@ -17,7 +19,9 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Noise Amount";
 	out.short_name = "Amount";
 	out.envelope = percentage::envelope();
+	out.clamp_range = { 0.0f, 1.0f };
 
+	out.flags |= blink_EnvelopeFlags_HostClamp;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 

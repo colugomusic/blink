@@ -28,7 +28,7 @@ public:
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const
 	{
-		return param_->search().search_vec_(*data_, block_positions);
+		return param_->searcher.search_vec_(*data_, block_positions);
 	}
 
 private:

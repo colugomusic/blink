@@ -9,6 +9,8 @@ namespace blink {
 namespace std_params {
 namespace sample_offset {
 
+static constexpr auto UUID { BLINK_STD_UUID_SAMPLE_OFFSET };
+
 inline auto constrain(int v)
 {
 	return v;

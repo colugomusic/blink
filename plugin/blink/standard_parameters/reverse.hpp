@@ -7,6 +7,8 @@ namespace blink {
 namespace std_params {
 namespace reverse {
 
+static constexpr auto UUID { BLINK_STD_UUID_REVERSE };
+
 inline ToggleSpec toggle()
 {
 	ToggleSpec out;

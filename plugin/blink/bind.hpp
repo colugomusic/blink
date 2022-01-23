@@ -40,8 +40,8 @@ inline blink_Chord chord(const ChordParameter& chord)
 	blink_Chord out;
 
 	out.parameter_type = blink_ParameterType_Chord;
-	out.icon = chord.icon();
-	out.flags = chord.flags();
+	out.icon = chord.icon;
+	out.flags = chord.flags;
 
 	return out;
 }
@@ -52,7 +52,7 @@ inline blink_Option option(const OptionParameter& option)
 
 	out.parameter_type = option.get_type();
 	out.max_index = option.get_max_index();
-	out.default_index = option.get_default_index();
+	out.default_index = option.default_index;
 	out.proc_data = (void*)(&option);
 
 	out.get_text = [](void* proc_data, blink_Index index)
@@ -71,28 +71,28 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 
 	out.proc_data = (void*)(&envelope_parameter);
 	out.parameter_type = blink_ParameterType_Envelope;
-	out.flags = envelope_parameter.get_flags();
-	out.clamp_range = envelope_parameter.get_clamp_range();
+	out.flags = envelope_parameter.flags;
+	out.clamp_range = envelope_parameter.clamp_range;
 	out.icon = blink_StdIcon_None; // TODO
 
-	out.options_count = envelope_parameter.get_options_count();
-	out.sliders_count = envelope_parameter.get_sliders_count();
+	out.options_count = envelope_parameter.options.size();
+	out.sliders_count = envelope_parameter.sliders.size();
 
 	out.get_option = [](void* proc_data, blink_Index index)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->get_option(index);
+		return envelope->options[index];
 	};
 
 	out.get_slider = [](void* proc_data, blink_Index index)
 	{
 		auto envelope = (EnvelopeParameter*)(proc_data);
 
-		return envelope->get_slider(index);
+		return envelope->sliders[index];
 	};
 
-	out.envelope = envelope_parameter.envelope().bind();
+	out.envelope = envelope_parameter.envelope.bind();
 
 	return out;
 }
@@ -103,9 +103,10 @@ inline blink_SliderParameter slider_parameter(const SliderParameter<float>& slid
 
 	out.parameter_type = blink_ParameterType_Slider;
 
-	out.slider = Slider<float>::bind(slider_parameter.slider());
-	out.icon = slider_parameter.spec().icon;
-	out.flags = slider_parameter.spec().flags;
+	out.slider = Slider<float>::bind(slider_parameter.slider);
+	out.icon = slider_parameter.spec.icon;
+	out.flags = slider_parameter.spec.flags;
+	out.clamp_range = slider_parameter.clamp_range;
 
 	return out;
 }
@@ -115,9 +116,9 @@ inline blink_IntSliderParameter slider_parameter(const SliderParameter<int>& sli
 	blink_IntSliderParameter out;
 
 	out.parameter_type = blink_ParameterType_IntSlider;
-	out.slider = Slider<float>::bind(slider_parameter.slider());
-	out.icon = slider_parameter.spec().icon;
-	out.flags = slider_parameter.spec().flags;
+	out.slider = Slider<float>::bind(slider_parameter.slider);
+	out.icon = slider_parameter.spec.icon;
+	out.flags = slider_parameter.spec.flags;
 
 	return out;
 }
@@ -127,9 +128,9 @@ inline blink_Toggle toggle(const ToggleParameter& toggle)
 	blink_Toggle out;
 
 	out.parameter_type = blink_ParameterType_Toggle;
-	out.default_value = toggle.get_default_value() ? BLINK_TRUE : BLINK_FALSE;
-	out.icon = toggle.get_icon();
-	out.flags = toggle.get_flags();
+	out.default_value = toggle.default_value ? BLINK_TRUE : BLINK_FALSE;
+	out.icon = toggle.icon;
+	out.flags = toggle.flags;
 
 	return out;
 }
@@ -150,7 +151,7 @@ inline blink_Parameter parameter(const Parameter& parameter)
 {
 	blink_Parameter out;
 
-	out.uuid = parameter.get_uuid();
+	out.uuid = parameter.uuid;
 	out.group_index = parameter.get_group_index();
 	out.name = parameter.get_name();
 	out.short_name = parameter.get_short_name();

@@ -11,8 +11,10 @@ class Parameter
 {
 public:
 
+	const blink_UUID uuid;
+
 	Parameter(const ParameterSpec& spec)
-		: uuid_(spec.uuid)
+		: uuid(spec.uuid)
 		, name_(spec.name)
 	{
 		if (spec.short_name) short_name_ = spec.short_name;
@@ -21,7 +23,6 @@ public:
 
 	void set_group_index(int group_index) { group_index_ = group_index; }
 
-	blink_UUID get_uuid() const { return uuid_; }
 	int get_group_index() const { return group_index_; }
 	const char* get_name() const { return name_.c_str(); }
 	const char* get_short_name() const { return short_name_ ? short_name_->c_str() : nullptr; }
@@ -31,7 +32,6 @@ public:
 
 private:
 
-	blink_UUID uuid_;
 	int group_index_ = -1;
 	std::string name_;
 	std::optional<std::string> short_name_;
