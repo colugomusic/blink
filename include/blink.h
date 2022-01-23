@@ -310,6 +310,8 @@ enum blink_SliderFlags
 	                                                // selected)
 	blink_SliderFlags_CanManipulate       = 1 << 3, // Has no effect for int sliders
 	blink_SliderFlags_IsManipulatorTarget = 1 << 4,
+	blink_SliderFlags_HostClamp           = 1 << 5, // Host will clamp values to clamp_range,
+	                                                // after applying manipulator offsets
 };
 
 enum blink_ToggleFlags
@@ -444,6 +446,9 @@ typedef struct
 	int flags; // blink_SliderFlags
 	blink_StdIcon icon;
 	blink_Slider slider;
+
+	// Only used if blink_SliderFlags_HostClamp is set
+	blink_Range clamp_range;
 } blink_SliderParameter;
 
 typedef struct
