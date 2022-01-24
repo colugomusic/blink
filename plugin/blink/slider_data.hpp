@@ -9,22 +9,22 @@ class SliderIndexData
 {
 public:
 
-	SliderIndexData(const blink::Slider<float>& slider, const blink_ParameterData* param_data, blink_Index index)
-		: data_(param_data ? &param_data[index].slider : nullptr)
-		, slider_(&slider)
-	{
-	}
+	const blink_SliderData* const data;
+	const float value;
+	const blink::Slider<float>& slider;
 
-	float value() const
+	SliderIndexData(const blink::Slider<float>& slider_, const blink_ParameterData* param_data, blink_Index index)
+		: data { param_data ? &param_data[index].slider : nullptr }
+		, value { data ? data->data.points[0].y : slider_.spec.default_value }
+		, slider { slider_ }
 	{
-		return data_->data.points[0].y;
 	}
 
 	float search(blink_Position block_position) const
 	{
-		if (data_->data.count == 1) return value();
+		if (!data || data->data.count == 1) return value;
 
-		return slider_->search().search(data_->data, block_position);
+		return slider.searcher.search(data->data, block_position);
 	}
 
 	float search(const BlockPositions& block_positions) const
@@ -34,39 +34,48 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		if (data_->data.count == 1)
+		if (!data || data->data.count == 1)
 		{
-			std::fill(out, out + n, value());
+			std::fill(out, out + n, value);
 			return;
 		}
 
-		slider_->search().search_vec(data_->data, block_positions, n, out);
+		slider.searcher.search_vec(data->data, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		if (data_->data.count == 1)
+		if (!data || data->data.count == 1)
 		{
-			std::fill(out, out + block_positions.count, value());
+			std::fill(out, out + block_positions.count, value);
 			return;
 		}
 
-		slider_->search().search_vec(data_->data, block_positions, out);
+		slider.searcher.search_vec(data->data, block_positions, out);
 	}
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
-		if (data_->data.count == 1) return value();
+		if (!data || data->data.count == 1) return value;
 
-		return slider_->search().search_vec_(data_->data, block_positions);
+		return slider.searcher.search_vec_(data->data, block_positions);
 	}
+};
 
-	const auto& data() const { return *data_; }
+class IntSliderIndexData
+{
+public:
 
-private:
+	const blink_IntSliderData* const data;
+	const int value;
+	const blink::Slider<int>* const slider;
 
-	const blink_SliderData* data_;
-	const blink::Slider<float>* slider_;
+	IntSliderIndexData(const blink::Slider<int>& slider_, const blink_ParameterData* param_data, blink_Index index)
+		: data {param_data ? &param_data[index].int_slider : nullptr }
+		, value { data ? data->value : slider_.spec.default_value }
+		, slider { &slider_ }
+	{
+	}
 };
 
 template <int Index>
@@ -76,6 +85,17 @@ public:
 
 	SliderData(const blink::Slider<float>& slider, const blink_ParameterData* param_data)
 		: SliderIndexData(slider, param_data, Index)
+	{
+	}
+};
+
+template <int Index>
+class IntSliderData : public IntSliderIndexData
+{
+public:
+
+	IntSliderData(const blink::Slider<int>& slider, const blink_ParameterData* param_data)
+		: IntSliderIndexData(slider, param_data, Index)
 	{
 	}
 };

@@ -75,8 +75,8 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 	out.clamp_range = envelope_parameter.clamp_range;
 	out.icon = blink_StdIcon_None; // TODO
 
-	out.options_count = envelope_parameter.options.size();
-	out.sliders_count = envelope_parameter.sliders.size();
+	out.options_count = blink_Index(envelope_parameter.options.size());
+	out.sliders_count = blink_Index(envelope_parameter.sliders.size());
 
 	out.get_option = [](void* proc_data, blink_Index index)
 	{

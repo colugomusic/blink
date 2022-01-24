@@ -9,22 +9,22 @@ class ToggleIndexData
 {
 public:
 
-	ToggleIndexData(const blink::ToggleParameter& toggle, const blink_ParameterData* param_data, blink_Index index)
-		: data_(&param_data[index].toggle)
-		, toggle(&toggle)
-	{
-	}
+	const blink_ToggleData* const data;
+	const bool value;
+	const blink::ToggleParameter& toggle;
 
-	bool value() const
+	ToggleIndexData(const blink::ToggleParameter& toggle_, const blink_ParameterData* param_data, blink_Index index)
+		: data { param_data ? &param_data[index].toggle : nullptr }
+		, value { data ? data->data.points[0].value == BLINK_TRUE : toggle_.default_value }
+		, toggle { toggle_ }
 	{
-		return data_->data.points[0].value;
 	}
 
 	bool search(blink_Position block_position) const
 	{
-		if (data_->data.count == 1) return data_->data.points[0].value;
+		if (!data || data->data.count == 1) return value;
 
-		return toggle->searcher.search(data_->data, block_position);
+		return toggle.searcher.search(data->data, block_position);
 	}
 
 	bool search(const BlockPositions& block_positions) const
@@ -34,37 +34,30 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, bool* out) const
 	{
-		if (data_->data.count == 1)
+		if (!data || data->data.count == 1)
 		{
-			std::fill(out, out + n, value());
+			std::fill(out, out + n, value);
 			return;
 		}
 
-		toggle->searcher.search_vec(data_->data, block_positions, n, out);
+		toggle.searcher.search_vec(data->data, block_positions, n, out);
 	}
 
 	void search_vec(const BlockPositions& block_positions, bool* out) const
 	{
-		if (data_->data.count == 1)
+		if (!data || data->data.count == 1)
 		{
-			std::fill(out, out + block_positions.count, value());
+			std::fill(out, out + block_positions.count, value);
 			return;
 		}
 
-		toggle->searcher.search_vec(data_->data, block_positions, out);
+		toggle.searcher.search_vec(data->data, block_positions, out);
 	}
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const
 	{
-		return toggle->searcher.search_vec_(data_->data, block_positions);
+		return toggle.searcher.search_vec_(data->data, block_positions);
 	}
-
-	const auto& data() const { return *data_; }
-
-private:
-
-	const blink_ToggleData* data_;
-	const blink::ToggleParameter* toggle;
 };
 
 template <int Index>

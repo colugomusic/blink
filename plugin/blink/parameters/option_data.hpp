@@ -5,23 +5,31 @@
 
 namespace blink {
 
-template <int Index>
-class OptionData
+class OptionIndexData
 {
 public:
 
-	OptionData(const blink_ParameterData* param_data, const blink::OptionParameter& param)
-		: data_(&param_data[Index].option)
-		, param_(&param)
+	const blink_OptionData* const data;
+	const blink_Index value;
+	const OptionParameter& option;
+
+	OptionIndexData(const OptionParameter& option_, const blink_ParameterData* param_data, blink_Index index)
+		: data { param_data ? &param_data[index].option : nullptr }
+		, value { data ? data->data.points[0].y : option.default_index }
+		, option { option_ }
 	{
 	}
+};
 
-	blink_Index get() const { return blink_Index(data_->data.points[0].y); }
+template <int Index>
+class OptionData : public OptionIndexData
+{
+public:
 
-private:
-
-	const blink_OptionData* data_;
-	const blink::OptionParameter* param_;
+	OptionData(const OptionParameter& option, const blink_ParameterData* param_data)
+		: OptionIndexData(option, param_data, Index)
+	{
+	}
 };
 
 } // blink

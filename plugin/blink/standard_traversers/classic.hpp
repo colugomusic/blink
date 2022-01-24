@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include "../traverser.hpp"
+#include <blink/envelope_data.hpp>
 #include <blink/parameters/envelope_parameter.hpp>
 #include <blink/parameters/slider_parameter.hpp>
 #include "warp.hpp"
@@ -168,7 +169,7 @@ public:
 
 	void get_positions(
 		float transpose,
-		const blink_EnvelopeData* env_pitch,
+		blink::EnvelopeIndexData env_pitch,
 		const blink_WarpPoints* warp_points,
 		const Traverser& traverser,
 		int sample_offset,
@@ -181,7 +182,7 @@ private:
 	
 	void get_sculpted_positions(
 		float transpose,
-		const blink_EnvelopeData* env_pitch,
+		blink::EnvelopeIndexData env_pitch,
 		const Traverser& traverser,
 		int count,
 		snd::transport::DSPVectorFramePosition* positions,
@@ -202,7 +203,7 @@ private:
 
 inline void Classic::get_sculpted_positions(
 	float transpose,
-	const blink_EnvelopeData* env_pitch,
+	blink::EnvelopeIndexData env_pitch,
 	const Traverser& traverser,
 	int count,
 	snd::transport::DSPVectorFramePosition *positions,
@@ -210,9 +211,9 @@ inline void Classic::get_sculpted_positions(
 {
 	const auto& block_positions = traverser.block_positions();
 
-	if (!env_pitch || env_pitch->points.count < 1)
+	if (!env_pitch.data || env_pitch.data->points.count < 1)
 	{
-		const auto ff = math::convert::p_to_ff((env_pitch ? std::clamp(0.0f, env_pitch->points.min, env_pitch->points.max) : 0.0f) + transpose);
+		const auto ff = math::convert::p_to_ff((env_pitch.data ? std::clamp(0.0f, env_pitch.data->points.min, env_pitch.data->points.max) : 0.0f) + transpose);
 
 		*positions = block_positions.positions * ff;
 
@@ -230,7 +231,7 @@ inline void Classic::get_sculpted_positions(
 			calculator_.reset();
 		}
 
-		positions->set(i, calculator_.calculate(transpose, env_pitch, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr));
+		positions->set(i, calculator_.calculate(transpose, env_pitch.data, block_positions.positions[i], derivatives ? &(derivatives->getBuffer()[i]) : nullptr));
 	}
 }
 
@@ -267,7 +268,7 @@ inline void Classic::get_warp_positions(
 
 inline void Classic::get_positions(
 	float transpose,
-	const blink_EnvelopeData* env_pitch,
+	blink::EnvelopeIndexData env_pitch,
 	const blink_WarpPoints* warp_points,
 	const Traverser& traverser,
 	int sample_offset,

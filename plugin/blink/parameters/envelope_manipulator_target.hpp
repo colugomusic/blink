@@ -10,22 +10,22 @@ class EnvelopeManipulatorTarget
 public:
 
 	EnvelopeManipulatorTarget(EnvelopeManipulatorTargetSpec spec)
+		: offset_ { spec.offset_envelope ? std::optional<Envelope> { *spec.offset_envelope } : std::nullopt }
+		, override_ { spec.override_envelope ? std::optional<Envelope> { *spec.override_envelope } : std::nullopt }
 	{
 		api_.proc_data = this;
 		api_.offset_envelope = nullptr;
 		api_.override_envelope = nullptr;
 		api_.apply_offset = nullptr;
 
-		if (spec.offset_envelope)
+		if (offset_)
 		{
-			offset_ = Envelope { *spec.offset_envelope };
 			offset_api_ = offset_->bind();
 			api_.offset_envelope = &offset_api_;
 		}
 
-		if (spec.override_envelope)
+		if (override_)
 		{
-			override_ = Envelope { *spec.override_envelope };
 			override_api_ = override_->bind();
 			api_.override_envelope = &override_api_;
 		}

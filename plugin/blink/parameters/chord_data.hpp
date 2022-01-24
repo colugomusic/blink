@@ -5,36 +5,72 @@
 
 namespace blink {
 
-template <int Index>
-class ChordData
+class ChordIndexData
 {
 public:
 
-	ChordData(const blink_ParameterData* param_data, const blink::ChordParameter* param)
-		: data_(&param_data[Index].chord)
-		, param_(param)
+	const blink_ChordData* const data;
+	const blink_Scale value;
+	const ChordParameter& chord;
+
+	ChordIndexData(const ChordParameter& chord_, const blink_ParameterData* param_data, blink_Index index)
+		: data { param_data ? &param_data[index].chord : nullptr }
+		, value { data ? data->blocks.blocks[0].scale : 0 }
+		, chord { chord_ }
 	{
 	}
 
-	void search_vec(const BlockPositions& block_positions, int n, int* out) const
+	blink_Scale search(blink_Position block_position) const
 	{
-		param_->search().search_vec(*data_, block_positions, n, out);
+		if (!data || data->blocks.count == 1) return value;
+
+		return chord.searcher.search(*data, block_position);
 	}
 
-	void search_vec(const BlockPositions& block_positions, int* out) const
+	blink_Scale search(const BlockPositions& block_positions) const
 	{
-		param_->search().search_vec(*data_, block_positions, out);
+		return search(block_positions.positions[0]);
+	}
+
+	void search_vec(const BlockPositions& block_positions, int n, blink_Scale* out) const
+	{
+		if (!data || data->blocks.count == 1)
+		{
+			std::fill(out, out + n, value);
+			return;
+		}
+
+		chord.searcher.search_vec(*data, block_positions, n, out);
+	}
+
+	void search_vec(const BlockPositions& block_positions, blink_Scale* out) const
+	{
+		if (!data || data->blocks.count == 1)
+		{
+			std::fill(out, out + block_positions.count, value);
+			return;
+		}
+
+		chord.searcher.search_vec(*data, block_positions, out);
 	}
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const
 	{
-		return param_->searcher.search_vec_(*data_, block_positions);
+		if (!data || data->blocks.count == 1) return ml::DSPVectorInt{ int32_t(value) };
+
+		return chord.searcher.search_vec_(*data, block_positions);
 	}
+};
 
-private:
+template <int Index>
+class ChordData : public ChordIndexData
+{
+public:
 
-	const blink_ChordData* data_;
-	const blink::ChordParameter* param_;
+	ChordData(const ChordParameter& chord_, const blink_ParameterData* param_data)
+		: ChordIndexData(chord_, param_data, Index)
+	{
+	}
 };
 
 } // blink
