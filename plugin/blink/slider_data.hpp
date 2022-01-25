@@ -10,19 +10,21 @@ class SliderIndexData
 public:
 
 	const blink_SliderData* const data;
+	const float default_value;
 	const float value;
 	const blink::Slider<float>& slider;
 
 	SliderIndexData(const blink::Slider<float>& slider_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].slider : nullptr }
-		, value { data ? data->data.points[0].y : slider_.spec.default_value }
+		, default_value { slider_.spec.default_value }
+		, value { data && data->data.count > 0 ? data->data.points[0].y : default_value }
 		, slider { slider_ }
 	{
 	}
 
 	float search(blink_Position block_position) const
 	{
-		if (!data || data->data.count == 1) return value;
+		if (!data || data->data.count <= 1) return value;
 
 		return slider.searcher.search(data->data, block_position);
 	}
@@ -34,7 +36,7 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		if (!data || data->data.count == 1)
+		if (!data || data->data.count <= 1)
 		{
 			std::fill(out, out + n, value);
 			return;
@@ -45,7 +47,7 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		if (!data || data->data.count == 1)
+		if (!data || data->data.count <= 1)
 		{
 			std::fill(out, out + block_positions.count, value);
 			return;
@@ -56,7 +58,7 @@ public:
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
-		if (!data || data->data.count == 1) return value;
+		if (!data || data->data.count <= 1) return value;
 
 		return slider.searcher.search_vec_(data->data, block_positions);
 	}
@@ -67,12 +69,14 @@ class IntSliderIndexData
 public:
 
 	const blink_IntSliderData* const data;
+	const int default_value;
 	const int value;
 	const blink::Slider<int>* const slider;
 
 	IntSliderIndexData(const blink::Slider<int>& slider_, const blink_ParameterData* param_data, blink_Index index)
 		: data {param_data ? &param_data[index].int_slider : nullptr }
-		, value { data ? data->value : slider_.spec.default_value }
+		, default_value { slider_.spec.default_value }
+		, value { data ? data->value : default_value }
 		, slider { &slider_ }
 	{
 	}

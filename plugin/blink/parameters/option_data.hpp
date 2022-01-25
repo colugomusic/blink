@@ -10,12 +10,14 @@ class OptionIndexData
 public:
 
 	const blink_OptionData* const data;
+	const blink_Index default_value;
 	const blink_Index value;
 	const OptionParameter& option;
 
 	OptionIndexData(const OptionParameter& option_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].option : nullptr }
-		, value { data ? data->data.points[0].y : option.default_index }
+		, default_value { option.default_index }
+		, value { data && data->data.count > 0 ? data->data.points[0].y : default_value }
 		, option { option_ }
 	{
 	}

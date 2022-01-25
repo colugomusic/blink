@@ -10,19 +10,21 @@ class ToggleIndexData
 public:
 
 	const blink_ToggleData* const data;
+	const bool default_value;
 	const bool value;
 	const blink::ToggleParameter& toggle;
 
 	ToggleIndexData(const blink::ToggleParameter& toggle_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].toggle : nullptr }
-		, value { data ? data->data.points[0].value == BLINK_TRUE : toggle_.default_value }
+		, default_value { toggle_.default_value }
+		, value { data && data->data.count > 0 ? data->data.points[0].value == BLINK_TRUE : default_value }
 		, toggle { toggle_ }
 	{
 	}
 
 	bool search(blink_Position block_position) const
 	{
-		if (!data || data->data.count == 1) return value;
+		if (!data || data->data.count <= 1) return value;
 
 		return toggle.searcher.search(data->data, block_position);
 	}
@@ -34,7 +36,7 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, bool* out) const
 	{
-		if (!data || data->data.count == 1)
+		if (!data || data->data.count <= 1)
 		{
 			std::fill(out, out + n, value);
 			return;
@@ -45,7 +47,7 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, bool* out) const
 	{
-		if (!data || data->data.count == 1)
+		if (!data || data->data.count <= 1)
 		{
 			std::fill(out, out + block_positions.count, value);
 			return;

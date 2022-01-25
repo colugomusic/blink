@@ -11,18 +11,20 @@ public:
 
 	const blink_EnvelopeData* const data;
 	const float default_value;
+	const float value;
 	const blink::Envelope& envelope;
 
 	EnvelopeIndexData(const blink::Envelope& envelope_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].envelope : nullptr }
 		, default_value { envelope_.default_value }
+		, value { data && data->points.count > 0 ? data->points.points[0].y : default_value }
 		, envelope { envelope_ }
 	{
 	}
 
 	float search(blink_Position block_position) const
 	{
-		if (!data) return default_value;
+		if (!data || data->points.count <= 1) return value;
 
 		return envelope.searcher.search(data->points, block_position);
 	}
@@ -34,9 +36,9 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, float* out) const
 	{
-		if (!data || data->points.count == 1)
+		if (!data || data->points.count <= 1)
 		{
-			std::fill(out, out + n, default_value);
+			std::fill(out, out + n, value);
 			return;
 		}
 
@@ -45,9 +47,9 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, float* out) const
 	{
-		if (!data || data->points.count == 1)
+		if (!data || data->points.count <= 1)
 		{
-			std::fill(out, out + block_positions.count, default_value);
+			std::fill(out, out + block_positions.count, value);
 			return;
 		}
 
@@ -56,7 +58,7 @@ public:
 
 	ml::DSPVector search_vec(const BlockPositions& block_positions) const
 	{
-		if (!data) return default_value;
+		if (!data || data->points.count <= 1) return value;
 
 		return envelope.searcher.search_vec_(data->points, block_positions);
 	}
