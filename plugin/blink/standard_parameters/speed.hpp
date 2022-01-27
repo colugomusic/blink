@@ -8,6 +8,8 @@ namespace blink {
 namespace std_params {
 namespace speed {
 
+static constexpr auto UUID { BLINK_STD_UUID_SPEED };
+
 inline SliderSpec<float> slider()
 {
 	SliderSpec<float> out;
@@ -29,11 +31,12 @@ inline SliderParameterSpec<float> slider_parameter()
 {
 	SliderParameterSpec<float> out;
 
-	out.uuid = BLINK_STD_UUID_SPEED;
+	out.uuid = UUID;
 	out.name = "Speed";
 
 	out.slider = slider();
-	out.flags = blink_SliderFlags_MovesDisplay;
+	out.flags |= blink_SliderFlags_MovesDisplay;
+	out.flags |= blink_SliderFlags_CanManipulate;
 
 	return out;
 }
@@ -91,9 +94,10 @@ inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
 {
 	EnvelopeManipulatorTargetSpec out;
 
-	out.offset_envelope = percentage::envelope<0, 200>();
-	out.offset_envelope->default_value = 1.0f;
+	//out.offset_envelope = percentage::envelope<0, 200>();
+	//out.offset_envelope->default_value = 1.0f;
 
+	out.offset_envelope = envelope();
 	out.override_envelope = envelope();
 
 	out.apply_offset = [](float value, float offset) -> float

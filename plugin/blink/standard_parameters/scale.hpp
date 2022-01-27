@@ -7,11 +7,13 @@ namespace blink {
 namespace std_params {
 namespace scale {
 
+static constexpr auto UUID { BLINK_STD_UUID_SCALE };
+
 inline ChordSpec chord()
 {
 	ChordSpec out;
 
-	out.uuid = BLINK_STD_UUID_SCALE;
+	out.uuid = UUID;
 	out.name = "Scale";
 	out.icon = blink_StdIcon_PianoRoll;
 	out.searcher.binary = search::chord_binary;
