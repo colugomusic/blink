@@ -8,6 +8,8 @@ namespace blink {
 namespace std_params {
 namespace mix {
 
+static constexpr auto UUID { BLINK_STD_UUID_MIX };
+
 inline EnvelopeSpec envelope()
 {
 	EnvelopeSpec out;
@@ -30,11 +32,13 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_MIX;
+	out.uuid = UUID;
 	out.name = "Mix";
 
 	out.envelope = envelope();
+	out.clamp_range = { 0.0f, 1.0f };
 
+	out.flags |= blink_EnvelopeFlags_HostClamp;;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 
