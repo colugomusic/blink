@@ -53,6 +53,7 @@ inline blink_Option option(const OptionParameter& option)
 	out.parameter_type = option.get_type();
 	out.max_index = option.get_max_index();
 	out.default_index = option.default_index;
+	out.flags = option.flags;
 	out.proc_data = (void*)(&option);
 
 	out.get_text = [](void* proc_data, blink_Index index)

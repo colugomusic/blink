@@ -168,7 +168,7 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	blink_IntPoints data;
+	blink_FloatPoints data;
 } blink_OptionData;
 
 typedef struct
@@ -299,6 +299,7 @@ enum blink_OptionFlags
 	blink_OptionFlags_CanManipulate       = 1 << 1,
 	blink_OptionFlags_IsManipulatorTarget = 1 << 2,
 	blink_OptionFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
+	blink_OptionFlags_Morphable           = 1 << 4, // Can the host can send us fractional values?
 };
 
 enum blink_SliderFlags
@@ -331,7 +332,11 @@ enum blink_ToggleFlags
 
 //
 // Option parameter
+//
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
+//
+// Values are actually stored as floats, not ints, to enable morphing via
+// manipulators when blink_OptionFlags_Morphable is set
 //
 typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
 
@@ -351,7 +356,7 @@ typedef struct
 
 //
 // Envelope parameter
-// Can be manipulated in Blockhead using the envelope editor
+// Can be edited in Blockhead using the envelope editor
 //
 typedef blink_Bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
 typedef blink_Bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
@@ -382,7 +387,6 @@ typedef struct
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Manipulators
-// WIP
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef float (*blink_ApplyOffset)(void* proc_data, float value, float offset);
 
@@ -426,7 +430,7 @@ typedef struct
 
 //
 // Chord parameter
-// Can be manipulated in Blockhead using the chord/scale/harmonics editor thing
+// Can be edited in Blockhead using the chord/scale/harmonics editor thing
 //
 typedef struct
 {
@@ -487,10 +491,15 @@ union blink_ParameterObject
 
 typedef struct
 {
-	// Generators can share parameter UUIDs to allow the user to switch back and forth
-	// between different generators without losing modulation data (for example the
-	// "Amp", "Pan" and "Pitch" envelopes are shared between Classic and Fudge
-	// generators.)
+	// The UUID is unique to a particular parameter concept e.g. "Amp", "Pitch", etc.
+
+	// Can be shared between different parameter types e.g. the plugin could declare
+	// both an Amp envelope and and Amp slider with the same UUID.
+	
+	// Declaring multiple parameters with the same UUID, of the same type, within
+	// the same plugin is invalid.
+
+	// UUIDs can be shared between different plugins
 	blink_UUID uuid;
 
 	// < 0 if the parameter does not belong to a group

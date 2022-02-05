@@ -19,6 +19,8 @@ inline OptionSpec option()
 		"Multiply",
 		"Mix",
 	};
+	out.flags |= blink_OptionFlags_CanManipulate;
+	out.flags |= blink_OptionFlags_IsManipulatorTarget;
 
 	return out;
 }

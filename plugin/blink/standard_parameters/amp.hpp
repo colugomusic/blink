@@ -81,7 +81,8 @@ inline SliderParameterSpec<float> slider_parameter()
 
 	out.slider = slider();
 	out.icon = blink_StdIcon_Amp;
-	out.flags = blink_SliderFlags_MovesDisplay;
+	out.flags |= blink_SliderFlags_CanManipulate;
+	out.flags |= blink_SliderFlags_MovesDisplay;
 
 	return out;
 }

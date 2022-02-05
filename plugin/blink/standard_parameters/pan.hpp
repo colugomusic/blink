@@ -103,6 +103,7 @@ inline SliderParameterSpec<float> slider_parameter()
 
 	out.slider = slider();
 	out.icon = blink_StdIcon_Pan;
+	out.flags |= blink_SliderFlags_CanManipulate;
 
 	return out;
 }

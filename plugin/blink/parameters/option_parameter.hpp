@@ -11,6 +11,7 @@ public:
 
 	const std::vector<std::string> options;
 	const blink_Index default_index;
+	const int flags;
 
 	OptionParameter(OptionSpec spec);
 
@@ -21,9 +22,10 @@ public:
 };
 
 inline OptionParameter::OptionParameter(OptionSpec spec)
-	: Parameter(spec)
-	, options(spec.options)
-	, default_index(spec.default_index)
+	: Parameter { spec }
+	, options { spec.options }
+	, default_index { spec.default_index }
+	, flags { spec.flags }
 {
 }
 
