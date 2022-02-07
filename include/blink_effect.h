@@ -56,6 +56,11 @@ typedef struct
 	void* proc_data;
 
 	blink_EffectInstance_GetInfo get_info;
+
+	// Called when the audio stream is initialized or restarted (happens if the
+	// host changes sample rate)
+	// 
+	// This function may allocate/deallocate memory
 	blink_Instance_StreamInit stream_init;
 
 	// Blockhead will call add_unit() four times per effect block to create a set
@@ -65,6 +70,8 @@ typedef struct
 	// A crossfade between one or more units occurs whenever block data changes
 	// or the song loops back to an earlier position. These two sitations may
 	// occur simulataneously therefore Blockhead requires four units in total.
+
+	// This function may allocate/deallocate memory
 	blink_EffectInstance_AddUnit add_unit;
 } blink_EffectInstance;
 
