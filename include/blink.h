@@ -34,7 +34,7 @@
 typedef uint8_t blink_ChannelCount;
 typedef uint64_t blink_FrameCount;
 typedef uint32_t blink_ParamCount;
-typedef uint32_t blink_Index;
+typedef int32_t blink_Index;
 typedef int32_t blink_ID;
 typedef const char* blink_UUID;
 typedef uint32_t blink_SR;
@@ -168,7 +168,7 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	blink_FloatPoints data;
+	blink_IntPoints data;
 } blink_OptionData;
 
 typedef struct
@@ -299,7 +299,6 @@ enum blink_OptionFlags
 	blink_OptionFlags_CanManipulate       = 1 << 1,
 	blink_OptionFlags_IsManipulatorTarget = 1 << 2,
 	blink_OptionFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
-	blink_OptionFlags_Morphable           = 1 << 4, // Can the host can send us fractional values?
 };
 
 enum blink_SliderFlags
@@ -334,9 +333,6 @@ enum blink_ToggleFlags
 // Option parameter
 //
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
-//
-// Values are actually stored as floats, not ints, to enable morphing via
-// manipulators when blink_OptionFlags_Morphable is set
 //
 typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
 
