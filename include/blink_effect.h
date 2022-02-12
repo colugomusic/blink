@@ -35,7 +35,7 @@ typedef struct
 
 struct blink_EffectUnitState
 {
-	int data_offset;
+	int64_t data_offset;
 	blink_ParameterData* parameter_data;
 };
 

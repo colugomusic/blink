@@ -101,7 +101,7 @@ typedef struct
 
 struct blink_SamplerUnitState
 {
-	int data_offset;
+	int64_t data_offset;
 	blink_ChannelMode channel_mode;
 	const blink_WarpPoints* warp_points;
 	const blink_ParameterData* parameter_data;

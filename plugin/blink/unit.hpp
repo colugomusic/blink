@@ -31,7 +31,7 @@ protected:
 
 	blink_SR SR() const { return get_SR(instance_); }
 
-	void begin_process(std::uint64_t buffer_id, const blink_Position* positions, int data_offset)
+	void begin_process(std::uint64_t buffer_id, const blink_Position* positions, int64_t data_offset)
 	{
 		//
 		// Unit::reset() is called at the start of the buffer if we have gone

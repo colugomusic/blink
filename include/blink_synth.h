@@ -13,7 +13,7 @@ typedef struct
 
 struct blink_SynthUnitState
 {
-	int data_offset;
+	int64_t data_offset;
 	blink_ParameterData* parameter_data;
 };
 
