@@ -17,7 +17,7 @@ public:
 	OptionIndexData(const OptionParameter& option_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].option : nullptr }
 		, default_value { option_.default_index }
-		, value { data && data->data.count > 0 ? data->data.points[0].y : default_value }
+		, value { data && data->points.count > 0 ? data->points.data[0].y : default_value }
 		, option { option_ }
 	{
 	}

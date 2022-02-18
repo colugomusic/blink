@@ -91,7 +91,7 @@ public:
 
 		for (blink_Index i = point_search_index_; i < envelope->points.count; i++)
 		{
-			const PitchPoint p1(envelope->points.points[i], envelope->points.min, envelope->points.max, transpose);
+			const PitchPoint p1(envelope->points.data[i], envelope->points.min, envelope->points.max, transpose);
 
 			if (block_position < p1.x)
 			{
@@ -104,7 +104,7 @@ public:
 					return (block_position * p1.get_ff()) + segment_start_;
 				}
 
-				PitchPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, transpose);
+				PitchPoint p0(envelope->points.data[i - 1], envelope->points.min, envelope->points.max, transpose);
 
 				auto n = block_position - p0.x;
 				auto segment_size = double(p1.x) - p0.x;
@@ -130,7 +130,7 @@ public:
 				{
 					point_search_index_ = i + 1;
 
-					PitchPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, transpose);
+					PitchPoint p0(envelope->points.data[i - 1], envelope->points.min, envelope->points.max, transpose);
 
 					auto segment_size = double(p1.x) - p0.x;
 
@@ -142,7 +142,7 @@ public:
 			}
 		}
 
-		PitchPoint p0(envelope->points.points[envelope->points.count - 1], envelope->points.min, envelope->points.max, transpose);
+		PitchPoint p0(envelope->points.data[envelope->points.count - 1], envelope->points.min, envelope->points.max, transpose);
 
 		auto n = block_position - p0.x;
 

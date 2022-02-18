@@ -17,14 +17,14 @@ public:
 
 	ChordIndexData(const ChordParameter& chord_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].chord : nullptr }
-		, value { data && data->blocks.count > 0 ? data->blocks.blocks[0].scale : EMPTY }
+		, value { data && data->points.count > 0 ? data->points.data[0].y : EMPTY }
 		, chord { chord_ }
 	{
 	}
 
 	blink_Scale search(blink_Position block_position) const
 	{
-		if (!data || data->blocks.count <= 1) return value;
+		if (!data || data->points.count <= 1) return value;
 
 		return chord.searcher.search(*data, block_position);
 	}
@@ -36,7 +36,7 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, int n, blink_Scale* out) const
 	{
-		if (!data || data->blocks.count <= 1)
+		if (!data || data->points.count <= 1)
 		{
 			std::fill(out, out + n, value);
 			return;
@@ -47,7 +47,7 @@ public:
 
 	void search_vec(const BlockPositions& block_positions, blink_Scale* out) const
 	{
-		if (!data || data->blocks.count <= 1)
+		if (!data || data->points.count <= 1)
 		{
 			std::fill(out, out + block_positions.count, value);
 			return;
@@ -58,7 +58,7 @@ public:
 
 	ml::DSPVectorInt search_vec(const BlockPositions& block_positions) const
 	{
-		if (!data || data->blocks.count <= 1) return ml::DSPVectorInt{ int32_t(value) };
+		if (!data || data->points.count <= 1) return ml::DSPVectorInt{ int32_t(value) };
 
 		return chord.searcher.search_vec_(*data, block_positions);
 	}

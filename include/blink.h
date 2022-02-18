@@ -65,11 +65,12 @@ enum blink_StdIcon
 	blink_StdIcon_PianoRoll = 8,
 };
 
-// Plugins define their own error codes. Blockhead will probably just ignore
-// any errors but this might be useful for future proofing
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Standard error codes
+// Plugins cans defined their own error codes which must be > 0
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef int blink_Error;
 
-// Some shared error codes. Plugin-specific error codes should be > 0
 enum blink_StdError
 {
 	blink_StdError_None = 0,
@@ -79,10 +80,13 @@ enum blink_StdError
 	blink_StdError_ManipulatorTargetDoesNotExist = -4,
 };
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Modulation point types
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
 	blink_IntPosition x;
-	blink_Bool value;
+	blink_Bool y;
 } blink_BoolPoint;
 
 typedef struct
@@ -99,14 +103,23 @@ typedef struct
 
 typedef struct
 {
+	blink_IntPosition x;
+	blink_Scale y;
+} blink_ChordBlock;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Modulation point array types
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+typedef struct
+{
 	blink_Index count;
-	blink_BoolPoint* points;
+	blink_BoolPoint* data;
 } blink_BoolPoints;
 
 typedef struct
 {
 	blink_Index count;
-	blink_FloatPoint* points;
+	blink_FloatPoint* data;
 	float min;
 	float max;
 } blink_FloatPoints;
@@ -114,11 +127,20 @@ typedef struct
 typedef struct
 {
 	blink_Index count;
-	blink_IntPoint* points;
+	blink_IntPoint* data;
 	int32_t min;
 	int32_t max;
 } blink_IntPoints;
 
+typedef struct
+{
+	blink_Index count;
+	blink_ChordBlock* data;
+} blink_ChordBlocks;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Range types
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
 	float min;
@@ -131,6 +153,9 @@ typedef struct
 	int max;
 } blink_IntRange;
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Parameter types
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 enum blink_ParameterType
 {
 	blink_ParameterType_Chord,
@@ -141,22 +166,13 @@ enum blink_ParameterType
 	blink_ParameterType_Toggle,
 };
 
-typedef struct
-{
-	blink_IntPosition position;
-	blink_Scale scale;
-} blink_ChordBlock;
-
-typedef struct
-{
-	blink_Index count;
-	blink_ChordBlock* blocks;
-} blink_ChordBlocks;
-
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Parameter data
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
 	blink_ParameterType type;
-	blink_ChordBlocks blocks;
+	blink_ChordBlocks points;
 } blink_ChordData;
 
 typedef struct
@@ -168,25 +184,25 @@ typedef struct
 typedef struct
 {
 	blink_ParameterType type;
-	blink_IntPoints data;
+	blink_IntPoints points;
 } blink_OptionData;
 
 typedef struct
 {
 	blink_ParameterType type;
-	blink_FloatPoints data;
+	blink_FloatPoints points;
 } blink_SliderData;
 
 typedef struct
 {
 	blink_ParameterType type;
-	int32_t value;
+	blink_IntPoints points;
 } blink_IntSliderData;
 
 typedef struct
 {
 	blink_ParameterType type;
-	blink_BoolPoints data;
+	blink_BoolPoints points;
 } blink_ToggleData;
 
 union blink_ParameterData
@@ -199,6 +215,9 @@ union blink_ParameterData
 	blink_IntSliderData int_slider;
 	blink_ToggleData toggle;
 };
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// Parameter data END
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 typedef float (*blink_Stepify)(void* proc_data, float value);
 typedef float (*blink_SnapValue)(void* proc_data, float value, float step_size, float snap_amount);
@@ -329,11 +348,11 @@ enum blink_ToggleFlags
 // Parameter Flags END
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Option parameter
 //
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
 
 typedef struct
@@ -350,10 +369,10 @@ typedef struct
 
 } blink_Option;
 
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Envelope parameter
 // Can be edited in Blockhead using the envelope editor
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef blink_Bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
 typedef blink_Bool (*blink_GetStepLine)(void* proc_data, int index, float step_size, float* out);
 typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData* data, float block_position);
@@ -424,10 +443,10 @@ typedef struct
 	blink_Envelope envelope;
 } blink_EnvelopeParameter;
 
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Chord parameter
 // Can be edited in Blockhead using the chord/scale/harmonics editor thing
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
@@ -435,10 +454,10 @@ typedef struct
 	blink_StdIcon icon;
 } blink_Chord;
 
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Slider parameter
 // Will be displayed in Blockhead as a slider or spinbox control
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 typedef struct
 {
@@ -459,10 +478,10 @@ typedef struct
 	blink_IntSlider slider;
 } blink_IntSliderParameter;
 
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Toggle parameter
 // On/off value
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Toggle
@@ -471,9 +490,9 @@ typedef struct
 	int flags; // blink_ToggleFlags
 } blink_Toggle;
 
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Generic Parameter
-//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 union blink_ParameterObject
 {
 	enum blink_ParameterType type;

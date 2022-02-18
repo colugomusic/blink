@@ -13,20 +13,20 @@ namespace search {
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc>
-inline float float_points(const blink_FloatPoints* data, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+inline float float_points(const blink_FloatPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
 {
 	*left = 0;
 
-	const auto clamp = [data](float value)
+	const auto clamp = [points](float value)
 	{
-		return std::clamp(value, data->min, data->max);
+		return std::clamp(value, points->min, points->max);
 	};
 
-	if (data->count < 1) return clamp(default_value);
-	if (data->count == 1) return clamp(data->points[0].y);
+	if (points->count < 1) return clamp(default_value);
+	if (points->count == 1) return clamp(points->data[0].y);
 
-	auto search_beg = data->points + search_beg_index;
-	auto search_end = data->points + data->count;
+	auto search_beg = points->data + search_beg_index;
+	auto search_end = points->data + points->count;
 	const auto pos = search(search_beg, search_end);
 
 	if (pos == search_beg)
@@ -38,7 +38,7 @@ inline float float_points(const blink_FloatPoints* data, float default_value, bl
 	if (pos == search_end)
 	{
 		// No points to the right so we're at the end of the envelope
-		*left = int(std::distance<const blink_FloatPoint*>(data->points, (pos - 1)));
+		*left = int(std::distance<const blink_FloatPoint*>(points->data, (pos - 1)));
 
 		return clamp((pos - 1)->y);
 	}
@@ -51,13 +51,13 @@ inline float float_points(const blink_FloatPoints* data, float default_value, bl
 	const auto segment_size = p1.x - p0.x;	// Should never be zero
 	const auto r = (block_position - p0.x) / segment_size;
 
-	*left = int(std::distance<const blink_FloatPoint*>(data->points, (pos - 1)));
+	*left = int(std::distance<const blink_FloatPoint*>(points->data, (pos - 1)));
 
 	return math::lerp(clamp(p0.y), clamp(p1.y), float(r));
 }
 
 // Use a binary search to locate the envelope position
-inline float float_points_binary(const blink_FloatPoints* data, float default_value, blink_Position block_position, int search_beg_index, int* left)
+inline float float_points_binary(const blink_FloatPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
 {
 	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
 	{
@@ -69,12 +69,12 @@ inline float float_points_binary(const blink_FloatPoints* data, float default_va
 		return std::upper_bound(beg, end, block_position, less);
 	};
 
-	return float_points(data, default_value, block_position, search_beg_index, left, find);
+	return float_points(points, default_value, block_position, search_beg_index, left, find);
 }
 
 // Use a forward search to locate the envelope position (can be
 // faster when envelope is being traversed forwards)
-inline float float_points_forward(const blink_FloatPoints* data, float default_value, blink_Position block_position, int search_beg_index, int* left)
+inline float float_points_forward(const blink_FloatPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
 {
 	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
 	{
@@ -86,7 +86,7 @@ inline float float_points_forward(const blink_FloatPoints* data, float default_v
 		return std::find_if(beg, end, greater);
 	};
 
-	return float_points(data, default_value, block_position, search_beg_index, left, find);
+	return float_points(points, default_value, block_position, search_beg_index, left, find);
 }
 
 // returns the scale value at the given block position
@@ -100,10 +100,10 @@ inline int chord(const blink_ChordData* data, blink_Position block_position, int
 {
 	*left = 0;
 
-	if (data->blocks.count < 2) return 0;
+	if (data->points.count < 2) return 0;
 
-	auto search_beg = data->blocks.blocks + search_beg_index;
-	auto search_end = data->blocks.blocks + data->blocks.count;
+	auto search_beg = data->points.data + search_beg_index;
+	auto search_end = data->points.data + data->points.count;
 	const auto pos = search(search_beg, search_end);
 
 	if (pos == search_beg)
@@ -112,7 +112,7 @@ inline int chord(const blink_ChordData* data, blink_Position block_position, int
 		return 0;
 	}
 
-	*left = int(std::distance<const blink_ChordBlock*>(data->blocks.blocks, (pos - 1)));
+	*left = int(std::distance<const blink_ChordBlock*>(data->points.data, (pos - 1)));
 
 	if (pos == search_end)
 	{
@@ -122,7 +122,7 @@ inline int chord(const blink_ChordData* data, blink_Position block_position, int
 
 	// We're somewhere in between two scale transitions.
 	// Return the scale on the left
-	return (pos - 1)->scale;
+	return (pos - 1)->y;
 }
 
 // Use a binary search to locate the scale at the block position
@@ -132,7 +132,7 @@ inline int chord_binary(const blink_ChordData* data, blink_Position block_positi
 	{
 		const auto less = [](blink_Position position, blink_ChordBlock block)
 		{
-			return position < block.position;
+			return position < block.x;
 		};
 
 		return std::upper_bound(beg, end, block_position, less);
@@ -149,7 +149,7 @@ inline int chord_forward(const blink_ChordData* data, blink_Position block_posit
 	{
 		const auto greater = [block_position](blink_ChordBlock block)
 		{
-			return block.position > block_position;
+			return block.x > block_position;
 		};
 
 		return std::find_if(beg, end, greater);
@@ -165,14 +165,14 @@ inline int chord_forward(const blink_ChordData* data, blink_Position block_posit
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc>
-inline bool toggle(const blink_BoolPoints* data, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+inline bool toggle(const blink_BoolPoints* points, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
 {
 	*left = 0;
 
-	if (data->count < 2) return 0;
+	if (points->count < 2) return 0;
 
-	auto search_beg = data->points + search_beg_index;
-	auto search_end = data->points + data->count;
+	auto search_beg = points->data + search_beg_index;
+	auto search_end = points->data + points->count;
 	const auto pos = search(search_beg, search_end);
 
 	if (pos == search_beg)
@@ -181,7 +181,7 @@ inline bool toggle(const blink_BoolPoints* data, blink_Position block_position, 
 		return false;
 	}
 
-	*left = int(std::distance<const blink_BoolPoint*>(data->points, (pos - 1)));
+	*left = int(std::distance<const blink_BoolPoint*>(points->data, (pos - 1)));
 
 	if (pos == search_end)
 	{
@@ -191,11 +191,11 @@ inline bool toggle(const blink_BoolPoints* data, blink_Position block_position, 
 
 	// We're somewhere in between two bool transitions.
 	// Return the bool on the left
-	return (pos - 1)->value;
+	return (pos - 1)->y;
 }
 
 // Use a binary search to locate the block position
-inline bool toggle_binary(const blink_BoolPoints* data, blink_Position block_position, int search_beg_index, int* left)
+inline bool toggle_binary(const blink_BoolPoints* points, blink_Position block_position, int search_beg_index, int* left)
 {
 	const auto find = [block_position](const blink_BoolPoint* beg, const blink_BoolPoint* end)
 	{
@@ -207,12 +207,12 @@ inline bool toggle_binary(const blink_BoolPoints* data, blink_Position block_pos
 		return std::upper_bound(beg, end, block_position, less);
 	};
 
-	return toggle(data, block_position, search_beg_index, left, find);
+	return toggle(points, block_position, search_beg_index, left, find);
 }
 
 // Use a forward search to locate the block position (can be
 // faster when block is being traversed forwards)
-inline bool toggle_forward(const blink_BoolPoints* data, blink_Position block_position, int search_beg_index, int* left)
+inline bool toggle_forward(const blink_BoolPoints* points, blink_Position block_position, int search_beg_index, int* left)
 {
 	const auto find = [block_position](const blink_BoolPoint* beg, const blink_BoolPoint* end)
 	{
@@ -224,7 +224,7 @@ inline bool toggle_forward(const blink_BoolPoints* data, blink_Position block_po
 		return std::find_if(beg, end, greater);
 	};
 
-	return toggle(data, block_position, search_beg_index, left, find);
+	return toggle(points, block_position, search_beg_index, left, find);
 }
 
 } // search

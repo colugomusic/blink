@@ -57,7 +57,7 @@ public:
 
 		for (blink_Index i = point_search_index_; i < envelope->points.count; i++)
 		{
-			const FFPoint p1(envelope->points.points[i], envelope->points.min, envelope->points.max, speed);
+			const FFPoint p1(envelope->points.data[i], envelope->points.min, envelope->points.max, speed);
 
 			if (block_position < p1.x)
 			{
@@ -70,7 +70,7 @@ public:
 					return float(spooky_maths(p1.ff, p1.ff, 1.0, block_position, double(segment_start_)));
 				}
 
-				FFPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, speed);
+				FFPoint p0(envelope->points.data[i - 1], envelope->points.min, envelope->points.max, speed);
 
 				auto n = block_position - p0.x;
 				auto segment_size = double(p1.x) - p0.x;
@@ -101,7 +101,7 @@ public:
 				{
 					point_search_index_ = i + 1;
 
-					FFPoint p0(envelope->points.points[i - 1], envelope->points.min, envelope->points.max, speed);
+					FFPoint p0(envelope->points.data[i - 1], envelope->points.min, envelope->points.max, speed);
 
 					auto segment_size = double(p1.x) - p0.x;
 
@@ -119,7 +119,7 @@ public:
 			}
 		}
 
-		FFPoint p0(envelope->points.points[envelope->points.count - 1], envelope->points.min, envelope->points.max, speed);
+		FFPoint p0(envelope->points.data[envelope->points.count - 1], envelope->points.min, envelope->points.max, speed);
 
 		auto n = block_position - p0.x;
 

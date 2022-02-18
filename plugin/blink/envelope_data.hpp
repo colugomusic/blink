@@ -17,7 +17,7 @@ public:
 	EnvelopeIndexData(const blink::Envelope& envelope_, const blink_ParameterData* param_data, blink_Index index)
 		: data { param_data ? &param_data[index].envelope : nullptr }
 		, default_value { envelope_.default_value }
-		, value { data && data->points.count > 0 ? data->points.points[0].y : default_value }
+		, value { data && data->points.count > 0 ? data->points.data[0].y : default_value }
 		, envelope { envelope_ }
 	{
 	}
