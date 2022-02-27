@@ -35,6 +35,14 @@ typedef struct
 
 struct blink_EffectUnitState
 {
+	uint64_t id; // Increments by at least one every time the unit state changes.
+	             // The same unit state might be passed in for multiple audio buffers, i.e.
+	             // this id might not change from one buffer to the next.
+	             // Could be used to optimize things like envelope traversals, for example
+	             // if the parameter state has not changed since the last audio buffer then
+				 // a plugin could continue searching from the previously hit envelope
+	             // point instead of searching from the beginning
+
 	int64_t data_offset;
 	blink_ParameterData* parameter_data;
 };
