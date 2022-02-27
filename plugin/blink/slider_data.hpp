@@ -69,8 +69,8 @@ class IntSliderIndexData
 public:
 
 	const blink_IntSliderData* const data;
-	const int default_value;
-	const int value;
+	const int64_t default_value;
+	const int64_t value;
 	const blink::Slider<int>* const slider;
 
 	IntSliderIndexData(const blink::Slider<int>& slider_, const blink_ParameterData* param_data, blink_Index index)
