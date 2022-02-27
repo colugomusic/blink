@@ -112,16 +112,7 @@ inline int chord(const blink_ChordData* data, blink_Position block_position, int
 		return 0;
 	}
 
-	*left = int(std::distance<const blink_ChordBlock*>(data->points.data, (pos - 1)));
-
-	if (pos == search_end)
-	{
-		// Nothing to the right so we're at the end
-		return 0;
-	}
-
-	// We're somewhere in between two scale transitions.
-	// Return the scale on the left
+	// Otherwise always return the scale to the left
 	return (pos - 1)->y;
 }
 
@@ -181,7 +172,7 @@ inline bool toggle(const blink_BoolPoints* points, blink_Position block_position
 		return false;
 	}
 
-	*left = int(std::distance<const blink_BoolPoint*>(points->data, (pos - 1)));
+	*left = int(std::distance<const blink_IntPoint*>(points->data, (pos - 1)));
 
 	if (pos == search_end)
 	{
@@ -197,9 +188,9 @@ inline bool toggle(const blink_BoolPoints* points, blink_Position block_position
 // Use a binary search to locate the block position
 inline bool toggle_binary(const blink_BoolPoints* points, blink_Position block_position, int search_beg_index, int* left)
 {
-	const auto find = [block_position](const blink_BoolPoint* beg, const blink_BoolPoint* end)
+	const auto find = [block_position](const blink_IntPoint* beg, const blink_IntPoint* end)
 	{
-		const auto less = [](blink_Position position, blink_BoolPoint point)
+		const auto less = [](blink_Position position, blink_IntPoint point)
 		{
 			return position < point.x;
 		};
@@ -214,9 +205,9 @@ inline bool toggle_binary(const blink_BoolPoints* points, blink_Position block_p
 // faster when block is being traversed forwards)
 inline bool toggle_forward(const blink_BoolPoints* points, blink_Position block_position, int search_beg_index, int* left)
 {
-	const auto find = [block_position](const blink_BoolPoint* beg, const blink_BoolPoint* end)
+	const auto find = [block_position](const blink_IntPoint* beg, const blink_IntPoint* end)
 	{
-		const auto greater = [block_position](blink_BoolPoint point)
+		const auto greater = [block_position](blink_IntPoint point)
 		{
 			return point.x > block_position;
 		};
