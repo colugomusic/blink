@@ -10,8 +10,8 @@ class OptionIndexData
 public:
 
 	const blink_OptionData* const data;
-	const int32_t default_value;
-	const int32_t value;
+	const int64_t default_value;
+	const int64_t value;
 	const OptionParameter& option;
 
 	OptionIndexData(const OptionParameter& option_, const blink_ParameterData* param_data, blink_Index index)
