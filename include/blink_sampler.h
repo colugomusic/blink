@@ -51,11 +51,16 @@ typedef struct
 } blink_WarpPoints;
 
 //
-// Sampler Config
+// Sampler Buffer Data
 //
 typedef struct
 {
-	uint64_t buffer_id;
+	uint64_t buffer_id; // increments for each audio buffer. instances should reset themselves
+	                    // if they go at least one audio buffer without being processed i.e.
+	                    // if (buffer_id > (previous_buffer_id + 1)) )
+	                    // units should also reset themselves if they go at least one audio buffer
+	                    // without being processed.
+
 	blink_SR song_rate;
 	blink_SampleInfo* sample_info;
 	blink_Bool analysis_ready;
@@ -99,8 +104,18 @@ typedef struct
 	float* amp;
 } blink_SamplerDrawInfo;
 
+// Unit state is essentially state that changes in response to user input (e.g. parameter
+// state).
 struct blink_SamplerUnitState
 {
+	uint64_t id; // Increments by at least one every time the unit state changes.
+	             // The same unit state might be passed in for multiple audio buffers, i.e.
+	             // this id might not change from one buffer to the next.
+	             // Could be used to optimize things like envelope traversals, for example
+	             // if the parameter state has not changed since the last audio buffer then
+				 // a plugin could continue searching from the previously hit envelope
+	             // point instead of searching from the beginning
+
 	int64_t data_offset;
 	blink_ChannelMode channel_mode;
 	const blink_WarpPoints* warp_points;
