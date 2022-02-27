@@ -86,19 +86,13 @@ enum blink_StdError
 typedef struct
 {
 	blink_IntPosition x;
-	blink_Bool y;
-} blink_BoolPoint;
-
-typedef struct
-{
-	blink_IntPosition x;
 	float y;
 } blink_FloatPoint;
 
 typedef struct
 {
 	blink_IntPosition x;
-	int32_t y;
+	int64_t y;
 } blink_IntPoint;
 
 typedef struct
@@ -113,7 +107,7 @@ typedef struct
 typedef struct
 {
 	blink_Index count;
-	blink_BoolPoint* data;
+	blink_IntPoint* data;
 } blink_BoolPoints;
 
 typedef struct
