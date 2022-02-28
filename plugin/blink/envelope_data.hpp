@@ -22,6 +22,9 @@ public:
 	{
 	}
 
+	EnvelopeIndexData(const EnvelopeIndexData& rhs) = default;
+	EnvelopeIndexData(EnvelopeIndexData && rhs) = default;
+
 	float search(blink_Position block_position) const
 	{
 		if (!data || data->points.count <= 1) return value;
@@ -73,6 +76,9 @@ public:
 		: EnvelopeIndexData(envelope, param_data, Index)
 	{
 	}
+
+	EnvelopeData(const EnvelopeData & rhs) = default;
+	EnvelopeData(EnvelopeData && rhs) = default;
 };
 
 } // blink

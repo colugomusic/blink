@@ -21,6 +21,9 @@ public:
 		, option { option_ }
 	{
 	}
+
+	OptionIndexData(const OptionIndexData & rhs) = default;
+	OptionIndexData(OptionIndexData && rhs) = default;
 };
 
 template <int Index>
@@ -32,6 +35,9 @@ public:
 		: OptionIndexData(option, param_data, Index)
 	{
 	}
+
+	OptionData(const OptionData & rhs) = default;
+	OptionData(OptionData && rhs) = default;
 };
 
 } // blink

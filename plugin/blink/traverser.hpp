@@ -14,12 +14,20 @@ namespace blink {
 // Generates a vector of block read positions and a vector of search reset points to
 // indicate places where traversers need to reset themselves
 // 
-// Can also be used to generate a single position and reset event (the first elements
-// of the vectors are used)
-//
 class Traverser
 {
 public:
+
+	void generate(uint64_t state_id, const BlockPositions& block_positions, int n = kFloatsPerDSPVector)
+	{
+		generate(block_positions, n);
+
+		if (state_id != state_id_)
+		{
+			set_reset(0);
+			state_id_ = state_id;
+		}
+	}
 
 	void generate(const BlockPositions& block_positions, int n = kFloatsPerDSPVector)
 	{
@@ -47,28 +55,7 @@ private:
 
 	const BlockPositions* block_positions_;
 	ml::DSPVectorInt reset_;
+	uint64_t state_id_ { 0 };
 };
 
-//
-// Puts a reset event at the traverser's start if the pointer changed
-//
-template <class T>
-class TraverserResetter
-{
-public:
-
-	void check(const T* ptr, Traverser* traverser)
-	{
-		if (ptr != last_ptr_)
-		{
-			traverser->set_reset(0);
-		}
-
-		last_ptr_ = ptr;
-	}
-
-private:
-
-	const T* last_ptr_ = nullptr;
-};
 }

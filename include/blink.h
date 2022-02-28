@@ -312,6 +312,7 @@ enum blink_OptionFlags
 	blink_OptionFlags_CanManipulate       = 1 << 1,
 	blink_OptionFlags_IsManipulatorTarget = 1 << 2,
 	blink_OptionFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
+	blink_OptionFlags_Hidden              = 1 << 4,
 };
 
 enum blink_SliderFlags
