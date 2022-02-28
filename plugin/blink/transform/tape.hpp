@@ -45,6 +45,7 @@ public:
 
 	auto& get_pitched_positions() const { return stage_.positions.pitched; }
 	auto& get_warped_positions() const { return stage_.positions.warped; }
+	auto& get_reversed_positions() const { return stage_.positions.reversed; }
 	auto& get_pitched_derivatives() const { return stage_.derivatives.pitched; }
 	auto& get_warped_derivatives() const { return stage_.derivatives.warped; }
 
