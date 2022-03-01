@@ -143,21 +143,12 @@ public:
 	struct Config
 	{
 		uint64_t unit_state_id;
-		float transpose;
-		int64_t sample_offset;
 		std::function<blink_IntPosition(blink_IntPosition)> transform_position;
-
-		struct
-		{
-			const blink_EnvelopeData* pitch;
-		} env;
 
 		struct
 		{
 			const blink_OptionData* reverse;
 		} option;
-
-		const blink_WarpPoints* warp_points;
 
 		struct
 		{
