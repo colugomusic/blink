@@ -120,6 +120,60 @@ inline void Tape::apply_warp(const Config& config, int count)
 
 inline void Tape::apply_reverse(const Config& config, int count)
 {
+	// These sub-calculators are used to transform reverse
+	// modulation points into "post-warp-space" by applying
+	// the pitch and warp calculations to each point
+	struct
+	{
+		calculators::PitchUnit pitch;
+		calculators::PitchUnit::Config pitch_config {};
+		calculators::WarpUnit warp;
+
+		struct
+		{
+			blink_Position pre_pitch { std::numeric_limits<std::int32_t>::max() };
+			blink_Position pre_warp { std::numeric_limits<std::int32_t>::max() };
+		} prev_positions;
+	} sub_calculators;
+
+	sub_calculators.pitch_config.pitch = config.env.pitch;
+	sub_calculators.pitch_config.transpose = config.transpose;
+
+	const auto transform_position { [&sub_calculators, &config](blink_IntPosition p)
+	{
+		auto x { static_cast<blink_Position>(p) };
+
+		if (config.env.pitch && config.env.pitch->points.count > 0)
+		{
+			if (x < sub_calculators.prev_positions.pre_pitch)
+			{
+				sub_calculators.pitch.reset();
+			}
+
+			sub_calculators.prev_positions.pre_pitch = x;
+
+			x = sub_calculators.pitch(sub_calculators.pitch_config, x);
+		}
+
+		x -= config.sample_offset;
+
+		if (config.warp_points && config.warp_points->count > 0)
+		{
+			if (x < sub_calculators.prev_positions.pre_warp)
+			{
+				sub_calculators.warp.reset();
+			}
+
+			sub_calculators.prev_positions.pre_warp = x;
+
+			x = sub_calculators.warp(config.warp_points, x);
+		}
+
+		p = static_cast<blink_IntPosition>(x);
+
+		return p;
+	}};
+
 	calculators::Reverse::Config calculator_config;
 
 	calculator_config.env.pitch = config.env.pitch;
@@ -129,6 +183,7 @@ inline void Tape::apply_reverse(const Config& config, int count)
 	calculator_config.transpose = config.transpose;
 	calculator_config.unit_state_id = config.unit_state_id;
 	calculator_config.warp_points = config.warp_points;
+	calculator_config.transform_position = transform_position;
 
 	calculators_.reverse(calculator_config, stage_.positions.warped, count);
 }

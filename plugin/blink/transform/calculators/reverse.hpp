@@ -145,6 +145,7 @@ public:
 		uint64_t unit_state_id;
 		float transpose;
 		int64_t sample_offset;
+		std::function<blink_IntPosition(blink_IntPosition)> transform_position;
 
 		struct
 		{
@@ -172,61 +173,10 @@ public:
 			return;
 		}
 
-		struct
-		{
-			PitchUnit pitch;
-			PitchUnit::Config pitch_config {};
-			WarpUnit warp;
-
-			struct
-			{
-				blink_Position pre_pitch { std::numeric_limits<std::int32_t>::max() };
-				blink_Position pre_warp { std::numeric_limits<std::int32_t>::max() };
-			} prev_positions;
-		} sub_calculators;
-
-		sub_calculators.pitch_config.pitch = config.env.pitch;
-		sub_calculators.pitch_config.transpose = config.transpose;
-
-		const auto transform_position { [&sub_calculators, &config](blink_IntPosition p)
-		{
-			auto x { static_cast<blink_Position>(p) };
-
-			if (config.env.pitch && config.env.pitch->points.count > 0)
-			{
-				if (x < sub_calculators.prev_positions.pre_pitch)
-				{
-					sub_calculators.pitch.reset();
-				}
-
-				sub_calculators.prev_positions.pre_pitch = x;
-
-				x = sub_calculators.pitch(sub_calculators.pitch_config, x);
-			}
-
-			x -= config.sample_offset;
-
-			if (config.warp_points && config.warp_points->count > 0)
-			{
-				if (x < sub_calculators.prev_positions.pre_warp)
-				{
-					sub_calculators.warp.reset();
-				}
-
-				sub_calculators.prev_positions.pre_warp = x;
-
-				x = sub_calculators.warp(config.warp_points, x);
-			}
-
-			p = static_cast<blink_IntPosition>(x);
-
-			return p;
-		}};
-
 		ReverseUnit::Config unit_config;
 
 		unit_config.reversal_data = config.option.reverse;
-		unit_config.transform_position = transform_position;
+		unit_config.transform_position = config.transform_position;
 
 		traverser_.generate(config.unit_state_id, block_positions, count);
 
