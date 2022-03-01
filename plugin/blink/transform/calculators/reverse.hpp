@@ -21,6 +21,10 @@ public:
 
 	blink_Position operator()(Config config, blink_Position block_position)
 	{
+		static constexpr auto MIRROR { 0 };
+		static constexpr auto TAPE { 1 };
+		static constexpr auto SLIP { 2 };
+
 		const auto get_point { [&config](blink_Index i)
 		{
 			return config.reversal_data->points.data[i];
@@ -61,7 +65,24 @@ public:
 					const auto x { block_position };
 					const auto distance { x - p0.x };
 
-					return segment_start_frame_ + (distance * direction);
+					switch (p0.y)
+					{
+						case SLIP:
+						case TAPE:
+						{
+							return segment_start_frame_ - distance;
+						}
+
+						case MIRROR:
+						{
+							return p1.x - distance;
+						}
+
+						default:
+						{
+							return segment_start_frame_ + distance;
+						}
+					}
 				}
 			}
 			else
@@ -71,7 +92,20 @@ public:
 					const auto p0 { get_xformed_point(i-1) };
 					const auto distance { p1.x - p0.x };
 
-					segment_start_frame_ += (distance * direction);
+					switch (p0.y)
+					{
+						case TAPE:
+						{
+							segment_start_frame_ -= distance;
+							break;
+						}
+
+						default:
+						{
+							segment_start_frame_ += distance;
+							break;
+						}
+					}
 				}
 				else
 				{
