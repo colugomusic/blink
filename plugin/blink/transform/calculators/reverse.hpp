@@ -143,6 +143,12 @@ public:
 			PitchUnit pitch;
 			PitchUnit::Config pitch_config {};
 			WarpUnit warp;
+
+			struct
+			{
+				blink_Position pre_pitch { std::numeric_limits<std::int32_t>::max() };
+				blink_Position pre_warp { std::numeric_limits<std::int32_t>::max() };
+			} prev_positions;
 		} sub_calculators;
 
 		sub_calculators.pitch_config.pitch = config.env.pitch;
@@ -150,13 +156,17 @@ public:
 
 		const auto transform_position { [&sub_calculators, &config](blink_IntPosition p)
 		{
-			sub_calculators.pitch.reset(); // TODO: v0.21 surely this can be optimized!!!!
-			sub_calculators.warp.reset();  //       shouldn't have to reset these every time
-
 			auto x { static_cast<blink_Position>(p) };
 
 			if (config.env.pitch && config.env.pitch->points.count > 0)
 			{
+				if (x < sub_calculators.prev_positions.pre_pitch)
+				{
+					sub_calculators.pitch.reset();
+				}
+
+				sub_calculators.prev_positions.pre_pitch = x;
+
 				x = sub_calculators.pitch(sub_calculators.pitch_config, x);
 			}
 
@@ -164,6 +174,13 @@ public:
 
 			if (config.warp_points && config.warp_points->count > 0)
 			{
+				if (x < sub_calculators.prev_positions.pre_warp)
+				{
+					sub_calculators.warp.reset();
+				}
+
+				sub_calculators.prev_positions.pre_warp = x;
+
 				x = sub_calculators.warp(config.warp_points, x);
 			}
 
@@ -180,14 +197,6 @@ public:
 		traverser_.generate(config.unit_state_id, block_positions, count);
 
 		const auto& resets { traverser_.get_resets() };
-
-		//for (int i = 0; i < config.option.reverse->points.count; i++)
-		//{
-		//	const auto p { config.option.reverse->points.data[i] };
-		//	const auto xp { transform_point(p) };
-
-		//	std::cout << p.x << " --> " << xp.x << "\n";
-		//}
 
 		for (int i = 0; i < count; i++)
 		{
