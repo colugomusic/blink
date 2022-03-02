@@ -10,11 +10,13 @@ namespace blink {
 namespace std_params {
 namespace resonance {
 
+static constexpr auto UUID { BLINK_STD_UUID_FILTER_RESONANCE };
+
 inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_FILTER_RESONANCE;
+	out.uuid = UUID;
 	out.name = "Resonance";
 	out.envelope = percentage::envelope();
 
