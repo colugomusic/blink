@@ -24,46 +24,25 @@ public:
 		static constexpr auto MIRROR { 0 };
 		static constexpr auto TAPE { 1 };
 		static constexpr auto SLIP { 2 };
-
-		const auto get_point { [&config](blink_Index i)
-		{
-			return config.reversal_data->points.data[i];
-		}};
-
-		const auto get_xformed_point { [&config](blink_Index i)
-		{
-			auto p { config.reversal_data->points.data[i] };
-
-			p.x = config.transform_position(p.x);
-
-			return p;
-		}};
-
-		const auto get_direction { [&](blink_Index i)
-		{
-			if (i == 0) return 1;
-
-			const auto p0 { get_xformed_point(i-1) };
-
-			return p0.y >= 0 ? -1 : 1;
-		}};
+		
+		config_ = std::move(config);
 
 		for (blink_Index i = point_search_index_; i < config.reversal_data->points.count; i++)
 		{
-			const auto direction { get_direction(i) };
-			const auto p1 { get_xformed_point(i) };
+			const auto p1 { get_cache_point(1, i) };
 
 			if (block_position < p1.x)
 			{
 				if (i == 0) return block_position;
 
-				const auto p0 { get_xformed_point(i-1) };
+				const auto p0 { get_cache_point(0, i - 1) };
 				const auto length { p1.x - p0.x };
 
 				if (length > 0)
 				{
-					const auto x { block_position };
-					const auto distance { x - p0.x };
+					// If we got here then we are somewhere between two reverse
+					// points
+					const auto distance { block_position - p0.x };
 
 					switch (p0.y)
 					{
@@ -89,7 +68,13 @@ public:
 			{
 				if (i != 0)
 				{
-					const auto p0 { get_xformed_point(i-1) };
+					// If we got here then we are somewhere in between two
+					// reverse points and we are about to go to the next point
+
+					// The starting frame of the next segment needs to be
+					// calculated
+
+					const auto p0 { get_cache_point(0, i - 1) };
 					const auto distance { p1.x - p0.x };
 
 					switch (p0.y)
@@ -109,6 +94,9 @@ public:
 				}
 				else
 				{
+					// If we got here then we are about to pass the first reverse
+					// point, in which case the segment start is the x position of
+					// the point
 					segment_start_frame_ = p1.x;
 				}
 
@@ -116,24 +104,49 @@ public:
 			}
 		}
 
-		const auto p0 { get_xformed_point(config.reversal_data->points.count-1) };
-		const auto x { block_position };
-		const auto distance { x - p0.x };
-		const auto direction { get_direction(config.reversal_data->points.count) };
+		const auto p0 { get_cache_point(0, config.reversal_data->points.count-1) };
+		const auto distance { block_position - p0.x };
 
-		return segment_start_frame_ + (distance * direction);
+		return segment_start_frame_ + distance;
 	}
 
 	void reset()
 	{
 		segment_start_frame_ = 0.0f;
 		point_search_index_ = 0;
+		cache_.dirt = { -1, -1 };
 	}
 
 private:
 
+	// Two points are kept in cache because the transformation might be expensive (?)
+	//
+	// If point_index is not equal to whatever it was the last time this point was
+	// accessed, the point is considered dirty and will update
+	//
+	blink_IntPoint get_cache_point(int cache_index, int point_index) const
+	{
+		if (cache_.dirt[cache_index] != point_index)
+		{
+			cache_.points[cache_index] = config_.reversal_data->points.data[point_index];
+			cache_.points[cache_index].x = config_.transform_position(cache_.points[cache_index].x);
+			cache_.dirt[cache_index] = point_index;
+
+			return cache_.points[cache_index];
+		}
+
+		return cache_.points[cache_index];
+	}
+
+	Config config_ {};
 	blink_Position segment_start_frame_ { 0.0f };
 	int point_search_index_ { 0 };
+
+	mutable struct
+	{
+		std::array<blink_IntPoint, 2> points;
+		std::array<int, 2> dirt { -1, -1 };
+	} cache_;
 };
 
 class Reverse
