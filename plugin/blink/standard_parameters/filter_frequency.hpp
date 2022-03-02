@@ -2,11 +2,15 @@
 
 #include <tweak/tweak.hpp>
 #include <blink/parameters/envelope_parameter_spec.hpp>
+#include <blink/standard_parameters/percentage.hpp>
+#include <blink/standard_parameters/search.hpp>
 #include <blink/math.hpp>
 
 namespace blink {
 namespace std_params {
 namespace filter_frequency {
+
+static constexpr auto UUID { BLINK_STD_UUID_FILTER_FREQUENCY };
 
 inline auto linear2hz(float v)
 {
@@ -114,7 +118,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 {
 	EnvelopeParameterSpec out;
 
-	out.uuid = BLINK_STD_UUID_FILTER_FREQUENCY;
+	out.uuid = UUID;
 	out.name = "Frequency";
 
 	out.envelope = envelope();
