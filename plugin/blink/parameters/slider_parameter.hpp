@@ -49,7 +49,7 @@ inline blink_ParameterType SliderParameter<int>::get_type() const
 template <class T>
 const char* SliderParameter<T>::display_value(T value) const
 {
-	return (display_value_buffer_ = spec_.slider.display_value(value)).c_str();
+	return (display_value_buffer_ = spec.slider.display_value(value)).c_str();
 }
 
 }

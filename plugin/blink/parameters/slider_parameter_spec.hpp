@@ -1,5 +1,6 @@
 #pragma once
 
+#include <blink/parameters/parameter_spec.hpp>
 #include <blink/slider_spec.hpp>
 
 namespace blink {
