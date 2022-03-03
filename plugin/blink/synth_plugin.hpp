@@ -1,6 +1,8 @@
 #pragma once
 
-#include <set>
+#include <algorithm>
+#include <memory>
+#include <vector>
 #include <blink/plugin.hpp>
 #include <blink/synth_instance.hpp>
 
@@ -10,41 +12,44 @@ class SynthPlugin : public Plugin
 {
 public:
 
-	~SynthPlugin();
-
 	SynthInstance* add_instance();
-	void destroy_instance(SynthInstance* instance);
+	blink_Error destroy_instance(SynthInstance* instance);
+	blink_Error destroy_instance(blink_SynthInstance && instance);
 
 private:
 
-	virtual SynthInstance* make_instance() = 0;
+	virtual auto make_instance() -> std::unique_ptr<blink::SynthInstance> = 0;
 
-	std::set<SynthInstance*> instances_;
+	std::vector<std::unique_ptr<SynthInstance>> instances_;
 };
-
-inline SynthPlugin::~SynthPlugin()
-{
-	for (auto instance : instances_)
-	{
-		delete instance;
-	}
-}
 
 inline SynthInstance* SynthPlugin::add_instance()
 {
-	const auto instance = make_instance();
+	auto instance { make_instance() };
 
-	instances_.insert(instance);
-	register_instance(instance);
+	register_instance(instance.get());
 
-	return instance;
+	return instances_.emplace_back(std::move(instance)).get();
 }
 
-inline void SynthPlugin::destroy_instance(SynthInstance* instance)
+inline blink_Error SynthPlugin::destroy_instance(SynthInstance* instance)
 {
-	instances_.erase(instance);
+	const auto pos { std::find_if(instances_.begin(), instances_.end(), [instance](auto && ptr)
+	{
+		return ptr.get() == instance;
+	})};
+
+	if (pos == instances_.end()) return blink_StdError_InvalidInstance;
+
 	unregister_instance(instance);
-	delete instance;
+	instances_.erase(pos);
+
+	return BLINK_OK;
+}
+
+inline blink_Error SynthPlugin::destroy_instance(blink_SynthInstance && instance)
+{
+	return destroy_instance(static_cast<SynthInstance*>(instance.proc_data));
 }
 
 } // tract

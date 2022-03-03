@@ -1,6 +1,8 @@
 #pragma once
 
-#include <set>
+#include <algorithm>
+#include <memory>
+#include <vector>
 #include <blink/plugin.hpp>
 #include <blink/effect_instance.hpp>
 
@@ -10,41 +12,44 @@ class EffectPlugin : public Plugin
 {
 public:
 
-	~EffectPlugin();
-
 	EffectInstance* add_instance();
-	void destroy_instance(EffectInstance* instance);
+	blink_Error destroy_instance(EffectInstance* instance);
+	blink_Error destroy_instance(blink_EffectInstance && instance);
 
 private:
 
-	virtual EffectInstance* make_instance() = 0;
+	virtual auto make_instance() -> std::unique_ptr<EffectInstance> = 0;
 
-	std::set<EffectInstance*> instances_;
+	std::vector<std::unique_ptr<EffectInstance>> instances_;
 };
-
-inline EffectPlugin::~EffectPlugin()
-{
-	for (auto instance : instances_)
-	{
-		delete instance;
-	}
-}
 
 inline EffectInstance* EffectPlugin::add_instance()
 {
-	const auto instance = make_instance();
+	auto instance { make_instance() };
 
-	instances_.insert(instance);
-	register_instance(instance);
+	register_instance(instance.get());
 
-	return instance;
+	return instances_.emplace_back(std::move(instance)).get();
 }
 
-inline void EffectPlugin::destroy_instance(EffectInstance* instance)
+inline blink_Error EffectPlugin::destroy_instance(EffectInstance* instance)
 {
-	instances_.erase(instance);
+	const auto pos { std::find_if(instances_.begin(), instances_.end(), [instance](auto && ptr)
+	{
+		return ptr.get() == instance;
+	})};
+
+	if (pos == instances_.end()) return blink_StdError_InvalidInstance;
+
 	unregister_instance(instance);
-	delete instance;
+	instances_.erase(pos);
+
+	return BLINK_OK;
+}
+
+inline blink_Error EffectPlugin::destroy_instance(blink_EffectInstance && instance)
+{
+	return destroy_instance(static_cast<EffectInstance*>(instance.proc_data));
 }
 
 } // tract

@@ -10,41 +10,44 @@ class SamplerPlugin : public Plugin
 {
 public:
 
-	~SamplerPlugin();
-
 	SamplerInstance* add_instance();
-	void destroy_instance(SamplerInstance* instance);
+	blink_Error destroy_instance(SamplerInstance* instance);
+	blink_Error destroy_instance(blink_SamplerInstance && instance);
 
 private:
 
-	virtual SamplerInstance* make_instance() = 0;
+	virtual auto make_instance() -> std::unique_ptr<blink::SamplerInstance> = 0;
 
-	std::set<SamplerInstance*> instances_;
+	std::vector<std::unique_ptr<SamplerInstance>> instances_;
 };
-
-inline SamplerPlugin::~SamplerPlugin()
-{
-	for (auto instance : instances_)
-	{
-		delete instance;
-	}
-}
 
 inline SamplerInstance* SamplerPlugin::add_instance()
 {
-	const auto instance = make_instance();
+	auto instance { make_instance() };
 
-	instances_.insert(instance);
-	register_instance(instance);
+	register_instance(instance.get());
 
-	return instance;
+	return instances_.emplace_back(std::move(instance)).get();
 }
 
-inline void SamplerPlugin::destroy_instance(SamplerInstance* instance)
+inline blink_Error SamplerPlugin::destroy_instance(SamplerInstance* instance)
 {
-	instances_.erase(instance);
+	const auto pos { std::find_if(instances_.begin(), instances_.end(), [instance](auto && ptr)
+	{
+		return ptr.get() == instance;
+	})};
+
+	if (pos == instances_.end()) return blink_StdError_InvalidInstance;
+
 	unregister_instance(instance);
-	delete instance;
+	instances_.erase(pos);
+
+	return BLINK_OK;
+}
+
+inline blink_Error SamplerPlugin::destroy_instance(blink_SamplerInstance && instance)
+{
+	return destroy_instance(static_cast<SamplerInstance*>(instance.proc_data));
 }
 
 } // tract

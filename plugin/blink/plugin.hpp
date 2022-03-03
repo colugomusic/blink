@@ -7,6 +7,7 @@
 #include <string>
 #include "blink.h"
 #include "instance.hpp"
+#include <blink/bind.hpp>
 #include <blink/envelope_spec.hpp>
 #include <blink/slider_spec.hpp>
 #include <blink/parameters/group.hpp>
@@ -44,9 +45,13 @@ public:
 	const Parameter& get_parameter(blink_Index index) const;
 	const Parameter& get_parameter(blink_UUID uuid) const;
 
-	std::optional<const EnvelopeManipulatorTarget*> get_envelope_manipulator_target(blink_UUID uuid) const;
+	auto get_envelope_manipulator_target(blink_UUID uuid) const -> std::optional<const EnvelopeManipulatorTarget*>;
+	auto get_envelope_manipulator_target(blink_UUID uuid, blink_EnvelopeManipulatorTarget* out) const -> blink_Error;
 
 	auto& resources() { return resources_; }
+
+	template <class FileSystem>
+	auto get_resource_data(const FileSystem& fs, const char* path) -> blink_ResourceData;
 
 private:
 
@@ -177,7 +182,7 @@ inline const Parameter& Plugin::get_parameter(blink_UUID uuid) const
 	return *pos->second;
 }
 
-inline std::optional<const EnvelopeManipulatorTarget*> Plugin::get_envelope_manipulator_target(blink_UUID uuid) const
+inline auto Plugin::get_envelope_manipulator_target(blink_UUID uuid) const -> std::optional<const EnvelopeManipulatorTarget*>
 {
 	const auto pos { envelope_manipulator_targets_.uuid_map.find(uuid) };
 
@@ -186,4 +191,28 @@ inline std::optional<const EnvelopeManipulatorTarget*> Plugin::get_envelope_mani
 	return pos->second;
 }
 
+inline auto Plugin::get_envelope_manipulator_target(blink_UUID uuid, blink_EnvelopeManipulatorTarget* out) const -> blink_Error
+{
+	const auto target { get_envelope_manipulator_target(uuid) };
+
+	if (!target) return blink_StdError_ManipulatorTargetDoesNotExist;
+
+	*out = bind::envelope_manipulator_target(**target);
+
+	return BLINK_OK;
 }
+
+template <class FileSystem>
+inline auto Plugin::get_resource_data(const FileSystem& fs, const char* path) -> blink_ResourceData
+{
+	if (resources_.has(path)) return resources_.get(path);
+
+	if (!fs.exists(path)) return { 0, 0 };
+	if (!fs.is_file(path)) return { 0, 0 };
+
+	const auto file { fs.open(path) };
+
+	return resources_.store(path, file);
+}
+
+} // blink

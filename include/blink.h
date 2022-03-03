@@ -79,6 +79,7 @@ enum blink_StdError
 	blink_StdError_NotInitialized = -2,
 	blink_StdError_NotImplemented = -3,
 	blink_StdError_ManipulatorTargetDoesNotExist = -4,
+	blink_StdError_InvalidInstance = -5,
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
