@@ -154,6 +154,10 @@ inline void Tape::apply_reverse(const Config& config, int count)
 
 			x = sub_calculators.pitch(sub_calculators.pitch_config, x);
 		}
+		else
+		{
+			x *= snd::convert::P2FF(config.transpose);
+		}
 
 		x -= config.sample_offset;
 

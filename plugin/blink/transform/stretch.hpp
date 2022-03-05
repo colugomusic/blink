@@ -154,6 +154,10 @@ inline void Stretch::apply_reverse(const Config& config, int count)
 
 			x = sub_calculators.speed(sub_calculators.speed_config, x);
 		}
+		else
+		{
+			x *= config.speed;
+		}
 
 		x -= config.sample_offset;
 
