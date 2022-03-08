@@ -220,6 +220,8 @@ public:
 		unit_config.transpose = config.transpose;
 		unit_config.pitch = config.pitch;
 
+		config.outputs.positions->prev_pos = (*config.outputs.positions)[config.outputs.positions->count - 1];
+
 		for (int i = 0; i < count; i++)
 		{
 			if (resets[i] > 0)

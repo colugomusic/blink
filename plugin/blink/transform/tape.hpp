@@ -5,6 +5,8 @@
 #include "calculators/pitch.hpp"
 #include "calculators/reverse.hpp"
 #include "calculators/warp.hpp"
+#include "correction_grains.hpp"
+#include <snd/transport/frame_position.hpp>
 
 namespace blink {
 namespace transform {
@@ -16,28 +18,30 @@ public:
 	struct Config
 	{
 		uint64_t unit_state_id;
-		float transpose;
-		int64_t sample_offset;
+		float transpose {};
+		int64_t sample_offset {};
 
 		struct
 		{
-			const blink_EnvelopeData* pitch;
+			const blink_EnvelopeData* pitch {};
 		} env;
 
 		struct
 		{
-			const blink_OptionData* reverse;
+			const blink_OptionData* reverse {};
 		} option;
 
-		const blink_WarpPoints* warp_points;
+		const blink_WarpPoints* warp_points {};
 
 		struct
 		{
 			struct
 			{
-				bool pitch;
-				bool warped;
+				bool pitch {};
+				bool warped {};
 			} derivatives;
+
+			bool correction_grains {};
 		} outputs;
 	};
 	
@@ -48,6 +52,7 @@ public:
 	auto& get_reversed_positions() const { return stage_.positions.reversed; }
 	auto& get_pitched_derivatives() const { return stage_.derivatives.pitched; }
 	auto& get_warped_derivatives() const { return stage_.derivatives.warped; }
+	auto& get_correction_grains() const { return stage_.correction_grains; }
 
 private:
 
@@ -70,6 +75,8 @@ private:
 			ml::DSPVector pitched;
 			ml::DSPVector warped;
 		} derivatives;
+
+		CorrectionGrains correction_grains;
 	} stage_;
 
 	struct
@@ -139,7 +146,7 @@ inline void Tape::apply_reverse(const Config& config, int count)
 	sub_calculators.pitch_config.pitch = config.env.pitch;
 	sub_calculators.pitch_config.transpose = config.transpose;
 
-	const auto transform_position { [&sub_calculators, &config](blink_IntPosition p)
+	const auto transform_position { [&sub_calculators, &config](blink_IntPosition p, float* derivative)
 	{
 		auto x { static_cast<blink_Position>(p) };
 
@@ -152,11 +159,13 @@ inline void Tape::apply_reverse(const Config& config, int count)
 
 			sub_calculators.prev_positions.pre_pitch = x;
 
-			x = sub_calculators.pitch(sub_calculators.pitch_config, x);
+			x = sub_calculators.pitch(sub_calculators.pitch_config, x, derivative);
 		}
 		else
 		{
-			x *= snd::convert::P2FF(config.transpose);
+			*derivative = snd::convert::P2FF(config.transpose);
+
+			x *= *derivative;
 		}
 
 		x -= config.sample_offset;
@@ -170,7 +179,11 @@ inline void Tape::apply_reverse(const Config& config, int count)
 
 			sub_calculators.prev_positions.pre_warp = x;
 
-			x = sub_calculators.warp(config.warp_points, x);
+			float ff;
+
+			x = sub_calculators.warp(config.warp_points, x, &ff);
+
+			*derivative *= ff;
 		}
 
 		p = static_cast<blink_IntPosition>(x);
@@ -182,6 +195,7 @@ inline void Tape::apply_reverse(const Config& config, int count)
 
 	calculator_config.option.reverse = config.option.reverse;
 	calculator_config.outputs.positions = &stage_.positions.reversed;
+	calculator_config.outputs.correction_grains = config.outputs.correction_grains ? &stage_.correction_grains : nullptr;
 	calculator_config.unit_state_id = config.unit_state_id;
 	calculator_config.transform_position = transform_position;
 
