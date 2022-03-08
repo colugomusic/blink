@@ -114,7 +114,7 @@ public:
 
 		const auto& resets { traverser_.get_resets() };
 
-		config.outputs.positions->prev_pos = (*config.outputs.positions)[config.outputs.positions->count - 1];
+		config.outputs.positions->rotate_prev_pos();
 
 		for (int i = 0; i < count; i++)
 		{

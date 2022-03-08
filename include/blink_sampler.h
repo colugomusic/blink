@@ -117,6 +117,7 @@ struct blink_SamplerUnitState
 	             // point instead of searching from the beginning
 
 	int64_t data_offset;
+	blink_Bool smooth_transitions;
 	blink_ChannelMode channel_mode;
 	const blink_WarpPoints* warp_points;
 	const blink_ParameterData* parameter_data;

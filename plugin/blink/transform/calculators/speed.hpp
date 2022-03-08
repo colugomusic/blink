@@ -200,7 +200,7 @@ public:
 		unit_config.speed = config.speed;
 		unit_config.env_speed = config.env_speed;
 
-		config.outputs.positions->prev_pos = (*config.outputs.positions)[config.outputs.positions->count - 1];
+		config.outputs.positions->rotate_prev_pos();
 
 		for (int i = 0; i < count; i++)
 		{
