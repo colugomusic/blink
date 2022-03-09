@@ -116,9 +116,9 @@ struct blink_SamplerUnitState
 				 // a plugin could continue searching from the previously hit envelope
 	             // point instead of searching from the beginning
 
-	int64_t data_offset;
 	blink_Bool smooth_transitions;
 	blink_ChannelMode channel_mode;
+	int64_t sample_offset;
 	const blink_WarpPoints* warp_points;
 	const blink_ParameterData* parameter_data;
 };

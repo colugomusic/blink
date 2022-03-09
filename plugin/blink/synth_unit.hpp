@@ -22,7 +22,7 @@ public:
 	{
 		get_instance()->begin_process(buffer.buffer_id);
 
-		Unit::begin_process(buffer.buffer_id, buffer.positions, unit_state.data_offset);
+		Unit::begin_process(buffer.buffer_id, buffer.positions);
 
 		return process(buffer, unit_state, out);
 	}
