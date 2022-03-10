@@ -31,13 +31,14 @@ struct BlockPositions
 	{
 	}
 
-	BlockPositions(const blink_Position* blink_positions, int count_)
+	BlockPositions(const blink_Position* blink_positions, std::int64_t offset, int count_)
 		: raw(blink_positions)
 		, count(count_)
+		, data_offset(offset)
 	{
 		for (int i = 0; i < count_; i++)
 		{
-			positions.set(i, blink_positions[i]);
+			positions.set(i, blink_positions[i] - offset);
 		}
 	}
 
@@ -46,24 +47,28 @@ struct BlockPositions
 		prev_pos = positions[count - 1];
 	}
 
-	void operator()(const blink_Position* blink_positions, int count_)
+	void operator()(const blink_Position* blink_positions, std::int64_t offset, int count_)
 	{
 		raw = blink_positions;
 		prev_pos = positions[count - 1];
 
 		for (int i = 0; i < count_; i++)
 		{
-			positions.set(i, blink_positions[i]);
+			positions.set(i, blink_positions[i] - offset);
 		}
 		
 		count = count_;
+		data_offset = offset;
 	}
 
-	void operator()(const snd::transport::DSPVectorFramePosition& vec_positions, int count_)
+	void operator()(const snd::transport::DSPVectorFramePosition& vec_positions, std::int64_t offset, int count_)
 	{
 		prev_pos = positions[count - 1];
-		positions = vec_positions;
+
+		positions = vec_positions - std::int32_t(offset);
+
 		count = count_;
+		data_offset = offset;
 	}
 
 	snd::transport::FramePosition operator[](int index) const

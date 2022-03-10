@@ -43,6 +43,7 @@ struct blink_EffectUnitState
 				 // a plugin could continue searching from the previously hit envelope
 	             // point instead of searching from the beginning
 
+	int64_t data_offset;
 	blink_ParameterData* parameter_data;
 };
 
