@@ -41,7 +41,7 @@ typedef const char* blink_UUID;
 typedef uint32_t blink_SR;
 typedef uint8_t blink_BitDepth;
 typedef double blink_Position;
-typedef int32_t blink_IntPosition;
+typedef int64_t blink_IntPosition;
 typedef int8_t blink_Bool;
 typedef uint32_t blink_Scale;
 

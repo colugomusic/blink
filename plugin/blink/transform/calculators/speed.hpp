@@ -46,7 +46,7 @@ public:
 	{
 		struct FFPoint
 		{
-			int x;
+			blink_IntPosition x;
 			float y;
 			double ff;
 

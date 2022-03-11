@@ -152,7 +152,7 @@ private:
 			// If we got here then we are about to pass the first reverse
 			// point, in which case the segment start is the x position of
 			// the point
-			return p1.x;
+			return blink_Position(p1.x);
 		}
 
 		// If we got here then we are somewhere in between two
