@@ -122,8 +122,10 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Frequency";
 
 	out.envelope = envelope();
+	out.clamp_range = { 0.0f, 1.0 };
 
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_HostClamp;
 	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 
 	return out;
