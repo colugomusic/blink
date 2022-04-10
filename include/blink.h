@@ -31,6 +31,7 @@
 #define BLINK_STD_CATEGORY_FILTERS "Filters"
 #define BLINK_STD_CATEGORY_SPACE "Space"
 #define BLINK_STD_CATEGORY_TONAL "Tonal"
+#define BLINK_STD_CATEGORY_UTILITY "Utility"
 
 typedef uint8_t blink_ChannelCount;
 typedef uint64_t blink_FrameCount;
