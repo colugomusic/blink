@@ -6,15 +6,9 @@
 
 namespace blink {
 
-inline ml::DSPVectorArray<2> stereo_pan(
-	const ml::DSPVectorArray<2> in,
-	float pan,
-	const EnvelopeIndexData& pan_envelope,
-	const BlockPositions& block_positions)
+inline auto stereo_pan(const ml::DSPVectorArray<2> in, float pan, ml::DSPVector env_pan) -> ml::DSPVectorArray<2>
 {
 	auto out = in;
-
-	auto env_pan = pan_envelope.search_vec(block_positions);
 
 	const auto zero = ml::DSPVector(0.0f);
 	const auto one = ml::DSPVector(1.0f);
@@ -34,7 +28,16 @@ inline ml::DSPVectorArray<2> stereo_pan(
 	return out;
 }
 
-inline float snap_pitch_to_scale(float pitch, std::int32_t scale)
+inline auto stereo_pan(
+	const ml::DSPVectorArray<2> in,
+	float pan,
+	const EnvelopeIndexData& pan_envelope,
+	const BlockPositions& block_positions) -> ml::DSPVectorArray<2>
+{
+	return stereo_pan(in, pan, pan_envelope.search_vec(block_positions));
+}
+
+inline auto snap_pitch_to_scale(float pitch, std::int32_t scale) -> float
 {
 	if (scale == 0) return pitch;
 
@@ -63,7 +66,7 @@ inline float snap_pitch_to_scale(float pitch, std::int32_t scale)
 	return pitch;
 }
 
-inline ml::DSPVector snap_pitch_to_scale(const ml::DSPVector& pitch, const ml::DSPVectorInt& scale)
+inline auto snap_pitch_to_scale(const ml::DSPVector& pitch, const ml::DSPVectorInt& scale) -> ml::DSPVector
 {
 	ml::DSPVector out;
 
