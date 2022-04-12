@@ -15,13 +15,13 @@ public:
 
 	virtual ~EffectInstance();
 
-	virtual blink_EffectInstanceInfo get_info() const;
+	virtual auto get_info() const -> blink_EffectInstanceInfo;
 	
-	EffectUnit* add_unit();
+	auto add_unit() -> EffectUnit*;
 
 private:
 
-	virtual std::shared_ptr<EffectUnit> make_unit() = 0;
+	virtual auto make_unit() -> std::shared_ptr<EffectUnit> = 0;
 
 	std::vector<std::shared_ptr<EffectUnit>> units_;
 };
@@ -39,7 +39,7 @@ inline EffectInstance::~EffectInstance()
 	}
 }
 
-inline blink_EffectInstanceInfo EffectInstance::get_info() const
+inline auto EffectInstance::get_info() const -> blink_EffectInstanceInfo
 {
 	blink_EffectInstanceInfo out;
 
@@ -52,11 +52,14 @@ inline blink_EffectInstanceInfo EffectInstance::get_info() const
 	return out;
 }
 
-inline EffectUnit* EffectInstance::add_unit()
+inline auto EffectInstance::add_unit() -> EffectUnit*
 {
 	const auto unit = make_unit();
 
-	unit->stream_init();
+	if (is_initialized())
+	{
+		unit->stream_init();
+	}
 
 	units_.push_back(unit);
 

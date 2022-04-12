@@ -6,7 +6,7 @@
 
 namespace blink {
 
-inline auto stereo_pan(const ml::DSPVectorArray<2> in, float pan, ml::DSPVector env_pan) -> ml::DSPVectorArray<2>
+inline auto stereo_pan(const ml::DSPVectorArray<2>& in, float pan, ml::DSPVector env_pan) -> ml::DSPVectorArray<2>
 {
 	auto out = in;
 
@@ -29,7 +29,7 @@ inline auto stereo_pan(const ml::DSPVectorArray<2> in, float pan, ml::DSPVector 
 }
 
 inline auto stereo_pan(
-	const ml::DSPVectorArray<2> in,
+	const ml::DSPVectorArray<2>& in,
 	float pan,
 	const EnvelopeIndexData& pan_envelope,
 	const BlockPositions& block_positions) -> ml::DSPVectorArray<2>

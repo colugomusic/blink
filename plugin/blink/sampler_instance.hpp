@@ -15,11 +15,11 @@ public:
 
 	virtual ~SamplerInstance();
 
-	SamplerUnit* add_unit();
+	auto add_unit() -> SamplerUnit*;
 
 private:
 
-	virtual std::shared_ptr<SamplerUnit> make_unit() = 0;
+	virtual auto make_unit() -> std::shared_ptr<SamplerUnit> = 0;
 
 	std::vector<std::shared_ptr<SamplerUnit>> units_;
 };
@@ -37,11 +37,14 @@ inline SamplerInstance::~SamplerInstance()
 	}
 }
 
-inline SamplerUnit* SamplerInstance::add_unit()
+inline auto SamplerInstance::add_unit() -> SamplerUnit*
 {
 	const auto unit = make_unit();
 
-	unit->stream_init();
+	if (is_initialized())
+	{
+		unit->stream_init();
+	}
 
 	units_.push_back(unit);
 

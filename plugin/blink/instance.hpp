@@ -15,27 +15,29 @@ public:
 
 	virtual ~Instance() {}
 
-	void begin_process(std::uint64_t buffer_id);
-	void stream_init(blink_SR SR);
+	auto begin_process(std::uint64_t buffer_id) -> void;
+	auto stream_init(blink_SR SR) -> void;
 
-	Plugin* get_plugin() const { return plugin_; }
-	blink_SR SR() const { return SR_; }
+	auto get_plugin() const { return plugin_; }
+	auto SR() const { return SR_; }
 
 protected:
 
-	void register_unit(Unit* unit);
-	void unregister_unit(Unit* unit);
+	auto register_unit(Unit* unit) -> void;
+	auto unregister_unit(Unit* unit) -> void;
+
+	auto is_initialized() const { return SR_ > 0; }
 
 private:
 
-	virtual void reset() {}
-	virtual void stream_init() {}
+	virtual auto reset() -> void {}
+	virtual auto stream_init() -> void {}
 
 	Plugin* plugin_;
-	blink_SR SR_;
+	blink_SR SR_ {};
 	std::set<Unit*> units_;
-	std::uint64_t buffer_id_ = 0;
-	int active_buffer_units_ = 0;
+	std::uint64_t buffer_id_ {};
+	int active_buffer_units_ {};
 };
 
 inline blink_SR get_SR(Instance* instance)

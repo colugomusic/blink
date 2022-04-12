@@ -15,11 +15,11 @@ public:
 
 	virtual ~SynthInstance();
 
-	SynthUnit* add_unit();
+	auto add_unit() -> SynthUnit*;
 
 private:
 
-	virtual std::shared_ptr<SynthUnit> make_unit() = 0;
+	virtual auto  make_unit() -> std::shared_ptr<SynthUnit> = 0;
 
 	std::vector<std::shared_ptr<SynthUnit>> units_;
 };
@@ -37,11 +37,14 @@ inline SynthInstance::~SynthInstance()
 	}
 }
 
-inline SynthUnit* SynthInstance::add_unit()
+inline auto SynthInstance::add_unit() -> SynthUnit*
 {
 	const auto unit = make_unit();
 
-	unit->stream_init();
+	if (is_initialized())
+	{
+		unit->stream_init();
+	}
 
 	units_.push_back(unit);
 
