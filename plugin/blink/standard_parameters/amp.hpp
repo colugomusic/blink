@@ -106,6 +106,11 @@ inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
 {
 	EnvelopeManipulatorTargetSpec out;
 
+	out.apply_offset = [](float value, float offset) -> float
+	{
+		return value * offset;
+	};
+
 	out.offset_envelope = envelope();
 	out.override_envelope = envelope();
 
