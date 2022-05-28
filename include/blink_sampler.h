@@ -152,22 +152,32 @@ typedef struct
 	blink_SamplerInstance_AddUnit add_unit;
 } blink_SamplerInstance;
 
+typedef struct
+{
+	// True if Blockhead should enable warp markers. From the plugin's
+	// perspective this just means warp data will be passed in to process().
+	// It is up to the plugin to interpret this data.
+	blink_Bool enable_warp_markers;
+
+	// True if the plugin needs to preprocess samples in some way.
+	// Preprocessing happens once per sample.
+	blink_Bool requires_preprocessing;
+
+	// True if the waveform resulting from the sample transformation
+	// could be substantially different from the waveform generated
+	// by blink_sampler_draw(). If this is true then Blockhead will
+	// draw a second waveform for the baked block data.
+	blink_Bool baked_waveform_could_be_different;
+} blink_SamplerInfo;
+
 #ifdef BLINK_EXPORT
 extern "C"
 {
+	EXPORTED blink_SamplerInfo blink_get_sampler_info();
 	EXPORTED blink_SamplerInstance blink_make_sampler_instance();
 
 	// Free all memory associated with this sampler instance.
 	EXPORTED blink_Error blink_destroy_sampler_instance(blink_SamplerInstance instance);
-
-	// Returns true if Blockhead should enable warp markers. From the plugin's
-	// perspective this just means warp data will be passed in to process().
-	// It is up to the plugin to interpret this data.
-	EXPORTED blink_Bool blink_sampler_enable_warp_markers();
-
-	// Returns true if the plugin needs to preprocess samples in some way.
-	// Preprocessing happens once per sample.
-	EXPORTED blink_Bool blink_sampler_requires_preprocessing();
 
 	// Called by the host once per sample only if
 	// blink_sampler_requires_preprocessing() returns true
