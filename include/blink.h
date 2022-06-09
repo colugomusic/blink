@@ -69,7 +69,7 @@ enum blink_StdIcon
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Standard error codes
-// Plugins cans defined their own error codes which must be > 0
+// Plugins can define their own error codes which must be > 0
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef int blink_Error;
 
