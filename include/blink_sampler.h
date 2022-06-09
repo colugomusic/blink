@@ -180,7 +180,7 @@ extern "C"
 	EXPORTED blink_Error blink_destroy_sampler_instance(blink_SamplerInstance instance);
 
 	// Called by the host once per sample only if
-	// blink_sampler_requires_preprocessing() returns true
+	// blink_SamplerInfo::requires_preprocessing is true
 	//
 	// This function will be called in a separate thread from everything else.
 	//
