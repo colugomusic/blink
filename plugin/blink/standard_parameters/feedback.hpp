@@ -4,6 +4,7 @@
 #include "percentage.hpp"
 #include <blink/parameters/envelope_parameter_spec.hpp>
 #include <blink/parameters/envelope_manipulator_target_spec.hpp>
+#include <blink/parameters/slider_parameter_spec.hpp>
 
 namespace blink {
 namespace std_params {
@@ -32,6 +33,21 @@ inline auto envelope_parameter()
 	out.flags |= blink_EnvelopeFlags_HostClamp;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
+
+	return out;
+}
+
+inline auto slider_parameter()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = UUID;
+	out.clamp_range = { 0.0f, 1.0f };
+	out.name = "Feedback";
+	out.slider = percentage::slider();
+
+	out.flags |= blink_SliderFlags_HostClamp;
+	out.flags |= blink_SliderFlags_CanManipulate;
 
 	return out;
 }
