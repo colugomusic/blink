@@ -1,0 +1,80 @@
+#pragma once
+
+#include <blink/parameters/envelope_parameter_spec.hpp>
+#include <blink/parameters/envelope_manipulator_target_spec.hpp>
+#include <blink/parameters/slider_parameter_spec.hpp>
+
+namespace blink {
+namespace std_params {
+namespace delay_time {
+
+static constexpr auto UUID { BLINK_STD_UUID_DELAY_TIME };
+
+auto inline slider()
+{
+	SliderSpec<float> out;
+
+	out.constrain = [](float v)
+	{
+		return std::clamp(v, 0.0f, 1.0f);
+	};
+
+	out.decrement = [](float v, bool precise)
+	{
+		return v;
+	};
+
+	return out;
+}
+
+inline auto envelope()
+{
+	EnvelopeSpec out;
+
+	return out;
+}
+
+inline auto envelope_parameter()
+{
+	EnvelopeParameterSpec out;
+
+	out.uuid = UUID;
+	out.name = "Time";
+	out.long_desc = "Delay Time";
+	out.envelope = envelope();
+	out.clamp_range = { 0.0f, 1.0f };
+
+	out.flags |= blink_EnvelopeFlags_HostClamp;
+	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
+
+	return out;
+}
+
+inline auto slider_parameter()
+{
+	SliderParameterSpec<float> out;
+
+	out.uuid = UUID;
+	out.clamp_range = { 0.0f, 1.0f };
+	out.name = "Time";
+	out.long_desc = "Delay Time";
+	out.slider = percentage::slider();
+
+	out.flags |= blink_SliderFlags_HostClamp;
+	out.flags |= blink_SliderFlags_CanManipulate;
+
+	return out;
+}
+
+inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
+{
+	EnvelopeManipulatorTargetSpec out;
+
+
+	return out;
+}
+
+} // feedback
+} // std_params
+} // blink
