@@ -14,7 +14,7 @@ class ResourceStore
 {
 public:
 
-	blink_ResourceData get(const std::string& path) const
+	blink_ResourceData get(std::string path) const
 	{
 		const auto pos = store_.find(path);
 
@@ -28,13 +28,13 @@ public:
 		return out;
 	}
 
-	bool has(const std::string& path) const
+	bool has(std::string path) const
 	{
 		return store_.find(path) != store_.end();
 	}
 
 	template <class File>
-	blink_ResourceData store(const std::string& path, const File& file)
+	blink_ResourceData store(std::string path, const File& file)
 	{
 		assert(store_.find(path) == store_.end());
 
