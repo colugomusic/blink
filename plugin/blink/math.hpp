@@ -10,6 +10,20 @@
 #pragma warning(pop)
 
 namespace blink {
+namespace const_math {
+
+template <class T> constexpr T tol{ 0.001 };
+template <class T> constexpr T abs(const T x) { return x < T(0) ? -x : x; }
+template <class T> constexpr T square(const T x) { return x * x; }
+template <class T> constexpr T sqrt_helper(const T x, const T g)
+{
+	return abs(g - x / g) < tol ? g : sqrt_helper(x, (g + x / g) / T(2));
+}
+
+template <class T> constexpr T sqrt(const T x) { return sqrt_helper(x, T(1)); }
+
+} // const_math
+
 namespace math {
 
 template <class T>
@@ -48,6 +62,18 @@ constexpr ml::DSPVectorArray<ROWS> stepify(const ml::DSPVectorArray<ROWS>& value
 }
 
 namespace convert {
+
+template <class T>
+constexpr T linear_to_delay_time_ms(T linear)
+{
+	return T(2000) * (linear * linear);
+}
+
+template <class T>
+constexpr T delay_time_ms_to_linear(T ms)
+{
+	return const_math::sqrt(ms / T(2000))
+}
 
 template <class T>
 inline T bi_to_uni(T bi)
@@ -165,26 +191,7 @@ ml::DSPVectorArray<ROWS> p_to_t(int SR, const ml::DSPVectorArray<ROWS>& p)
 	return float(SR) / pitch_to_frequency(p + 60.0f);
 }
 
-}
-
-
-//template <class T, class Curve>
-//constexpr T mod_normalize(Curve curve, T min, T max, T value)
-//{
-//	return curve_(inverse_lerp(min, max, value));
-//}
-//
-//template <class T, class Curve>
-//constexpr T mod_transform(Curve curve, T min, T max, T value)
-//{
-//	return lerp(min, max, mod_normalize(curve, min, max, value));
-//}
-//
-//template <class T, class Curve, class InverseCurve>
-//constexpr T mod_inverse_normalize(Curve curve, InverseCurve inverse_curve, T min, T max, T value)
-//{
-//	return inverse_curve(lerp(curve(min), curve(max), value));
-//}
+} // convert
 
 // Apply curve and return normalized value
 template <class T, class Curve>
