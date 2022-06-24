@@ -72,7 +72,7 @@ constexpr T linear_to_delay_time_ms(T linear)
 template <class T>
 constexpr T delay_time_ms_to_linear(T ms)
 {
-	return const_math::sqrt(ms / T(2000))
+	return const_math::sqrt(ms / T(2000));
 }
 
 template <class T>
