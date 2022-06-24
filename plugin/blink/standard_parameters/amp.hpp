@@ -18,7 +18,7 @@ static constexpr auto UUID { BLINK_STD_UUID_AMP };
 inline auto stepify(float v) { return tweak::std::amp::stepify(v); }
 inline auto display(float v) { return tweak::std::amp::to_string(v); }
 inline auto constrain(float v) { return tweak::std::amp::constrain(v); }
-inline auto from_string(const std::string& str) { return tweak::std::amp::from_string(str); }
+inline auto from_string(std::string str) { return tweak::std::amp::from_string(str); }
 inline auto increment(float v, bool precise) { return tweak::std::amp::increment(v, precise); }
 inline auto decrement(float v, bool precise) { return tweak::std::amp::decrement(v, precise); }
 inline auto drag(float v, int amount, bool precise) { return tweak::std::amp::drag(v, amount, precise); }

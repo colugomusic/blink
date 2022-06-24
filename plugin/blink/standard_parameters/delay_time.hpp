@@ -40,7 +40,7 @@ auto inline slider()
 		return v;
 	};
 
-	out.from_string = [](const std::string& str)
+	out.from_string = [](std::string str)
 	{
 	};
 

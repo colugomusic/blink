@@ -45,7 +45,7 @@ inline auto display(float v)
 	return ss.str();
 }
 
-inline auto from_string(const std::string& str) -> std::optional<float>
+inline auto from_string(std::string str) -> std::optional<float>
 {
 	auto value = tweak::find_number<float>(str);
 

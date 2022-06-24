@@ -21,7 +21,7 @@ inline SliderSpec<float> slider(float min, float max, float default_value, float
 	out.decrement = [min, max, precision](float v, bool precise) { return v - (precise ? precision * 0.1f : precision); };
 	out.drag = [min, max, precision](float v, int amount, bool precise) { return v + (amount * (precise ? precision * 0.1f : precision)); };
 	out.to_string = [](float v) { return tweak::to_string(v); };
-	out.from_string = [](const std::string& s) { return tweak::find_number<float>(s); };
+	out.from_string = [](std::string s) { return tweak::find_number<float>(s); };
 	out.default_value = default_value;
 
 	return out;

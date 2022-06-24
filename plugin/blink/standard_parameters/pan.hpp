@@ -59,7 +59,7 @@ inline auto drag(float v, int amount, bool precise) -> float
 	return tweak::drag<float, 500, 5000>(v, amount, precise);
 };
 
-inline auto from_string(const std::string& str) -> std::optional<float>
+inline auto from_string(std::string str) -> std::optional<float>
 {
 	std::string uppercase = str;
 

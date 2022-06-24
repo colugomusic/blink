@@ -15,7 +15,7 @@ inline SliderSpec<float> slider(float min, float max, float default_value, float
 
 	out.stepify = [](float v) { return tweak::std::ms::stepify(v); };
 	out.to_string = [](float v) { return tweak::std::ms::to_string(v); };
-	out.from_string = [](const std::string& s) { return tweak::std::ms::from_string(s); };
+	out.from_string = [](std::string s) { return tweak::std::ms::from_string(s); };
 
 	return out;
 }

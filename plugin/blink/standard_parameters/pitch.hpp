@@ -51,7 +51,7 @@ inline SliderSpec<float> slider()
 	out.decrement = pitch::decrement;
 	out.drag = pitch::drag;
 	out.to_string = [](float v) { return tweak::to_string(v); };
-	out.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
+	out.from_string = [](std::string str) { return tweak::find_number<float>(str); };
 	out.stepify = pitch::stepify;
 	out.default_value = 0.0f;
 
@@ -102,7 +102,7 @@ inline EnvelopeSpec envelope()
 	out.range.min.default_value = -24.0f;
 	out.range.min.to_string = [](float v) { return tweak::to_string(v); };
 	out.range.min.drag = pitch::drag;
-	out.range.min.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
+	out.range.min.from_string = [](std::string str) { return tweak::find_number<float>(str); };
 
 	out.range.max.constrain = pitch::constrain;
 	out.range.max.decrement = pitch::decrement;
@@ -110,7 +110,7 @@ inline EnvelopeSpec envelope()
 	out.range.max.default_value = 24.0f;
 	out.range.max.to_string = [](float v) { return tweak::to_string(v); };
 	out.range.max.drag = pitch::drag;
-	out.range.max.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
+	out.range.max.from_string = [](std::string str) { return tweak::find_number<float>(str); };
 
 	out.step_size.constrain = [](float v) { return tweak::constrain(v, 0.0f, 60.0f); };
 	out.step_size.decrement = [out](float v, bool precise) { return out.step_size.constrain(tweak::decrement<1, 10>(v, precise)); };
@@ -118,7 +118,7 @@ inline EnvelopeSpec envelope()
 	out.step_size.default_value = 1.0f;
 	out.step_size.to_string = [](float v) { return tweak::to_string(v); };
 	out.step_size.drag = [out](float v, int amount, bool precise) { return out.step_size.constrain(pitch::drag(v, amount, precise)); };
-	out.step_size.from_string = [](const std::string& str) { return tweak::find_number<float>(str); };
+	out.step_size.from_string = [](std::string str) { return tweak::find_number<float>(str); };
 
 	out.default_snap_amount = 1.0f;
 

@@ -16,7 +16,7 @@ inline auto constrain(int v)
 	return v;
 };
 
-inline auto from_string(const std::string& str) -> std::optional<float>
+inline auto from_string(std::string str) -> std::optional<float>
 {
 	auto db = tweak::find_number<float>(str);
 
@@ -51,7 +51,7 @@ inline SliderSpec<int> slider()
 	out.decrement = sample_offset::decrement;
 	out.drag = sample_offset::drag;
 	out.to_string = [](int v) { return tweak::to_string(v); };
-	out.from_string = [](const std::string& str) { return tweak::find_number<int>(str); };
+	out.from_string = [](std::string str) { return tweak::find_number<int>(str); };
 	out.default_value = 0;
 
 	return out;
