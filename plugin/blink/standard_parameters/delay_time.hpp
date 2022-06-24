@@ -92,6 +92,10 @@ inline auto envelope()
 	EnvelopeSpec out;
 
 	out.default_value = math::convert::delay_time_ms_to_linear(100.0f);
+	out.range.min.default_value = 0.0f;
+    //out.range.min.to_string = [](float v) { return to_string(v); };
+	out.range.max.default_value = 1.0f;
+    //out.range.max.to_string = [](float v) { return to_string(v); };
 	out.searcher.binary = std_params::search::float_points_binary;
 	out.searcher.forward = std_params::search::float_points_forward;
 	out.snap_value = tweak::snap_value;
