@@ -42,6 +42,7 @@ auto inline slider()
 
 	out.from_string = [](std::string str)
 	{
+		return 0.0f;
 	};
 
 
