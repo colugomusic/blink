@@ -30,7 +30,7 @@ public:
 
 	bool has(std::string path) const
 	{
-		return store_.find(path) != store_.end();
+		return store_.find(std::move(path)) != store_.end();
 	}
 
 	template <class File>
@@ -44,7 +44,7 @@ public:
 
 		store_[path] = std::move(buffer);
 
-		return get(path);
+		return get(std::move(path));
 	}
 
 private:
