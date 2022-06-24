@@ -55,12 +55,6 @@ public:
 	// millions of pixels off the left edge of the screen therefore it is
 	// not good enough to simply traverse the entire sample.
 	//
-	// blink_EnvelopePoint has an unused 'curve' member which could be
-	// used to represent an ease-in/ease-out curve from one envelope point
-	// to the next. This is not implemented because I do not understand
-	// the mathematics involved in calculating the resulting sample
-	// position.
-	//
 	blink_Position operator()(Config config, blink_Position block_position, float* derivative = nullptr)
 	{
 		struct PitchPoint
