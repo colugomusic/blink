@@ -18,6 +18,7 @@ inline auto envelope_parameter()
 	out.name = "Mix";
 
 	out.envelope = percentage::envelope();
+	out.envelope.default_value = 1.0f;
 	out.clamp_range = { 0.0f, 1.0f };
 
 	out.flags |= blink_EnvelopeFlags_HostClamp;;
@@ -35,6 +36,7 @@ inline auto slider_parameter()
 	out.name = "Mix";
 
 	out.slider = percentage::slider();
+	out.slider.default_value = 1.0f;
 
 	out.flags |= blink_SliderFlags_CanManipulate;
 
