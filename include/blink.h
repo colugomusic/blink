@@ -83,8 +83,7 @@ enum blink_StdError
 	blink_StdError_AlreadyInitialized = -1,
 	blink_StdError_NotInitialized = -2,
 	blink_StdError_NotImplemented = -3,
-	blink_StdError_ManipulatorTargetDoesNotExist = -4,
-	blink_StdError_InvalidInstance = -5,
+	blink_StdError_InvalidInstance = -4,
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -403,15 +402,14 @@ typedef struct
 } blink_Envelope;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Manipulators
+// Manipulator Settings
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef float (*blink_ApplyOffset)(void* proc_data, float value, float offset);
 
 typedef struct
 {
-	void* proc_data;
-
 	// Either of these can be null, but at least one must be defined
+	// if *_IsManipulatorTarget is set
 	blink_Envelope* offset_envelope;
 	blink_Envelope* override_envelope;
 
@@ -420,9 +418,9 @@ typedef struct
 	// addition
 	blink_ApplyOffset apply_offset;
 
-} blink_EnvelopeManipulatorTarget;
+} blink_ManipulatorSettings;
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Manipulators END
+// Manipulator Settings END
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 typedef struct
@@ -443,6 +441,8 @@ typedef struct
 	blink_GetSlider get_slider;
 
 	blink_Envelope envelope;
+
+	blink_ManipulatorSettings manipulator_settings;
 } blink_EnvelopeParameter;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -470,6 +470,8 @@ typedef struct
 
 	// Only used if blink_SliderFlags_HostClamp is set
 	blink_Range clamp_range;
+
+	blink_ManipulatorSettings manipulator_settings;
 } blink_SliderParameter;
 
 typedef struct
@@ -593,9 +595,6 @@ extern "C"
 	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID uuid);
-
-	// Optional, but required if manipulators are enabled
-	EXPORTED blink_Error blink_get_envelope_manipulator_target(blink_UUID uuid, blink_EnvelopeManipulatorTarget* out);
 
 	// Optional
 	EXPORTED blink_ResourceData blink_get_resource_data(const char* path);

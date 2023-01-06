@@ -19,10 +19,18 @@ public:
 	blink_ParameterType get_type() const override;
 
 	const char* display_value(T value) const;
+	auto manipulator_settings() const { return manipulator_settings_; }
 
 private:
 
 	mutable std::string display_value_buffer_;
+	std::optional<Envelope> offset_envelope_{};
+	std::optional<Envelope> override_envelope_{};
+	std::function<float(float, float)> apply_offset_;
+
+	blink_Envelope offset_api_{0};
+	blink_Envelope override_api_{0};
+	blink_ManipulatorSettings manipulator_settings_;
 };
 
 template <class T>
@@ -31,7 +39,31 @@ SliderParameter<T>::SliderParameter(SliderParameterSpec<T> spec_)
 	, spec(spec_)
 	, slider(spec.slider)
 	, clamp_range(spec.clamp_range)
+	, offset_envelope_(spec.offset_envelope)
+	, override_envelope_(spec.override_envelope)
+	, apply_offset_(spec.apply_offset)
 {
+	if (offset_envelope_)
+	{
+		offset_api_ = offset_envelope_->bind();
+		manipulator_settings_.offset_envelope = &offset_api_;
+	}
+
+	if (override_envelope_)
+	{
+		override_api_ = override_envelope_->bind();
+		manipulator_settings_.override_envelope = &override_api_;
+	}
+
+	if (apply_offset_ && (offset_envelope_ || override_envelope_))
+	{
+		manipulator_settings_.apply_offset = [](void* proc_data, float value, float offset)
+		{
+			auto self = (SliderParameter*)(proc_data);
+
+			return self->apply_offset_(value, offset);
+		};
+	}
 }
 
 template <>

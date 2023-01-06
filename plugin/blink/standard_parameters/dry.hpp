@@ -28,11 +28,6 @@ inline auto slider_parameter()
 	return out;
 }
 
-inline auto envelope_manipulator_target()
-{
-	return mix::envelope_manipulator_target();
-}
-
 } // dry
 } // blink
 } // std_params

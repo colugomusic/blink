@@ -36,7 +36,6 @@ public:
 	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeParameterSpec spec);
 	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
 	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
-	std::shared_ptr<EnvelopeManipulatorTarget> add_manipulator_target(blink_UUID uuid, EnvelopeManipulatorTargetSpec spec);
 
 	template <class T>
 	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
@@ -44,9 +43,6 @@ public:
 	const Group& get_group(int index) const;
 	const Parameter& get_parameter(blink_Index index) const;
 	const Parameter& get_parameter(blink_UUID uuid) const;
-
-	auto get_envelope_manipulator_target(blink_UUID uuid) const -> std::optional<const EnvelopeManipulatorTarget*>;
-	auto get_envelope_manipulator_target(blink_UUID uuid, blink_EnvelopeManipulatorTarget* out) const -> blink_Error;
 
 	auto& resources() { return resources_; }
 
@@ -62,12 +58,6 @@ private:
 		std::vector<std::shared_ptr<Parameter>> store;
 		std::map<std::string, Parameter*> uuid_map;
 	} parameters_;
-
-	struct
-	{
-		std::vector<std::shared_ptr<EnvelopeManipulatorTarget>> store;
-		std::map<std::string, EnvelopeManipulatorTarget*> uuid_map;
-	} envelope_manipulator_targets_;
 
 	std::vector<Group> groups_;
 	std::set<Instance*> instances_;
@@ -143,16 +133,6 @@ inline std::shared_ptr<ToggleParameter> Plugin::add_parameter(ToggleSpec spec)
 	return param;
 }
 
-inline std::shared_ptr<EnvelopeManipulatorTarget> Plugin::add_manipulator_target(blink_UUID uuid, EnvelopeManipulatorTargetSpec spec)
-{
-	const auto out { std::make_shared<EnvelopeManipulatorTarget>(spec) };
-
-	envelope_manipulator_targets_.store.push_back(out);
-	envelope_manipulator_targets_.uuid_map[uuid] = out.get();
-
-	return out;
-}
-
 inline int Plugin::get_num_groups() const
 {
 	return int(groups_.size());
@@ -180,26 +160,6 @@ inline const Parameter& Plugin::get_parameter(blink_UUID uuid) const
 	assert(pos != parameters_.uuid_map.end());
 
 	return *pos->second;
-}
-
-inline auto Plugin::get_envelope_manipulator_target(blink_UUID uuid) const -> std::optional<const EnvelopeManipulatorTarget*>
-{
-	const auto pos { envelope_manipulator_targets_.uuid_map.find(uuid) };
-
-	if (pos == envelope_manipulator_targets_.uuid_map.end()) return {};
-
-	return pos->second;
-}
-
-inline auto Plugin::get_envelope_manipulator_target(blink_UUID uuid, blink_EnvelopeManipulatorTarget* out) const -> blink_Error
-{
-	const auto target { get_envelope_manipulator_target(uuid) };
-
-	if (!target) return blink_StdError_ManipulatorTargetDoesNotExist;
-
-	*out = bind::envelope_manipulator_target(**target);
-
-	return BLINK_OK;
 }
 
 template <class FileSystem>

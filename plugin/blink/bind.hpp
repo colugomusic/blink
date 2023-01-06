@@ -94,6 +94,7 @@ inline blink_EnvelopeParameter envelope_parameter(const EnvelopeParameter& envel
 	};
 
 	out.envelope = envelope_parameter.envelope.bind();
+	out.manipulator_settings = envelope_parameter.manipulator_settings();
 
 	return out;
 }
@@ -108,6 +109,7 @@ inline blink_SliderParameter slider_parameter(const SliderParameter<float>& slid
 	out.icon = slider_parameter.spec.icon;
 	out.flags = slider_parameter.spec.flags;
 	out.clamp_range = slider_parameter.clamp_range;
+	out.manipulator_settings = slider_parameter.manipulator_settings();
 
 	return out;
 }
@@ -132,18 +134,6 @@ inline blink_Toggle toggle(const ToggleParameter& toggle)
 	out.default_value = toggle.default_value ? BLINK_TRUE : BLINK_FALSE;
 	out.icon = toggle.icon;
 	out.flags = toggle.flags;
-
-	return out;
-}
-
-inline blink_EnvelopeManipulatorTarget envelope_manipulator_target(const EnvelopeManipulatorTarget& target)
-{
-	blink_EnvelopeManipulatorTarget out;
-
-	out.proc_data = target.api()->proc_data;
-	out.offset_envelope = target.api()->offset_envelope;
-	out.override_envelope = target.api()->override_envelope;
-	out.apply_offset = target.api()->apply_offset;
 
 	return out;
 }

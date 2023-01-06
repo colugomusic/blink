@@ -40,13 +40,6 @@ inline auto slider_parameter()
 
 	out.flags |= blink_SliderFlags_CanManipulate;
 
-	return out;
-}
-
-inline auto envelope_manipulator_target()
-{
-	EnvelopeManipulatorTargetSpec out;
-
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = percentage::envelope();
 
