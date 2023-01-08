@@ -21,9 +21,9 @@ public:
 		if (spec.long_desc) long_desc_ = spec.long_desc;
 	}
 
-	void set_group_index(int group_index) { group_index_ = group_index; }
+	void set_group_name(std::string group_name) { group_name_ = group_name; }
 
-	int get_group_index() const { return group_index_; }
+	const char* get_group_name() const { return group_name_.c_str(); }
 	const char* get_name() const { return name_.c_str(); }
 	const char* get_short_name() const { return short_name_ ? short_name_->c_str() : nullptr; }
 	const char* get_long_desc() const { return long_desc_ ? long_desc_->c_str() : nullptr; }
@@ -33,6 +33,7 @@ public:
 private:
 
 	int group_index_ = -1;
+	std::string group_name_;
 	std::string name_;
 	std::optional<std::string> short_name_;
 	std::optional<std::string> long_desc_;

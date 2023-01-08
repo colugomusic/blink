@@ -10,7 +10,6 @@
 #include <blink/bind.hpp>
 #include <blink/envelope_spec.hpp>
 #include <blink/slider_spec.hpp>
-#include <blink/parameters/group.hpp>
 #include <blink/parameters/chord_parameter.hpp>
 #include <blink/parameters/envelope_manipulator_target.hpp>
 #include <blink/parameters/envelope_parameter.hpp>
@@ -28,10 +27,8 @@ public:
 	void register_instance(Instance* instance);
 	void unregister_instance(Instance* instance);
 
-	int get_num_groups() const;
 	int get_num_parameters() const;
 
-	int add_group(std::string name);
 	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
 	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeParameterSpec spec);
 	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
@@ -40,7 +37,6 @@ public:
 	template <class T>
 	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
 
-	const Group& get_group(int index) const;
 	const Parameter& get_parameter(blink_Index index) const;
 	const Parameter& get_parameter(blink_UUID uuid) const;
 
@@ -59,7 +55,6 @@ private:
 		std::map<std::string, Parameter*> uuid_map;
 	} parameters_;
 
-	std::vector<Group> groups_;
 	std::set<Instance*> instances_;
 	ResourceStore resources_;
 };
@@ -72,13 +67,6 @@ inline void Plugin::register_instance(Instance* instance)
 inline void Plugin::unregister_instance(Instance* instance)
 {
 	instances_.erase(instance);
-}
-
-inline int Plugin::add_group(std::string name)
-{
-	groups_.push_back({ name });
-
-	return int(groups_.size() - 1);
 }
 
 inline void Plugin::add_parameter(blink_UUID uuid, std::shared_ptr<Parameter> parameter)
@@ -133,19 +121,9 @@ inline std::shared_ptr<ToggleParameter> Plugin::add_parameter(ToggleSpec spec)
 	return param;
 }
 
-inline int Plugin::get_num_groups() const
-{
-	return int(groups_.size());
-}
-
 inline int Plugin::get_num_parameters() const
 {
 	return int(parameters_.store.size());
-}
-
-inline const Group& Plugin::get_group(int index) const
-{
-	return groups_[index];
 }
 
 inline const Parameter& Plugin::get_parameter(blink_Index index) const

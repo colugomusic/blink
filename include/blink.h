@@ -521,8 +521,8 @@ typedef struct
 	// UUIDs can be shared between different plugins
 	blink_UUID uuid;
 
-	// < 0 if the parameter does not belong to a group
-	blink_ID group_index;
+	// Null if the parameter does not belong to a group
+	const char* group_name;
 
 	// Full parameter name e.g. "Noise Amount"
 	const char* name;
@@ -535,11 +535,6 @@ typedef struct
 
 	union blink_ParameterObject parameter;
 } blink_Parameter;
-
-typedef struct
-{
-	const char* name;
-} blink_Group;
 
 typedef struct
 {
@@ -590,9 +585,7 @@ extern "C"
 	EXPORTED blink_PluginInfo blink_get_plugin_info();
 	EXPORTED blink_Error blink_init();
 	EXPORTED blink_Error blink_terminate();
-	EXPORTED int blink_get_num_groups();
 	EXPORTED int blink_get_num_parameters();
-	EXPORTED blink_Group blink_get_group(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter(blink_Index index);
 	EXPORTED blink_Parameter blink_get_parameter_by_uuid(blink_UUID uuid);
 

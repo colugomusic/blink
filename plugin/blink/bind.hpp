@@ -26,15 +26,6 @@ inline blink_IntRange range(const Range<int>& range)
 	return out;
 }
 
-inline blink_Group group(const Group& group)
-{
-	blink_Group out;
-
-	out.name = group.name.c_str();
-
-	return out;
-}
-
 inline blink_Chord chord(const ChordParameter& chord)
 {
 	blink_Chord out;
@@ -143,7 +134,7 @@ inline blink_Parameter parameter(const Parameter& parameter)
 	blink_Parameter out;
 
 	out.uuid = parameter.uuid;
-	out.group_index = parameter.get_group_index();
+	out.group_name = parameter.get_group_name();
 	out.name = parameter.get_name();
 	out.short_name = parameter.get_short_name();
 	out.long_desc = parameter.get_long_desc();
