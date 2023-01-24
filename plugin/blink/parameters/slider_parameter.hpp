@@ -30,7 +30,7 @@ private:
 
 	blink_Envelope offset_api_{0};
 	blink_Envelope override_api_{0};
-	blink_ManipulatorSettings manipulator_settings_;
+	blink_ManipulatorSettings manipulator_settings_{0};
 };
 
 template <class T>
