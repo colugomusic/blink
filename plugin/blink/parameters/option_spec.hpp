@@ -14,7 +14,6 @@ struct OptionSpec : public ParameterSpec
 	blink_StdIcon icon = blink_StdIcon_None;
 	StepSearcherSpec searcher;
 	std::vector<std::string> options;
-	std::string manipulation_delegate;
 };
 
 }

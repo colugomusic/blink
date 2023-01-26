@@ -19,6 +19,7 @@ public:
 	{
 		if (spec.short_name) short_name_ = spec.short_name;
 		if (spec.long_desc) long_desc_ = spec.long_desc;
+		if (spec.manipulation_delegate) manipulation_delegate_ = spec.manipulation_delegate;
 	}
 
 	void set_group_name(std::string group_name) { group_name_ = group_name; }
@@ -27,6 +28,7 @@ public:
 	const char* get_name() const { return name_.c_str(); }
 	const char* get_short_name() const { return short_name_ ? short_name_->c_str() : nullptr; }
 	const char* get_long_desc() const { return long_desc_ ? long_desc_->c_str() : nullptr; }
+	const char* get_manipulation_delegate() const { return manipulation_delegate_ ? manipulation_delegate_->c_str() : nullptr; }
 
 	virtual blink_ParameterType get_type() const = 0;
 
@@ -37,6 +39,7 @@ private:
 	std::string name_;
 	std::optional<std::string> short_name_;
 	std::optional<std::string> long_desc_;
+	std::optional<std::string> manipulation_delegate_;
 };
 
 }
