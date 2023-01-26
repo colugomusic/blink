@@ -139,7 +139,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.envelope = envelope();
 
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
-	out.flags |= blink_EnvelopeFlags_IsManipulatorTarget;
 
 	return out;
 }

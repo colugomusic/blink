@@ -7,7 +7,6 @@
 #include <blink/parameters/option_parameter.hpp>
 #include <blink/parameters/slider_parameter.hpp>
 #include <blink/parameters/slider_parameter_spec.hpp>
-#include <blink/parameters/toggle_parameter.hpp>
 #include <blink/parameters/group.hpp>
 #include <blink/parameters/envelope_manipulator_target.hpp>
 
@@ -26,9 +25,9 @@ inline blink_IntRange range(const Range<int>& range)
 	return out;
 }
 
-inline blink_Chord chord(const ChordParameter& chord)
+inline blink_ChordParameter chord(const ChordParameter& chord)
 {
-	blink_Chord out;
+	blink_ChordParameter out;
 
 	out.parameter_type = blink_ParameterType_Chord;
 	out.icon = chord.icon;
@@ -37,13 +36,14 @@ inline blink_Chord chord(const ChordParameter& chord)
 	return out;
 }
 
-inline blink_Option option(const OptionParameter& option)
+inline blink_OptionParameter option(const OptionParameter& option)
 {
-	blink_Option out;
+	blink_OptionParameter out;
 
 	out.parameter_type = option.get_type();
 	out.max_index = option.get_max_index();
 	out.default_index = option.default_index;
+	out.icon = option.icon;
 	out.flags = option.flags;
 	out.proc_data = (void*)(&option);
 
@@ -96,6 +96,7 @@ inline blink_SliderParameter slider_parameter(const SliderParameter<float>& slid
 
 	out.parameter_type = blink_ParameterType_Slider;
 
+	out.proc_data = (void*)(&slider_parameter);
 	out.slider = Slider<float>::bind(slider_parameter.slider);
 	out.icon = slider_parameter.spec.icon;
 	out.flags = slider_parameter.spec.flags;
@@ -113,18 +114,6 @@ inline blink_IntSliderParameter slider_parameter(const SliderParameter<int>& sli
 	out.slider = Slider<float>::bind(slider_parameter.slider);
 	out.icon = slider_parameter.spec.icon;
 	out.flags = slider_parameter.spec.flags;
-
-	return out;
-}
-
-inline blink_Toggle toggle(const ToggleParameter& toggle)
-{
-	blink_Toggle out;
-
-	out.parameter_type = blink_ParameterType_Toggle;
-	out.default_value = toggle.default_value ? BLINK_TRUE : BLINK_FALSE;
-	out.icon = toggle.icon;
-	out.flags = toggle.flags;
 
 	return out;
 }
@@ -170,12 +159,6 @@ inline blink_Parameter parameter(const Parameter& parameter)
 		case blink_ParameterType_IntSlider:
 		{
 			out.parameter.int_slider = slider_parameter(*static_cast<const SliderParameter<int>*>(&parameter));
-			break;
-		}
-
-		case blink_ParameterType_Toggle:
-		{
-			out.parameter.toggle = toggle(*static_cast<const ToggleParameter*>(&parameter));
 			break;
 		}
 	}

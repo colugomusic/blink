@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blink/parameters/toggle_spec.hpp>
+#include <blink/parameters/option_spec.hpp>
 #include "search.hpp"
 
 namespace blink {
@@ -9,17 +9,22 @@ namespace loop {
 
 static constexpr auto UUID { BLINK_STD_UUID_LOOP };
 
-inline ToggleSpec toggle()
+inline OptionSpec toggle()
 {
-	ToggleSpec out;
+	OptionSpec out;
 
 	out.uuid = BLINK_STD_UUID_LOOP;
 	out.name = "Loop";
-	out.flags = blink_ToggleFlags_ShowInContextMenu | blink_ToggleFlags_ShowButton | blink_ToggleFlags_MovesDisplay | blink_ToggleFlags_IconOnly;
+	out.flags =
+		blink_OptionFlags_IsToggle |
+		blink_OptionFlags_ShowInContextMenu |
+		blink_OptionFlags_ShowButton |
+		blink_OptionFlags_MovesDisplay |
+		blink_OptionFlags_IconOnly;
 	out.icon = blink_StdIcon_Loop;
-	out.default_value = false;
-	out.searcher.binary = search::toggle_binary;
-	out.searcher.forward = search::toggle_forward;
+	out.default_index = 0;
+	out.searcher.binary = search::step_binary;
+	out.searcher.forward = search::step_forward;
 
 	return out;
 }

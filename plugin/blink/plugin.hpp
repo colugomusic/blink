@@ -15,7 +15,6 @@
 #include <blink/parameters/envelope_parameter.hpp>
 #include <blink/parameters/option_parameter.hpp>
 #include <blink/parameters/slider_parameter.hpp>
-#include <blink/parameters/toggle_parameter.hpp>
 #include "resource_store.hpp"
 
 namespace blink {
@@ -32,7 +31,6 @@ public:
 	std::shared_ptr<ChordParameter> add_parameter(ChordSpec spec);
 	std::shared_ptr<EnvelopeParameter> add_parameter(EnvelopeParameterSpec spec);
 	std::shared_ptr<OptionParameter> add_parameter(OptionSpec spec);
-	std::shared_ptr<ToggleParameter> add_parameter(ToggleSpec spec);
 
 	template <class T>
 	std::shared_ptr<SliderParameter<T>> add_parameter(SliderParameterSpec<T> spec);
@@ -106,15 +104,6 @@ template <class T>
 inline std::shared_ptr<SliderParameter<T>> Plugin::add_parameter(SliderParameterSpec<T> spec)
 {
 	const auto param { std::make_shared<SliderParameter<T>>(spec) };
-
-	add_parameter(spec.uuid, param);
-
-	return param;
-}
-
-inline std::shared_ptr<ToggleParameter> Plugin::add_parameter(ToggleSpec spec)
-{
-	const auto param { std::make_shared<ToggleParameter>(spec) };
 
 	add_parameter(spec.uuid, param);
 

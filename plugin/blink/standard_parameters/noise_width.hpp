@@ -23,7 +23,6 @@ inline SliderParameterSpec<float> slider_parameter()
 	out.clamp_range = { 0.0f, 1.0f };
 	out.flags |= blink_SliderFlags_HostClamp;
 	out.flags |= blink_SliderFlags_CanManipulate;
-	out.flags |= blink_SliderFlags_IsManipulatorTarget;
 
 	return out;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include "block_positions.hpp"
 #include "searcher_spec.hpp"
 
@@ -127,26 +128,28 @@ private:
 	ChordSearcherSpec spec_;
 };
 
-class BoolSearcher : public Searcher<bool, blink_BoolPoints>
+class StepSearcher : public Searcher<int64_t, blink_IntPoints>
 {
 public:
 
-	BoolSearcher(BoolSearcherSpec spec) : spec_(spec) {}
+	StepSearcher(StepSearcherSpec spec, int64_t default_value) : spec_(spec), default_value_{default_value} {}
 
-	bool binary_search(const blink_BoolPoints& points, blink_Position position, int search_beg_index, int* left) const override
+	int64_t binary_search(const blink_IntPoints& points, blink_Position position, int search_beg_index, int* left) const override
 	{
-		return spec_.binary(&points, position, search_beg_index, left);
+		assert (spec_.binary);
+		return spec_.binary(&points, default_value_, position, search_beg_index, left);
 	}
 
-	bool forward_search(const blink_BoolPoints& points, blink_Position position, int search_beg_index, int* left) const override
+	int64_t forward_search(const blink_IntPoints& points, blink_Position position, int search_beg_index, int* left) const override
 	{
-		return spec_.forward(&points, position, search_beg_index, left);
+		assert (spec_.forward);
+		return spec_.forward(&points, default_value_, position, search_beg_index, left);
 	}
 
-	auto search_vec_(const blink_BoolPoints& data, const BlockPositions& block_positions) const
+	auto search_vec_(const blink_IntPoints& data, const BlockPositions& block_positions) const
 	{
 		ml::DSPVectorInt out;
-		std::array<bool, kFloatsPerDSPVector> buffer;
+		std::array<int64_t, kFloatsPerDSPVector> buffer;
 
 		Searcher::search_vec(data, block_positions, buffer.data());
 
@@ -160,6 +163,7 @@ public:
 
 private:
 
-	BoolSearcherSpec spec_;
+	StepSearcherSpec spec_;
+	int64_t default_value_;
 };
 }

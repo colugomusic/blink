@@ -24,7 +24,8 @@
 #define BLINK_STD_UUID_NOISE_WIDTH "84e18fd3-03f1-49c2-a713-12e7e24dc03f"
 #define BLINK_STD_UUID_PAN "9c312a2c-a1b4-4a8d-ab68-07ea157c4574"
 #define BLINK_STD_UUID_PITCH "ca2529db-e7bd-4019-9a07-22aee24526d1"
-#define BLINK_STD_UUID_REVERSE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
+#define BLINK_STD_UUID_REVERSE_MODE "af00fb24-07ed-4b10-bc79-5b405334cc17"
+#define BLINK_STD_UUID_REVERSE_TOGGLE "e7cacaf8-4afc-4e81-83de-50620fed4b13"
 #define BLINK_STD_UUID_SAMPLE_OFFSET "88373752-7656-4d0e-8da2-a18c05af0106"
 #define BLINK_STD_UUID_SPEED "04293c38-3a64-42b2-80f0-43a4f8190ba7"
 #define BLINK_STD_UUID_WET "953c5871-fe00-4b51-a93f-b5142fd9de81"
@@ -79,7 +80,7 @@ typedef int blink_Error;
 
 enum blink_StdError
 {
-	blink_StdError_None = 0,
+	blink_StdError_None = BLINK_OK,
 	blink_StdError_AlreadyInitialized = -1,
 	blink_StdError_NotInitialized = -2,
 	blink_StdError_NotImplemented = -3,
@@ -110,12 +111,6 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Modulation point array types
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
-	blink_Index count;
-	blink_IntPoint* data;
-} blink_BoolPoints;
-
 typedef struct
 {
 	blink_Index count;
@@ -163,7 +158,6 @@ enum blink_ParameterType
 	blink_ParameterType_Option,
 	blink_ParameterType_Slider,
 	blink_ParameterType_IntSlider,
-	blink_ParameterType_Toggle,
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -199,12 +193,6 @@ typedef struct
 	blink_IntPoints points;
 } blink_IntSliderData;
 
-typedef struct
-{
-	blink_ParameterType type;
-	blink_BoolPoints points;
-} blink_ToggleData;
-
 union blink_ParameterData
 {
 	blink_ParameterType type;
@@ -213,7 +201,6 @@ union blink_ParameterData
 	blink_OptionData option;
 	blink_SliderData slider;
 	blink_IntSliderData int_slider;
-	blink_ToggleData toggle;
 };
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Parameter data END
@@ -273,17 +260,6 @@ typedef struct
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Parameter Flags
-//
-// If a parameter is flagged with 'CanManipulate' it just means that a manipulator
-// can be created for the associated UUID through the UI for that parameter.
-//
-// If a parameter is flagged with 'IsManipulatorTarget' then if a manipulator is
-// acting on the associated UUID then this parameter will be the one whose data
-// is actually transformed by the host.
-//
-// Different parameters may share the same UUID within the same plugin (for example
-// a Pitch envelope and a Pitch slider which work together), but only one parameter
-// per-UUID may be flagged as 'IsManipulatorTarget'.
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 enum blink_ChordFlags
 {
@@ -294,7 +270,6 @@ enum blink_ChordFlags
 	blink_ChordFlags_IconOnly                           = 1 << 4, // Only show icon in button
 	blink_ChordFlags_MovesDisplay                       = 1 << 5, // Editing should trigger a visual update
 	blink_ChordFlags_CanManipulate                      = 1 << 6,
-	blink_ChordFlags_IsManipulatorTarget                = 1 << 7,
 };
 
 enum blink_EnvelopeFlags
@@ -307,8 +282,7 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_IconOnly                           = 1 << 5, // Only show icon in button
 	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6, // Editing should trigger a visual update
 	blink_EnvelopeFlags_CanManipulate                      = 1 << 7,
-	blink_EnvelopeFlags_IsManipulatorTarget                = 1 << 8,
-	blink_EnvelopeFlags_HostClamp                          = 1 << 9, // Host will clamp values to clamp_range,
+	blink_EnvelopeFlags_HostClamp                          = 1 << 8, // Host will clamp values to clamp_range,
 	                                                                 // after applying manipulator offsets
 };
 
@@ -316,9 +290,12 @@ enum blink_OptionFlags
 {
 	blink_OptionFlags_None                = 1 << 0,
 	blink_OptionFlags_CanManipulate       = 1 << 1,
-	blink_OptionFlags_IsManipulatorTarget = 1 << 2,
-	blink_OptionFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
-	blink_OptionFlags_Hidden              = 1 << 4,
+	blink_OptionFlags_MovesDisplay        = 1 << 2, // Editing should trigger a visual update
+	blink_OptionFlags_Hidden              = 1 << 3,
+	blink_OptionFlags_IsToggle            = 1 << 4, // Option will be treated as an ON/OFF toggle
+	blink_OptionFlags_ShowButton          = 1 << 5,
+	blink_OptionFlags_ShowInContextMenu   = 1 << 6,
+	blink_OptionFlags_IconOnly            = 1 << 7,
 };
 
 enum blink_SliderFlags
@@ -329,20 +306,8 @@ enum blink_SliderFlags
 	                                                // to create sliders which are only visible when an envelope is
 	                                                // selected)
 	blink_SliderFlags_CanManipulate       = 1 << 3, // Has no effect for int sliders
-	blink_SliderFlags_IsManipulatorTarget = 1 << 4,
-	blink_SliderFlags_HostClamp           = 1 << 5, // Host will clamp values to clamp_range,
+	blink_SliderFlags_HostClamp           = 1 << 4, // Host will clamp values to clamp_range,
 	                                                // after applying manipulator offsets
-};
-
-enum blink_ToggleFlags
-{
-	blink_ToggleFlags_None                = 1 << 0,
-	blink_ToggleFlags_ShowButton          = 1 << 1,
-	blink_ToggleFlags_ShowInContextMenu   = 1 << 2,
-	blink_ToggleFlags_MovesDisplay        = 1 << 3, // Editing should trigger a visual update
-	blink_ToggleFlags_IconOnly            = 1 << 4, // Only show icon in toggle
-	blink_ToggleFlags_CanManipulate       = 1 << 5,
-	blink_ToggleFlags_IsManipulatorTarget = 1 << 6,
 };
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -353,6 +318,7 @@ enum blink_ToggleFlags
 // Option parameter
 //
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
+// If blink_OptionFlags_IsToggle is set, will be displayed as a check item
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
 
@@ -361,17 +327,18 @@ typedef struct
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Option
 	blink_Index max_index;
 	blink_Index default_index;
+	blink_StdIcon icon;
 
 	void* proc_data;
 	int flags; // blink_OptionFlags
 
 	// Returns the display text for the option index
+	// Can be NULL if blink_OptionFlags_IsToggle is set
 	blink_Option_GetText get_text;
-
-} blink_Option;
+} blink_OptionParameter;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Envelope parameter
+// Envelope
 // Can be edited in Blockhead using the envelope editor
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef blink_Bool (*blink_GetGridLine)(void* proc_data, int index, float* out);
@@ -423,6 +390,9 @@ typedef struct
 // Manipulator Settings END
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Envelope parameter
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
@@ -454,7 +424,7 @@ typedef struct
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
 	int flags; // blink_ChordFlags
 	blink_StdIcon icon;
-} blink_Chord;
+} blink_ChordParameter;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Slider parameter
@@ -464,6 +434,7 @@ typedef struct
 typedef struct
 {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Slider
+	void* proc_data;
 	int flags; // blink_SliderFlags
 	blink_StdIcon icon;
 	blink_Slider slider;
@@ -483,29 +454,16 @@ typedef struct
 } blink_IntSliderParameter;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Toggle parameter
-// On/off value
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
-	enum blink_ParameterType parameter_type; // blink_ParameterType_Toggle
-	blink_Bool default_value;
-	blink_StdIcon icon;
-	int flags; // blink_ToggleFlags
-} blink_Toggle;
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Generic Parameter
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 union blink_ParameterObject
 {
 	enum blink_ParameterType type;
-	blink_Chord chord;
+	blink_ChordParameter chord;
 	blink_EnvelopeParameter envelope;
-	blink_Option option;
+	blink_OptionParameter option;
 	blink_SliderParameter slider;
 	blink_IntSliderParameter int_slider;
-	blink_Toggle toggle;
 };
 
 typedef struct
@@ -532,6 +490,11 @@ typedef struct
 
 	// Long description of the parameter. Can be null
 	const char* long_desc;
+
+	// Normally null. If this is set, when the user tries to create a manipulator for
+	// this parameter, the host will create a manipulator for this other parameter
+	// instead.
+	blink_UUID manipulation_delegate;
 
 	union blink_ParameterObject parameter;
 } blink_Parameter;

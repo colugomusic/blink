@@ -1,28 +1,27 @@
 #pragma once
 
 #include <blink/parameters/option_spec.hpp>
-#include <blink/parameters/toggle_spec.hpp>
 #include "search.hpp"
 
 namespace blink {
 namespace std_params {
 namespace reverse {
 
-static constexpr auto UUID { BLINK_STD_UUID_REVERSE };
-
 inline auto option()
 {
 	blink::OptionSpec out;
 
-	out.uuid = UUID;
+	out.uuid = BLINK_STD_UUID_REVERSE_MODE;
 	out.name = "Reverse";
 	
 	out.flags =
-		blink_OptionFlags_IsManipulatorTarget |
+		blink_OptionFlags_CanManipulate |
 		blink_OptionFlags_MovesDisplay |
 		blink_OptionFlags_Hidden;
 
 	out.default_index = -1;
+	out.searcher.binary = search::step_binary;
+	out.searcher.forward = search::step_forward;
 
 	out.options = {
 		"Mirror",
@@ -35,22 +34,26 @@ inline auto option()
 
 inline auto toggle()
 {
-	ToggleSpec out;
+	OptionSpec out;
 
-	out.uuid = UUID;
+	out.uuid = BLINK_STD_UUID_REVERSE_TOGGLE;
 	out.name = "Reverse";
 
 	out.flags =
-		blink_ToggleFlags_CanManipulate |
-		blink_ToggleFlags_ShowInContextMenu |
-		blink_ToggleFlags_ShowButton |
-		blink_ToggleFlags_MovesDisplay |
-		blink_ToggleFlags_IconOnly;
+		blink_OptionFlags_IsToggle |
+		blink_OptionFlags_ShowInContextMenu |
+		blink_OptionFlags_ShowButton |
+		blink_OptionFlags_MovesDisplay |
+		blink_OptionFlags_IconOnly;
 
 	out.icon = blink_StdIcon_Reverse;
-	out.default_value = false;
-	out.searcher.binary = search::toggle_binary;
-	out.searcher.forward = search::toggle_forward;
+	out.default_index = 0;
+	out.searcher.binary = search::step_binary;
+	out.searcher.forward = search::step_forward;
+
+	// When the user tries to create a manipulator for this parameter,
+	// create a manipulator for this other parameter instead
+	out.manipulation_delegate = BLINK_STD_UUID_REVERSE_MODE;
 
 	return out;
 }

@@ -2,6 +2,7 @@
 
 #include "parameter.hpp"
 #include "option_spec.hpp"
+#include <blink/searcher.hpp>
 
 namespace blink {
 
@@ -11,6 +12,8 @@ public:
 
 	const std::vector<std::string> options;
 	const blink_Index default_index;
+	const blink_StdIcon icon;
+	const StepSearcher searcher;
 	const int flags;
 
 	OptionParameter(OptionSpec spec);
@@ -25,6 +28,8 @@ inline OptionParameter::OptionParameter(OptionSpec spec)
 	: Parameter { spec }
 	, options { spec.options }
 	, default_index { spec.default_index }
+	, icon(spec.icon)
+	, searcher(spec.searcher, default_index)
 	, flags { spec.flags }
 {
 }

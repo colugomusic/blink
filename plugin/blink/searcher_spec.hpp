@@ -16,10 +16,10 @@ struct ChordSearcherSpec
 	std::function<blink_Scale(const blink_ChordData* data, blink_Position block_pos, int search_beg_index, int* left)> forward;
 };
 
-struct BoolSearcherSpec
+struct StepSearcherSpec
 {
-	std::function<bool(const blink_BoolPoints* points, blink_Position block_pos, int search_beg_index, int* left)> binary;
-	std::function<bool(const blink_BoolPoints* points, blink_Position block_pos, int search_beg_index, int* left)> forward;
+	std::function<bool(const blink_IntPoints* points, int64_t default_value, blink_Position block_pos, int search_beg_index, int* left)> binary;
+	std::function<bool(const blink_IntPoints* points, int64_t default_value, blink_Position block_pos, int search_beg_index, int* left)> forward;
 };
 
 } // blink
