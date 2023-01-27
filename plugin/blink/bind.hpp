@@ -127,7 +127,7 @@ inline blink_Parameter parameter(const Parameter& parameter)
 	out.name = parameter.get_name();
 	out.short_name = parameter.get_short_name();
 	out.long_desc = parameter.get_long_desc();
-	out.manipulation_delegate = parameter.get_manipulation_delegate();
+	out.manipulation_delegate = parameter.manipulation_delegate;
 
 	const auto type = parameter.get_type();
 

@@ -10,7 +10,7 @@ struct ParameterSpec
 	const char* name;
 	const char* short_name = nullptr;
 	const char* long_desc = nullptr;
-	const char* manipulation_delegate = nullptr;
+	blink_Index manipulation_delegate = -1;
 	int flags = 0;
 };
 

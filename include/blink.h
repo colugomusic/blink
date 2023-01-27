@@ -491,10 +491,11 @@ typedef struct
 	// Long description of the parameter. Can be null
 	const char* long_desc;
 
-	// Normally null. If this is set, when the user tries to create a manipulator for
-	// this parameter, the host will create a manipulator for this other parameter
-	// instead.
-	blink_UUID manipulation_delegate;
+	// Normally -1.
+	// If this is >= 0, when the user tries to create a manipulator for
+	// this parameter, the host will create a manipulator for the parameter
+	// at this specified index instead
+	blink_Index manipulation_delegate;
 
 	union blink_ParameterObject parameter;
 } blink_Parameter;
