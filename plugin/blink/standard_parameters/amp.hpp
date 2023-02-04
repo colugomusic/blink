@@ -98,13 +98,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.flags = blink_EnvelopeFlags_MovesDisplay;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 
-	return out;
-}
-
-inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
-{
-	EnvelopeManipulatorTargetSpec out;
-
 	out.apply_offset = [](float value, float offset) -> float
 	{
 		return value * offset;

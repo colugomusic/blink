@@ -134,14 +134,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.envelope = envelope();
 	out.flags |= blink_EnvelopeFlags_MovesDisplay;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
-
-	return out;
-}
-
-inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
-{
-	EnvelopeManipulatorTargetSpec out;
-
 	out.offset_envelope = envelope();
 	out.override_envelope = envelope();
 

@@ -86,16 +86,6 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.flags |= blink_EnvelopeFlags_MovesDisplay;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 
-	return out;
-}
-
-inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
-{
-	EnvelopeManipulatorTargetSpec out;
-
-	//out.offset_envelope = percentage::envelope<0, 200>();
-	//out.offset_envelope->default_value = 1.0f;
-
 	out.offset_envelope = envelope();
 	out.override_envelope = envelope();
 

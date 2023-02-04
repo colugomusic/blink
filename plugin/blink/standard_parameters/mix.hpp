@@ -24,6 +24,9 @@ inline auto envelope_parameter()
 	out.flags |= blink_EnvelopeFlags_HostClamp;;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 
+	out.offset_envelope = percentage::bipolar::envelope();
+	out.override_envelope = percentage::envelope();
+
 	return out;
 }
 

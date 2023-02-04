@@ -61,7 +61,7 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeParameterSpec spec_)
 		manipulator_settings_.override_envelope = &override_api_;
 	}
 
-	if (apply_offset_ && (offset_envelope_ || override_envelope_))
+	if (apply_offset_)
 	{
 		manipulator_settings_.apply_offset = [](void* proc_data, float value, float offset)
 		{

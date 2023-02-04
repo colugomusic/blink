@@ -33,6 +33,9 @@ inline auto envelope_parameter()
 	out.flags |= blink_EnvelopeFlags_HostClamp;
 	out.flags |= blink_EnvelopeFlags_CanManipulate;
 
+	out.offset_envelope = percentage::bipolar::envelope();
+	out.override_envelope = envelope();
+
 	return out;
 }
 
@@ -47,13 +50,6 @@ inline auto slider_parameter()
 
 	out.flags |= blink_SliderFlags_HostClamp;
 	out.flags |= blink_SliderFlags_CanManipulate;
-
-	return out;
-}
-
-inline EnvelopeManipulatorTargetSpec envelope_manipulator_target()
-{
-	EnvelopeManipulatorTargetSpec out;
 
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = envelope();
