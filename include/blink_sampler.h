@@ -62,7 +62,7 @@ typedef struct
 	                    // without being processed.
 
 	blink_SR song_rate;
-	blink_SampleInfo* sample_info;
+	const blink_SampleInfo* sample_info;
 	blink_Bool analysis_ready;
 	blink_Position* positions;
 } blink_SamplerBuffer;
