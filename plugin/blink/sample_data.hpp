@@ -153,6 +153,11 @@ inline auto SampleData::get_interp_pos(snd::transport::DSPVectorFramePosition po
 	out.next = math::ceil(pos);
 	out.prev = math::floor(pos);
 
+	for (int i = 0; i < kFloatsPerDSPVector; i++)
+	{
+		out.next[i] = out.next[i] % info_->num_frames;
+	}
+
 	out.x = pos.fract;
 
 	return out;
