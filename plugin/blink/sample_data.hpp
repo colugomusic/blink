@@ -155,10 +155,7 @@ inline auto SampleData::get_interp_pos(snd::transport::DSPVectorFramePosition po
 
 	if (loop)
 	{
-		for (int i = 0; i < kFloatsPerDSPVector; i++)
-		{
-			out.next[i] = out.next[i] % info_->num_frames;
-		}
+		out.next[kFloatsPerDSPVector - 1] %= info_->num_frames;
 	}
 
 	out.x = pos.fract;
