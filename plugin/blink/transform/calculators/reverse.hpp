@@ -241,7 +241,7 @@ public:
 			config.outputs.correction_grains->count = 0;
 		}
 
-		if (!config.option.reverse || config.option.reverse->points.count < 1)
+		if (!config.option.reverse || config.option.reverse->points.count < 2)
 		{
 			*config.outputs.positions = block_positions;
 			return;
