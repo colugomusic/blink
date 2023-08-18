@@ -99,7 +99,7 @@ public:
 			}
 		}
 
-		const auto p0 { get_cache_point(0, config.reversal_data->points.count-1) };
+		const auto p0 { get_cache_point(0, config_.reversal_data->points.count-1) };
 		const auto distance { block_position - p0.x };
 
 		return segment_start_frame_ + distance;
