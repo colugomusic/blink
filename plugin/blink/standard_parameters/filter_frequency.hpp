@@ -35,7 +35,7 @@ inline auto display(float v)
 
 	if (hz >= 1000.0f)
 	{
-		ss << math::stepify(hz / 1000.0f, 0.1f) << " MHz";
+		ss << math::stepify(hz / 1000.0f, 0.1f) << " KHz";
 	}
 	else
 	{
