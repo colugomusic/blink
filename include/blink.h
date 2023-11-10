@@ -123,8 +123,8 @@ typedef struct
 {
 	blink_Index count;
 	blink_IntPoint* data;
-	int32_t min;
-	int32_t max;
+	int64_t min;
+	int64_t max;
 } blink_IntPoints;
 
 typedef struct
