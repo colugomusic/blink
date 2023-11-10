@@ -120,6 +120,7 @@ struct blink_SamplerUnitState
 	blink_Bool smooth_transitions;
 	blink_ChannelMode channel_mode;
 	const blink_WarpPoints* warp_points;
+	// May be NULL, in which case plugins should act as if all parameters are default.
 	const blink_ParameterData* parameter_data;
 };
 
