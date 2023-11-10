@@ -44,7 +44,8 @@ struct blink_EffectUnitState
 	             // point instead of searching from the beginning
 
 	int64_t data_offset;
-	blink_ParameterData* parameter_data;
+	// May be NULL, in which case plugins should act as if all parameters are default.
+	const blink_ParameterData* parameter_data;
 };
 
 typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);

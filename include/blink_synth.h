@@ -22,7 +22,8 @@ struct blink_SynthUnitState
 	             // point instead of searching from the beginning
 
 	int64_t data_offset;
-	blink_ParameterData* parameter_data;
+	// May be NULL, in which case plugins should act as if all parameters are default.
+	const blink_ParameterData* parameter_data;
 };
 
 typedef blink_Error(*blink_Synth_Process)(void* proc_data, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
