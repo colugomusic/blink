@@ -40,9 +40,10 @@ struct blink_EffectUnitState
 	             // this id might not change from one buffer to the next.
 	             // Could be used to optimize things like envelope traversals, for example
 	             // if the parameter state has not changed since the last audio buffer then
-				 // a plugin could continue searching from the previously hit envelope
+	             // a plugin could continue searching from the previously hit envelope
 	             // point instead of searching from the beginning
 
+	float scale;
 	int64_t data_offset;
 	// May be NULL, in which case plugins should act as if all parameters are default.
 	const blink_ParameterData* parameter_data;
