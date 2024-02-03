@@ -7,43 +7,46 @@ namespace blink {
 namespace transform {
 namespace calculators {
 
-template <class T> T ratio(T min, T max, T distance)
-{
+template <class T> T ratio(T min, T max, T distance) {
 	return std::pow(T(2), ((max - min) / distance) / T(12));
 }
 
-template <class T> T sum_of_geometric_series(T first, T ratio, T n)
-{
+template <class T> T sum_of_geometric_series(T first, T ratio, T n) {
 	return first * ((T(1) - std::pow(ratio, n)) / (T(1) - ratio));
 }
 
-//
-// pull requests extremely welcome
-//
-
-template <class T> T weird_math_that_i_dont_understand(T min, T max, T distance, T n)
-{
-	auto r = ratio(min, max, distance);
-
-	if (std::abs(T(1) - r) <= T(0))
-	{
-		return n * math::convert::p_to_ff(min);
-	}
-
-	return sum_of_geometric_series(math::convert::p_to_ff(min), r, n);
+template <class T> T sum_of_geometric_series_inverse(T first, T ratio, T sum) {
+	return std::log(T(1) - sum * (T(1) - ratio) / first) / std::log(ratio);
 }
 
-template <class T> T weird_math_that_i_dont_understand_ff(T min, T max, T distance, T n)
-{
+template <class T> T weird_math(T min, T max, T distance, T n) {
+	const auto r      = ratio(min, max, distance); 
+	const auto ff_min = math::convert::p_to_ff(min);
+	if (std::abs(T(1) - r) <= T(0)) {
+		return n * ff_min;
+	} 
+	return sum_of_geometric_series(ff_min, r, n);
+}
+
+template <class T> T weird_math_inverse(T min, T max, T distance, T n) {
+	const auto r      = ratio(min, max, distance); 
+	const auto ff_min = math::convert::p_to_ff(min);
+	if (std::abs(T(1) - r) <= T(0)) {
+		return n / ff_min;
+	} 
+	return sum_of_geometric_series_inverse(ff_min, r, n);
+}
+
+template <class T> T weird_math_ff(T min, T max, T distance, T n) {
 	return math::convert::p_to_ff(min) * std::pow(ratio(min, max, distance), n);
 }
+
 
 class PitchUnit
 {
 public:
 
-	struct Config
-	{
+	struct Config {
 		float transpose { 0.0f };
 		const blink_EnvelopeData* pitch { nullptr };
 	};
@@ -55,103 +58,67 @@ public:
 	// millions of pixels off the left edge of the screen therefore it is
 	// not good enough to simply traverse the entire sample.
 	//
-	blink_Position operator()(Config config, blink_Position block_position, float* derivative = nullptr)
-	{
-		struct PitchPoint
-		{
+	blink_Position operator()(Config config, blink_Position block_position, float* derivative = nullptr) {
+		struct PitchPoint {
 			blink_IntPosition x;
-			float pitch;
-
+			float pitch; 
 			PitchPoint(const blink_FloatPoint& p, float min, float max, float transpose)
 				: x(p.x)
 				, pitch(std::clamp(p.y, min, max) + transpose)
 				, ff_(1.0f)
 			{
-			}
-
-			PitchPoint(PitchPoint && rhs) = default;
-
-			float get_ff() const
-			{
-				if (!ff_ready_)
-				{
+			} 
+			PitchPoint(PitchPoint && rhs) = default; 
+			float get_ff() const {
+				if (!ff_ready_) {
 					ff_ = math::convert::p_to_ff(pitch);
 					ff_ready_ = true;
-				}
-
+				} 
 				return ff_;
-			}
-
-		private:
-
+			} 
+		private: 
 			mutable bool ff_ready_ = false;
 			mutable float ff_;
-		};
-
-		for (blink_Index i { point_search_index_ }; i < config.pitch->points.count; i++)
-		{
-			const PitchPoint p1(config.pitch->points.data[i], config.pitch->points.min, config.pitch->points.max, config.transpose);
-
-			if (block_position < p1.x)
-			{
-				if (i == 0)
-				{
-					point_search_index_ = 0;
-
-					if (derivative) *derivative = p1.get_ff();
-
+		}; 
+		for (blink_Index i { point_search_index_ }; i < config.pitch->points.count; i++) {
+			const PitchPoint p1(config.pitch->points.data[i], config.pitch->points.min, config.pitch->points.max, config.transpose); 
+			if (block_position < p1.x) {
+				if (i == 0) {
+					point_search_index_ = 0; 
+					if (derivative) *derivative = p1.get_ff(); 
 					return (block_position * p1.get_ff()) + segment_start_;
-				}
-
-				PitchPoint p0(config.pitch->points.data[i - 1], config.pitch->points.min, config.pitch->points.max, config.transpose);
-
+				} 
+				PitchPoint p0(config.pitch->points.data[i - 1], config.pitch->points.min, config.pitch->points.max, config.transpose); 
 				auto n { block_position - p0.x };
-				auto segment_size { double(p1.x) - p0.x };
-
-				if (segment_size > 0.0f)
-				{
-					point_search_index_ = i;
-
-					if (derivative) *derivative = float(weird_math_that_i_dont_understand_ff(double(p0.pitch), double(p1.pitch), segment_size, n));
-
-					return (weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, n)) + segment_start_;
+				auto segment_size { double(p1.x) - p0.x }; 
+				if (segment_size > 0.0f) {
+					point_search_index_ = i; 
+					if (derivative) *derivative = float(weird_math_ff(double(p0.pitch), double(p1.pitch), segment_size, n)); 
+					return (weird_math(double(p0.pitch), double(p1.pitch), segment_size, n)) + segment_start_;
 				}
 			}
-			else
-			{
-				if (i == 0)
-				{
-					point_search_index_ = 1;
-
+			else {
+				if (i == 0) {
+					point_search_index_ = 1; 
 					segment_start_ += (p1.x * p1.get_ff()) + segment_start_;
 				}
-				else
-				{
-					point_search_index_ = i + 1;
-
-					PitchPoint p0(config.pitch->points.data[i - 1], config.pitch->points.min, config.pitch->points.max, config.transpose);
-
-					auto segment_size { double(p1.x) - p0.x };
-
-					if (segment_size > 0.0f)
-					{
-						segment_start_ = (weird_math_that_i_dont_understand(double(p0.pitch), double(p1.pitch), segment_size, segment_size)) + segment_start_;
+				else {
+					point_search_index_ = i + 1; 
+					PitchPoint p0(config.pitch->points.data[i - 1], config.pitch->points.min, config.pitch->points.max, config.transpose); 
+					auto segment_size { double(p1.x) - p0.x }; 
+					if (segment_size > 0.0f) {
+						segment_start_ = (weird_math(double(p0.pitch), double(p1.pitch), segment_size, segment_size)) + segment_start_;
 					}
 				}
 			}
-		}
-
-		PitchPoint p0(config.pitch->points.data[config.pitch->points.count - 1], config.pitch->points.min, config.pitch->points.max, config.transpose);
-
-		auto n { block_position - p0.x };
-
-		if (derivative) *derivative = p0.get_ff();
-
+		} 
+		PitchPoint p0(config.pitch->points.data[config.pitch->points.count - 1], config.pitch->points.min, config.pitch->points.max, config.transpose); 
+		auto n { block_position - p0.x }; 
+		if (derivative) *derivative = p0.get_ff(); 
 		return (n * p0.get_ff()) + segment_start_;
 	}
 
-	void reset()
-	{
+	void reset() {
 		segment_start_ = 0.0f;
 		point_search_index_ = 0;
 	}

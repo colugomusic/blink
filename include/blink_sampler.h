@@ -214,5 +214,10 @@ extern "C"
 	// The host takes care of actually rendering the waveform but relies on
 	// the plugin to calculate the waveform position at each pixel.
 	EXPORTED blink_Error blink_sampler_draw(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out);
+
+	// If you are wondering what on earth this stuff is about then please
+	// bother Chris about it and he will write a proper comment here.
+	EXPORTED double blink_get_sonic_fragment_at_block_position(blink_Position block_position);
+	EXPORTED blink_Position blink_block_position_for_sonic_fragment(double fragment);
 }
 #endif

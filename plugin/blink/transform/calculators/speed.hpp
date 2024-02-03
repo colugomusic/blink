@@ -7,16 +7,26 @@ namespace blink {
 namespace transform {
 namespace calculators {
 
-template <class T> T quadratic_formula(T a, T b, T c, T n)
-{
+template <class T> T quadratic_formula(T a, T b, T c, T n) {
 	return (a * (n * n)) + (b * n) + c;
 }
 
-template <class T> T spooky_maths(T f0, T f1, T N, T n, T C)
-{
-	auto accel = (f1 - f0) / (T(2) * N);
+template <class T> T quadratic_formula_inverse(T a, T b, T c, T y) {
+	assert (a != T(0));
+	return (-b + std::sqrt(b * b - 4 * a * (c - y))) / (2 * a);
+}
 
+template <class T> T spooky_maths(T f0, T f1, T N, T n, T C) {
+	auto accel = (f1 - f0) / (T(2) * N); 
 	return quadratic_formula(accel, f0, C, n);
+}
+
+template <class T> T spooky_maths_inverse(T f0, T f1, T N, T n, T C) {
+	auto accel = (f1 - f0) / (T(2) * N); 
+	if (accel == T(0)) {
+		return (n - c) / b;
+	}
+	return quadratic_formula_inverse(accel, f0, C, n);
 }
 
 class SpeedUnit

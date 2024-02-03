@@ -270,6 +270,7 @@ enum blink_ChordFlags
 	blink_ChordFlags_IconOnly                           = 1 << 4, // Only show icon in button
 	blink_ChordFlags_MovesDisplay                       = 1 << 5, // Editing should trigger a visual update
 	blink_ChordFlags_CanManipulate                      = 1 << 6,
+	blink_ChordFlags_SonicPivot                         = 1 << 7,
 };
 
 enum blink_EnvelopeFlags
@@ -284,6 +285,7 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_CanManipulate                      = 1 << 7,
 	blink_EnvelopeFlags_HostClamp                          = 1 << 8, // Host will clamp values to clamp_range,
 	                                                                 // after applying manipulator offsets
+	blink_EnvelopeFlags_SonicPivot                         = 1 << 9,
 };
 
 enum blink_OptionFlags
@@ -296,6 +298,7 @@ enum blink_OptionFlags
 	blink_OptionFlags_ShowButton          = 1 << 5,
 	blink_OptionFlags_ShowInContextMenu   = 1 << 6,
 	blink_OptionFlags_IconOnly            = 1 << 7,
+	blink_OptionFlags_SonicPivot          = 1 << 8,
 };
 
 enum blink_SliderFlags
@@ -308,6 +311,7 @@ enum blink_SliderFlags
 	blink_SliderFlags_CanManipulate       = 1 << 3, // Has no effect for int sliders
 	blink_SliderFlags_HostClamp           = 1 << 4, // Host will clamp values to clamp_range,
 	                                                // after applying manipulator offsets
+	blink_SliderFlags_SonicPivot          = 1 << 5,
 };
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
