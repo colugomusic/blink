@@ -45,8 +45,7 @@ protected:
 
 		buffer_id_ = buffer_id;
 
-		block_positions_(positions, data_offset, kFloatsPerDSPVector);
-		block_positions_.positions *= scale;
+		block_positions_(positions, scale, data_offset, kFloatsPerDSPVector);
 	}
 
 	const BlockPositions& block_positions() const
