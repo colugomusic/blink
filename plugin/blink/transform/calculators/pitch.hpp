@@ -81,7 +81,7 @@ struct PitchUnit {
 				} 
 				const auto p0     = make_pitch_point(config.pitch->points.data[i - 1], config.pitch->points.min, config.pitch->points.max, config.transpose); 
 				auto n            = block_position - p0.x;
-				auto segment_size = double(p1.x) - p0.x;
+				auto segment_size = p1.x - p0.x;
 				if (segment_size > 0.0f) {
 					point_search_index_ = i; 
 					if (derivative) {
@@ -98,7 +98,7 @@ struct PitchUnit {
 				else {
 					point_search_index_ = i + 1; 
 					const auto p0 = make_pitch_point(config.pitch->points.data[i - 1], config.pitch->points.min, config.pitch->points.max, config.transpose); 
-					auto segment_size { double(p1.x) - p0.x }; 
+					auto segment_size { p1.x - p0.x }; 
 					if (segment_size > 0.0f) {
 						segment_start_ = (weird_math(double(p0.pitch), double(p1.pitch), segment_size, segment_size)) + segment_start_;
 					}
