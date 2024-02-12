@@ -13,7 +13,7 @@ namespace search {
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc>
-inline float float_points(const blink_FloatPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+inline float float_points(const blink_RealPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
 {
 	*left = 0;
 
@@ -38,7 +38,7 @@ inline float float_points(const blink_FloatPoints* points, float default_value, 
 	if (pos == search_end)
 	{
 		// No points to the right so we're at the end of the envelope
-		*left = int(std::distance<const blink_FloatPoint*>(points->data, (pos - 1)));
+		*left = int(std::distance<const blink_RealPoint*>(points->data, (pos - 1)));
 
 		return clamp((pos - 1)->y);
 	}
@@ -51,17 +51,17 @@ inline float float_points(const blink_FloatPoints* points, float default_value, 
 	const auto segment_size = p1.x - p0.x;	// Should never be zero
 	const auto r = (block_position - p0.x) / segment_size;
 
-	*left = int(std::distance<const blink_FloatPoint*>(points->data, (pos - 1)));
+	*left = int(std::distance<const blink_RealPoint*>(points->data, (pos - 1)));
 
 	return math::lerp(clamp(p0.y), clamp(p1.y), float(r));
 }
 
 // Use a binary search to locate the envelope position
-inline float float_points_binary(const blink_FloatPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
+inline float float_points_binary(const blink_RealPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
 {
-	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
+	const auto find = [block_position](const blink_RealPoint* beg, const blink_RealPoint* end)
 	{
-		const auto less = [](blink_Position position, blink_FloatPoint point)
+		const auto less = [](blink_Position position, blink_RealPoint point)
 		{
 			return position < point.x;
 		};
@@ -74,11 +74,11 @@ inline float float_points_binary(const blink_FloatPoints* points, float default_
 
 // Use a forward search to locate the envelope position (can be
 // faster when envelope is being traversed forwards)
-inline float float_points_forward(const blink_FloatPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
+inline float float_points_forward(const blink_RealPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
 {
-	const auto find = [block_position](const blink_FloatPoint* beg, const blink_FloatPoint* end)
+	const auto find = [block_position](const blink_RealPoint* beg, const blink_RealPoint* end)
 	{
-		const auto greater = [block_position](blink_FloatPoint point)
+		const auto greater = [block_position](blink_RealPoint point)
 		{
 			return point.x > block_position;
 		};

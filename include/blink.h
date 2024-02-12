@@ -47,20 +47,17 @@ typedef const char* blink_UUID;
 typedef uint32_t blink_SR;
 typedef uint8_t blink_BitDepth;
 typedef double blink_Position;
-typedef int64_t blink_IntPosition;
 typedef int8_t blink_Bool;
 typedef uint32_t blink_Scale;
 
-enum blink_ChannelMode
-{
+enum blink_ChannelMode {
 	blink_ChannelMode_Left = 0,
 	blink_ChannelMode_Right = 1,
 	blink_ChannelMode_Stereo = 2,
 	blink_ChannelMode_StereoSwap = 3,
 };
 
-enum blink_StdIcon
-{
+enum blink_StdIcon {
 	blink_StdIcon_None = 0,
 	blink_StdIcon_Amp = 1,
 	blink_StdIcon_Pan = 2,
@@ -78,8 +75,7 @@ enum blink_StdIcon
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef int blink_Error;
 
-enum blink_StdError
-{
+enum blink_StdError {
 	blink_StdError_None = BLINK_OK,
 	blink_StdError_AlreadyInitialized = -1,
 	blink_StdError_NotInitialized = -2,
@@ -90,45 +86,39 @@ enum blink_StdError
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Modulation point types
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
-	blink_IntPosition x;
+typedef struct {
+	blink_Position x;
 	float y;
-} blink_FloatPoint;
+} blink_RealPoint;
 
-typedef struct
-{
-	blink_IntPosition x;
+typedef struct {
+	blink_Position x;
 	int64_t y;
 } blink_IntPoint;
 
-typedef struct
-{
-	blink_IntPosition x;
+typedef struct {
+	blink_Position x;
 	blink_Scale y;
 } blink_ChordBlock;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Modulation point array types
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
+typedef struct {
 	blink_Index count;
-	blink_FloatPoint* data;
+	blink_RealPoint* data;
 	float min;
 	float max;
-} blink_FloatPoints;
+} blink_RealPoints;
 
-typedef struct
-{
+typedef struct {
 	blink_Index count;
 	blink_IntPoint* data;
 	int64_t min;
 	int64_t max;
 } blink_IntPoints;
 
-typedef struct
-{
+typedef struct {
 	blink_Index count;
 	blink_ChordBlock* data;
 } blink_ChordBlocks;
@@ -136,14 +126,12 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Range types
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
+typedef struct {
 	float min;
 	float max;
 } blink_Range;
 
-typedef struct
-{
+typedef struct {
 	int min;
 	int max;
 } blink_IntRange;
@@ -151,8 +139,7 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Parameter types
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-enum blink_ParameterType
-{
+enum blink_ParameterType {
 	blink_ParameterType_Chord,
 	blink_ParameterType_Envelope,
 	blink_ParameterType_Option,
@@ -163,38 +150,32 @@ enum blink_ParameterType
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Parameter data
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
+typedef struct {
 	blink_ParameterType type;
 	blink_ChordBlocks points;
 } blink_ChordData;
 
-typedef struct
-{
+typedef struct {
 	blink_ParameterType type;
-	blink_FloatPoints points;
+	blink_RealPoints points;
 } blink_EnvelopeData;
 
-typedef struct
-{
+typedef struct {
 	blink_ParameterType type;
 	blink_IntPoints points;
 } blink_OptionData;
 
-typedef struct
-{
+typedef struct {
 	blink_ParameterType type;
-	blink_FloatPoints points;
+	blink_RealPoints points;
 } blink_SliderData;
 
-typedef struct
-{
+typedef struct {
 	blink_ParameterType type;
 	blink_IntPoints points;
 } blink_IntSliderData;
 
-union blink_ParameterData
-{
+union blink_ParameterData {
 	blink_ParameterType type;
 	blink_ChordData chord;
 	blink_EnvelopeData envelope;
@@ -221,12 +202,9 @@ typedef int (*blink_IntDecrement)(void* proc_data, int value, blink_Bool precise
 typedef const char* (*blink_IntDisplayValue)(void* proc_data, int value);
 typedef blink_Bool (*blink_IntFromString)(void* proc_data, const char* str, int* value);
 
-typedef struct
-{
-	float default_value;
-
-	void* proc_data;
-
+typedef struct {
+	float default_value; 
+	void* proc_data; 
 	blink_DisplayValue display_value;
 	blink_FromString from_string;
 	blink_Constrain constrain;
@@ -236,12 +214,9 @@ typedef struct
 	blink_Stepify stepify;
 } blink_Slider;
 
-typedef struct
-{
-	int default_value;
-
-	void* proc_data;
-
+typedef struct {
+	int default_value; 
+	void* proc_data; 
 	blink_IntDisplayValue display_value;
 	blink_IntFromString from_string;
 	blink_IntConstrain constrain;
@@ -250,8 +225,7 @@ typedef struct
 	blink_IntDecrement decrement;
 } blink_IntSlider;
 
-typedef struct
-{
+typedef struct {
 	// Step size is also a range with a value that
 	// can be configured by the user
 	blink_Slider step_size;
@@ -261,8 +235,7 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Parameter Flags
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-enum blink_ChordFlags
-{
+enum blink_ChordFlags {
 	blink_ChordFlags_None                               = 1 << 0,
 	blink_ChordFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1, // Will not appear in modulator tree
 	blink_ChordFlags_DefaultActive                      = 1 << 2,
@@ -273,8 +246,7 @@ enum blink_ChordFlags
 	blink_ChordFlags_SonicPivot                         = 1 << 7,
 };
 
-enum blink_EnvelopeFlags
-{
+enum blink_EnvelopeFlags {
 	blink_EnvelopeFlags_None                               = 1 << 0,
 	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1, // Will not appear in modulator tree
 	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
@@ -288,8 +260,7 @@ enum blink_EnvelopeFlags
 	blink_EnvelopeFlags_SonicPivot                         = 1 << 9,
 };
 
-enum blink_OptionFlags
-{
+enum blink_OptionFlags {
 	blink_OptionFlags_None                = 1 << 0,
 	blink_OptionFlags_CanManipulate       = 1 << 1,
 	blink_OptionFlags_MovesDisplay        = 1 << 2, // Editing should trigger a visual update
@@ -301,8 +272,7 @@ enum blink_OptionFlags
 	blink_OptionFlags_SonicPivot          = 1 << 8,
 };
 
-enum blink_SliderFlags
-{
+enum blink_SliderFlags {
 	blink_SliderFlags_None                = 1 << 0,
 	blink_SliderFlags_MovesDisplay        = 1 << 1, // Editing should trigger a visual update
 	blink_SliderFlags_NonGlobal           = 1 << 2, // Do not create a global control for this slider (can be used
@@ -326,16 +296,13 @@ enum blink_SliderFlags
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
 
-typedef struct
-{
+typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Option
 	blink_Index max_index;
 	blink_Index default_index;
 	blink_StdIcon icon;
-
 	void* proc_data;
 	int flags; // blink_OptionFlags
-
 	// Returns the display text for the option index
 	// Can be NULL if blink_OptionFlags_IsToggle is set
 	blink_Option_GetText get_text;
@@ -351,18 +318,14 @@ typedef float (*blink_EnvelopeSearch)(void* proc_data, const blink_EnvelopeData*
 typedef blink_Index (*blink_GetOption)(void* proc_data, blink_Index index);
 typedef blink_Index (*blink_GetSlider)(void* proc_data, blink_Index index);
 
-typedef struct
-{
-	void* proc_data;
-
+typedef struct {
+	void* proc_data; 
 	float default_value;
-	bool show_grid_labels;
-
+	bool show_grid_labels; 
 	blink_Slider value_slider;
 	blink_Slider min_slider;
 	blink_Slider max_slider;
-	blink_EnvelopeSnapSettings snap_settings;
-
+	blink_EnvelopeSnapSettings snap_settings; 
 	blink_DisplayValue display_value;
 	blink_FromString from_string;
 	blink_EnvelopeSearch search;
@@ -377,18 +340,15 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef float (*blink_ApplyOffset)(void* proc_data, float value, float offset);
 
-typedef struct
-{
+typedef struct {
 	// Either of these can be null, but at least one must be defined
 	// if *_IsManipulatorTarget is set
 	blink_Envelope* offset_envelope;
-	blink_Envelope* override_envelope;
-
+	blink_Envelope* override_envelope; 
 	// Can be null, even if offset_envelope is set, in which case
 	// the host will default to applying offset values by simple
 	// addition
-	blink_ApplyOffset apply_offset;
-
+	blink_ApplyOffset apply_offset; 
 } blink_ManipulatorSettings;
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Manipulator Settings END
@@ -397,25 +357,18 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Envelope parameter
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
-	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope
-
+typedef struct {
+	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope 
 	void* proc_data;
 	int flags; // blink_EnvelopeFlags
-	blink_StdIcon icon;
-
+	blink_StdIcon icon; 
 	// Only used if blink_EnvelopeFlags_HostClamp is set
-	blink_Range clamp_range;
-
+	blink_Range clamp_range; 
 	blink_Index sliders_count;
-	blink_Index options_count;
-
+	blink_Index options_count; 
 	blink_GetOption get_option;
-	blink_GetSlider get_slider;
-
-	blink_Envelope envelope;
-
+	blink_GetSlider get_slider; 
+	blink_Envelope envelope; 
 	blink_ManipulatorSettings manipulator_settings;
 } blink_EnvelopeParameter;
 
@@ -423,8 +376,7 @@ typedef struct
 // Chord parameter
 // Can be edited in Blockhead using the chord/scale/harmonics editor thing
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct
-{
+typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
 	int flags; // blink_ChordFlags
 	blink_StdIcon icon;
@@ -434,23 +386,18 @@ typedef struct
 // Slider parameter
 // Will be displayed in Blockhead as a slider or spinbox control
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-typedef struct
-{
+typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Slider
 	void* proc_data;
 	int flags; // blink_SliderFlags
 	blink_StdIcon icon;
-	blink_Slider slider;
-
+	blink_Slider slider; 
 	// Only used if blink_SliderFlags_HostClamp is set
-	blink_Range clamp_range;
-
+	blink_Range clamp_range; 
 	blink_ManipulatorSettings manipulator_settings;
 } blink_SliderParameter;
 
-typedef struct
-{
+typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_IntSlider
 	blink_StdIcon icon;
 	int flags; // blink_SliderFlags
@@ -460,8 +407,7 @@ typedef struct
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Generic Parameter
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-union blink_ParameterObject
-{
+union blink_ParameterObject {
 	enum blink_ParameterType type;
 	blink_ChordParameter chord;
 	blink_EnvelopeParameter envelope;
@@ -470,69 +416,51 @@ union blink_ParameterObject
 	blink_IntSliderParameter int_slider;
 };
 
-typedef struct
-{
+typedef struct {
 	// The UUID is unique to a particular parameter concept e.g. "Amp", "Pitch", etc.
-
 	// Can be shared between different parameter types e.g. the plugin could declare
 	// both an Amp envelope and and Amp slider with the same UUID.
-	
 	// Declaring multiple parameters with the same UUID, of the same type, within
 	// the same plugin is invalid.
-
 	// UUIDs can be shared between different plugins
-	blink_UUID uuid;
-
+	blink_UUID uuid; 
 	// Null if the parameter does not belong to a group
-	const char* group_name;
-
+	const char* group_name; 
 	// Full parameter name e.g. "Noise Amount"
-	const char* name;
-
+	const char* name; 
 	// Short parameter name to use in the context of a group, e.g. "Amount". Can be null
-	const char* short_name;
-
+	const char* short_name; 
 	// Long description of the parameter. Can be null
-	const char* long_desc;
-
+	const char* long_desc; 
 	// Normally -1.
 	// If this is >= 0, when the user tries to create a manipulator for
 	// this parameter, the host will create a manipulator for the parameter
 	// at this specified index instead
-	blink_Index manipulation_delegate;
-
+	blink_Index manipulation_delegate; 
 	union blink_ParameterObject parameter;
 } blink_Parameter;
 
-typedef struct
-{
+typedef struct {
 	size_t size;
 	const char* data;
 } blink_ResourceData;
 
-typedef struct
-{
+typedef struct {
 	// Unique identifier for this plugin
-	blink_UUID uuid;
-
+	blink_UUID uuid; 
 	// The name of the plugin
-	const char* name;
-
+	const char* name; 
 	// The plugin category as a list of strings delimited by '|'
-	//
 	// e.g. 
 	//	"Destruction"
 	//	"Filters|Butterworth"
 	//	"Space|Reverbs"
-	// 	"Developer Name|Phasers"
-
+	// 	"Developer Name|Phasers" 
 	// May be null for no category
-	const char* category;
-
+	const char* category; 
 	// The plugin version string
 	// Usual format is something like v0.0.0
-	const char* version;
-
+	const char* version; 
 	// If this is true, the host will try to find an icon resource at res/icon.png
 	// If there isn't one, a default icon will be used
 	blink_Bool has_icon;

@@ -110,7 +110,7 @@ inline void Tape::apply_reverse(const Config& config, int count) {
 	sub_calculators.pitch_config.pitch = config.env.pitch;
 	sub_calculators.pitch_config.transpose = config.transpose;
 
-	const auto transform_position { [&sub_calculators, &config](blink_IntPosition p, float* derivative)
+	const auto transform_position { [&sub_calculators, &config](blink_Position p, float* derivative)
 	{
 		auto x { static_cast<blink_Position>(p) };
 
@@ -150,7 +150,7 @@ inline void Tape::apply_reverse(const Config& config, int count) {
 			*derivative *= ff;
 		}
 
-		p = static_cast<blink_IntPosition>(x);
+		p = static_cast<blink_Position>(x);
 
 		return p;
 	}};

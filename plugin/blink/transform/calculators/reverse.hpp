@@ -17,7 +17,7 @@ public:
 	struct Config
 	{
 		const blink_OptionData* reversal_data;
-		std::function<blink_IntPosition(blink_IntPosition, float*)> transform_position;
+		std::function<blink_Position(blink_Position, float*)> transform_position;
 		CorrectionGrains* correction_grains {};
 	};
 
@@ -220,7 +220,7 @@ public:
 	struct Config
 	{
 		uint64_t unit_state_id;
-		std::function<blink_IntPosition(blink_IntPosition, float*)> transform_position;
+		std::function<blink_Position(blink_Position, float*)> transform_position;
 
 		struct
 		{

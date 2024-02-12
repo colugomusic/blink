@@ -139,7 +139,7 @@ inline void Stretch::apply_reverse(const Config& config, int count)
 	sub_calculators.speed_config.env_speed = config.env.speed;
 	sub_calculators.speed_config.speed = config.speed;
 
-	const auto transform_position { [&sub_calculators, &config](blink_IntPosition p, float* derivative)
+	const auto transform_position { [&sub_calculators, &config](blink_Position p, float* derivative)
 	{
 		auto x { static_cast<blink_Position>(p) };
 
@@ -173,7 +173,7 @@ inline void Stretch::apply_reverse(const Config& config, int count)
 			x = sub_calculators.warp(config.warp_points, x);
 		}
 
-		p = static_cast<blink_IntPosition>(x);
+		p = static_cast<blink_Position>(x);
 
 		return p;
 	}};

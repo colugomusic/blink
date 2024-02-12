@@ -10,8 +10,7 @@
 typedef bool (*blink_Preprocess_ShouldAbort)(void* host);
 typedef void (*blink_Preprocess_ReportProgress)(void* host, float progress);
 
-typedef struct
-{
+typedef struct {
 	blink_Preprocess_ShouldAbort should_abort;
 	blink_Preprocess_ReportProgress report_progress;
 } blink_PreprocessCallbacks;
@@ -21,31 +20,25 @@ typedef blink_FrameCount(*blink_GetSampleDataCB)(void* host, blink_ChannelCount 
 //
 // Sample Info
 //
-typedef struct
-{
+typedef struct {
 	blink_ID id;
 	blink_ChannelCount num_channels;
-	blink_FrameCount num_frames;
-
+	blink_FrameCount num_frames; 
 	// Array of 2 positions for the start and end of the loop.
 	// Or null if no loop
-	blink_FrameCount* loop_points;
-
+	blink_FrameCount* loop_points; 
 	blink_SR SR;
-	blink_BitDepth bit_depth;
-
+	blink_BitDepth bit_depth; 
 	void* host;
 	blink_GetSampleDataCB get_data;
 } blink_SampleInfo;
 
-typedef struct
-{
-	blink_IntPosition x, y;
+typedef struct {
+	int64_t x, y;
 	float value; // currently unused
 } blink_WarpPoint;
 
-typedef struct
-{
+typedef struct {
 	blink_Index count;
 	blink_WarpPoint* points;
 } blink_WarpPoints;
@@ -53,14 +46,12 @@ typedef struct
 //
 // Sampler Buffer Data
 //
-typedef struct
-{
+typedef struct {
 	uint64_t buffer_id; // increments for each audio buffer. instances should reset themselves
 	                    // if they go at least one audio buffer without being processed i.e.
 	                    // if (buffer_id > (previous_buffer_id + 1)) )
 	                    // units should also reset themselves if they go at least one audio buffer
 	                    // without being processed.
-
 	blink_SR song_rate;
 	const blink_SampleInfo* sample_info;
 	blink_Bool analysis_ready;
@@ -72,42 +63,34 @@ typedef struct
 // This is passed in to blink_sampler_draw() as an output argument
 // Blockhead may set any of the pointers to null depending on what data it needs from the plugin.
 //
-typedef struct
-{
+typedef struct {
 	// The sample position after being transformed by parameter settings but before time warping
 	// has been performed
-	double* sculpted_sample_positions;
-
+	double* sculpted_sample_positions; 
 	// The sample position after time warping has been performed
 	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
-	double* warped_sample_positions;
-
+	double* warped_sample_positions; 
 	// The block position after being transformed by parameter settings but before time warping
 	// has been performed.
 	// This will differ from sculpted_sample_positions when the sample rate of the sample is not
 	// equal to the song rate
-	double* sculpted_block_positions;
-
+	double* sculpted_block_positions; 
 	// The block position after time warping has been performed
 	// Blockhead will always pass null if blink_sampler_enable_warp_markers() returns false
 	// This will differ from warped_sample_positions when the sample rate of the sample is not
 	// equal to the song rate
-	double* warped_block_positions;
-
+	double* warped_block_positions; 
 	// The sample position after time warping and other transformations (loop, reverse etc)
-	double* final_sample_positions;
-
+	double* final_sample_positions; 
 	// The rate of change in the sample position after time warping
-	float* waveform_derivatives;
-
+	float* waveform_derivatives; 
 	// The amplitude after being transformed by parameter settings
 	float* amp;
 } blink_SamplerDrawInfo;
 
 // Unit state is essentially state that changes in response to user input (e.g. parameter
 // state).
-struct blink_SamplerUnitState
-{
+struct blink_SamplerUnitState {
 	uint64_t id; // Increments by at least one every time the unit state changes.
 	             // The same unit state might be passed in for multiple audio buffers, i.e.
 	             // this id might not change from one buffer to the next.
@@ -115,7 +98,6 @@ struct blink_SamplerUnitState
 	             // if the parameter state has not changed since the last audio buffer then
 	             // a plugin could continue searching from the previously hit envelope
 	             // point instead of searching from the beginning
-
 	float scale;
 	int64_t data_offset;
 	blink_Bool smooth_transitions;
@@ -129,21 +111,16 @@ struct blink_SamplerUnitState
 // output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
 typedef blink_Error(*blink_Sampler_Process)(void* proc_data, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
 
-typedef struct
-{
-	void* proc_data;
-
+typedef struct {
+	void* proc_data; 
 	blink_Sampler_Process process;
 } blink_SamplerUnit;
 
 typedef blink_SamplerUnit(*blink_SamplerInstance_AddUnit)(void* proc_data);
 
-typedef struct
-{
-	void* proc_data;
-
-	blink_Instance_StreamInit stream_init;
-
+typedef struct {
+	void* proc_data; 
+	blink_Instance_StreamInit stream_init; 
 	// Blockhead will call add_unit() four times per sampler block to create a set
 	// synchronized samplers for the purposes of crossfading between them to
 	// avoid clicks.
@@ -154,17 +131,14 @@ typedef struct
 	blink_SamplerInstance_AddUnit add_unit;
 } blink_SamplerInstance;
 
-typedef struct
-{
+typedef struct {
 	// True if Blockhead should enable warp markers. From the plugin's
 	// perspective this just means warp data will be passed in to process().
 	// It is up to the plugin to interpret this data.
-	blink_Bool enable_warp_markers;
-
+	blink_Bool enable_warp_markers; 
 	// True if the plugin needs to preprocess samples in some way.
 	// Preprocessing happens once per sample.
-	blink_Bool requires_preprocessing;
-
+	blink_Bool requires_preprocessing; 
 	// True if the waveform resulting from the sample transformation
 	// could be substantially different from the waveform generated
 	// by blink_sampler_draw(). If this is true then Blockhead will

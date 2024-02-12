@@ -8,11 +8,10 @@
 namespace blink {
 
 template <class T>
-struct SliderSpec : public tweak::Spec<T>
-{
+struct SliderSpec : public tweak::Spec<T> {
 	T default_value;
 	int flags = 0;
-	FloatSearcherSpec searcher;
+	RealSearcherSpec searcher;
 };
 
 }

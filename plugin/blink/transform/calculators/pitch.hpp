@@ -42,13 +42,13 @@ template <class T> T weird_math_ff(T min, T max, T distance, T n) {
 }
 
 struct PitchPoint {
-	blink_IntPosition x;
+	blink_Position x;
 	float pitch; 
 	float ff;
 }; 
 
 inline
-auto make_pitch_point(const blink_FloatPoint& p, float min, float max, float transpose) {
+auto make_pitch_point(const blink_RealPoint& p, float min, float max, float transpose) {
 	PitchPoint pp;
 	pp.x     = p.x;
 	pp.pitch = std::clamp(p.y, min, max) + transpose;

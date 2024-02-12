@@ -13,7 +13,7 @@ public:
 
 	const SliderSpec<T> spec;
 	const tweak::Tweaker<T> tweaker;
-	const FloatSearcher searcher;
+	const RealSearcher searcher;
 
 	Slider(SliderSpec<T> spec_);
 

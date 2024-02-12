@@ -18,7 +18,7 @@ public:
 	const Slider<float> value_slider;
 	const float default_value;
 	const EnvelopeSnapSettings snap_settings;
-	const FloatSearcher searcher;
+	const RealSearcher searcher;
 
 	Envelope(EnvelopeSpec spec);
 

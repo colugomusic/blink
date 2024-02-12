@@ -50,11 +50,11 @@ public:
 	{
 		struct FFPoint
 		{
-			blink_IntPosition x;
+			blink_Position x;
 			float y;
 			double ff;
 
-			FFPoint(const blink_FloatPoint& p, float min, float max, float speed)
+			FFPoint(const blink_RealPoint& p, float min, float max, float speed)
 				: x(p.x)
 				, y(p.y)
 				, ff(double(std::clamp(p.y, min, max)) * speed)
