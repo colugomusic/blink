@@ -55,7 +55,7 @@ public:
 						}
 						else
 						{
-							*derivative = static_cast<float>(x_diff / y_diff);
+							*derivative = static_cast<float>(x_diff) / static_cast<float>(y_diff);
 						}
 					}
 
