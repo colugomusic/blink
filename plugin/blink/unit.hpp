@@ -31,25 +31,19 @@ protected:
 
 	blink_SR SR() const { return get_SR(instance_); }
 
-	void begin_process(std::uint64_t buffer_id, const blink_Position* positions, int64_t data_offset, float scale)
-	{
+	void begin_process(std::uint64_t buffer_id, const blink_Position* positions) {
 		//
 		// Unit::reset() is called at the start of the buffer if we have gone
 		// at least one buffer without processing this unit
 		//
-
-		if (buffer_id > buffer_id_ + 1)
-		{
+		if (buffer_id > buffer_id_ + 1) {
 			reset();
 		}
-
 		buffer_id_ = buffer_id;
-
-		block_positions_(positions, scale, data_offset, kFloatsPerDSPVector);
+		block_positions_(positions, kFloatsPerDSPVector);
 	}
 
-	const BlockPositions& block_positions() const
-	{
+	const BlockPositions& block_positions() const {
 		return block_positions_;
 	}
 

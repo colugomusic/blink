@@ -18,12 +18,9 @@ public:
 
 	virtual ~SynthUnit() {}
 
-	blink_Error synth_process(const blink_SynthBuffer& buffer, const blink_SynthUnitState& unit_state, float* out)
-	{
-		get_instance()->begin_process(buffer.buffer_id);
-
-		Unit::begin_process(buffer.buffer_id, buffer.positions, unit_state.data_offset, unit_state.scale);
-
+	blink_Error synth_process(const blink_SynthBuffer& buffer, const blink_SynthUnitState& unit_state, float* out) {
+		get_instance()->begin_process(buffer.buffer_id); 
+		Unit::begin_process(buffer.buffer_id, buffer.positions); 
 		return process(buffer, unit_state, out);
 	}
 

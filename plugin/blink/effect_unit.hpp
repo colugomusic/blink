@@ -19,12 +19,9 @@ public:
 
 	virtual ~EffectUnit() {}
 
-	blink_Error effect_process(const blink_EffectBuffer& buffer, const blink_EffectUnitState& unit_state, const float* in, float* out)
-	{
-		get_instance()->begin_process(buffer.buffer_id);
-
-		Unit::begin_process(buffer.buffer_id, buffer.positions, unit_state.data_offset, unit_state.scale);
-
+	blink_Error effect_process(const blink_EffectBuffer& buffer, const blink_EffectUnitState& unit_state, const float* in, float* out) {
+		get_instance()->begin_process(buffer.buffer_id); 
+		Unit::begin_process(buffer.buffer_id, buffer.positions); 
 		return process(buffer, unit_state, in, out);
 	}
 
