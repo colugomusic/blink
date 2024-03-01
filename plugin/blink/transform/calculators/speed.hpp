@@ -21,13 +21,13 @@ template <class T> T spooky_maths(T f0, T f1, T N, T n, T C) {
 	return quadratic_formula(accel, f0, C, n);
 }
 
-template <class T> T spooky_maths_inverse(T f0, T f1, T N, T n, T C) {
-	auto accel = (f1 - f0) / (T(2) * N); 
-	if (accel == T(0)) {
-		return (n - C) / b;
-	}
-	return quadratic_formula_inverse(accel, f0, C, n);
-}
+//template <class T> T spooky_maths_inverse(T f0, T f1, T N, T n, T C) {
+	//auto accel = (f1 - f0) / (T(2) * N);
+	//if (accel == T(0)) {
+		//return (n - C) / b;
+	//}
+	//return quadratic_formula_inverse(accel, f0, C, n);
+//}
 
 class SpeedUnit {
 public: 
