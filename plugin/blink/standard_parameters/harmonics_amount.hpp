@@ -81,8 +81,8 @@ inline auto envelope_parameter()
 	out.envelope = envelope();
 	out.clamp_range = { 0.0f, 3.0f };
 
-	out.flags |= blink_EnvelopeFlags_HostClamp;
-	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_HostClamp;
+	out.flags |= blink_ParamFlags_CanManipulate;
 	out.offset_envelope = offset_envelope();
 	out.override_envelope = envelope();
 

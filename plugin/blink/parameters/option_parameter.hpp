@@ -38,7 +38,7 @@ inline const char* OptionParameter::get_text(blink_Index index) const
 {
 	if (options.empty())
 	{
-		assert (bool(flags & blink_OptionFlags_IsToggle));
+		assert (bool(flags & blink_ParamFlags_IsToggle));
 
 		if (index > 0) return "ON";
 

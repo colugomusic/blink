@@ -67,7 +67,7 @@ inline SliderParameterSpec<int> slider_parameter()
 	out.slider = slider();
 
 	out.icon = blink_StdIcon_SampleOffset;
-	out.flags = blink_SliderFlags_MovesDisplay;
+	out.flags = blink_ParamFlags_MovesDisplay;
 
 	return out;
 }

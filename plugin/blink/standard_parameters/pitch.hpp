@@ -67,7 +67,7 @@ inline SliderParameterSpec<float> slider_parameter()
 
 	out.slider = slider();
 	out.icon = blink_StdIcon_Pitch;
-	out.flags = blink_SliderFlags_MovesDisplay;
+	out.flags = blink_ParamFlags_MovesDisplay;
 
 	return out;
 }
@@ -132,8 +132,8 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.uuid = BLINK_STD_UUID_PITCH;
 	out.name = "Pitch";
 	out.envelope = envelope();
-	out.flags |= blink_EnvelopeFlags_MovesDisplay;
-	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_MovesDisplay;
+	out.flags |= blink_ParamFlags_CanManipulate;
 	out.offset_envelope = envelope();
 	out.override_envelope = envelope();
 

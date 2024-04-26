@@ -16,11 +16,11 @@ inline OptionSpec toggle()
 	out.uuid = BLINK_STD_UUID_LOOP;
 	out.name = "Loop";
 	out.flags =
-		blink_OptionFlags_IsToggle |
-		blink_OptionFlags_ShowInContextMenu |
-		blink_OptionFlags_ShowButton |
-		blink_OptionFlags_MovesDisplay |
-		blink_OptionFlags_IconOnly;
+		blink_ParamFlags_IsToggle |
+		blink_ParamFlags_ShowInContextMenu |
+		blink_ParamFlags_ShowButton |
+		blink_ParamFlags_MovesDisplay |
+		blink_ParamFlags_IconOnly;
 	out.icon = blink_StdIcon_Loop;
 	out.default_index = 0;
 	out.searcher.binary = search::step_binary;

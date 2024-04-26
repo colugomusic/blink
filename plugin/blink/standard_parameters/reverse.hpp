@@ -15,9 +15,9 @@ inline auto option()
 	out.name = "Reverse";
 	
 	out.flags =
-		blink_OptionFlags_CanManipulate |
-		blink_OptionFlags_MovesDisplay |
-		blink_OptionFlags_Hidden;
+		blink_ParamFlags_CanManipulate |
+		blink_ParamFlags_MovesDisplay |
+		blink_ParamFlags_Hidden;
 
 	out.default_index = -1;
 	out.searcher.binary = search::step_binary;
@@ -40,12 +40,12 @@ inline auto toggle()
 	out.name = "Reverse";
 
 	out.flags =
-		blink_OptionFlags_CanManipulate |
-		blink_OptionFlags_IsToggle |
-		blink_OptionFlags_ShowInContextMenu |
-		blink_OptionFlags_ShowButton |
-		blink_OptionFlags_MovesDisplay |
-		blink_OptionFlags_IconOnly;
+		blink_ParamFlags_CanManipulate |
+		blink_ParamFlags_IsToggle |
+		blink_ParamFlags_ShowInContextMenu |
+		blink_ParamFlags_ShowButton |
+		blink_ParamFlags_MovesDisplay |
+		blink_ParamFlags_IconOnly;
 
 	out.icon = blink_StdIcon_Reverse;
 	out.default_index = 0;

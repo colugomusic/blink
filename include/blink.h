@@ -235,53 +235,21 @@ typedef struct {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Parameter Flags
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-enum blink_ChordFlags {
-	blink_ChordFlags_None                               = 1 << 0,
-	blink_ChordFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1, // Will not appear in modulator tree
-	blink_ChordFlags_DefaultActive                      = 1 << 2,
-	blink_ChordFlags_DefaultDisabled                    = 1 << 3,
-	blink_ChordFlags_IconOnly                           = 1 << 4, // Only show icon in button
-	blink_ChordFlags_MovesDisplay                       = 1 << 5, // Editing should trigger a visual update
-	blink_ChordFlags_CanManipulate                      = 1 << 6,
-	blink_ChordFlags_SonicPivot                         = 1 << 7,
-};
-
-enum blink_EnvelopeFlags {
-	blink_EnvelopeFlags_None                               = 1 << 0,
-	blink_EnvelopeFlags_AlwaysShowButtonWhenGroupIsVisible = 1 << 1, // Will not appear in modulator tree
-	blink_EnvelopeFlags_DefaultActive                      = 1 << 2,
-	blink_EnvelopeFlags_DefaultDisabled                    = 1 << 3,
-	blink_EnvelopeFlags_DefaultAlwaysVisible               = 1 << 4,
-	blink_EnvelopeFlags_IconOnly                           = 1 << 5, // Only show icon in button
-	blink_EnvelopeFlags_MovesDisplay                       = 1 << 6, // Editing should trigger a visual update
-	blink_EnvelopeFlags_CanManipulate                      = 1 << 7,
-	blink_EnvelopeFlags_HostClamp                          = 1 << 8, // Host will clamp values to clamp_range,
-	                                                                 // after applying manipulator offsets
-	blink_EnvelopeFlags_SonicPivot                         = 1 << 9,
-};
-
-enum blink_OptionFlags {
-	blink_OptionFlags_None                = 1 << 0,
-	blink_OptionFlags_CanManipulate       = 1 << 1,
-	blink_OptionFlags_MovesDisplay        = 1 << 2, // Editing should trigger a visual update
-	blink_OptionFlags_Hidden              = 1 << 3,
-	blink_OptionFlags_IsToggle            = 1 << 4, // Option will be treated as an ON/OFF toggle
-	blink_OptionFlags_ShowButton          = 1 << 5,
-	blink_OptionFlags_ShowInContextMenu   = 1 << 6,
-	blink_OptionFlags_IconOnly            = 1 << 7,
-	blink_OptionFlags_SonicPivot          = 1 << 8,
-};
-
-enum blink_SliderFlags {
-	blink_SliderFlags_None                = 1 << 0,
-	blink_SliderFlags_MovesDisplay        = 1 << 1, // Editing should trigger a visual update
-	blink_SliderFlags_NonGlobal           = 1 << 2, // Do not create a global control for this slider (can be used
-	                                                // to create sliders which are only visible when an envelope is
-	                                                // selected)
-	blink_SliderFlags_CanManipulate       = 1 << 3, // Has no effect for int sliders
-	blink_SliderFlags_HostClamp           = 1 << 4, // Host will clamp values to clamp_range,
-	                                                // after applying manipulator offsets
-	blink_SliderFlags_SonicPivot          = 1 << 5,
+enum blink_ParamFlags {
+	blink_ParamFlags_None                       = 1 << 0,
+	blink_ParamFlags_AlwaysShowWhenGroupVisible = 1 << 1, // Will not appear in modulator tree
+	blink_ParamFlags_CanManipulate              = 1 << 2, // Has no effect for int sliders
+	blink_ParamFlags_DefaultActive              = 1 << 3,
+	blink_ParamFlags_DefaultAlwaysVisible       = 1 << 4,
+	blink_ParamFlags_DefaultDisabled            = 1 << 5,
+	blink_ParamFlags_Hidden                     = 1 << 6,
+	blink_ParamFlags_HostClamp                  = 1 << 7, // Host will clamp values to clamp_range, after applying manipulator offsets
+	blink_ParamFlags_IconOnly                   = 1 << 8, // Only show icon in button
+	blink_ParamFlags_IsToggle                   = 1 << 9, // Option will be treated as an ON/OFF toggle
+	blink_ParamFlags_MovesDisplay               = 1 << 8, // Editing should trigger a visual update
+	blink_ParamFlags_ShowButton                 = 1 << 9,
+	blink_ParamFlags_ShowInContextMenu          = 1 << 10,
+	blink_ParamFlags_SonicPivot                 = 1 << 11,
 };
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -292,7 +260,7 @@ enum blink_SliderFlags {
 // Option parameter
 //
 // Will be displayed in Blockhead as a drop-down menu or radio buttons or something
-// If blink_OptionFlags_IsToggle is set, will be displayed as a check item
+// If blink_ParamFlags_IsToggle is set, will be displayed as a check item
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef const char* (*blink_Option_GetText)(void* proc_data, blink_Index index);
 
@@ -302,9 +270,9 @@ typedef struct {
 	blink_Index default_index;
 	blink_StdIcon icon;
 	void* proc_data;
-	int flags; // blink_OptionFlags
+	int flags; // blink_ParamFlags
 	// Returns the display text for the option index
-	// Can be NULL if blink_OptionFlags_IsToggle is set
+	// Can be NULL if blink_ParamFlags_IsToggle is set
 	blink_Option_GetText get_text;
 } blink_OptionParameter;
 
@@ -360,10 +328,9 @@ typedef struct {
 typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Envelope 
 	void* proc_data;
-	int flags; // blink_EnvelopeFlags
+	int flags; // blink_ParamFlags
 	blink_StdIcon icon; 
-	// Only used if blink_EnvelopeFlags_HostClamp is set
-	blink_Range clamp_range; 
+	blink_Range clamp_range; // Only used if blink_ParamFlags_HostClamp is set
 	blink_Index sliders_count;
 	blink_Index options_count; 
 	blink_GetOption get_option;
@@ -378,7 +345,7 @@ typedef struct {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Chord
-	int flags; // blink_ChordFlags
+	int flags; // blink_ParamFlags
 	blink_StdIcon icon;
 } blink_ChordParameter;
 
@@ -389,18 +356,17 @@ typedef struct {
 typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_Slider
 	void* proc_data;
-	int flags; // blink_SliderFlags
+	int flags; // blink_ParamFlags
 	blink_StdIcon icon;
 	blink_Slider slider; 
-	// Only used if blink_SliderFlags_HostClamp is set
-	blink_Range clamp_range; 
+	blink_Range clamp_range; // Only used if blink_ParamFlags_HostClamp is set
 	blink_ManipulatorSettings manipulator_settings;
 } blink_SliderParameter;
 
 typedef struct {
 	enum blink_ParameterType parameter_type; // blink_ParameterType_IntSlider
 	blink_StdIcon icon;
-	int flags; // blink_SliderFlags
+	int flags; // blink_ParamFlags
 	blink_IntSlider slider;
 } blink_IntSliderParameter;
 

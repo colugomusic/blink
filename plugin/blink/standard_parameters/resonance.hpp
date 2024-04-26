@@ -20,7 +20,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Resonance";
 	out.envelope = percentage::envelope();
 
-	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_CanManipulate;
 
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = percentage::envelope();

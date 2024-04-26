@@ -103,7 +103,7 @@ inline SliderParameterSpec<float> slider_parameter()
 
 	out.slider = slider();
 	out.icon = blink_StdIcon_Pan;
-	out.flags |= blink_SliderFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_CanManipulate;
 
 	return out;
 }
@@ -138,7 +138,7 @@ inline EnvelopeParameterSpec envelope_parameter()
 	out.name = "Pan";
 	out.envelope = envelope();
 
-	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_CanManipulate;
 	out.offset_envelope = envelope();
 	out.override_envelope = envelope();
 

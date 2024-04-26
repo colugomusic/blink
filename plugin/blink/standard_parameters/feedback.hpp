@@ -30,8 +30,8 @@ inline auto envelope_parameter()
 	out.envelope = envelope();
 	out.clamp_range = { 0.0f, 1.0f };
 
-	out.flags |= blink_EnvelopeFlags_HostClamp;
-	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_HostClamp;
+	out.flags |= blink_ParamFlags_CanManipulate;
 
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = envelope();
@@ -48,8 +48,8 @@ inline auto slider_parameter()
 	out.name = "Feedback";
 	out.slider = percentage::slider();
 
-	out.flags |= blink_SliderFlags_HostClamp;
-	out.flags |= blink_SliderFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_HostClamp;
+	out.flags |= blink_ParamFlags_CanManipulate;
 
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = envelope();

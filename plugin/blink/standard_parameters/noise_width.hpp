@@ -21,8 +21,8 @@ inline SliderParameterSpec<float> slider_parameter()
 	out.slider = percentage::slider();
 
 	out.clamp_range = { 0.0f, 1.0f };
-	out.flags |= blink_SliderFlags_HostClamp;
-	out.flags |= blink_SliderFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_HostClamp;
+	out.flags |= blink_ParamFlags_CanManipulate;
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = percentage::envelope();
 

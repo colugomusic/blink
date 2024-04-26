@@ -21,8 +21,8 @@ inline auto envelope_parameter()
 	out.envelope.default_value = 1.0f;
 	out.clamp_range = { 0.0f, 1.0f };
 
-	out.flags |= blink_EnvelopeFlags_HostClamp;;
-	out.flags |= blink_EnvelopeFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_HostClamp;;
+	out.flags |= blink_ParamFlags_CanManipulate;
 
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = percentage::envelope();
@@ -40,7 +40,7 @@ inline auto slider_parameter()
 	out.slider = percentage::slider();
 	out.slider.default_value = 1.0f;
 
-	out.flags |= blink_SliderFlags_CanManipulate;
+	out.flags |= blink_ParamFlags_CanManipulate;
 
 	out.offset_envelope = percentage::bipolar::envelope();
 	out.override_envelope = percentage::envelope();
