@@ -237,19 +237,19 @@ typedef struct {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 enum blink_ParamFlags {
 	blink_ParamFlags_None                       = 1 << 0,
-	blink_ParamFlags_AlwaysShowWhenGroupVisible = 1 << 1, // Will not appear in modulator tree
-	blink_ParamFlags_CanManipulate              = 1 << 2, // Has no effect for int sliders
+	blink_ParamFlags_AlwaysShowWhenGroupVisible = 1 << 1,  // Will not appear in modulator tree
+	blink_ParamFlags_CanManipulate              = 1 << 2,  // Has no effect for int sliders
 	blink_ParamFlags_DefaultActive              = 1 << 3,
 	blink_ParamFlags_DefaultAlwaysVisible       = 1 << 4,
 	blink_ParamFlags_DefaultDisabled            = 1 << 5,
 	blink_ParamFlags_Hidden                     = 1 << 6,
-	blink_ParamFlags_HostClamp                  = 1 << 7, // Host will clamp values to clamp_range, after applying manipulator offsets
-	blink_ParamFlags_IconOnly                   = 1 << 8, // Only show icon in button
-	blink_ParamFlags_IsToggle                   = 1 << 9, // Option will be treated as an ON/OFF toggle
-	blink_ParamFlags_MovesDisplay               = 1 << 8, // Editing should trigger a visual update
-	blink_ParamFlags_ShowButton                 = 1 << 9,
-	blink_ParamFlags_ShowInContextMenu          = 1 << 10,
-	blink_ParamFlags_SonicPivot                 = 1 << 11,
+	blink_ParamFlags_HostClamp                  = 1 << 7,  // Host will clamp values to clamp_range, after applying manipulator offsets
+	blink_ParamFlags_IconOnly                   = 1 << 8,  // Only show icon in button
+	blink_ParamFlags_IsToggle                   = 1 << 9,  // Option will be treated as an ON/OFF toggle
+	blink_ParamFlags_MovesDisplay               = 1 << 10, // Editing should trigger a visual update
+	blink_ParamFlags_ShowButton                 = 1 << 11,
+	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
+	blink_ParamFlags_SonicPivot                 = 1 << 13,
 };
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
