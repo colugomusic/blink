@@ -373,23 +373,19 @@ typedef struct {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Generic Parameter
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-union blink_ParameterObject {
+typedef union {
 	enum blink_ParameterType type;
 	blink_ChordParameter chord;
 	blink_EnvelopeParameter envelope;
 	blink_OptionParameter option;
 	blink_SliderParameter slider;
 	blink_IntSliderParameter int_slider;
-};
+} blink_ParameterObject;
 
 typedef struct {
-	// The UUID is unique to a particular parameter concept e.g. "Amp", "Pitch", etc.
-	// Can be shared between different parameter types e.g. the plugin could declare
-	// both an Amp envelope and and Amp slider with the same UUID.
-	// Declaring multiple parameters with the same UUID, of the same type, within
-	// the same plugin is invalid.
-	// UUIDs can be shared between different plugins
-	blink_UUID uuid; 
+} blink_ParameterSettings;
+
+typedef struct {
 	// Null if the parameter does not belong to a group
 	const char* group_name; 
 	// Full parameter name e.g. "Noise Amount"
@@ -403,7 +399,25 @@ typedef struct {
 	// this parameter, the host will create a manipulator for the parameter
 	// at this specified index instead
 	blink_Index manipulation_delegate; 
-	union blink_ParameterObject parameter;
+} blink_ParameterSettings;
+
+typedef struct {
+	// The UUID is unique to a particular parameter concept e.g. "Amp", "Pitch", etc.
+	// Can be shared between different parameter types e.g. the plugin could declare
+	// both an Amp envelope and and Amp slider with the same UUID.
+	// Declaring multiple parameters with the same UUID, of the same type, within
+	// the same plugin is invalid.
+	// UUIDs can be shared between different plugins
+	blink_UUID uuid; 
+	// Structs containing the settings for the parameter. If the UUID is that of a
+	// standard parameter known by the host, these are optional. Leaving them null
+	// will tell the host to just use the default settings for the parameter.
+	// However you can still set them if you want to customize the parameter
+	// in some way.
+	// If this is a non-standard parameter, these must be set, otherwise the plugin
+	// is considered invalid and the host will reject it.
+	blink_ParameterSettings* settings = 0;
+	blink_ParameterObject* parameter = 0;
 } blink_Parameter;
 
 typedef struct {
