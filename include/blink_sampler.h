@@ -39,7 +39,7 @@ typedef struct {
 } blink_WarpPoint;
 
 typedef struct {
-	blink_Index count;
+	size_t count;
 	blink_WarpPoint* points;
 } blink_WarpPoints;
 
@@ -107,35 +107,7 @@ struct blink_SamplerUnitState {
 	const blink_ParameterData* parameter_data;
 };
 
-// output pointer is aligned on a 16-byte boundary
-// output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
-typedef blink_Error(*blink_Sampler_Process)(void* proc_data, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
-
 typedef struct {
-	void* proc_data; 
-	blink_Sampler_Process process;
-} blink_SamplerUnit;
-
-typedef blink_SamplerUnit(*blink_SamplerInstance_AddUnit)(void* proc_data);
-
-typedef struct {
-	void* proc_data; 
-	blink_Instance_StreamInit stream_init; 
-	// Blockhead will call add_unit() four times per sampler block to create a set
-	// synchronized samplers for the purposes of crossfading between them to
-	// avoid clicks.
-	//
-	// A crossfade between one or more units occurs whenever block data changes
-	// or the song loops back to an earlier position. These two sitations may
-	// occur simulataneously therefore Blockhead requires four units in total.
-	blink_SamplerInstance_AddUnit add_unit;
-} blink_SamplerInstance;
-
-typedef struct {
-	// True if Blockhead should enable warp markers. From the plugin's
-	// perspective this just means warp data will be passed in to process().
-	// It is up to the plugin to interpret this data.
-	blink_Bool enable_warp_markers; 
 	// True if the plugin needs to preprocess samples in some way.
 	// Preprocessing happens once per sample.
 	blink_Bool requires_preprocessing; 
@@ -150,10 +122,10 @@ typedef struct {
 extern "C"
 {
 	EXPORTED blink_SamplerInfo blink_get_sampler_info();
-	EXPORTED blink_SamplerInstance blink_make_sampler_instance();
 
-	// Free all memory associated with this sampler instance.
-	EXPORTED blink_Error blink_destroy_sampler_instance(blink_SamplerInstance instance);
+	// output pointer is aligned on a 16-byte boundary
+	// output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
+	EXPORTED blink_Error blink_sampler_process(blink_UnitID unit_id, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
 
 	// Called by the host once per sample only if
 	// blink_SamplerInfo::requires_preprocessing is true
