@@ -19,6 +19,7 @@
 
 namespace blink {
 
+/*
 class Plugin
 {
 public:
@@ -141,5 +142,6 @@ inline auto Plugin::get_resource_data(const FileSystem& fs, const char* path) ->
 
 	return resources_.store(path, file);
 }
+*/
 
 } // blink

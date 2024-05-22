@@ -20,7 +20,7 @@ public:
 			return position - blink_Position(warp_points->points[0].y - warp_points->points[0].x);
 		}
 
-		for (blink_Index i = point_search_index_; i < warp_points->count; i++)
+		for (int i = point_search_index_; i < warp_points->count; i++)
 		{
 			point_search_index_ = i;
 
@@ -66,7 +66,7 @@ public:
 
 		auto p0 { warp_points->points[warp_points->count - 1] };
 
-		point_search_index_ = warp_points->count;
+		point_search_index_ = int(warp_points->count);
 
 		if (derivative) *derivative = 1.0f;
 

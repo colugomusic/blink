@@ -17,7 +17,7 @@ public:
 
 	blink_SR get_SR() const { return info_->SR; }
 	blink_FrameCount get_num_frames() const { return info_->num_frames; }
-	blink_FrameCount get_data(blink_ChannelCount channel, blink_Index index, blink_FrameCount size, float* buffer) const;
+	blink_FrameCount get_data(blink_ChannelCount channel, blink_FrameCount index, blink_FrameCount size, float* buffer) const;
 	float read_frame(blink_ChannelCount channel, int pos) const;
 	float read_frame_interp(blink_ChannelCount channel, float pos, bool loop = false) const;
 	ml::DSPVector read_frames(blink_ChannelCount channel, const ml::DSPVectorInt& pos) const;
@@ -56,20 +56,20 @@ private:
 };
 
 inline SampleData::SampleData(const blink_SampleInfo* info, blink_ChannelMode channel_mode)
-	: info_(info)
-	, loop_length_(info->loop_points ? info->loop_points[1] - info->loop_points[0] : 0)
-	, channel_mode_(channel_mode)
+	: info_{info}
+	, loop_length_{info->loop_points ? info->loop_points[1].value - info->loop_points[0].value : 0}
+	, channel_mode_{channel_mode}
 {
 }
 
-inline blink_FrameCount SampleData::get_data(blink_ChannelCount channel, blink_Index index, blink_FrameCount size, float* buffer) const
+inline blink_FrameCount SampleData::get_data(blink_ChannelCount channel, blink_FrameCount index, blink_FrameCount size, float* buffer) const
 {
 	return info_->get_data(info_->host, channel, index, size, buffer);
 }
 
 inline float SampleData::read_frame(blink_ChannelCount channel, int pos) const
 {
-	if (pos < 0 || pos >= int(info_->num_frames))
+	if (pos < 0 || pos >= int(info_->num_frames.value))
 	{
 		return 0.0f;
 	}
@@ -78,7 +78,7 @@ inline float SampleData::read_frame(blink_ChannelCount channel, int pos) const
 		float out;
 
 		// Could return zero if sample header wasn't loaded yet.
-		if (get_data(channel, pos, 1, &out) == 0) return 0.0f;
+		if (get_data(channel, {uint64_t(pos)}, {1}, &out).value == 0) return 0.0f;
 
 		return out;
 	}
@@ -90,14 +90,14 @@ inline ml::DSPVector SampleData::read_frames(blink_ChannelCount channel, const m
 
 	for (int i = 0; i < kFloatsPerDSPVector; i++)
 	{
-		if (pos[i] < 0 || pos[i] >= int(info_->num_frames))
+		if (pos[i] < 0 || pos[i] >= int(info_->num_frames.value))
 		{
 			out[i] = 0.0f;
 		}
 		else
 		{
 			// Could return zero if sample header wasn't loaded yet.
-			if (get_data(channel, pos[i], 1, &(out[i])) == 0) break;
+			if (get_data(channel, {uint64_t(pos[i])}, {1}, &(out[i])).value == 0) break;
 		}
 	}
 
@@ -108,20 +108,20 @@ inline float SampleData::get_loop_pos(float pos) const
 {
 	if (!info_->loop_points)
 	{
-		return math::wrap(pos, float(info_->num_frames));
+		return math::wrap(pos, float(info_->num_frames.value));
 	}
 	
-	return math::wrap(pos - info_->loop_points[0], float(loop_length_)) + info_->loop_points[0];
+	return math::wrap(pos - info_->loop_points[0].value, float(loop_length_.value)) + info_->loop_points[0].value;
 }
 
 inline snd::transport::DSPVectorFramePosition SampleData::get_loop_pos(const snd::transport::DSPVectorFramePosition& pos) const
 {
 	if (!info_->loop_points)
 	{
-		return math::wrap(pos, float(info_->num_frames));
+		return math::wrap(pos, float(info_->num_frames.value));
 	}
 	
-	return math::wrap(pos - std::int32_t(info_->loop_points[0]), float(loop_length_)) + std::int32_t(info_->loop_points[0]);
+	return math::wrap(pos - std::int32_t(info_->loop_points[0].value), float(loop_length_.value)) + std::int32_t(info_->loop_points[0].value);
 }
 
 inline auto SampleData::get_interp_pos(float pos, bool loop) const -> InterpPos
@@ -155,7 +155,7 @@ inline auto SampleData::get_interp_pos(snd::transport::DSPVectorFramePosition po
 
 	if (loop)
 	{
-		out.next[kFloatsPerDSPVector - 1] %= info_->num_frames;
+		out.next[kFloatsPerDSPVector - 1] %= info_->num_frames.value;
 	}
 
 	out.x = pos.fract;

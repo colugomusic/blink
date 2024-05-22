@@ -1,3 +1,4 @@
+/* TODELETE:
 #pragma once
 
 #include <blink.h>
@@ -17,3 +18,4 @@ inline const char* get_std_error_string(blink_StdError error)
 }
 
 } // blink
+*/

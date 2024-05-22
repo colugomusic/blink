@@ -13,7 +13,7 @@ namespace search {
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc>
-inline float float_points(const blink_RealPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+inline float float_points(const blink_RealPoints* points, float default_value, blink_Position block_position, size_t search_beg_index, size_t* left, SearchFunc search)
 {
 	*left = 0;
 
@@ -57,7 +57,7 @@ inline float float_points(const blink_RealPoints* points, float default_value, b
 }
 
 // Use a binary search to locate the envelope position
-inline float float_points_binary(const blink_RealPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
+inline float float_points_binary(const blink_RealPoints* points, float default_value, blink_Position block_position, size_t search_beg_index, size_t* left)
 {
 	const auto find = [block_position](const blink_RealPoint* beg, const blink_RealPoint* end)
 	{
@@ -74,7 +74,7 @@ inline float float_points_binary(const blink_RealPoints* points, float default_v
 
 // Use a forward search to locate the envelope position (can be
 // faster when envelope is being traversed forwards)
-inline float float_points_forward(const blink_RealPoints* points, float default_value, blink_Position block_position, int search_beg_index, int* left)
+inline float float_points_forward(const blink_RealPoints* points, float default_value, blink_Position block_position, size_t search_beg_index, size_t* left)
 {
 	const auto find = [block_position](const blink_RealPoint* beg, const blink_RealPoint* end)
 	{
@@ -95,29 +95,23 @@ inline float float_points_forward(const blink_RealPoints* points, float default_
 //        or zero if there isn't one.
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
-template <class SearchFunc>
-inline int chord(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
-{
-	*left = 0;
-
-	if (data->points.count < 2) return 0;
-
+template <class SearchFunc> [[nodiscard]] inline
+auto chord(const blink_ChordData* data, blink_Position block_position, size_t search_beg_index, size_t* left, SearchFunc search) -> blink_Scale {
+	*left = 0; 
+	if (data->points.count < 2) return 0; 
 	auto search_beg = data->points.data + search_beg_index;
 	auto search_end = data->points.data + data->points.count;
-	const auto pos = search(search_beg, search_end);
-
-	if (pos == search_beg)
-	{
+	const auto pos = search(search_beg, search_end); 
+	if (pos == search_beg) {
 		// The scale to the right is the first one
 		return 0;
-	}
-
+	} 
 	// Otherwise always return the scale to the left
 	return (pos - 1)->y;
 }
 
 // Use a binary search to locate the scale at the block position
-inline int chord_binary(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left)
+inline blink_Scale chord_binary(const blink_ChordData* data, blink_Position block_position, size_t search_beg_index, size_t* left)
 {
 	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end)
 	{
@@ -134,7 +128,7 @@ inline int chord_binary(const blink_ChordData* data, blink_Position block_positi
 
 // Use a forward search to locate the scale at the block position (can be
 // faster when block is being traversed forwards)
-inline int chord_forward(const blink_ChordData* data, blink_Position block_position, int search_beg_index, int* left)
+inline blink_Scale chord_forward(const blink_ChordData* data, blink_Position block_position, size_t search_beg_index, size_t* left)
 {
 	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end)
 	{
@@ -156,7 +150,7 @@ inline int chord_forward(const blink_ChordData* data, blink_Position block_posit
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc>
-inline int64_t step(const blink_IntPoints* points, int64_t default_value, blink_Position block_position, int search_beg_index, int* left, SearchFunc search)
+inline int64_t step(const blink_IntPoints* points, int64_t default_value, blink_Position block_position, size_t search_beg_index, size_t* left, SearchFunc search)
 {
 	*left = 0;
 
@@ -187,7 +181,7 @@ inline int64_t step(const blink_IntPoints* points, int64_t default_value, blink_
 }
 
 // Use a binary search to locate the block position
-inline int64_t step_binary(const blink_IntPoints* points, int64_t default_value, blink_Position block_position, int search_beg_index, int* left)
+inline int64_t step_binary(const blink_IntPoints* points, int64_t default_value, blink_Position block_position, size_t search_beg_index, size_t* left)
 {
 	const auto find = [block_position](const blink_IntPoint* beg, const blink_IntPoint* end)
 	{
@@ -204,7 +198,7 @@ inline int64_t step_binary(const blink_IntPoints* points, int64_t default_value,
 
 // Use a forward search to locate the block position (can be
 // faster when block is being traversed forwards)
-inline int64_t step_forward(const blink_IntPoints* points, int64_t default_value, blink_Position block_position, int search_beg_index, int* left)
+inline int64_t step_forward(const blink_IntPoints* points, int64_t default_value, blink_Position block_position, size_t search_beg_index, size_t* left)
 {
 	const auto find = [block_position](const blink_IntPoint* beg, const blink_IntPoint* end)
 	{

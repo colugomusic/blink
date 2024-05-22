@@ -1,3 +1,4 @@
+/* TODELETE:
 #pragma once
 
 #include <functional>
@@ -10,18 +11,16 @@ namespace blink {
 
 struct EnvelopeSpec {
 	std::function<std::string(float)> to_string; 
-	/*
-	Where to display grid lines. Value returned should be in linear space
+	//Where to display grid lines. Value returned should be in linear space
 
-	index == 0 is the default value
-	index == 1 is the first grid line above the default value
-	index == -1 is the first grid line below the default value
+	//index == 0 is the default value
+	//index == 1 is the first grid line above the default value
+	//index == -1 is the first grid line below the default value
 
-	The host calls this repeatedly in both directions until the returned grid
-	line falls off the top or bottom of the envelope editor, or until two grid
-	lines are generated which are too close together on the screen, or until
+	//The host calls this repeatedly in both directions until the returned grid
+	//line falls off the top or bottom of the envelope editor, or until two grid
+	//lines are generated which are too close together on the screen, or until
 	and empty value is returned
-	*/
 	std::function<std::optional<float>(int index)> get_gridline; 
 	std::function<float(int index, float step_size)> get_stepline;
 	std::function<float(float)> stepify;
@@ -36,3 +35,4 @@ struct EnvelopeSpec {
 };
 
 }
+*/

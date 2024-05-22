@@ -1,3 +1,4 @@
+/* TODELETE:
 #pragma once
 
 #include "parameter.hpp"
@@ -85,3 +86,4 @@ const char* SliderParameter<T>::display_value(T value) const
 }
 
 }
+*/

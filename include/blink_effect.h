@@ -4,9 +4,8 @@
 
 #define BLINK_EFFECT
 
-typedef struct
-{
-	uint64_t buffer_id;
+typedef struct {
+	blink_BufferID buffer_id;
 	blink_SR song_rate;
 	blink_Position* positions;
 } blink_EffectBuffer;
@@ -46,49 +45,13 @@ struct blink_EffectUnitState
 	float scale;
 	int64_t data_offset;
 	// May be NULL, in which case plugins should act as if all parameters are default.
-	const blink_ParameterData* parameter_data;
+	const blink_ParamData* parameter_data;
 };
-
-typedef blink_Error(*blink_Effect_Process)(void* proc_data, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
-
-typedef struct
-{
-	void* proc_data;
-
-	blink_Effect_Process process;
-} blink_EffectUnit;
-
-typedef blink_EffectInstanceInfo(*blink_EffectInstance_GetInfo)(void* proc_data);
-typedef blink_EffectUnit(*blink_EffectInstance_AddUnit)(void* proc_data);
-
-typedef struct
-{
-	void* proc_data;
-
-	blink_EffectInstance_GetInfo get_info;
-
-	// Called when the audio stream is initialized or restarted (happens if the
-	// host changes sample rate)
-	// 
-	// This function may allocate/deallocate memory
-	blink_Instance_StreamInit stream_init;
-
-	// Blockhead will call add_unit() four times per effect block to create a set
-	// synchronized effects for the purposes of crossfading between them to
-	// avoid clicks.
-	//
-	// A crossfade between one or more units occurs whenever block data changes
-	// or the song loops back to an earlier position. These two sitations may
-	// occur simulataneously therefore Blockhead requires four units in total.
-
-	// This function may allocate/deallocate memory
-	blink_EffectInstance_AddUnit add_unit;
-} blink_EffectInstance;
 
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	EXPORTED blink_EffectInstance blink_make_effect_instance();
-	EXPORTED blink_Error blink_destroy_effect_instance(blink_EffectInstance instance);
+	EXPORTED blink_Error              blink_effect_process(blink_UnitIndex unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
+	EXPORTED blink_EffectInstanceInfo blink_effect_get_info(blink_InstanceIndex instance_idx);
 }
 #endif

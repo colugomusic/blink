@@ -1,3 +1,4 @@
+/* TODELETE:
 #pragma once
 
 #include <cassert>
@@ -73,3 +74,4 @@ inline EnvelopeParameter::EnvelopeParameter(EnvelopeParameterSpec spec_)
 }
 
 }
+*/

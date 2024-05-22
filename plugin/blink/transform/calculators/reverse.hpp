@@ -30,7 +30,7 @@ public:
 		config_ = std::move(config);
 		const auto start_index { point_search_index_ };
 
-		for (blink_Index i = point_search_index_; i < config.reversal_data->points.count; i++)
+		for (int i = point_search_index_; i < config.reversal_data->points.count; i++)
 		{
 			const auto p1 { get_cache_point(1, i) };
 
@@ -99,7 +99,7 @@ public:
 			}
 		}
 
-		const auto p0 { get_cache_point(0, config_.reversal_data->points.count-1) };
+		const auto p0 { get_cache_point(0, int(config_.reversal_data->points.count-1)) };
 		const auto distance { block_position - p0.x };
 
 		return segment_start_frame_ + distance;
@@ -143,7 +143,7 @@ private:
 		}
 	}
 
-	blink_Position calculate_next_segment_start_frame(blink_Index current_search_index)
+	blink_Position calculate_next_segment_start_frame(int current_search_index)
 	{
 		const auto p1 { get_cache_point(1, current_search_index) };
 
@@ -178,7 +178,7 @@ private:
 		}
 	}
 
-	void generate_correction_grain(blink_Index current_search_index, int buffer_index)
+	void generate_correction_grain(int current_search_index, int buffer_index)
 	{
 		if (current_search_index < 1) return;
 

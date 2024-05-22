@@ -1,3 +1,4 @@
+/* TODELETE:
 #pragma once
 
 #include <functional>
@@ -19,3 +20,4 @@ struct SliderParameterSpec : public ParameterSpec
 };
 
 }
+*/

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include "blink/envelope_data.hpp"
+#include "blink/math.hpp"
 #include "blink/traverser.hpp"
 
 namespace blink {
@@ -69,7 +71,7 @@ struct PitchUnit {
 	// not good enough to simply traverse the entire sample.
 	//
 	blink_Position xform(Config config, blink_Position block_position, float* derivative = nullptr) {
-		for (blink_Index i = point_search_index_; i < config.pitch->points.count; i++) {
+		for (int i = point_search_index_; i < config.pitch->points.count; i++) {
 			const auto p1 = make_pitch_point(config.pitch->points.data[i], config.pitch->points.min, config.pitch->points.max, config.transpose);
 			if (block_position < p1.x) {
 				if (i == 0) {

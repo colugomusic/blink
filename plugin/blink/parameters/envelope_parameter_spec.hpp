@@ -1,3 +1,4 @@
+/* TODELETE:
 #pragma once
 
 #include <functional>
@@ -27,3 +28,4 @@ struct EnvelopeParameterSpec : public ParameterSpec
 };
 
 }
+*/
