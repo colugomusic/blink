@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include <blink/blink_plugin_impl.hpp>
+#include <blink/plugin_impl.hpp>
 #include <blink/math.hpp>
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>

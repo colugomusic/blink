@@ -1,10 +1,8 @@
 #pragma once
 
-#include <limits>
-#include <optional>
 #include <blink.h>
+#include <limits>
 #include <snd/transport/frame_position.hpp>
-
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
@@ -14,7 +12,7 @@ namespace blink {
 struct BlockPositions {
 	snd::transport::DSPVectorFramePosition positions;
 	snd::transport::FramePosition prev_pos = std::numeric_limits<std::int32_t>::max();
-	int count = kFloatsPerDSPVector;
+	int count = BLINK_VECTOR_SIZE;
 	BlockPositions() {
 		positions.set(count - 1, std::numeric_limits<std::int32_t>::max());
 	}
@@ -30,22 +28,22 @@ struct BlockPositions {
 			positions.set(i, blink_positions[i]);
 		}
 	}
-	void rotate_prev_pos() {
+	auto rotate_prev_pos() -> void {
 		prev_pos = positions[count - 1];
 	}
-	void add(const blink_Position* blink_positions, int count_) {
+	auto add(const blink_Position* blink_positions, int count_) -> void {
 		prev_pos = positions[count - 1]; 
 		for (int i = 0; i < count_; i++) {
 			positions.set(i, blink_positions[i]);
 		}
 		count = count_;
 	}
-	void add(const snd::transport::DSPVectorFramePosition& vec_positions, int count_) {
+	auto add(const snd::transport::DSPVectorFramePosition& vec_positions, int count_) -> void {
 		prev_pos  = positions[count - 1]; 
 		positions = vec_positions;
 		count     = count_;
 	}
-	snd::transport::FramePosition operator[](int index) const {
+	auto operator[](int index) const -> snd::transport::FramePosition {
 		if (index == -1) {
 			return prev_pos; 
 		}
@@ -53,4 +51,4 @@ struct BlockPositions {
 	}
 };
 
-}
+} // blink

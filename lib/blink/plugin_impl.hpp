@@ -19,19 +19,6 @@ namespace ent {
 	>;
 } // ent
 
-/* TODO: move to host
-namespace ent {
-	using Instance = DynamicEntityStore<
-		SR,
-		UnitVec,
-		InstanceProcess
-	>;
-	using Unit = DynamicEntityStore<
-		UnitProcess
-	>;
-} // ent
-*/
-
 struct Plugin {
 	blink_PluginIdx index;
 	blink_HostFns host;
@@ -117,23 +104,6 @@ auto get_std_error_string(blink_StdError error) -> const char* {
 	}
 }
 
-/* TODO: move this logic to host
-template <typename InstanceResetFn>
-auto begin_process(Plugin* plugin, blink_InstanceIdx instance_idx, blink_BufferID buffer_id, InstanceResetFn&& instance_reset_fn) -> void {
-	// instance is reset at the start of the buffer if we have gone
-	// at least one buffer with no units being processed
-	auto& instance_process = plugin->instance.get<InstanceProcess>(instance_idx.value);
-	if (buffer_id.value > instance_process.buffer_id.value.value) {
-		if (buffer_id.value > instance_process.buffer_id.value.value + 1 || instance_process.active_buffer_units == 0) {
-			instance_reset_fn(instance_idx);
-		}
-		instance_process.buffer_id.value     = buffer_id;
-		instance_process.active_buffer_units = 0;
-	}
-	instance_process.active_buffer_units++;
-}
-*/
-
 namespace add {
 namespace param {
 
@@ -165,7 +135,7 @@ namespace env {
 
 [[nodiscard]] inline
 auto default_value(const Plugin& plugin, blink_EnvIdx env_idx) -> float {
-	return plugin.host.read_env_default_value(plugin.index, env_idx);
+	return plugin.host.read_env_default_value(env_idx);
 }
 
 } // env
@@ -174,7 +144,7 @@ namespace slider_int {
 
 [[nodiscard]] inline
 auto default_value(const Plugin& plugin, blink_SliderIntIdx slider_int_idx) -> int64_t {
-	return plugin.host.read_slider_int_default_value(plugin.index, slider_int_idx);
+	return plugin.host.read_slider_int_default_value(slider_int_idx);
 }
 
 } // slider_int
@@ -183,7 +153,7 @@ namespace slider_real {
 
 [[nodiscard]] inline
 auto default_value(const Plugin& plugin, blink_SliderRealIdx slider_real_idx) -> float {
-	return plugin.host.read_slider_real_default_value(plugin.index, slider_real_idx);
+	return plugin.host.read_slider_real_default_value(slider_real_idx);
 }
 
 } // slider_real
