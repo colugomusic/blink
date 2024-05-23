@@ -183,22 +183,16 @@ inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, 
 	return (interp_pos.x * (next_value - prev_value)) + prev_value;
 }
 
-template <std::size_t ROWS>
-inline ml::DSPVectorArray<ROWS> SampleData::read_frames_interp(const snd::transport::DSPVectorFramePosition& pos, bool loop) const
-{
-	ml::DSPVectorArray<ROWS> out;
-
-	const auto interp_pos = get_interp_pos(pos, loop);
-
-	for (int r = 0; r < ROWS; r++)
-	{
-		const auto next_value = read_frames(r, interp_pos.next);
-		const auto prev_value = read_frames(r, interp_pos.prev);
-
+template <std::size_t ROWS> [[nodiscard]]
+auto SampleData::read_frames_interp(const snd::transport::DSPVectorFramePosition& pos, bool loop) const -> ml::DSPVectorArray<ROWS> {
+	ml::DSPVectorArray<ROWS> out; 
+	const auto interp_pos = get_interp_pos(pos, loop); 
+	for (int r = 0; r < ROWS; r++) {
+		const auto next_value = read_frames({uint8_t(r)}, interp_pos.next);
+		const auto prev_value = read_frames({uint8_t(r)}, interp_pos.prev); 
 		out.row(r) = (interp_pos.x * (next_value - prev_value)) + prev_value;
-	}
-
+	} 
 	return out;
 }
 
-}
+} // blink

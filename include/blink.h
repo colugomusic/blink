@@ -10,6 +10,7 @@
 #define BLINK_OK 0
 #define BLINK_TRUE 1
 #define BLINK_FALSE 0
+#define BLINK_STRING_MAX 128
 
 #define BLINK_STD_UUID_AMP "273e7c30-404b-4db6-ba97-20f33d49fe51"
 #define BLINK_STD_UUID_DELAY_TIME "064315cd-affd-43a7-b7e8-4e586890375e"
@@ -47,16 +48,13 @@ typedef uint32_t blink_Scale;
 
 typedef struct {      int8_t value; } blink_Bool;
 typedef struct {     int64_t value; } blink_BufferID;
-typedef struct {      size_t value; } blink_EnvelopeIndex;
-typedef struct {      size_t value; } blink_EnvelopeParamIndex;
-typedef struct {      size_t value; } blink_InstanceIndex;
-typedef struct {      size_t value; } blink_IntSliderIndex;
-typedef struct {      size_t value; } blink_IntSliderParamIndex;
-typedef struct {      size_t value; } blink_OptionParamIndex;
-typedef struct {      size_t value; } blink_ParamIndex;
-typedef struct {      size_t value; } blink_RealSliderIndex;
-typedef struct {      size_t value; } blink_RealSliderParamIndex;
-typedef struct {      size_t value; } blink_UnitIndex;
+typedef struct {      size_t value; } blink_EnvIdx;
+typedef struct {      size_t value; } blink_InstanceIdx;
+typedef struct {      size_t value; } blink_SliderIntIdx;
+typedef struct {      size_t value; } blink_ParamIdx;
+typedef struct {      size_t value; } blink_PluginIdx;
+typedef struct {      size_t value; } blink_SliderRealIdx;
+typedef struct {      size_t value; } blink_UnitIdx;
 typedef struct {     int32_t value; } blink_Flags;
 typedef struct {     int32_t value; } blink_ID;
 typedef struct {     uint8_t value; } blink_BitDepth;
@@ -100,6 +98,19 @@ enum blink_StdError {
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Range types
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+typedef struct {
+	float min;
+	float max;
+} blink_Range;
+
+typedef struct {
+	int min;
+	int max;
+} blink_IntRange;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Modulation point types
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
@@ -140,75 +151,35 @@ typedef struct {
 } blink_ChordBlocks;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Range types
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct {
-	float min;
-	float max;
-} blink_Range;
-
-typedef struct {
-	int min;
-	int max;
-} blink_IntRange;
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Param types
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-enum blink_ParamType {
-	blink_ParamType_Chord,
-	blink_ParamType_Envelope,
-	blink_ParamType_Option,
-	blink_ParamType_Slider,
-	blink_ParamType_IntSlider,
-};
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Param data
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
-	blink_ParamType type;
 	blink_ChordBlocks points;
 } blink_ChordData;
 
 typedef struct {
-	blink_ParamType type;
 	blink_RealPoints points;
-} blink_EnvelopeData;
+} blink_EnvData;
 
 typedef struct {
-	blink_ParamType type;
 	blink_IntPoints points;
 } blink_OptionData;
 
 typedef struct {
-	blink_ParamType type;
 	blink_RealPoints points;
-} blink_SliderData;
+} blink_SliderRealData;
 
 typedef struct {
-	blink_ParamType type;
 	blink_IntPoints points;
-} blink_IntSliderData;
+} blink_SliderIntData;
 
 union blink_ParamData {
-	blink_ParamType type;
 	blink_ChordData chord;
-	blink_EnvelopeData envelope;
+	blink_EnvData envelope;
 	blink_OptionData option;
-	blink_SliderData slider;
-	blink_IntSliderData int_slider;
+	blink_SliderIntData slider_int;
+	blink_SliderRealData slider_real;
 };
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Param data END
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-typedef struct {
-	// Step size is also a range with a value that
-	// can be configured by the user
-	blink_RealSliderIndex step_size_slider;
-	float default_snap_amount;
-} blink_EnvSnapSettings;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Param Flags
@@ -230,22 +201,25 @@ enum blink_ParamFlags {
 	blink_ParamFlags_SonicPivot                 = 1 << 13,
 };
 
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Param Flags END
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Manipulator Settings
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
 	// Either of these can be empty, but at least one must be defined
 	// if blink_ParamFlags_CanManipulate is set
-	blink_EnvelopeIndex offset_envelope;
-	blink_EnvelopeIndex override_envelope; 
+	blink_EnvIdx offset_envelope;
+	blink_EnvIdx override_envelope; 
 } blink_ManipSettings;
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// Manipulator Settings END
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Envelope Snap Settings
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+typedef struct {
+	// Step size is also a range with a value that
+	// can be configured by the user
+	blink_SliderRealIdx step_size_slider;
+	float default_snap_amount;
+} blink_EnvSnapSettings;
 
 typedef struct {
 	// Null if the parameter does not belong to a group
@@ -293,6 +267,79 @@ typedef struct {
 	blink_Bool enable_warp_markers; 
 } blink_PluginInfo;
 
+typedef size_t  (*blink_Tweak_ToStringReal)(float value, char buffer[BLINK_STRING_MAX]);
+typedef float   (*blink_Tweak_FromStringReal)(const char* string);
+typedef float   (*blink_Tweak_ConstrainReal)(float value);
+typedef float   (*blink_Tweak_DragReal)(float value, int pixels, bool precise);
+typedef float   (*blink_Tweak_IncrementReal)(float value, bool precise);
+typedef float   (*blink_Tweak_DecrementReal)(float value, bool precise);
+typedef float   (*blink_Tweak_StepifyReal)(float value);
+typedef size_t  (*blink_Tweak_ToStringInt)(int64_t value, char buffer[BLINK_STRING_MAX]);
+typedef int64_t (*blink_Tweak_FromStringInt)(const char* string);
+typedef int64_t (*blink_Tweak_ConstrainInt)(int64_t value);
+typedef int64_t (*blink_Tweak_DragInt)(int64_t value, int pixels, bool precise);
+typedef int64_t (*blink_Tweak_IncrementInt)(int64_t value, bool precise);
+typedef int64_t (*blink_Tweak_DecrementInt)(int64_t value, bool precise);
+typedef int64_t (*blink_Tweak_StepifyInt)(int64_t value);
+
+typedef struct {
+	blink_Tweak_ToStringReal to_string;
+	blink_Tweak_FromStringReal from_string;
+	blink_Tweak_ConstrainReal constrain;
+	blink_Tweak_DragReal drag;
+	blink_Tweak_IncrementReal increment;
+	blink_Tweak_DecrementReal decrement;
+	blink_Tweak_StepifyReal stepify;
+} blink_TweakerReal;
+
+typedef struct {
+	blink_Tweak_ToStringInt to_string;
+	blink_Tweak_FromStringInt from_string;
+	blink_Tweak_ConstrainInt constrain;
+	blink_Tweak_DragInt drag;
+	blink_Tweak_IncrementInt increment;
+	blink_Tweak_DecrementInt decrement;
+	blink_Tweak_StepifyInt stepify;
+} blink_TweakerInt;
+
+typedef blink_ParamIdx      (*blink_host_add_param_env)(blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_option)(blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef float               (*blink_host_read_env_default_value)(blink_PluginIdx plugin_idx, blink_EnvIdx env_idx);
+typedef blink_EnvIdx        (*blink_host_read_param_env_env_idx)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef int64_t             (*blink_host_read_param_option_default_value)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef blink_SliderIntIdx  (*blink_host_read_param_slider_int_slider_idx)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef blink_SliderRealIdx (*blink_host_read_param_slider_real_slider_idx)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef float               (*blink_host_read_slider_real_default_value)(blink_PluginIdx plugin_idx, blink_SliderRealIdx sld_idx);
+typedef int64_t             (*blink_host_read_slider_int_default_value)(blink_PluginIdx plugin_idx, blink_SliderIntIdx sld_idx);
+typedef blink_Error         (*blink_host_write_param_add_flags)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamFlags flags);
+typedef blink_Error         (*blink_host_write_param_add_subparam)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
+typedef blink_Error         (*blink_host_write_param_delegate)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
+typedef blink_Error         (*blink_host_write_param_group)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString group_name);
+typedef blink_Error         (*blink_host_write_slider_int_tweaker)(blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
+typedef blink_Error         (*blink_host_write_slider_real_tweaker)(blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
+
+struct blink_HostFns {
+	blink_host_add_param_env                     add_param_env;
+	blink_host_add_param_option                  add_param_option;
+	blink_host_add_param_slider_int              add_param_slider_int;
+	blink_host_add_param_slider_real             add_param_slider_real;
+	blink_host_read_env_default_value            read_env_default_value;
+	blink_host_read_param_env_env_idx            read_param_env_env_idx;
+	blink_host_read_param_option_default_value   read_param_option_default_value;
+	blink_host_read_param_slider_int_slider_idx  read_param_slider_int_slider_idx;
+	blink_host_read_param_slider_real_slider_idx read_param_slider_real_slider_idx;
+	blink_host_read_slider_int_default_value     read_slider_int_default_value;
+	blink_host_read_slider_real_default_value    read_slider_real_default_value;
+	blink_host_write_param_add_flags             write_param_add_flags;
+	blink_host_write_param_add_subparam          write_param_add_subparam;
+	blink_host_write_param_delegate	             write_param_delegate;
+	blink_host_write_param_group                 write_param_group;
+	blink_host_write_slider_int_tweaker          write_slider_int_tweaker;
+	blink_host_write_slider_real_tweaker         write_slider_real_tweaker;
+};
+
 #ifdef BLINK_EXPORT
 
 #ifdef _WIN32
@@ -303,81 +350,16 @@ typedef struct {
 
 extern "C"
 {
-	EXPORTED blink_Error           blink_destroy_instance(blink_InstanceIndex instance_idx);
-	EXPORTED blink_Error           blink_init();
-	EXPORTED blink_Error           blink_stream_init(blink_InstanceIndex instance_idx, blink_SR SR);
-	EXPORTED blink_Error           blink_terminate();
-	EXPORTED blink_InstanceIndex   blink_make_instance();
-	EXPORTED blink_PluginInfo      blink_get_plugin_info();
-	EXPORTED blink_UnitIndex       blink_add_unit(blink_InstanceIndex instance_idx);
-	EXPORTED size_t                blink_get_num_params();
-	EXPORTED blink_TempString      blink_get_error_string(blink_Error error);
-	EXPORTED blink_ResourceData    blink_get_resource_data(const char* path); // Optional
-
-	// Param
-	EXPORTED blink_Flags           blink_get_param_flags(blink_ParamIndex param_idx);
-	EXPORTED blink_Bool            blink_get_param_by_uuid(blink_UUID uuid, blink_ParamIndex* out);
-	EXPORTED blink_ParamIndex      blink_param_get_subparam(blink_ParamIndex param_idx, size_t index);
-	EXPORTED blink_ParamSettings   blink_param_get_settings(blink_ParamIndex param_idx);
-	EXPORTED blink_ParamType       blink_param_get_type(blink_ParamIndex param_idx);
-	EXPORTED blink_StdIcon         blink_get_icon(blink_ParamIndex param_idx);
-	EXPORTED blink_UUID            blink_get_param_uuid(blink_ParamIndex param_idx);
-	EXPORTED size_t                blink_param_get_num_subparams(blink_ParamIndex param_idx);
-
-	// Envelope Param
-	EXPORTED float                 blink_param_env_apply_offset(blink_EnvelopeParamIndex env_idx, float value, float offset);
-	EXPORTED blink_EnvelopeIndex   blink_param_env_get_env(blink_EnvelopeParamIndex env_idx);
-	EXPORTED blink_ManipSettings   blink_param_env_get_manipulator_settings(blink_EnvelopeParamIndex env_idx);
-	EXPORTED blink_Range           blink_param_env_get_clamp_range(blink_EnvelopeParamIndex env_idx);
-
-	// Int Slider Param
-	EXPORTED blink_IntSliderIndex  blink_param_int_slider_get_slider(blink_IntSliderParamIndex sld_idx);
-
-	// Real Slider Param
-	EXPORTED float                 blink_param_slider_apply_offset(blink_RealSliderParamIndex env_idx, float value, float offset);
-	EXPORTED blink_ManipSettings   blink_param_slider_get_manipulator_settings(blink_RealSliderParamIndex sld_idx);
-	EXPORTED blink_Range           blink_param_slider_get_clamp_range(blink_RealSliderParamIndex sld_idx);
-	EXPORTED blink_RealSliderIndex blink_param_slider_get_slider(blink_RealSliderParamIndex sld_idx);
-
-	// Option Param
-	EXPORTED blink_TempString      blink_param_option_get_text(blink_OptionParamIndex opt_idx, int64_t value);
-	EXPORTED int64_t               blink_param_option_get_default_value(blink_OptionParamIndex opt_idx);
-	EXPORTED int64_t               blink_param_option_get_max_value(blink_OptionParamIndex opt_idx);
-
-	// Envelope
-	EXPORTED blink_Bool            blink_env_from_string(blink_EnvelopeIndex env_indx, const char* str, float* value);
-	EXPORTED blink_Bool            blink_env_get_grid_line(blink_EnvelopeIndex env_idx, int index, float* out);
-	EXPORTED blink_Bool            blink_env_get_step_line(blink_EnvelopeIndex env_idx, int index, float step_size, float* out);
-	EXPORTED blink_Bool            blink_env_should_show_grid_labels(blink_EnvelopeIndex env_idx);
-	EXPORTED blink_EnvSnapSettings blink_env_get_snap_settings(blink_EnvelopeIndex env_indx);
-	EXPORTED blink_RealSliderIndex blink_env_get_max_slider(blink_EnvelopeIndex env_idx);
-	EXPORTED blink_RealSliderIndex blink_env_get_min_slider(blink_EnvelopeIndex env_idx);
-	EXPORTED blink_RealSliderIndex blink_env_get_value_slider(blink_EnvelopeIndex env_idx);
-	EXPORTED blink_TempString      blink_env_to_string(blink_EnvelopeIndex env_indx, float value);
-	EXPORTED float                 blink_env_get_default_value(blink_EnvelopeIndex env_idx);
-	EXPORTED float                 blink_env_search(blink_EnvelopeIndex env_idx, const blink_EnvelopeData* data, float block_position);
-	EXPORTED float                 blink_env_snap_value(blink_EnvelopeIndex env_indx, float value, float step_size, float snap_amount);
-	EXPORTED float                 blink_env_stepify(blink_EnvelopeIndex env_idx, float value);
-
-	// Real Slider
-	EXPORTED blink_Bool            blink_slider_from_string(blink_RealSliderIndex sld_idx, const char* str, float* value);
-	EXPORTED blink_TempString      blink_slider_to_string(blink_RealSliderIndex sld_idx, float value);
-	EXPORTED float                 blink_slider_constrain(blink_RealSliderIndex sld_idx, float value);
-	EXPORTED float                 blink_slider_decrement(blink_RealSliderIndex sld_idx, float value, blink_Bool precise);
-	EXPORTED float                 blink_slider_drag(blink_RealSliderIndex sld_idx, float start_value, int amount, blink_Bool precise);
-	EXPORTED float                 blink_slider_get_default_value(blink_RealSliderIndex sld_idx);
-	EXPORTED float                 blink_slider_increment(blink_RealSliderIndex sld_idx, float value, blink_Bool precise);
-	EXPORTED float                 blink_slider_snap_value(blink_RealSliderIndex sld_idx, float value, float step_size, float snap_amount);
-	EXPORTED float                 blink_slider_stepify(blink_RealSliderIndex sld_idx, float value);
-
-	// Int Slider
-	EXPORTED blink_Bool            blink_int_slider_from_string(blink_IntSliderIndex sld_idx, const char* str, int64_t* value);
-	EXPORTED blink_TempString      blink_int_slider_to_string(blink_IntSliderIndex sld_idx, int64_t value);
-	EXPORTED int64_t               blink_int_slider_constrain(blink_IntSliderIndex sld_idx, int64_t value);
-	EXPORTED int64_t               blink_int_slider_decrement(blink_IntSliderIndex sld_idx, int64_t value, blink_Bool precise);
-	EXPORTED int64_t               blink_int_slider_drag(blink_IntSliderIndex sld_idx, int64_t start_value, int64_t amount, blink_Bool precise);
-	EXPORTED int64_t               blink_int_slider_get_default_value(blink_IntSliderIndex sld_idx);
-	EXPORTED int64_t               blink_int_slider_increment(blink_IntSliderIndex sld_idx, int64_t value, blink_Bool precise);
+	EXPORTED blink_TempString   blink_get_error_string(blink_Error error);
+	EXPORTED blink_PluginInfo   blink_get_plugin_info();
+	EXPORTED blink_ResourceData blink_get_resource_data(const char* path); // Optional
+	EXPORTED blink_Error        blink_init(blink_PluginIdx plugin_idx, blink_HostFns host);
+	EXPORTED blink_Error        blink_instance_destroy(blink_InstanceIdx instance_idx);
+	EXPORTED blink_InstanceIdx  blink_instance_make();
+	EXPORTED blink_Error        blink_instance_reset(blink_InstanceIdx instance_idx, blink_SR SR);
+	EXPORTED blink_Error        blink_terminate();
+	EXPORTED blink_UnitIdx      blink_unit_add(blink_InstanceIdx instance_idx);
+	EXPORTED blink_Error        blink_unit_reset(blink_InstanceIdx instance_idx, blink_SR SR);
 }
 
 #endif

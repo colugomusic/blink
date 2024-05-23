@@ -1,11 +1,11 @@
 #pragma once
 
 #include "blink.h"
-#include "blink/traverser.hpp"
 #include "calculators/pitch.hpp"
 #include "calculators/reverse.hpp"
 #include "calculators/warp.hpp"
 #include "correction_grains.hpp"
+#include "blink/traverser.hpp"
 #include <snd/transport/frame_position.hpp>
 
 namespace blink {
@@ -17,7 +17,7 @@ struct Tape {
 		float transpose {};
 		int64_t sample_offset {};
 		struct {
-			const blink_EnvelopeData* pitch {};
+			const blink_EnvData* pitch {};
 		} env; 
 		struct
 		{

@@ -14,7 +14,7 @@ namespace blink {
 struct BlockPositions {
 	snd::transport::DSPVectorFramePosition positions;
 	snd::transport::FramePosition prev_pos = std::numeric_limits<std::int32_t>::max();
-	int count                              = kFloatsPerDSPVector;
+	int count = kFloatsPerDSPVector;
 	BlockPositions() {
 		positions.set(count - 1, std::numeric_limits<std::int32_t>::max());
 	}
@@ -33,17 +33,17 @@ struct BlockPositions {
 	void rotate_prev_pos() {
 		prev_pos = positions[count - 1];
 	}
-	void operator()(const blink_Position* blink_positions, int count_) {
+	void add(const blink_Position* blink_positions, int count_) {
 		prev_pos = positions[count - 1]; 
 		for (int i = 0; i < count_; i++) {
 			positions.set(i, blink_positions[i]);
 		}
-		count       = count_;
+		count = count_;
 	}
-	void operator()(const snd::transport::DSPVectorFramePosition& vec_positions, int count_) {
-		prev_pos    = positions[count - 1]; 
-		positions   = vec_positions;
-		count       = count_;
+	void add(const snd::transport::DSPVectorFramePosition& vec_positions, int count_) {
+		prev_pos  = positions[count - 1]; 
+		positions = vec_positions;
+		count     = count_;
 	}
 	snd::transport::FramePosition operator[](int index) const {
 		if (index == -1) {

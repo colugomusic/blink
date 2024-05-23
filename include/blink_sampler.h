@@ -52,6 +52,7 @@ typedef struct {
 	                          // if (buffer_id > (previous_buffer_id + 1)) )
 	                          // units should also reset themselves if they go at least one audio buffer
 	                          // without being processed.
+	blink_SR SR;
 	blink_SR song_rate;
 	const blink_SampleInfo* sample_info;
 	blink_Bool analysis_ready;
@@ -104,7 +105,7 @@ struct blink_SamplerUnitState {
 	blink_ChannelMode channel_mode;
 	const blink_WarpPoints* warp_points;
 	// May be NULL, in which case plugins should act as if all parameters are default.
-	const blink_ParamData* parameter_data;
+	const blink_ParamData* param_data;
 };
 
 typedef struct {
@@ -125,7 +126,7 @@ extern "C"
 
 	// output pointer is aligned on a 16-byte boundary
 	// output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
-	EXPORTED blink_Error blink_sampler_process(blink_UnitIndex unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
+	EXPORTED blink_Error blink_sampler_process(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
 
 	// Called by the host once per sample only if
 	// blink_SamplerInfo::requires_preprocessing is true

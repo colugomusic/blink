@@ -1,9 +1,8 @@
 #pragma once
 
 #include <algorithm>
-#include "blink/envelope_data.hpp"
-#include "blink/math.hpp"
-#include "blink/traverser.hpp"
+#include <blink/math.hpp>
+#include <blink/traverser.hpp>
 
 namespace blink {
 namespace transform {
@@ -60,8 +59,8 @@ auto make_pitch_point(const blink_RealPoint& p, float min, float max, float tran
 
 struct PitchUnit {
 	struct Config {
-		float transpose                 = 0.0f;
-		const blink_EnvelopeData* pitch = nullptr;
+		float transpose            = 0.0f;
+		const blink_EnvData* pitch = nullptr;
 	};
 	// We use this for both sample playback and waveform generation. This
 	// calculation needs to be fast, preferably O(n) or better.
@@ -127,7 +126,7 @@ struct Pitch {
 	struct Config {
 		uint64_t unit_state_id;
 		float transpose;
-		const blink_EnvelopeData* pitch; 
+		const blink_EnvData* pitch; 
 		struct {
 			BlockPositions* positions;
 			ml::DSPVector* derivatives;

@@ -2,7 +2,7 @@
 
 #include "bits.hpp"
 #include "block_positions.hpp"
-#include "envelope_data.hpp"
+#include "search.hpp"
 
 namespace blink {
 
@@ -31,10 +31,10 @@ inline auto stereo_pan(const ml::DSPVectorArray<2>& in, float pan, ml::DSPVector
 inline auto stereo_pan(
 	const ml::DSPVectorArray<2>& in,
 	float pan,
-	const EnvelopeIndexData& pan_envelope,
+	const EnvData& pan_envelope,
 	const BlockPositions& block_positions) -> ml::DSPVectorArray<2>
 {
-	return stereo_pan(in, pan, pan_envelope.search_vec(block_positions));
+	return stereo_pan(in, pan, blink::search::vec(pan_envelope, block_positions));
 }
 
 inline auto snap_pitch_to_scale(float pitch, std::int32_t scale) -> float
