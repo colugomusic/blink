@@ -9,42 +9,98 @@
 
 namespace blink {
 
+enum class StdEnv {
+	AMP,
+	DELAY_TIME,
+	DRY,
+	FEEDBACK,
+	FILTER_FREQUENCY,
+	FILTER_RESONANCE,
+	FORMANT,
+	MIX,
+	NOISE_AMOUNT,
+	NOISE_COLOR,
+	NOISE_WIDTH,
+	PAN,
+	PITCH,
+	SCALE,
+	SPEED,
+	WET,
+};
+
+enum class StdOption {
+	LOOP,
+	NOISE_MODE,
+	REVERSE_MODE,
+	REVERSE_TOGGLE,
+};
+
+enum class StdSliderInt {
+	SAMPLE_OFFSET,
+};
+
+enum class StdSliderReal {
+	AMP,
+	DELAY_TIME,
+	DRY,
+	FEEDBACK,
+	FILTER_FREQUENCY,
+	FILTER_RESONANCE,
+	FORMANT,
+	MIX,
+	NOISE_AMOUNT,
+	NOISE_COLOR,
+	NOISE_WIDTH,
+	PAN,
+	PITCH,
+	SCALE,
+	SPEED,
+	WET,
+};
+
 enum class PluginType { effect, sampler, synth };
 
-struct ApplyOffsetFn    { blink_ApplyOffsetFn fn = nullptr; };
-struct StepifyFn        { blink_Tweak_StepifyReal fn = nullptr; };
-struct BufferID         { blink_BufferID value = {0}; };
-struct ClampRange       { blink_Range value = {0}; };
-struct EnvFns           { blink_EnvFns value = {0}; };
-struct EnvIdx           { blink_EnvIdx value = {0}; };
-struct EnvSnapSettings  { blink_EnvSnapSettings value = {0, 1}; };
-struct LocalInstanceIdx { blink_InstanceIdx value = {0}; };
-struct LocalUnitIdx     { blink_UnitIdx value = {0}; };
-struct MaxSliderIdx     { int value = -1; };
-struct MinSliderIdx     { int value = -1; };
-struct OffsetEnvIdx     { blink_EnvIdx value = {0}; };
-struct OverrideEnvIdx   { blink_EnvIdx value = {0}; };
-struct ParamFlags       { blink_Flags value = {0}; };
-struct ParamIcon        { blink_StdIcon value = {blink_StdIcon_None}; };
-struct ParamStrings     { blink_ParamStrings value = {0}; };
-struct ParamTypeIdx     { size_t value = 0; };
-struct SR               { blink_SR value = {0}; };
-struct StringVec        { std::vector<std::string> value; };
-struct SubParams        { std::vector<blink_ParamIdx> value; };
-struct TweakerInt       { blink_TweakerInt value {0}; };
-struct TweakerReal      { blink_TweakerReal value {0}; };
-struct UnitVec          { std::vector<blink_UnitIdx> value; };
-struct ValueSliderIdx   { int value = -1; };
+struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
+struct StepifyFn          { blink_Tweak_StepifyReal fn = nullptr; };
+struct BufferID           { blink_BufferID value = {0}; };
+struct ClampRange         { blink_Range value = {0}; };
+struct EnvFns             { blink_EnvFns value = {0}; };
+struct EnvIdx             { blink_EnvIdx value = {0}; };
+struct EnvSnapSettings    { blink_EnvSnapSettings value = {0, 1}; };
+struct LocalInstanceIdx   { blink_InstanceIdx value = {0}; };
+struct LocalUnitIdx       { blink_UnitIdx value = {0}; };
+struct MaxSliderIdx       { std::optional<blink_SliderRealIdx> value; };
+struct MinSliderIdx       { std::optional<blink_SliderRealIdx> value; };
+struct OffsetEnvIdx       { EnvIdx value; };
+struct ParamEnvIdx        { size_t value = 0; };
+struct ParamOptionIdx     { size_t value = 0; };
+struct ParamSliderIntIdx  { size_t value = 0; };
+struct ParamSliderRealIdx { size_t value = 0; };
+struct OverrideEnvIdx     { EnvIdx value; };
+struct ParamFlags         { blink_Flags value = {0}; };
+struct ParamIcon          { blink_StdIcon value = {blink_StdIcon_None}; };
+struct ParamStrings       { blink_ParamStrings value = {0}; };
+struct ParamTypeIdx       { size_t value = 0; };
+struct PluginIdx          { blink_PluginIdx value = {0}; };
+struct SR                 { blink_SR value = {0}; };
+struct StringVec          { std::vector<std::string> value; };
+struct SubParams          { std::vector<blink_ParamIdx> value; };
+struct TweakerInt         { blink_TweakerInt value {0}; };
+struct TweakerReal        { blink_TweakerReal value {0}; };
+struct UnitVec            { std::vector<blink_UnitIdx> value; };
+struct ValueSliderIdx     { std::optional<blink_SliderRealIdx> value; };
 template <typename T> struct DefaultValue { T value = T(0); };
 
 struct InstanceProcess {
+	LocalInstanceIdx local_idx;
 	BufferID buffer_id;
 	int active_buffer_units = 0;
 };
 
 struct UnitProcess {
+	PluginIdx plugin_idx;
+	LocalUnitIdx local_idx;
 	blink_InstanceIdx instance_idx;
-	BlockPositions block_positions;
 	BufferID buffer_id;
 };
 
@@ -58,7 +114,7 @@ struct PluginInterface {
 	using instance_reset_fn = std::function<blink_Error(blink_InstanceIdx instance_idx, blink_SR SR)>;
 	using terminate_fn = std::function<blink_Error()>;
 	using unit_add_fn = std::function<blink_UnitIdx(blink_InstanceIdx instance_idx)>;
-	using unit_reset_fn = std::function<blink_Error(blink_InstanceIdx instance_idx, blink_SR SR)>;
+	using unit_reset_fn = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
 	get_error_string_fn  blink_get_error_string;
 	get_plugin_info_fn   blink_get_plugin_info;
 	get_resource_data_fn blink_get_resource_data;

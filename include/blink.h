@@ -239,17 +239,17 @@ typedef float      (*blink_SnapValue)(float value, float step_size, float snap_a
 typedef float      (*blink_Tweak_ConstrainReal)(float value);
 typedef float      (*blink_Tweak_DecrementReal)(float value, bool precise);
 typedef float      (*blink_Tweak_DragReal)(float value, int pixels, bool precise);
-typedef float      (*blink_Tweak_FromStringReal)(const char* string);
+typedef blink_Bool (*blink_Tweak_FromStringReal)(const char* string, float* out);
 typedef float      (*blink_Tweak_IncrementReal)(float value, bool precise);
 typedef float      (*blink_Tweak_StepifyReal)(float value);
 typedef int64_t    (*blink_Tweak_ConstrainInt)(int64_t value);
 typedef int64_t    (*blink_Tweak_DecrementInt)(int64_t value, bool precise);
 typedef int64_t    (*blink_Tweak_DragInt)(int64_t value, int pixels, bool precise);
-typedef int64_t    (*blink_Tweak_FromStringInt)(const char* string);
+typedef blink_Bool (*blink_Tweak_FromStringInt)(const char* string, int64_t* out);
 typedef int64_t    (*blink_Tweak_IncrementInt)(int64_t value, bool precise);
 typedef int64_t    (*blink_Tweak_StepifyInt)(int64_t value);
-typedef size_t     (*blink_Tweak_ToStringInt)(int64_t value, char buffer[BLINK_STRING_MAX]);
-typedef size_t     (*blink_Tweak_ToStringReal)(float value, char buffer[BLINK_STRING_MAX]);
+typedef void       (*blink_Tweak_ToStringInt)(int64_t value, char buffer[BLINK_STRING_MAX]);
+typedef void       (*blink_Tweak_ToStringReal)(float value, char buffer[BLINK_STRING_MAX]);
 
 typedef struct {
 	blink_Tweak_ToStringReal to_string;
@@ -280,17 +280,17 @@ typedef struct {
 } blink_EnvFns;
 
 typedef blink_EnvIdx        (*blink_host_add_env)();
-typedef blink_ParamIdx      (*blink_host_add_param_env)(blink_PluginIdx plugin_idx, blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_option)(blink_PluginIdx plugin_idx, blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(blink_PluginIdx plugin_idx, blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_env)(blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_option)(blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(blink_UUID uuid);
 typedef blink_SliderIntIdx  (*blink_host_add_slider_int)();
 typedef blink_SliderRealIdx (*blink_host_add_slider_real)();
 typedef float               (*blink_host_read_env_default_value)(blink_EnvIdx env_idx);
-typedef blink_EnvIdx        (*blink_host_read_param_env_env_idx)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
-typedef int64_t             (*blink_host_read_param_option_default_value)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
-typedef blink_SliderIntIdx  (*blink_host_read_param_slider_int_slider_idx)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
-typedef blink_SliderRealIdx (*blink_host_read_param_slider_real_slider_idx)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef blink_EnvIdx        (*blink_host_read_param_env_env_idx)(blink_ParamIdx param_idx);
+typedef int64_t             (*blink_host_read_param_option_default_value)(blink_ParamIdx param_idx);
+typedef blink_SliderIntIdx  (*blink_host_read_param_slider_int_slider_idx)(blink_ParamIdx param_idx);
+typedef blink_SliderRealIdx (*blink_host_read_param_slider_real_slider_idx)(blink_ParamIdx param_idx);
 typedef float               (*blink_host_read_slider_real_default_value)(blink_SliderRealIdx sld_idx);
 typedef int64_t             (*blink_host_read_slider_int_default_value)(blink_SliderIntIdx sld_idx);
 typedef blink_Error         (*blink_host_write_env_default_value)(blink_EnvIdx env_idx, float value);
@@ -299,12 +299,12 @@ typedef blink_Error         (*blink_host_write_env_max_slider)(blink_EnvIdx env_
 typedef blink_Error         (*blink_host_write_env_min_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef blink_Error         (*blink_host_write_env_snap_settings)(blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
 typedef blink_Error         (*blink_host_write_env_value_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef blink_Error         (*blink_host_write_param_add_flags)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamFlags flags);
-typedef blink_Error         (*blink_host_write_param_add_subparam)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
-typedef blink_Error         (*blink_host_write_param_delegate)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
-typedef blink_Error         (*blink_host_write_param_group)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString group_name);
-typedef blink_Error         (*blink_host_write_param_icon)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StdIcon icon);
-typedef blink_Error         (*blink_host_write_param_strings)(blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamStrings strings);
+typedef blink_Error         (*blink_host_write_param_add_flags)(blink_ParamIdx param_idx, blink_ParamFlags flags);
+typedef blink_Error         (*blink_host_write_param_add_subparam)(blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
+typedef blink_Error         (*blink_host_write_param_delegate)(blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
+typedef blink_Error         (*blink_host_write_param_group)(blink_ParamIdx param_idx, blink_StaticString group_name);
+typedef blink_Error         (*blink_host_write_param_icon)(blink_ParamIdx param_idx, blink_StdIcon icon);
+typedef blink_Error         (*blink_host_write_param_strings)(blink_ParamIdx param_idx, blink_ParamStrings strings);
 typedef blink_Error         (*blink_host_write_slider_int_default_value)(blink_SliderIntIdx sld_idx, int64_t value);
 typedef blink_Error         (*blink_host_write_slider_int_tweaker)(blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
 typedef blink_Error         (*blink_host_write_slider_real_default_value)(blink_SliderRealIdx sld_idx, float value);

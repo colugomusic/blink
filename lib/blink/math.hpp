@@ -10,20 +10,6 @@
 #pragma warning(pop)
 
 namespace blink {
-namespace const_math {
-
-template <class T> constexpr T tol{ T(0.001) };
-template <class T> constexpr T abs(const T x) { return x < T(0) ? -x : x; }
-template <class T> constexpr T square(const T x) { return x * x; }
-template <class T> constexpr T sqrt_helper(const T x, const T g)
-{
-	return abs(g - x / g) < tol<T> ? g : sqrt_helper(x, (g + x / g) / T(2));
-}
-
-template <class T> constexpr T sqrt(const T x) { return sqrt_helper(x, T(1)); }
-
-} // const_math
-
 namespace math {
 
 template <class T>
