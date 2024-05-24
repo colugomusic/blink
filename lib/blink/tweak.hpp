@@ -75,6 +75,16 @@ auto find_positive_number<int64_t>(std::string str) -> std::optional<int64_t> {
 	}
 }
 
+[[nodiscard]] inline
+auto from_string(const char* str, int64_t* out) -> blink_Bool {
+	auto value = tweak::find_number<int64_t>(str);
+	if (!value) {
+		return {false};
+	}
+	*out = *value;
+	return {true};
+}
+
 template <int Normal, int Precise> [[nodiscard]] constexpr
 auto increment(float v, bool precise) -> float {
 	return v + 1.0f / (precise ? Precise : Normal);
@@ -142,6 +152,20 @@ auto stepify(T value, T step) -> T {
 template <int N, class T> [[nodiscard]] constexpr
 auto stepify(T v) -> T {
 	return stepify(v, T(1) / N);
+}
+
+inline
+auto to_string(int64_t v, char buffer[BLINK_STRING_MAX]) -> void {
+	std::stringstream ss;
+	ss << v;
+	write_string(ss.str(), buffer);
+}
+
+inline
+auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
+	std::stringstream ss;
+	ss << v;
+	write_string(ss.str(), buffer);
 }
 
 namespace amp {
@@ -218,6 +242,19 @@ auto drag(float v, int amount, bool precise) -> float {
 	return math::convert::db_to_linear(tweak::drag<float, 1, 10>(math::convert::linear_to_db(v), amount / 5, precise));
 };
 
+[[nodiscard]] inline
+auto tweaker() -> blink_TweakerReal {
+	blink_TweakerReal out;
+	out.constrain   = tweak::amp::constrain;
+	out.decrement   = tweak::amp::decrement;
+	out.drag        = tweak::amp::drag;
+	out.from_string = tweak::amp::from_string;
+	out.increment   = tweak::amp::increment;
+	out.stepify     = tweak::amp::stepify;
+	out.to_string   = tweak::amp::to_string;
+	return out;
+}
+
 } // amp
 
 namespace percentage {
@@ -262,6 +299,18 @@ auto from_string(const char* str, float* out) -> blink_Bool {
 	return {true};
 };
 
+template <int MIN = 0, int MAX = 100> [[nodiscard]]
+auto tweaker() -> blink_TweakerReal {
+	blink_TweakerReal out;
+	out.constrain   = [](float v) { return std::clamp(v, float(MIN) / 100.0f, float(MAX) / 100.0f); };
+	out.decrement   = tweak::percentage::decrement;
+	out.drag        = tweak::percentage::drag;
+	out.from_string = tweak::percentage::from_string;
+	out.increment   = tweak::percentage::increment;
+	out.stepify     = tweak::percentage::stepify;
+	out.to_string   = tweak::percentage::to_string;
+	return out;
+}
 namespace bipolar {
 
 [[nodiscard]] inline
@@ -269,8 +318,51 @@ auto constrain(float v) -> float {
 	return std::clamp(v, -1.0f, 1.0f);
 };
 
+template <int MIN = 0, int MAX = 100> [[nodiscard]]
+auto tweaker() -> blink_TweakerReal {
+	blink_TweakerReal out;
+	out.constrain   = tweak::percentage::bipolar::constrain;
+	out.increment   = tweak::percentage::increment;
+	out.decrement   = tweak::percentage::decrement;
+	out.drag        = tweak::percentage::drag;
+	out.to_string   = tweak::percentage::to_string;
+	out.from_string = tweak::percentage::from_string;
+	return out;
+}
+
 } // bipolar
 } // namespace percentage
+
+namespace sample_offset {
+
+[[nodiscard]] inline
+auto decrement(int64_t v, bool precise) -> int64_t {
+	return v - 1;
+}
+
+[[nodiscard]] inline
+auto drag(int64_t v, int amount, bool precise) -> int64_t {
+	return v + (amount / (precise ? 50 : 1));
+}
+
+[[nodiscard]] inline
+auto increment(int64_t v, bool precise) -> int64_t {
+	return v + 1;
+}
+
+[[nodiscard]] inline
+auto tweaker() -> blink_TweakerInt {
+	blink_TweakerInt out;
+	out.constrain   = nullptr;
+	out.increment   = tweak::sample_offset::increment;
+	out.decrement   = tweak::sample_offset::decrement;
+	out.drag        = tweak::sample_offset::drag;
+	out.to_string   = blink::tweak::to_string;
+	out.from_string = blink::tweak::from_string;
+	return out;
+}
+
+} // sample_offset
 
 /*
 [[nodiscard]] inline

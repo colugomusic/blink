@@ -24,7 +24,9 @@ namespace ent {
 	>;
 	using Param = StaticEntityStore<
 		blink_UUID,
+		ManipDelegate,
 		ParamFlags,
+		ParamGroup,
 		ParamIcon,
 		ParamStrings,
 		ParamTypeIdx,
@@ -94,6 +96,26 @@ auto default_value(const Host& host, blink_EnvIdx env_idx) -> float {
 }
 
 [[nodiscard]] inline
+auto default_value(const Host& host, blink_SliderIntIdx sld_idx) -> int64_t {
+	return host.slider_int.get<DefaultValue<int64_t>>(sld_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto default_value(const Host& host, blink_SliderRealIdx sld_idx) -> float {
+	return host.slider_real.get<DefaultValue<float>>(sld_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto default_value(const Host& host, ParamOptionIdx option_idx) -> int64_t {
+	return host.param_option.get<DefaultValue<int64_t>>(option_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto env_idx(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx {
+	return host.param_env.get<EnvIdx>(param_env_idx.value).value;
+}
+
+[[nodiscard]] inline
 auto iface(const Host& host, blink_PluginIdx plugin_idx) -> const PluginInterface& {
 	return host.plugin.get<PluginInterface>(plugin_idx.value);
 }
@@ -101,6 +123,16 @@ auto iface(const Host& host, blink_PluginIdx plugin_idx) -> const PluginInterfac
 [[nodiscard]] inline
 auto process(Host* host, blink_InstanceIdx instance_idx) -> InstanceProcess& {
 	return host->instance.get<InstanceProcess>(instance_idx.value);
+}
+
+[[nodiscard]] inline
+auto slider_idx(const Host& host, ParamSliderIntIdx param_env_idx) -> blink_SliderIntIdx {
+	return host.param_slider_int.get<blink_SliderIntIdx>(param_env_idx.value);
+}
+
+[[nodiscard]] inline
+auto slider_idx(const Host& host, ParamSliderRealIdx param_env_idx) -> blink_SliderRealIdx {
+	return host.param_slider_real.get<blink_SliderRealIdx>(param_env_idx.value);
 }
 
 [[nodiscard]] inline
@@ -120,6 +152,11 @@ namespace write {
 inline
 auto add_flags(Host* host, blink_ParamIdx param_idx, int flags) -> void {
 	host->param.get<ParamFlags>(param_idx.value).value.value |= flags;
+}
+
+inline
+auto add_subparam(Host* host, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) -> void {
+	host->param.get<SubParams>(param_idx.value).value.push_back(subparam_idx);
 }
 
 inline
@@ -163,13 +200,28 @@ auto fns(Host* host, blink_EnvIdx env_idx, EnvFns fns) -> void {
 }
 
 inline
+auto group(Host* host, blink_ParamIdx param_idx, blink_StaticString group) -> void {
+	host->param.get<ParamGroup>(param_idx.value).value = group;
+}
+
+inline
 auto icon(Host* host, blink_ParamIdx param_idx, blink_StdIcon icon) -> void {
 	host->param.get<ParamIcon>(param_idx.value).value = icon;
 }
 
 inline
+auto manip_delegate(Host* host, blink_ParamIdx param_idx, blink_ParamIdx delegate) -> void {
+	host->param.get<ManipDelegate>(param_idx.value).value = delegate;
+}
+
+inline
 auto max_slider(Host* host, blink_EnvIdx env_idx, MaxSliderIdx value) -> void {
 	host->env.get<MaxSliderIdx>(env_idx.value) = value;
+}
+
+inline
+auto min_slider(Host* host, blink_EnvIdx env_idx, MinSliderIdx value) -> void {
+	host->env.get<MinSliderIdx>(env_idx.value) = value;
 }
 
 inline
@@ -208,13 +260,33 @@ auto short_name(Host* host, blink_ParamIdx param_idx, blink_ParamStrings strings
 }
 
 inline
+auto slider(Host* host, ParamSliderIntIdx sld_idx, blink_SliderIntIdx value) -> void {
+	host->param_slider_int.get<blink_SliderIntIdx>(sld_idx.value) = value;
+}
+
+inline
 auto slider(Host* host, ParamSliderRealIdx sld_idx, blink_SliderRealIdx value) -> void {
 	host->param_slider_real.get<blink_SliderRealIdx>(sld_idx.value) = value;
 }
 
 inline
+auto snap_settings(Host* host, blink_EnvIdx env_idx, EnvSnapSettings value) -> void {
+	host->env.get<EnvSnapSettings>(env_idx.value) = value;
+}
+
+inline
+auto strings(Host* host, blink_ParamIdx param_idx, blink_ParamStrings strings) -> void {
+	host->param.get<ParamStrings>(param_idx.value).value = strings;
+}
+
+inline
 auto strings(Host* host, ParamOptionIdx option_idx, StringVec strings) -> void {
 	host->param_option.get<StringVec>(option_idx.value) = std::move(strings);
+}
+
+inline
+auto tweaker(Host* host, blink_SliderIntIdx sld_idx, TweakerInt value) -> void {
+	host->slider_int.get<TweakerInt>(sld_idx.value) = value;
 }
 
 inline
@@ -271,14 +343,7 @@ auto empty_real(Host* host) -> blink_SliderRealIdx {
 [[nodiscard]] inline
 auto amp(Host* host) -> blink_SliderRealIdx {
 	const auto idx = add::slider::empty_real(host);
-	blink_TweakerReal tweaker;
-	tweaker.constrain   = tweak::amp::constrain;
-	tweaker.decrement   = tweak::amp::decrement;
-	tweaker.drag        = tweak::amp::drag;
-	tweaker.from_string = tweak::amp::from_string;
-	tweaker.increment   = tweak::amp::increment;
-	tweaker.stepify     = tweak::amp::stepify;
-	tweaker.to_string   = tweak::amp::to_string;
+	write::tweaker(host, idx, {tweak::amp::tweaker()});
 	write::default_value(host, idx, {1.0f});
 	return idx;
 }
@@ -286,33 +351,27 @@ auto amp(Host* host) -> blink_SliderRealIdx {
 template <int MIN = 0, int MAX = 100> [[nodiscard]]
 auto percentage(Host* host) -> blink_SliderRealIdx {
 	const auto idx = add::slider::empty_real(host);
-	blink_TweakerReal tweaker;
-	tweaker.constrain   = [](float v) { return std::clamp(v, float(MIN) / 100.0f, float(MAX) / 100.0f); };
-	tweaker.decrement   = tweak::percentage::decrement;
-	tweaker.drag        = tweak::percentage::drag;
-	tweaker.from_string = tweak::percentage::from_string;
-	tweaker.increment   = tweak::percentage::increment;
-	tweaker.stepify     = tweak::percentage::stepify;
-	tweaker.to_string   = tweak::percentage::to_string;
 	write::default_value(host, {idx}, {0});
-	write::tweaker(host, {idx}, {tweaker});
+	write::tweaker(host, {idx}, {tweak::percentage::tweaker<MIN, MAX>()});
 	return idx;
 }
 
 [[nodiscard]] inline
 auto percentage_bipolar(Host* host) -> blink_SliderRealIdx {
 	const auto idx = add::slider::empty_real(host);
-	blink_TweakerReal tweaker;
-	tweaker.constrain   = tweak::percentage::bipolar::constrain;
-	tweaker.increment   = tweak::percentage::increment;
-	tweaker.decrement   = tweak::percentage::decrement;
-	tweaker.drag        = tweak::percentage::drag;
-	tweaker.to_string   = tweak::percentage::to_string;
-	tweaker.from_string = tweak::percentage::from_string;
 	write::default_value(host, idx, {0.0f});
-	write::tweaker(host, idx, {tweaker});
+	write::tweaker(host, {idx}, {tweak::percentage::bipolar::tweaker()});
 	return idx;
 }
+
+[[nodiscard]] inline
+auto sample_offset(Host* host) -> blink_SliderIntIdx {
+	const auto idx = add::slider::empty_int(host);
+	write::default_value(host, idx, {0});
+	write::tweaker(host, idx, {tweak::sample_offset::tweaker()});
+	return idx;
+}
+
 } // slider
 
 namespace env {
@@ -391,6 +450,126 @@ auto amp(Host* host) -> blink_ParamIdx {
 	write::env(host, param_env_idx, add::env::amp(host));
 	write::offset_env(host, param_env_idx, {add::env::amp(host)});
 	write::override_env(host, param_env_idx, {add::env::amp(host)});
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto delay_time(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto dry(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto feedback(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto filter_frequency(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto filter_resonance(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto formant(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto mix(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto noise_amount(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto noise_color(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto noise_width(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto pan(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto pitch(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto scale(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto speed(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto wet(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_env_idx = add::param::env::empty(host);
+	// TODO:
 	return param_idx;
 }
 
@@ -524,11 +703,153 @@ auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
 
 } // option
 
+namespace slider_int {
+
+[[nodiscard]] inline
+auto empty(Host* host) -> ParamSliderIntIdx {
+	return {host->param_slider_int.push_back()};
+}
+
+[[nodiscard]] inline
+auto sample_offset(Host* host) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto sld_param_idx = add::param::slider_int::empty(host);
+	const auto sld_idx       = add::slider::sample_offset(host);
+	write::type_idx(host, param_idx, sld_param_idx);
+	write::icon(host, param_idx, blink_StdIcon_SampleOffset);
+	write::add_flags(host, param_idx, blink_ParamFlags_MovesDisplay);
+	write::name(host, param_idx, "Sample Offset");
+	write::slider(host, sld_param_idx, sld_idx);
+	write::uuid(host, param_idx, {BLINK_STD_UUID_SAMPLE_OFFSET});
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto std(Host* host, StdSliderInt std_sld) -> blink_ParamIdx {
+	switch (std_sld) {
+		case StdSliderInt::SAMPLE_OFFSET: { return sample_offset(host); }
+	}
+	assert (false);
+	return {0};
+}
+
+[[nodiscard]] inline
+auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_sld_idx = add::param::slider_int::empty(host);
+	const auto sld_idx       = add::slider::empty_int(host);
+	write::type_idx(host, param_idx, param_sld_idx);
+	write::slider(host, param_sld_idx, sld_idx);
+	write::uuid(host, param_idx, uuid);
+	return param_idx;
+}
+
+} // slider_int
 namespace slider_real {
 
 [[nodiscard]] inline
 auto empty(Host* host) -> ParamSliderRealIdx {
 	return {host->param_slider_real.push_back()};
+}
+
+inline
+auto amp(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto delay_time(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto dry(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto feedback(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto filter_frequency(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto filter_resonance(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto formant(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto mix(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto noise_amount(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto noise_color(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
 }
 
 inline
@@ -544,6 +865,91 @@ auto noise_width(Host* host) -> blink_ParamIdx {
 	write::slider(host, sld_idx, add::slider::percentage(host));
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host)});
 	write::override_env(host, sld_idx, {add::env::percentage(host)});
+	return param_idx;
+}
+
+inline
+auto pan(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto pitch(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto scale(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto speed(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+inline
+auto wet(Host* host) -> blink_ParamIdx {
+	const auto param_idx  = add::param::empty(host);
+	const auto sld_idx = add::param::slider_real::empty(host);
+	write::type_idx(host, param_idx, sld_idx);
+	write::uuid(host, param_idx, {/*TODO:*/});
+	// TODO:
+	return param_idx;
+}
+
+[[nodiscard]] inline
+auto std(Host* host, StdSliderReal std_sld) -> blink_ParamIdx {
+	switch (std_sld) {
+		case StdSliderReal::AMP:              { return amp(host); }
+		case StdSliderReal::DELAY_TIME:       { return delay_time(host); }
+		case StdSliderReal::DRY:              { return dry(host); }
+		case StdSliderReal::FEEDBACK:         { return feedback(host); }
+		case StdSliderReal::FILTER_FREQUENCY: { return filter_frequency(host); }
+		case StdSliderReal::FILTER_RESONANCE: { return filter_resonance(host); }
+		case StdSliderReal::FORMANT:          { return formant(host); }
+		case StdSliderReal::MIX:              { return mix(host); }
+		case StdSliderReal::NOISE_AMOUNT:     { return noise_amount(host); }
+		case StdSliderReal::NOISE_COLOR:      { return noise_color(host); }
+		case StdSliderReal::NOISE_WIDTH:      { return noise_width(host); }
+		case StdSliderReal::PAN:              { return pan(host); }
+		case StdSliderReal::PITCH:            { return pitch(host); }
+		case StdSliderReal::SCALE:            { return scale(host); }
+		case StdSliderReal::SPEED:            { return speed(host); }
+		case StdSliderReal::WET:              { return wet(host); }
+	}
+	assert (false);
+	return {0};
+}
+
+[[nodiscard]] inline
+auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
+	const auto param_idx     = add::param::empty(host);
+	const auto param_sld_idx = add::param::slider_real::empty(host);
+	const auto sld_idx       = add::slider::empty_real(host);
+	write::type_idx(host, param_idx, param_sld_idx);
+	write::slider(host, param_sld_idx, sld_idx);
+	write::uuid(host, param_idx, uuid);
 	return param_idx;
 }
 
@@ -688,6 +1094,79 @@ auto make_host_fns() -> blink_HostFns {
 	};
 	fns.read_env_default_value = [](blink_EnvIdx env_idx) {
 		return read::default_value(the_host_instance, env_idx);
+	};
+	fns.read_param_env_env_idx = [](blink_ParamIdx param_idx) {
+		const auto type_idx = read::type_idx(the_host_instance, param_idx);
+		const auto env_idx  = read::env_idx(the_host_instance, ParamEnvIdx{type_idx});
+		return env_idx;
+	};
+	fns.read_param_option_default_value = [](blink_ParamIdx param_idx) {
+		const auto type_idx = read::type_idx(the_host_instance, param_idx);
+		return read::default_value(the_host_instance, ParamOptionIdx{type_idx});
+	};
+	fns.read_param_slider_int_slider_idx = [](blink_ParamIdx param_idx) {
+		const auto type_idx   = read::type_idx(the_host_instance, param_idx);
+		const auto slider_idx = read::slider_idx(the_host_instance, ParamSliderIntIdx{type_idx});
+		return slider_idx;
+	};
+	fns.read_param_slider_real_slider_idx = [](blink_ParamIdx param_idx) {
+		const auto type_idx   = read::type_idx(the_host_instance, param_idx);
+		const auto slider_idx = read::slider_idx(the_host_instance, ParamSliderRealIdx{type_idx});
+		return slider_idx;
+	};
+	fns.read_slider_int_default_value = [](blink_SliderIntIdx slider_idx) {
+		return read::default_value(the_host_instance, slider_idx);
+	};
+	fns.read_slider_real_default_value = [](blink_SliderRealIdx slider_idx) {
+		return read::default_value(the_host_instance, slider_idx);
+	};
+	fns.write_env_default_value = [](blink_EnvIdx env_idx, float value) {
+		write::default_value(&the_host_instance, env_idx, {value});
+	};
+	fns.write_env_fns = [](blink_EnvIdx env_idx, blink_EnvFns fns) {
+		write::fns(&the_host_instance, env_idx, {fns});
+	};
+	fns.write_env_max_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::max_slider(&the_host_instance, env_idx, {slider_idx});
+	};
+	fns.write_env_min_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::min_slider(&the_host_instance, env_idx, {slider_idx});
+	};
+	fns.write_env_snap_settings = [](blink_EnvIdx env_idx, blink_EnvSnapSettings settings) {
+		write::snap_settings(&the_host_instance, env_idx, {settings});
+	};
+	fns.write_env_value_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::value_slider(&the_host_instance, env_idx, {slider_idx});
+	};
+	fns.write_param_add_flags = [](blink_ParamIdx param_idx, blink_ParamFlags flags) {
+		write::add_flags(&the_host_instance, param_idx, {flags});
+	};
+	fns.write_param_add_subparam = [](blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) {
+		write::add_subparam(&the_host_instance, param_idx, {subparam_idx});
+	};
+	fns.write_param_group = [](blink_ParamIdx param_idx, blink_StaticString group) {
+		write::group(&the_host_instance, param_idx, group);
+	};
+	fns.write_param_icon = [](blink_ParamIdx param_idx, blink_StdIcon icon) {
+		write::icon(&the_host_instance, param_idx, icon);
+	};
+	fns.write_param_manip_delegate = [](blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) {
+		write::manip_delegate(&the_host_instance, param_idx, {delegate_idx});
+	};
+	fns.write_param_strings = [](blink_ParamIdx param_idx, blink_ParamStrings strings) {
+		write::strings(&the_host_instance, param_idx, strings);
+	};
+	fns.write_slider_int_default_value = [](blink_SliderIntIdx slider_idx, int64_t value) {
+		write::default_value(&the_host_instance, slider_idx, {value});
+	};
+	fns.write_slider_int_tweaker = [](blink_SliderIntIdx slider_idx, blink_TweakerInt tweaker) {
+		write::tweaker(&the_host_instance, slider_idx, {tweaker});
+	};
+	fns.write_slider_real_default_value = [](blink_SliderRealIdx slider_idx, float value) {
+		write::default_value(&the_host_instance, slider_idx, {value});
+	};
+	fns.write_slider_real_tweaker = [](blink_SliderRealIdx slider_idx, blink_TweakerReal tweaker) {
+		write::tweaker(&the_host_instance, slider_idx, {tweaker});
 	};
 	return fns;
 }

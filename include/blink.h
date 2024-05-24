@@ -193,8 +193,6 @@ typedef struct {
 } blink_EnvSnapSettings;
 
 typedef struct {
-	// Null if the parameter does not belong to a group
-	blink_StaticString group_name; 
 	// Full parameter name e.g. "Noise Amount"
 	blink_StaticString name; 
 	// Short parameter name to use in the context of a group, e.g. "Amount". Can be null
@@ -293,22 +291,22 @@ typedef blink_SliderIntIdx  (*blink_host_read_param_slider_int_slider_idx)(blink
 typedef blink_SliderRealIdx (*blink_host_read_param_slider_real_slider_idx)(blink_ParamIdx param_idx);
 typedef float               (*blink_host_read_slider_real_default_value)(blink_SliderRealIdx sld_idx);
 typedef int64_t             (*blink_host_read_slider_int_default_value)(blink_SliderIntIdx sld_idx);
-typedef blink_Error         (*blink_host_write_env_default_value)(blink_EnvIdx env_idx, float value);
-typedef blink_Error         (*blink_host_write_env_fns)(blink_EnvIdx env_idx, blink_EnvFns fns);
-typedef blink_Error         (*blink_host_write_env_max_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef blink_Error         (*blink_host_write_env_min_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef blink_Error         (*blink_host_write_env_snap_settings)(blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
-typedef blink_Error         (*blink_host_write_env_value_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef blink_Error         (*blink_host_write_param_add_flags)(blink_ParamIdx param_idx, blink_ParamFlags flags);
-typedef blink_Error         (*blink_host_write_param_add_subparam)(blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
-typedef blink_Error         (*blink_host_write_param_delegate)(blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
-typedef blink_Error         (*blink_host_write_param_group)(blink_ParamIdx param_idx, blink_StaticString group_name);
-typedef blink_Error         (*blink_host_write_param_icon)(blink_ParamIdx param_idx, blink_StdIcon icon);
-typedef blink_Error         (*blink_host_write_param_strings)(blink_ParamIdx param_idx, blink_ParamStrings strings);
-typedef blink_Error         (*blink_host_write_slider_int_default_value)(blink_SliderIntIdx sld_idx, int64_t value);
-typedef blink_Error         (*blink_host_write_slider_int_tweaker)(blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
-typedef blink_Error         (*blink_host_write_slider_real_default_value)(blink_SliderRealIdx sld_idx, float value);
-typedef blink_Error         (*blink_host_write_slider_real_tweaker)(blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
+typedef void                (*blink_host_write_env_default_value)(blink_EnvIdx env_idx, float value);
+typedef void                (*blink_host_write_env_fns)(blink_EnvIdx env_idx, blink_EnvFns fns);
+typedef void                (*blink_host_write_env_max_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
+typedef void                (*blink_host_write_env_min_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
+typedef void                (*blink_host_write_env_snap_settings)(blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
+typedef void                (*blink_host_write_env_value_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
+typedef void                (*blink_host_write_param_add_flags)(blink_ParamIdx param_idx, blink_ParamFlags flags);
+typedef void                (*blink_host_write_param_add_subparam)(blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
+typedef void                (*blink_host_write_param_manip_delegate)(blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
+typedef void                (*blink_host_write_param_group)(blink_ParamIdx param_idx, blink_StaticString group_name);
+typedef void                (*blink_host_write_param_icon)(blink_ParamIdx param_idx, blink_StdIcon icon);
+typedef void                (*blink_host_write_param_strings)(blink_ParamIdx param_idx, blink_ParamStrings strings);
+typedef void                (*blink_host_write_slider_int_default_value)(blink_SliderIntIdx sld_idx, int64_t value);
+typedef void                (*blink_host_write_slider_int_tweaker)(blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
+typedef void                (*blink_host_write_slider_real_default_value)(blink_SliderRealIdx sld_idx, float value);
+typedef void                (*blink_host_write_slider_real_tweaker)(blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
 
 struct blink_HostFns {
 	blink_host_add_env                           add_env;
@@ -333,7 +331,7 @@ struct blink_HostFns {
 	blink_host_write_env_value_slider            write_env_value_slider;
 	blink_host_write_param_add_flags             write_param_add_flags;
 	blink_host_write_param_add_subparam          write_param_add_subparam;
-	blink_host_write_param_delegate	             write_param_delegate;
+	blink_host_write_param_manip_delegate        write_param_manip_delegate;
 	blink_host_write_param_group                 write_param_group;
 	blink_host_write_param_icon                  write_param_icon;
 	blink_host_write_param_strings               write_param_strings;
