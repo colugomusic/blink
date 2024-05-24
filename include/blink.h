@@ -233,20 +233,23 @@ typedef struct {
 	blink_Bool enable_warp_markers; 
 } blink_PluginInfo;
 
-typedef size_t  (*blink_Tweak_ToStringReal)(float value, char buffer[BLINK_STRING_MAX]);
-typedef float   (*blink_Tweak_FromStringReal)(const char* string);
-typedef float   (*blink_Tweak_ConstrainReal)(float value);
-typedef float   (*blink_Tweak_DragReal)(float value, int pixels, bool precise);
-typedef float   (*blink_Tweak_IncrementReal)(float value, bool precise);
-typedef float   (*blink_Tweak_DecrementReal)(float value, bool precise);
-typedef float   (*blink_Tweak_StepifyReal)(float value);
-typedef size_t  (*blink_Tweak_ToStringInt)(int64_t value, char buffer[BLINK_STRING_MAX]);
-typedef int64_t (*blink_Tweak_FromStringInt)(const char* string);
-typedef int64_t (*blink_Tweak_ConstrainInt)(int64_t value);
-typedef int64_t (*blink_Tweak_DragInt)(int64_t value, int pixels, bool precise);
-typedef int64_t (*blink_Tweak_IncrementInt)(int64_t value, bool precise);
-typedef int64_t (*blink_Tweak_DecrementInt)(int64_t value, bool precise);
-typedef int64_t (*blink_Tweak_StepifyInt)(int64_t value);
+typedef blink_Bool (*blink_GetGridLine)(int index, float* out);
+typedef blink_Bool (*blink_GetStepLine)(int index, float step_size, float* out);
+typedef float      (*blink_SnapValue)(float value, float step_size, float snap_amount);
+typedef float      (*blink_Tweak_ConstrainReal)(float value);
+typedef float      (*blink_Tweak_DecrementReal)(float value, bool precise);
+typedef float      (*blink_Tweak_DragReal)(float value, int pixels, bool precise);
+typedef float      (*blink_Tweak_FromStringReal)(const char* string);
+typedef float      (*blink_Tweak_IncrementReal)(float value, bool precise);
+typedef float      (*blink_Tweak_StepifyReal)(float value);
+typedef int64_t    (*blink_Tweak_ConstrainInt)(int64_t value);
+typedef int64_t    (*blink_Tweak_DecrementInt)(int64_t value, bool precise);
+typedef int64_t    (*blink_Tweak_DragInt)(int64_t value, int pixels, bool precise);
+typedef int64_t    (*blink_Tweak_FromStringInt)(const char* string);
+typedef int64_t    (*blink_Tweak_IncrementInt)(int64_t value, bool precise);
+typedef int64_t    (*blink_Tweak_StepifyInt)(int64_t value);
+typedef size_t     (*blink_Tweak_ToStringInt)(int64_t value, char buffer[BLINK_STRING_MAX]);
+typedef size_t     (*blink_Tweak_ToStringReal)(float value, char buffer[BLINK_STRING_MAX]);
 
 typedef struct {
 	blink_Tweak_ToStringReal to_string;
@@ -268,6 +271,14 @@ typedef struct {
 	blink_Tweak_StepifyInt stepify;
 } blink_TweakerInt;
 
+typedef struct {
+	blink_GetGridLine get_grid_line;
+	blink_GetStepLine get_step_line;
+	blink_SnapValue snap_value;
+	blink_Tweak_StepifyReal stepify;
+	blink_Tweak_ToStringReal to_string;
+} blink_EnvFns;
+
 typedef blink_EnvIdx        (*blink_host_add_env)();
 typedef blink_ParamIdx      (*blink_host_add_param_env)(blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_option)(blink_PluginIdx plugin_idx, blink_UUID uuid);
@@ -283,6 +294,7 @@ typedef blink_SliderRealIdx (*blink_host_read_param_slider_real_slider_idx)(blin
 typedef float               (*blink_host_read_slider_real_default_value)(blink_SliderRealIdx sld_idx);
 typedef int64_t             (*blink_host_read_slider_int_default_value)(blink_SliderIntIdx sld_idx);
 typedef blink_Error         (*blink_host_write_env_default_value)(blink_EnvIdx env_idx, float value);
+typedef blink_Error         (*blink_host_write_env_fns)(blink_EnvIdx env_idx, blink_EnvFns fns);
 typedef blink_Error         (*blink_host_write_env_max_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef blink_Error         (*blink_host_write_env_min_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef blink_Error         (*blink_host_write_env_snap_settings)(blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
@@ -314,6 +326,7 @@ struct blink_HostFns {
 	blink_host_read_slider_int_default_value     read_slider_int_default_value;
 	blink_host_read_slider_real_default_value    read_slider_real_default_value;
 	blink_host_write_env_default_value           write_env_default_value;
+	blink_host_write_env_fns                     write_env_fns;
 	blink_host_write_env_max_slider              write_env_max_slider;
 	blink_host_write_env_min_slider              write_env_min_slider;
 	blink_host_write_env_snap_settings           write_env_snap_settings;

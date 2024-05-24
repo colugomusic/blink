@@ -1,7 +1,9 @@
 #pragma once
 
 #include <blink.h>
+#include <blink_std.h>
 #include "entity_store.hpp"
+#include "tweak.hpp"
 #include "types.hpp"
 
 namespace blink {
@@ -51,6 +53,7 @@ namespace ent {
 	>;
 	using Env = StaticEntityStore<
 		DefaultValue<float>,
+		EnvFns,
 		EnvSnapSettings,
 		MaxSliderIdx,
 		MinSliderIdx,
@@ -89,6 +92,20 @@ auto type_idx(const Host& host, blink_ParamIdx param_idx) -> size_t {
 } // read
 
 namespace write {
+namespace env {
+
+inline
+auto default_value(Host* host, blink_EnvIdx env_idx, DefaultValue<float> value) -> void {
+	host->env.get<DefaultValue<float>>(env_idx.value) = value;
+}
+
+inline
+auto fns(Host* host, blink_EnvIdx env_idx, EnvFns fns) -> void {
+	host->env.get<EnvFns>(env_idx.value) = fns;
+}
+
+} // env
+
 namespace slider {
 
 inline
@@ -123,6 +140,11 @@ auto short_name(Host* host, blink_ParamIdx param_idx, std::string_view name) -> 
 inline
 auto short_name(Host* host, blink_ParamIdx param_idx, blink_ParamStrings strings) -> void {
 	host->param.get<ParamStrings>(param_idx.value).value = strings;
+}
+
+inline
+auto uuid(Host* host, blink_ParamIdx param_idx, blink_UUID uuid) -> void {
+	host->param.get<blink_UUID>(param_idx.value) = uuid;
 }
 
 namespace option {
@@ -171,55 +193,61 @@ auto get_tweaker(const Host& host, blink_SliderIntIdx sld_idx) -> const blink_Tw
 	return host.slider_int.get<blink_TweakerInt>(sld_idx.value);
 }
 
-[[nodiscard]] inline
-auto from_string(const Host& host, blink_SliderIntIdx sld_idx, std::string_view str, int64_t* out) -> blink_Bool {
-	if (const auto value = tweak::from_string(get_tweaker(plugin, sld_idx), str.data())) {
-		*out = value.value();
-		return {true};
-	}
-	return {false};
-}
-
-[[nodiscard]] inline
-auto to_string(const Host& host, blink_SliderIntIdx sld_idx, int64_t value) -> blink_TempString {
-	static auto str = tweak::to_string(get_tweaker(plugin, sld_idx), value);
-	return {str.c_str()};
-}
-
-[[nodiscard]] inline 
-auto constrain(const Host& host, blink_SliderIntIdx sld_idx, int64_t value) -> int64_t {
-	return tweak::constrain(get_tweaker(plugin, sld_idx), value);
-}
-
-[[nodiscard]] inline 
-auto decrement(const Host& host, blink_SliderIntIdx sld_idx, int64_t value, blink_Bool precise) -> int64_t {
-	return tweak::decrement(get_tweaker(plugin, sld_idx), value, precise.value > 0);
-}
-
-[[nodiscard]] inline 
-auto drag(const Host& host, blink_SliderIntIdx sld_idx, int64_t start_value, int64_t amount, blink_Bool precise) -> int64_t {
-	return tweak::drag(get_tweaker(plugin, sld_idx), start_value, amount, precise.value > 0);
-}
-
-[[nodiscard]] inline 
-auto get_default_value(const Host& host, blink_SliderIntIdx sld_idx) -> int64_t {
-	return host.slider_int.get<DefaultValue<int64_t>>(sld_idx.value).value;
-}
-
-[[nodiscard]] inline 
-auto increment(const Host& host, blink_SliderIntIdx sld_idx, int64_t value, blink_Bool precise) -> int64_t {
-	return tweak::increment(get_tweaker(plugin, sld_idx), value, precise.value > 0);
-}
-
 namespace add {
+
+namespace slider {
+
+[[nodiscard]] inline
+auto basic_int(Host* host) -> blink_SliderIntIdx {
+	return {host->slider_int.push_back()};
+}
+
+[[nodiscard]] inline
+auto basic_real(Host* host) -> blink_SliderRealIdx {
+	return {host->slider_real.push_back()};
+}
+
+template <int MIN = 0, int MAX = 100> [[nodiscard]]
+auto percentage(Host* host) -> blink_SliderRealIdx {
+	const auto idx = blink_SliderRealIdx{host->slider_real.push_back()};
+	// TODO:
+	tweak::Spec<float> tweaker;
+	tweaker.constrain   = [](float v) { return std::clamp(v, float(MIN) / 100.0f, float(MAX) / 100.0f); };
+	tweaker.decrement   = tweak::std::percentage::decrement;
+	tweaker.drag        = tweak::std::percentage::drag;
+	tweaker.from_string = tweak::std::percentage::from_string;
+	tweaker.increment   = tweak::std::percentage::increment;
+	tweaker.stepify     = tweak::std::percentage::stepify;
+	tweaker.to_string   = tweak::std::percentage::to_string;
+	write::slider::default_value(plugin, {idx}, {0});
+	write::slider::tweaker(plugin, {idx}, std::move(tweaker));
+	return {idx};
+}
+
+} // slider
 
 namespace env {
 
+[[nodiscard]] inline
+auto basic(Host* host) -> blink_EnvIdx {
+	return {host->env.push_back()};
+}
+
 template <int MIN = 0, int MAX = 100> [[nodiscard]]
-auto percentage(Host* host) -> blink_EnvelopeIdx {
-	const auto idx = host->env.push_back();
-	write::env::default_value(plugin, idx, {0.0f});
-	write::env::searcher(plugin, idx, make_default_real_searcher({0.0f});
+auto percentage(Host* host) -> blink_EnvIdx {
+	const auto idx = blink_EnvIdx{host->env.push_back()};
+	EnvFns fns;
+	fns.value.stepify   = tweak::percentage::stepify;
+	fns.value.to_string = tweak::percentage::to_string;
+	write::env::default_value(host, idx, {0.0f});
+	write::env::fns(host, idx, fns);
+	write::env::value_slider(host, idx, add::slider::percentage_value<MIN, MAX>(host));
+	const auto max_slider = add::slider::basic_real();
+	const auto min_slider = add::slider::basic_real();
+	write::slider::default_value(host, max_slider, {float(MAX) / 100.0f});
+	write::slider::default_value(host, min_slider, {float(MIN) / 100.0f});
+	write::env::max_slider(host, idx, max_slider);
+	write::env::min_slider(host, idx, min_slider);
 	// TODO:
 	//write::env::set_max_slider(plugin, idx, add::slider::
 		//DefaultValue<float>,
@@ -241,80 +269,46 @@ auto percentage(Host* host) -> blink_EnvelopeIdx {
 
     return out;
 }
+
 } // env
-
-namespace slider {
-
-template <int MIN = 0, int MAX = 100> [[nodiscard]]
-auto percentage(Host* host) -> blink_SliderRealIdx {
-	const auto idx = host->slider_real.push_back();
-	tweak::Spec<float> tweaker;
-	tweaker.constrain   = [](float v) { return std::clamp(v, float(MIN) / 100.0f, float(MAX) / 100.0f); };
-	tweaker.decrement   = tweak::std::percentage::decrement;
-	tweaker.drag        = tweak::std::percentage::drag;
-	tweaker.from_string = tweak::std::percentage::from_string;
-	tweaker.increment   = tweak::std::percentage::increment;
-	tweaker.stepify     = tweak::std::percentage::stepify;
-	tweaker.to_string   = tweak::std::percentage::to_string;
-	write::slider::default_value(plugin, {idx}, {0});
-	write::slider::searcher(plugin, {idx}, make_default_real_searcher({0}));
-	write::slider::tweaker(plugin, {idx}, std::move(tweaker));
-	return {idx};
-}
-
-} // slider
 
 namespace param {
 
 [[nodiscard]] inline
-auto push_back(Host* host, blink_UUID uuid, bool custom) -> blink_ParamIdx {
+auto push_back(Host* host, blink_UUID uuid) -> blink_ParamIdx {
 	const auto param_idx = host->param.push_back();
-	host->param.get<blink_UUID>(param_idx) = uuid;
-	if (custom) {
-		const auto custom_idx = host->param.push_back();
-		host->param.get<ParamCustomIdx>(param_idx).value = custom_idx;
-	}
+	write::param::uuid(host, {param_idx}, uuid);
 	return {param_idx};
 }
 
 namespace option {
 
 inline
-auto push_back(Host* host, blink_UUID uuid, bool custom) -> blink_ParamIdx {
-	const auto param_idx = add::param::push_back(plugin, uuid, custom);
-	if (custom) {
-		const auto custom_idx       = read::custom_idx(*plugin, param_idx).value.value();
-		const auto param_option_idx = host->param_option.push_back();
-		host->param.get<ParamTypeIdx>(custom_idx).value = param_option_idx;
-	}
+auto push_back(Host* host, blink_UUID uuid) -> blink_ParamIdx {
+	const auto param_idx        = add::param::push_back(host, uuid);
+	const auto param_option_idx = host->param_option.push_back();
+	host->param.get<ParamTypeIdx>(param_idx.value).value = param_option_idx;
 	return param_idx;
 }
 
 inline
-auto noise_mode(Host* host, bool custom) -> blink_ParamIdx {
-	const auto param_idx = add::param::push_back(plugin, {BLINK_STD_UUID_NOISE_MODE}, custom);
-	if (custom) {
-		const auto custom_idx = read::custom_idx(*plugin, param_idx).value.value();
-		const auto type_idx   = read::type_idx(*plugin, custom_idx);
-		write::param::add_flags(plugin, custom_idx, blink_ParamFlags_CanManipulate);
-		write::param::name(plugin, custom_idx, "Noise Mode");
-		write::param::option::strings(plugin, type_idx, {{"Multiply", "Mix"}});
-	}
+auto noise_mode(Host* host) -> blink_ParamIdx {
+	const auto param_idx = add::param::push_back(host, {BLINK_STD_UUID_NOISE_MODE});
+	const auto type_idx  = read::type_idx(*host, param_idx);
+	write::param::add_flags(host, param_idx, blink_ParamFlags_CanManipulate);
+	write::param::name(host, param_idx, "Noise Mode");
+	write::param::option::strings(host, type_idx, {{"Multiply", "Mix"}});
 	return param_idx;
 }
 
 inline
-auto reverse(Host* host, bool custom) -> blink_ParamIdx {
-	const auto param_idx = add::param::push_back(plugin, {BLINK_STD_UUID_REVERSE_MODE}, custom);
-	if (custom) {
-		const auto custom_idx = read::custom_idx(*plugin, param_idx).value.value();
-		const auto type_idx   = read::type_idx(*plugin, custom_idx);
-		write::param::name(plugin, custom_idx, "Reverse");
-		write::param::add_flags(plugin, custom_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_Hidden | blink_ParamFlags_MovesDisplay);
-		write::param::option::default_value(plugin, type_idx, {-1});
-		write::param::option::searcher(plugin, type_idx, make_default_int_searcher({-1}));
-		write::param::option::strings(plugin, type_idx, {{"Mirror", "Tape", "Slip"}});
-	}
+auto reverse(Host* host) -> blink_ParamIdx {
+	const auto param_idx = add::param::push_back(host, {BLINK_STD_UUID_REVERSE_MODE});
+	const auto type_idx   = read::type_idx(*host, param_idx);
+	write::param::name(host, param_idx, "Reverse");
+	write::param::add_flags(host, param_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_Hidden | blink_ParamFlags_MovesDisplay);
+	write::param::option::default_value(host, type_idx, {-1});
+	write::param::option::strings(host, type_idx, {{"Mirror", "Tape", "Slip"}});
 	return param_idx;
 }
 
@@ -323,19 +317,16 @@ auto reverse(Host* host, bool custom) -> blink_ParamIdx {
 namespace slider_real {
 
 inline
-auto noise_width(Host* host, bool custom) -> blink_ParamIdx {
-	const auto param_idx = add::param::push_back(plugin, {BLINK_STD_UUID_NOISE_WIDTH}, custom);
-	if (custom) {
-		const auto custom_idx = read::custom_idx(*plugin, param_idx).value.value();
-		const auto type_idx   = read::type_idx(*plugin, custom_idx);
-		write::param::add_flags(plugin, custom_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-		write::param::name(plugin, custom_idx, "Noise Width");
-		write::param::short_name(plugin, custom_idx, "Width");
-		write::param::slider_real::clamp_range(plugin, type_idx, {{0.0f, 1.0f}});
-		write::param::slider_real::slider(plugin, type_idx, add::slider::percentage(plugin));
-		write::param::slider_real::offset_env(plugin, type_idx, add::env::percentage_bipolar(plugin));
-		write::param::slider_real::override_env(plugin, type_idx, add::env::percentage(plugin));
-	}
+auto noise_width(Host* host) -> blink_ParamIdx {
+	const auto param_idx = add::param::push_back(host, {BLINK_STD_UUID_NOISE_WIDTH});
+	const auto type_idx   = read::type_idx(*host, param_idx);
+	write::param::add_flags(host, param_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
+	write::param::name(host, param_idx, "Noise Width");
+	write::param::short_name(host, param_idx, "Width");
+	write::param::slider_real::clamp_range(host, type_idx, {{0.0f, 1.0f}});
+	write::param::slider_real::slider(host, type_idx, add::slider::percentage(host));
+	write::param::slider_real::offset_env(host, type_idx, add::env::percentage_bipolar(host));
+	write::param::slider_real::override_env(host, type_idx, add::env::percentage(host));
 	return param_idx;
 }
 

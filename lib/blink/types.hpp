@@ -12,8 +12,10 @@ namespace blink {
 enum class PluginType { effect, sampler, synth };
 
 struct ApplyOffsetFn    { blink_ApplyOffsetFn fn = nullptr; };
+struct StepifyFn        { blink_Tweak_StepifyReal fn = nullptr; };
 struct BufferID         { blink_BufferID value = {0}; };
 struct ClampRange       { blink_Range value = {0}; };
+struct EnvFns           { blink_EnvFns value = {0}; };
 struct EnvIdx           { blink_EnvIdx value = {0}; };
 struct EnvSnapSettings  { blink_EnvSnapSettings value = {0, 1}; };
 struct LocalInstanceIdx { blink_InstanceIdx value = {0}; };
@@ -24,7 +26,7 @@ struct OffsetEnvIdx     { blink_EnvIdx value = {0}; };
 struct OverrideEnvIdx   { blink_EnvIdx value = {0}; };
 struct ParamFlags       { blink_Flags value = {0}; };
 struct ParamIcon        { blink_StdIcon value = {blink_StdIcon_None}; };
-struct ParamStrings     { blink_ParamStrings value = {{0}, {0}, {0}, {0}}; };
+struct ParamStrings     { blink_ParamStrings value = {0}; };
 struct ParamTypeIdx     { size_t value = 0; };
 struct SR               { blink_SR value = {0}; };
 struct StringVec        { std::vector<std::string> value; };
