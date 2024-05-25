@@ -18,7 +18,7 @@ typedef uint32_t blink_Scale;
 typedef float (*blink_ApplyOffsetFn)(float, float);
 
 typedef struct {      int8_t value; } blink_Bool;
-typedef struct {     int64_t value; } blink_BufferID;
+typedef struct {    uint64_t value; } blink_BufferID;
 typedef struct {      size_t value; } blink_EnvIdx;
 typedef struct {      size_t value; } blink_InstanceIdx;
 typedef struct {      size_t value; } blink_SliderIntIdx;
@@ -267,46 +267,44 @@ typedef struct {
 	blink_Tweak_ToStringReal to_string;
 } blink_EnvFns;
 
-typedef blink_EnvIdx        (*blink_host_add_env)();
-typedef blink_ParamIdx      (*blink_host_add_param_env)(blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_option)(blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(blink_UUID uuid);
-typedef blink_SliderIntIdx  (*blink_host_add_slider_int)();
-typedef blink_SliderRealIdx (*blink_host_add_slider_real)();
-typedef float               (*blink_host_read_env_default_value)(blink_EnvIdx env_idx); // TODO: get rid
-typedef blink_EnvIdx        (*blink_host_read_param_env_env_idx)(blink_ParamIdx param_idx); // TODO: get rid
-typedef int64_t             (*blink_host_read_param_option_default_value)(blink_ParamIdx param_idx); // TODO: get rid
-typedef blink_SliderIntIdx  (*blink_host_read_param_slider_int_slider_idx)(blink_ParamIdx param_idx); // TODO: get rid
-typedef blink_SliderRealIdx (*blink_host_read_param_slider_real_slider_idx)(blink_ParamIdx param_idx); // TODO: get rid
-typedef float               (*blink_host_read_slider_real_default_value)(blink_SliderRealIdx sld_idx); // TODO: get rid
-typedef int64_t             (*blink_host_read_slider_int_default_value)(blink_SliderIntIdx sld_idx); // TODO: get rid
-typedef void                (*blink_host_write_env_default_value)(blink_EnvIdx env_idx, float value);
-typedef void                (*blink_host_write_env_fns)(blink_EnvIdx env_idx, blink_EnvFns fns);
-typedef void                (*blink_host_write_env_max_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef void                (*blink_host_write_env_min_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef void                (*blink_host_write_env_snap_settings)(blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
-typedef void                (*blink_host_write_env_value_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef void                (*blink_host_write_param_add_flags)(blink_ParamIdx param_idx, int flags);
-typedef void                (*blink_host_write_param_add_subparam)(blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
-typedef void                (*blink_host_write_param_env_clamp_range)(blink_ParamIdx param_idx, blink_Range range);
-typedef void                (*blink_host_write_param_env_env_idx)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
-typedef void                (*blink_host_write_param_env_offset_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
-typedef void                (*blink_host_write_param_env_override_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
-typedef void                (*blink_host_write_param_group)(blink_ParamIdx param_idx, blink_StaticString group_name);
-typedef void                (*blink_host_write_param_icon)(blink_ParamIdx param_idx, blink_StdIcon icon);
-typedef void                (*blink_host_write_param_long_desc)(blink_ParamIdx param_idx, blink_StaticString value);
-typedef void                (*blink_host_write_param_manip_delegate)(blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
-typedef void                (*blink_host_write_param_name)(blink_ParamIdx param_idx, blink_StaticString value);
-typedef void                (*blink_host_write_param_short_name)(blink_ParamIdx param_idx, blink_StaticString value);
-typedef void                (*blink_host_write_param_slider_real_offset_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
-typedef void                (*blink_host_write_param_slider_real_override_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
-typedef void                (*blink_host_write_slider_int_default_value)(blink_SliderIntIdx sld_idx, int64_t value);
-typedef void                (*blink_host_write_slider_int_tweaker)(blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
-typedef void                (*blink_host_write_slider_real_default_value)(blink_SliderRealIdx sld_idx, float value);
-typedef void                (*blink_host_write_slider_real_tweaker)(blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
+typedef blink_EnvIdx        (*blink_host_add_env)(void*);
+typedef blink_ParamIdx      (*blink_host_add_param_env)(void*, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_option)(void*, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(void*, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(void*, blink_UUID uuid);
+typedef blink_SliderIntIdx  (*blink_host_add_slider_int)(void*);
+typedef blink_SliderRealIdx (*blink_host_add_slider_real)(void*);
+typedef float               (*blink_host_read_param_env_default_value)(void*, blink_ParamIdx param_idx);
+typedef int64_t             (*blink_host_read_param_option_default_value)(void*, blink_ParamIdx param_idx);
+typedef float               (*blink_host_read_param_slider_real_default_value)(void*, blink_ParamIdx param_idx);
+typedef int64_t             (*blink_host_read_param_slider_int_default_value)(void*, blink_ParamIdx param_idx);
+typedef void                (*blink_host_write_env_default_value)(void*, blink_EnvIdx env_idx, float value);
+typedef void                (*blink_host_write_env_fns)(void*, blink_EnvIdx env_idx, blink_EnvFns fns);
+typedef void                (*blink_host_write_env_max_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
+typedef void                (*blink_host_write_env_min_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
+typedef void                (*blink_host_write_env_snap_settings)(void*, blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
+typedef void                (*blink_host_write_env_value_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
+typedef void                (*blink_host_write_param_add_flags)(void*, blink_ParamIdx param_idx, int flags);
+typedef void                (*blink_host_write_param_add_subparam)(void*, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
+typedef void                (*blink_host_write_param_env_clamp_range)(void*, blink_ParamIdx param_idx, blink_Range range);
+typedef void                (*blink_host_write_param_env_env_idx)(void*, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_env_offset_env)(void*, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_env_override_env)(void*, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_group)(void*, blink_ParamIdx param_idx, blink_StaticString group_name);
+typedef void                (*blink_host_write_param_icon)(void*, blink_ParamIdx param_idx, blink_StdIcon icon);
+typedef void                (*blink_host_write_param_long_desc)(void*, blink_ParamIdx param_idx, blink_StaticString value);
+typedef void                (*blink_host_write_param_manip_delegate)(void*, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
+typedef void                (*blink_host_write_param_name)(void*, blink_ParamIdx param_idx, blink_StaticString value);
+typedef void                (*blink_host_write_param_short_name)(void*, blink_ParamIdx param_idx, blink_StaticString value);
+typedef void                (*blink_host_write_param_slider_real_offset_env)(void*, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_slider_real_override_env)(void*, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_slider_int_default_value)(void*, blink_SliderIntIdx sld_idx, int64_t value);
+typedef void                (*blink_host_write_slider_int_tweaker)(void*, blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
+typedef void                (*blink_host_write_slider_real_default_value)(void*, blink_SliderRealIdx sld_idx, float value);
+typedef void                (*blink_host_write_slider_real_tweaker)(void*, blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
 
 struct blink_HostFns {
+	void* usr;
 	blink_host_add_env                              add_env;
 	blink_host_add_param_env                        add_param_env;
 	blink_host_add_param_option                     add_param_option;
@@ -314,13 +312,10 @@ struct blink_HostFns {
 	blink_host_add_param_slider_real                add_param_slider_real;
 	blink_host_add_slider_int                       add_slider_int;
 	blink_host_add_slider_real                      add_slider_real;
-	blink_host_read_env_default_value               read_env_default_value;
-	blink_host_read_param_env_env_idx               read_param_env_env_idx;
+	blink_host_read_param_env_default_value         read_param_env_default_value;
 	blink_host_read_param_option_default_value      read_param_option_default_value;
-	blink_host_read_param_slider_int_slider_idx     read_param_slider_int_slider_idx;
-	blink_host_read_param_slider_real_slider_idx    read_param_slider_real_slider_idx;
-	blink_host_read_slider_int_default_value        read_slider_int_default_value;
-	blink_host_read_slider_real_default_value       read_slider_real_default_value;
+	blink_host_read_param_slider_int_default_value  read_param_slider_int_default_value;
+	blink_host_read_param_slider_real_default_value read_param_slider_real_default_value;
 	blink_host_write_env_default_value              write_env_default_value;
 	blink_host_write_env_fns                        write_env_fns;
 	blink_host_write_env_max_slider                 write_env_max_slider;
@@ -442,7 +437,6 @@ typedef struct {
 
 typedef struct {
 	blink_BufferID buffer_id;
-	blink_SR SR;
 	blink_SR song_rate;
 	blink_Position* positions;
 } blink_UnitBuffer;
@@ -506,10 +500,12 @@ extern "C"
 	EXPORTED blink_Error              blink_init(blink_PluginIdx plugin_idx, blink_HostFns host);
 	EXPORTED blink_Error              blink_instance_destroy(blink_InstanceIdx instance_idx);
 	EXPORTED blink_InstanceIdx        blink_instance_make();
-	EXPORTED blink_Error              blink_instance_reset(blink_InstanceIdx instance_idx, blink_SR SR);
+	EXPORTED blink_Error              blink_instance_reset(blink_InstanceIdx instance_idx);
+	EXPORTED blink_Error              blink_instance_stream_init(blink_InstanceIdx instance_idx, blink_SR SR);
 	EXPORTED blink_Error              blink_terminate();
 	EXPORTED blink_UnitIdx            blink_unit_add(blink_InstanceIdx instance_idx);
-	EXPORTED blink_Error              blink_unit_reset(blink_InstanceIdx instance_idx, blink_SR SR);
+	EXPORTED blink_Error              blink_unit_reset(blink_UnitIdx unit_idx);
+	EXPORTED blink_Error              blink_unit_stream_init(blink_UnitIdx unit_idx, blink_SR SR);
 	EXPORTED blink_SamplerInfo        blink_get_sampler_info();
 
 	// EFFECT PLUGIN INTERFACE ----------------------------------------

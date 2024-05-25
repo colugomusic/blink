@@ -260,7 +260,7 @@ auto make_real_value(const blink_RealPoints& points, float default_value) -> flo
 [[nodiscard]] inline
 auto make_env_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> EnvData {
 	EnvData out;
-	out.default_value = plugin.host.read_env_default_value(plugin.host.read_param_env_env_idx(param_idx));
+	out.default_value = plugin.host.read_param_env_default_value(plugin.host.usr, param_idx);
 	if (param_data) {
 		out.data = &param_data->envelope;
 		out.value = make_real_value(out.data->points, out.default_value);
@@ -275,7 +275,7 @@ auto make_env_data(const Plugin& plugin, const blink_ParamData* param_data, blin
 [[nodiscard]] inline
 auto make_option_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> OptionData {
 	OptionData out;
-	out.default_value = plugin.host.read_param_option_default_value(param_idx);
+	out.default_value = plugin.host.read_param_option_default_value(plugin.host.usr, param_idx);
 	if (param_data) {
 		out.data = &param_data->option;
 		out.value = make_int_value(out.data->points, out.default_value);
@@ -290,7 +290,7 @@ auto make_option_data(const Plugin& plugin, const blink_ParamData* param_data, b
 [[nodiscard]] inline
 auto make_slider_int_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> SliderIntData {
 	SliderIntData out;
-	out.default_value = plugin.host.read_slider_int_default_value(plugin.host.read_param_slider_int_slider_idx(param_idx));
+	out.default_value = plugin.host.read_param_slider_int_default_value(plugin.host.usr, param_idx);
 	if (param_data) {
 		out.data = &param_data->slider_int;
 		out.value = make_int_value(out.data->points, out.default_value);
@@ -305,7 +305,7 @@ auto make_slider_int_data(const Plugin& plugin, const blink_ParamData* param_dat
 [[nodiscard]] inline
 auto make_slider_real_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> SliderRealData {
 	SliderRealData out;
-	out.default_value = plugin.host.read_slider_real_default_value(plugin.host.read_param_slider_real_slider_idx(param_idx));
+	out.default_value = plugin.host.read_param_slider_real_default_value(plugin.host.usr, param_idx);
 	if (param_data) {
 		out.data = &param_data->slider_real;
 		out.value = make_real_value(out.data->points, out.default_value);

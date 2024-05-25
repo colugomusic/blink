@@ -10,7 +10,7 @@ template <typename... Ts>
 struct StaticEntityStore {
 	auto push_back() -> size_t {
 		const auto index = size();
-		(std::get<std::vector<T>>(data_).emplace_back(), ...);
+		(std::get<std::vector<Ts>>(data_).emplace_back(), ...);
 		return index;
 	}
 	auto size() const -> size_t { return std::get<0>(data_).size(); }

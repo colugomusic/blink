@@ -18,7 +18,8 @@ namespace ent {
 		PluginInterface
 	>;
 	using Instance = DynamicEntityStore<
-		InstanceProcess
+		InstanceProcess,
+		UnitVec
 	>;
 	using Unit = DynamicEntityStore<
 		UnitProcess
@@ -86,9 +87,6 @@ struct Host {
 	blink_HostFns fns;
 };
 
-// Define this somewhere in your host application.
-extern Host the_host_instance;
-
 namespace read {
 
 [[nodiscard]] inline
@@ -124,6 +122,11 @@ auto iface(const Host& host, blink_PluginIdx plugin_idx) -> const PluginInterfac
 [[nodiscard]] inline
 auto process(Host* host, blink_InstanceIdx instance_idx) -> InstanceProcess& {
 	return host->instance.get<InstanceProcess>(instance_idx.value);
+}
+
+[[nodiscard]] inline
+auto type(const Host& host, blink_PluginIdx plugin_idx) -> PluginType {
+	return host.plugin.get<PluginType>(plugin_idx.value);
 }
 
 [[nodiscard]] inline
@@ -242,7 +245,7 @@ auto offset_env(Host* host, ParamSliderRealIdx sld_idx, OffsetEnvIdx value) -> v
 
 inline
 auto override_env(Host* host, ParamEnvIdx env_idx, OverrideEnvIdx value) -> void {
-	host->env.get<OverrideEnvIdx>(env_idx.value) = value;
+	host->param_env.get<OverrideEnvIdx>(env_idx.value) = value;
 }
 
 inline
@@ -916,13 +919,13 @@ auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
 } // add
 
 inline
-auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_InstanceIdx instance_idx, blink_BufferID buffer_id, blink_SR SR) -> void {
+auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_InstanceIdx instance_idx, blink_BufferID buffer_id) -> void {
 	auto& process = read::process(host, instance_idx);
 	if (buffer_id.value > process.buffer_id.value.value) {
 		if (buffer_id.value > process.buffer_id.value.value + 1 || process.active_buffer_units == 0) {
 			// instance is reset at the start of the buffer if we have gone
 			// at least one buffer with no units being processed
-			plugin.blink_instance_reset(process.local_idx.value, SR);
+			plugin.instance_reset(process.local_idx.value);
 		}
 		process.buffer_id.value     = buffer_id;
 		process.active_buffer_units = 0;
@@ -930,18 +933,48 @@ auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_Instanc
 	process.active_buffer_units++;
 }
 
-[[nodiscard]] inline
-auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, float* out) -> blink_Error {
+template <typename ProcessFn> inline
+auto unit_process(Host* host, blink_UnitIdx unit_idx, const blink_UnitBuffer& buffer, const blink_UnitState& unit_state, ProcessFn&& process_fn) -> blink_Error {
 	auto& process      = host->unit.get<UnitProcess>(unit_idx.value);
 	const auto& plugin = read::iface(*host, process.plugin_idx.value);
-	begin_unit_process(host, plugin, process.instance_idx, buffer.buffer_id, buffer.SR);
+	begin_unit_process(host, plugin, process.instance_idx, buffer.buffer_id);
 	if (buffer.buffer_id.value > process.buffer_id.value.value + 1) {
 		// unit is reset at the start of the buffer if we have gone
 		// at least one buffer without processing this unit
-		plugin.blink_unit_reset(process.local_idx.value, buffer.SR);
+		plugin.unit_reset(process.local_idx.value);
 	}
 	process.buffer_id.value = buffer.buffer_id;
-	return plugin.sampler.blink_sampler_process(unit_idx, &buffer, &unit_state, out);
+	return process_fn(plugin);
+}
+
+inline
+auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_EffectBuffer& buffer, const blink_EffectUnitState& unit_state, const float* in, float* out) -> blink_Error {
+	auto process_fn = [unit_idx, &buffer, &unit_state, in, out](const PluginInterface& plugin_iface) -> blink_Error {
+		return plugin_iface.effect.effect_process(unit_idx, &buffer, &unit_state, in, out);
+	};
+	return unit_process(host, unit_idx, buffer.unit, unit_state.unit, std::move(process_fn));
+}
+
+inline
+auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, float* out) -> blink_Error {
+	auto process_fn = [unit_idx, &buffer, &unit_state, out](const PluginInterface& plugin_iface) -> blink_Error {
+		return plugin_iface.sampler.sampler_process(unit_idx, &buffer, &unit_state, out);
+	};
+	return unit_process(host, unit_idx, buffer.unit, unit_state.unit, std::move(process_fn));
+}
+
+inline
+auto synth_process(Host* host, blink_UnitIdx unit_idx, const blink_SynthBuffer& buffer, const blink_SynthUnitState& unit_state, float* out) -> blink_Error {
+	auto process_fn = [unit_idx, &buffer, &unit_state, out](const PluginInterface& plugin_iface) -> blink_Error {
+		return plugin_iface.synth.synth_process(unit_idx, &buffer, &unit_state, out);
+	};
+	return unit_process(host, unit_idx, buffer.unit, unit_state.unit, std::move(process_fn));
+}
+
+inline
+auto terminate(const Host& host, blink_PluginIdx plugin_idx) -> blink_Error {
+	const auto& plugin = read::iface(host, plugin_idx);
+	return plugin.terminate();
 }
 
 [[nodiscard]] inline
@@ -1006,130 +1039,166 @@ auto get_std_slider_real(blink_UUID uuid) -> std::optional<StdSliderReal> {
 }
 
 [[nodiscard]] inline
-auto make_host_fns() -> blink_HostFns {
+auto add_unit(Host* host, blink_PluginIdx plugin_idx, blink_InstanceIdx instance_idx, blink_SR SR) -> blink_UnitIdx {
+	const auto& plugin_iface  = read::iface(*host, plugin_idx);
+	const auto& instance_proc = host->instance.get<InstanceProcess>(instance_idx.value);
+	const auto local_inst_idx = instance_proc.local_idx;
+	const auto idx            = host->unit.add();
+	auto& instance_units      = host->instance.get<UnitVec>(instance_idx.value).value;
+	auto& unit_proc           = host->unit.get<UnitProcess>(idx);
+	unit_proc.instance_idx    = instance_idx;
+	unit_proc.local_idx.value = plugin_iface.unit_add(local_inst_idx.value);
+	unit_proc.plugin_idx      = {plugin_idx};
+	instance_units.push_back({idx});
+	plugin_iface.unit_stream_init(unit_proc.local_idx.value, SR);
+	return {idx};
+}
+
+[[nodiscard]] inline
+auto destroy_instance(Host* host, blink_PluginIdx plugin_idx, blink_InstanceIdx instance_idx) -> void {
+	const auto& plugin_iface  = read::iface(*host, plugin_idx);
+	const auto& instance_proc = host->instance.get<InstanceProcess>(instance_idx.value);
+	const auto local_inst_idx = instance_proc.local_idx;
+	const auto& units         = host->instance.get<UnitVec>(instance_idx.value).value;
+	for (auto unit_idx : units) {
+		host->unit.erase(unit_idx.value);
+	}
+	host->instance.erase(instance_idx.value);
+	plugin_iface.instance_destroy(local_inst_idx.value);
+}
+
+[[nodiscard]] inline
+auto make_instance(Host* host, blink_PluginIdx plugin_idx, blink_SR SR) -> blink_InstanceIdx {
+	const auto& plugin_iface = read::iface(*host, plugin_idx);
+	const auto idx       = host->instance.add();
+	auto& proc           = host->instance.get<InstanceProcess>(idx);
+	proc.local_idx.value = plugin_iface.instance_make();
+	plugin_iface.instance_stream_init(proc.local_idx.value, SR);
+	return {idx};
+}
+
+[[nodiscard]] inline
+auto host_ptr(void* user) -> Host* {
+	return (Host*)(user);
+}
+
+[[nodiscard]] inline
+auto make_host_fns(Host* host) -> blink_HostFns {
 	blink_HostFns fns;
-	fns.add_env = []() {
-		return add::env::empty(&the_host_instance);
+	fns.usr = host;
+	fns.add_env = [](void* usr) {
+		return add::env::empty(host_ptr(usr));
 	};
-	fns.add_param_env = [](blink_UUID uuid) {
+	fns.add_param_env = [](void* usr, blink_UUID uuid) {
 		if (const auto std_param = get_std_env(uuid)) {
-			return add::param::env::std(&the_host_instance, *std_param);
+			return add::param::env::std(host_ptr(usr), *std_param);
 		}
 		else {
-			return add::param::env::custom(&the_host_instance, uuid);
+			return add::param::env::custom(host_ptr(usr), uuid);
 		}
 	};
-	fns.add_param_option = [](blink_UUID uuid) {
+	fns.add_param_option = [](void* usr, blink_UUID uuid) {
 		if (const auto std_param = get_std_option(uuid)) {
-			return add::param::option::std(&the_host_instance, *std_param);
+			return add::param::option::std(host_ptr(usr), *std_param);
 		}
 		else {
-			return add::param::option::custom(&the_host_instance, uuid);
+			return add::param::option::custom(host_ptr(usr), uuid);
 		}
 	};
-	fns.add_param_slider_int = [](blink_UUID uuid) {
+	fns.add_param_slider_int = [](void* usr, blink_UUID uuid) {
 		if (const auto std_param = get_std_slider_int(uuid)) {
-			return add::param::slider_int::std(&the_host_instance, *std_param);
+			return add::param::slider_int::std(host_ptr(usr), *std_param);
 		}
 		else {
-			return add::param::slider_int::custom(&the_host_instance, uuid);
+			return add::param::slider_int::custom(host_ptr(usr), uuid);
 		}
 	};
-	fns.add_param_slider_real = [](blink_UUID uuid) {
+	fns.add_param_slider_real = [](void* usr, blink_UUID uuid) {
 		if (const auto std_param = get_std_slider_real(uuid)) {
-			return add::param::slider_real::std(&the_host_instance, *std_param);
+			return add::param::slider_real::std(host_ptr(usr), *std_param);
 		}
 		else {
-			return add::param::slider_real::custom(&the_host_instance, uuid);
+			return add::param::slider_real::custom(host_ptr(usr), uuid);
 		}
 	};
-	fns.add_slider_int = []() {
-		return add::slider::empty_int(&the_host_instance);
+	fns.add_slider_int = [](void* usr) {
+		return add::slider::empty_int(host_ptr(usr));
 	};
-	fns.add_slider_real = []() {
-		return add::slider::empty_real(&the_host_instance);
+	fns.add_slider_real = [](void* usr) {
+		return add::slider::empty_real(host_ptr(usr));
 	};
-	fns.read_env_default_value = [](blink_EnvIdx env_idx) {
-		return read::default_value(the_host_instance, env_idx);
+	fns.read_param_env_default_value = [](void* usr, blink_ParamIdx param_idx) {
+		const auto param_env_idx = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_idx)};
+		const auto env_idx       = read::env_idx(*host_ptr(usr), param_env_idx);
+		return read::default_value(*host_ptr(usr), env_idx);
 	};
-	fns.read_param_env_env_idx = [](blink_ParamIdx param_idx) {
-		const auto type_idx = read::type_idx(the_host_instance, param_idx);
-		const auto env_idx  = read::env_idx(the_host_instance, ParamEnvIdx{type_idx});
-		return env_idx;
+	fns.read_param_option_default_value = [](void* usr, blink_ParamIdx param_idx) {
+		const auto type_idx = read::type_idx(*host_ptr(usr), param_idx);
+		return read::default_value(*host_ptr(usr), ParamOptionIdx{type_idx});
 	};
-	fns.read_param_option_default_value = [](blink_ParamIdx param_idx) {
-		const auto type_idx = read::type_idx(the_host_instance, param_idx);
-		return read::default_value(the_host_instance, ParamOptionIdx{type_idx});
+	fns.read_param_slider_int_default_value = [](void* usr, blink_ParamIdx param_idx) {
+		const auto param_slider_idx = ParamSliderIntIdx{read::type_idx(*host_ptr(usr), param_idx)};
+		const auto slider_idx       = read::slider_idx(*host_ptr(usr), param_slider_idx);
+		return read::default_value(*host_ptr(usr), slider_idx);
 	};
-	fns.read_param_slider_int_slider_idx = [](blink_ParamIdx param_idx) {
-		const auto type_idx   = read::type_idx(the_host_instance, param_idx);
-		const auto slider_idx = read::slider_idx(the_host_instance, ParamSliderIntIdx{type_idx});
-		return slider_idx;
+	fns.read_param_slider_real_default_value = [](void* usr, blink_ParamIdx param_idx) {
+		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_idx)};
+		const auto slider_idx       = read::slider_idx(*host_ptr(usr), param_slider_idx);
+		return read::default_value(*host_ptr(usr), slider_idx);
 	};
-	fns.read_param_slider_real_slider_idx = [](blink_ParamIdx param_idx) {
-		const auto type_idx   = read::type_idx(the_host_instance, param_idx);
-		const auto slider_idx = read::slider_idx(the_host_instance, ParamSliderRealIdx{type_idx});
-		return slider_idx;
+	fns.write_env_default_value = [](void* usr, blink_EnvIdx env_idx, float value) {
+		write::default_value(host_ptr(usr), env_idx, {value});
 	};
-	fns.read_slider_int_default_value = [](blink_SliderIntIdx slider_idx) {
-		return read::default_value(the_host_instance, slider_idx);
+	fns.write_env_fns = [](void* usr, blink_EnvIdx env_idx, blink_EnvFns fns) {
+		write::fns(host_ptr(usr), env_idx, {fns});
 	};
-	fns.read_slider_real_default_value = [](blink_SliderRealIdx slider_idx) {
-		return read::default_value(the_host_instance, slider_idx);
+	fns.write_env_max_slider = [](void* usr, blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::max_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
-	fns.write_env_default_value = [](blink_EnvIdx env_idx, float value) {
-		write::default_value(&the_host_instance, env_idx, {value});
+	fns.write_env_min_slider = [](void* usr, blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::min_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
-	fns.write_env_fns = [](blink_EnvIdx env_idx, blink_EnvFns fns) {
-		write::fns(&the_host_instance, env_idx, {fns});
+	fns.write_env_snap_settings = [](void* usr, blink_EnvIdx env_idx, blink_EnvSnapSettings settings) {
+		write::snap_settings(host_ptr(usr), env_idx, {settings});
 	};
-	fns.write_env_max_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
-		write::max_slider(&the_host_instance, env_idx, {slider_idx});
+	fns.write_env_value_slider = [](void* usr, blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::value_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
-	fns.write_env_min_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
-		write::min_slider(&the_host_instance, env_idx, {slider_idx});
+	fns.write_param_add_flags = [](void* usr, blink_ParamIdx param_idx, int flags) {
+		write::add_flags(host_ptr(usr), param_idx, {flags});
 	};
-	fns.write_env_snap_settings = [](blink_EnvIdx env_idx, blink_EnvSnapSettings settings) {
-		write::snap_settings(&the_host_instance, env_idx, {settings});
+	fns.write_param_add_subparam = [](void* usr, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) {
+		write::add_subparam(host_ptr(usr), param_idx, {subparam_idx});
 	};
-	fns.write_env_value_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
-		write::value_slider(&the_host_instance, env_idx, {slider_idx});
+	fns.write_param_group = [](void* usr, blink_ParamIdx param_idx, blink_StaticString group) {
+		write::group(host_ptr(usr), param_idx, group);
 	};
-	fns.write_param_add_flags = [](blink_ParamIdx param_idx, int flags) {
-		write::add_flags(&the_host_instance, param_idx, {flags});
+	fns.write_param_icon = [](void* usr, blink_ParamIdx param_idx, blink_StdIcon icon) {
+		write::icon(host_ptr(usr), param_idx, icon);
 	};
-	fns.write_param_add_subparam = [](blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) {
-		write::add_subparam(&the_host_instance, param_idx, {subparam_idx});
+	fns.write_param_long_desc = [](void* usr, blink_ParamIdx param_idx, blink_StaticString name) {
+		write::long_desc(host_ptr(usr), param_idx, name);
 	};
-	fns.write_param_group = [](blink_ParamIdx param_idx, blink_StaticString group) {
-		write::group(&the_host_instance, param_idx, group);
+	fns.write_param_manip_delegate = [](void* usr, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) {
+		write::manip_delegate(host_ptr(usr), param_idx, {delegate_idx});
 	};
-	fns.write_param_icon = [](blink_ParamIdx param_idx, blink_StdIcon icon) {
-		write::icon(&the_host_instance, param_idx, icon);
+	fns.write_param_name = [](void* usr, blink_ParamIdx param_idx, blink_StaticString name) {
+		write::name(host_ptr(usr), param_idx, name);
 	};
-	fns.write_param_long_desc = [](blink_ParamIdx param_idx, blink_StaticString name) {
-		write::long_desc(&the_host_instance, param_idx, name);
+	fns.write_param_short_name = [](void* usr, blink_ParamIdx param_idx, blink_StaticString name) {
+		write::short_name(host_ptr(usr), param_idx, name);
 	};
-	fns.write_param_manip_delegate = [](blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) {
-		write::manip_delegate(&the_host_instance, param_idx, {delegate_idx});
+	fns.write_slider_int_default_value = [](void* usr, blink_SliderIntIdx slider_idx, int64_t value) {
+		write::default_value(host_ptr(usr), slider_idx, {value});
 	};
-	fns.write_param_name = [](blink_ParamIdx param_idx, blink_StaticString name) {
-		write::name(&the_host_instance, param_idx, name);
+	fns.write_slider_int_tweaker = [](void* usr, blink_SliderIntIdx slider_idx, blink_TweakerInt tweaker) {
+		write::tweaker(host_ptr(usr), slider_idx, {tweaker});
 	};
-	fns.write_param_short_name = [](blink_ParamIdx param_idx, blink_StaticString name) {
-		write::short_name(&the_host_instance, param_idx, name);
+	fns.write_slider_real_default_value = [](void* usr, blink_SliderRealIdx slider_idx, float value) {
+		write::default_value(host_ptr(usr), slider_idx, {value});
 	};
-	fns.write_slider_int_default_value = [](blink_SliderIntIdx slider_idx, int64_t value) {
-		write::default_value(&the_host_instance, slider_idx, {value});
-	};
-	fns.write_slider_int_tweaker = [](blink_SliderIntIdx slider_idx, blink_TweakerInt tweaker) {
-		write::tweaker(&the_host_instance, slider_idx, {tweaker});
-	};
-	fns.write_slider_real_default_value = [](blink_SliderRealIdx slider_idx, float value) {
-		write::default_value(&the_host_instance, slider_idx, {value});
-	};
-	fns.write_slider_real_tweaker = [](blink_SliderRealIdx slider_idx, blink_TweakerReal tweaker) {
-		write::tweaker(&the_host_instance, slider_idx, {tweaker});
+	fns.write_slider_real_tweaker = [](void* usr, blink_SliderRealIdx slider_idx, blink_TweakerReal tweaker) {
+		write::tweaker(host_ptr(usr), slider_idx, {tweaker});
 	};
 	return fns;
 }

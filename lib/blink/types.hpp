@@ -116,20 +116,28 @@ struct PluginInterface {
 	using init_fn = std::function<blink_Error(blink_PluginIdx plugin_idx, blink_HostFns host)>;
 	using instance_destroy_fn = std::function<blink_Error(blink_InstanceIdx instance_idx)>;
 	using instance_make_fn = std::function<blink_InstanceIdx()>;
-	using instance_reset_fn = std::function<blink_Error(blink_InstanceIdx instance_idx, blink_SR SR)>;
+	using instance_reset_fn = std::function<blink_Error(blink_InstanceIdx instance_idx)>;
+	using instance_stream_init_fn = std::function<blink_Error(blink_InstanceIdx instance_idx, blink_SR SR)>;
 	using terminate_fn = std::function<blink_Error()>;
 	using unit_add_fn = std::function<blink_UnitIdx(blink_InstanceIdx instance_idx)>;
-	using unit_reset_fn = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
-	get_error_string_fn  blink_get_error_string;
-	get_plugin_info_fn   blink_get_plugin_info;
-	get_resource_data_fn blink_get_resource_data;
-	init_fn              blink_init;
-	instance_destroy_fn  blink_instance_destroy;
-	instance_make_fn     blink_instance_make;
-	instance_reset_fn    blink_instance_reset;
-	terminate_fn         blink_terminate;
-	unit_add_fn          blink_unit_add;
-	unit_reset_fn        blink_unit_reset;
+	using unit_reset_fn = std::function<blink_Error(blink_UnitIdx unit_idx)>;
+	using unit_stream_init_fn = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
+	get_error_string_fn     get_error_string;
+	get_plugin_info_fn      get_plugin_info;
+	get_resource_data_fn    get_resource_data;
+	init_fn                 init;
+	instance_destroy_fn     instance_destroy;
+	instance_make_fn        instance_make;
+	instance_reset_fn       instance_reset;
+	instance_stream_init_fn instance_stream_init;
+	terminate_fn            terminate;
+	unit_add_fn             unit_add;
+	unit_reset_fn           unit_reset;
+	unit_stream_init_fn     unit_stream_init;
+	struct Effect {
+		using effect_process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out)>;
+		effect_process_fn effect_process;
+	} effect;
 	struct Sampler {
 		using get_sampler_info_fn = std::function<blink_SamplerInfo()>;
 		using sampler_process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out)>;
@@ -138,14 +146,18 @@ struct PluginInterface {
 		using sampler_draw_fn = std::function<blink_Error(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
 		using get_sonic_fragment_at_block_position_fn = std::function<double(blink_Position block_position)>;
 		using block_position_for_sonic_fragment_fn = std::function<blink_Position(double fragment)>;
-		get_sampler_info_fn                     blink_get_sampler_info;
-		sampler_process_fn                      blink_sampler_process;
-		sampler_preprocess_sample_fn            blink_sampler_preprocess_sample;
-		sampler_sample_deleted_fn               blink_sampler_sample_deleted;
-		sampler_draw_fn                         blink_sampler_draw;
-		get_sonic_fragment_at_block_position_fn blink_get_sonic_fragment_at_block_position;
-		block_position_for_sonic_fragment_fn    blink_block_position_for_sonic_fragment;
+		get_sampler_info_fn                     get_sampler_info;
+		sampler_process_fn                      sampler_process;
+		sampler_preprocess_sample_fn            sampler_preprocess_sample;
+		sampler_sample_deleted_fn               sampler_sample_deleted;
+		sampler_draw_fn                         sampler_draw;
+		get_sonic_fragment_at_block_position_fn get_sonic_fragment_at_block_position;
+		block_position_for_sonic_fragment_fn    block_position_for_sonic_fragment;
 	} sampler;
+	struct Synth {
+		using synth_process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out)>;
+		synth_process_fn synth_process;
+	} synth;
 };
 
 } // blink
