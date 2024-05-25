@@ -1,9 +1,6 @@
 #pragma once
 
 #include "blink.h"
-#include "blink_effect.h"
-#include "blink_sampler.h"
-#include "blink_synth.h"
 #include "block_positions.hpp"
 #include <functional>
 #include <optional>

@@ -27,7 +27,6 @@ namespace ent {
 		blink_UUID,
 		ManipDelegate,
 		ParamFlags,
-		ParamGroup,
 		ParamIcon,
 		ParamStrings,
 		ParamTypeIdx,
@@ -203,12 +202,17 @@ auto fns(Host* host, blink_EnvIdx env_idx, EnvFns fns) -> void {
 
 inline
 auto group(Host* host, blink_ParamIdx param_idx, blink_StaticString group) -> void {
-	host->param.get<ParamGroup>(param_idx.value).value = group;
+	host->param.get<ParamStrings>(param_idx.value).group = group;
 }
 
 inline
 auto icon(Host* host, blink_ParamIdx param_idx, blink_StdIcon icon) -> void {
 	host->param.get<ParamIcon>(param_idx.value).value = icon;
+}
+
+inline
+auto long_desc(Host* host, blink_ParamIdx param_idx, blink_StaticString desc) -> void {
+	host->param.get<ParamStrings>(param_idx.value).long_desc = desc;
 }
 
 inline
@@ -247,18 +251,13 @@ auto override_env(Host* host, ParamSliderRealIdx sld_idx, OverrideEnvIdx value) 
 }
 
 inline
-auto name(Host* host, blink_ParamIdx param_idx, std::string_view name) -> void {
-	host->param.get<ParamStrings>(param_idx.value).value.name = {name.data()};
+auto name(Host* host, blink_ParamIdx param_idx, blink_StaticString name) -> void {
+	host->param.get<ParamStrings>(param_idx.value).name = name;
 }
 
 inline
-auto short_name(Host* host, blink_ParamIdx param_idx, std::string_view name) -> void {
-	host->param.get<ParamStrings>(param_idx.value).value.short_name = {name.data()};
-}
-
-inline
-auto short_name(Host* host, blink_ParamIdx param_idx, blink_ParamStrings strings) -> void {
-	host->param.get<ParamStrings>(param_idx.value).value = strings;
+auto short_name(Host* host, blink_ParamIdx param_idx, blink_StaticString name) -> void {
+	host->param.get<ParamStrings>(param_idx.value).short_name = name;
 }
 
 inline
@@ -274,11 +273,6 @@ auto slider(Host* host, ParamSliderRealIdx sld_idx, blink_SliderRealIdx value) -
 inline
 auto snap_settings(Host* host, blink_EnvIdx env_idx, EnvSnapSettings value) -> void {
 	host->env.get<EnvSnapSettings>(env_idx.value) = value;
-}
-
-inline
-auto strings(Host* host, blink_ParamIdx param_idx, blink_ParamStrings strings) -> void {
-	host->param.get<ParamStrings>(param_idx.value).value = strings;
 }
 
 inline
@@ -407,7 +401,7 @@ auto amp(Host* host) -> blink_ParamIdx {
 	const auto flags = blink_ParamFlags_CanManipulate | blink_ParamFlags_MovesDisplay;
 	const auto apply_offset_fn = [](float value, float offset) -> float { return value * offset; };
 	write::type_idx(host, param_idx, param_env_idx);
-	write::name(host, param_idx, "Amp");
+	write::name(host, param_idx, {"Amp"});
 	write::add_flags(host, param_idx, flags);
 	write::apply_offset_fn(host, param_env_idx, apply_offset_fn);
 	write::env(host, param_env_idx, add::env::amp(host));
@@ -592,7 +586,7 @@ auto loop(Host* host) -> blink_ParamIdx {
 		blink_ParamFlags_IconOnly;
 	write::type_idx(host, param_idx, option_idx);
 	write::icon(host, param_idx, blink_StdIcon_Loop);
-	write::name(host, param_idx, "Loop");
+	write::name(host, param_idx, {"Loop"});
 	write::uuid(host, param_idx, {BLINK_STD_UUID_LOOP});
 	write::add_flags(host, param_idx, flags);
 	write::default_value(host, option_idx, {0});
@@ -606,7 +600,7 @@ auto noise_mode(Host* host) -> blink_ParamIdx {
 	write::type_idx(host, param_idx, option_idx);
 	write::uuid(host, param_idx, {BLINK_STD_UUID_NOISE_MODE});
 	write::add_flags(host, param_idx, blink_ParamFlags_CanManipulate);
-	write::name(host, param_idx, "Noise Mode");
+	write::name(host, param_idx, {"Noise Mode"});
 	write::strings(host, option_idx, {{"Multiply", "Mix"}});
 	return param_idx;
 }
@@ -617,7 +611,7 @@ auto reverse_mode(Host* host) -> blink_ParamIdx {
 	const auto option_idx = add::param::option::empty(host);
 	write::type_idx(host, param_idx, option_idx);
 	write::uuid(host, param_idx, {BLINK_STD_UUID_REVERSE_MODE});
-	write::name(host, param_idx, "Reverse");
+	write::name(host, param_idx, {"Reverse"});
 	write::add_flags(host, param_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_Hidden | blink_ParamFlags_MovesDisplay);
 	write::default_value(host, option_idx, {-1});
 	write::strings(host, option_idx, {{"Mirror", "Tape", "Slip"}});
@@ -637,7 +631,7 @@ auto reverse_toggle(Host* host) -> blink_ParamIdx {
 		blink_ParamFlags_IconOnly;
 	write::type_idx(host, param_idx, option_idx);
 	write::uuid(host, param_idx, {BLINK_STD_UUID_REVERSE_TOGGLE});
-	write::name(host, param_idx, "Reverse");
+	write::name(host, param_idx, {"Reverse"});
 	write::icon(host, param_idx, blink_StdIcon_Reverse);
 	write::default_value(host, option_idx, {0});
 	return param_idx;
@@ -681,7 +675,7 @@ auto sample_offset(Host* host) -> blink_ParamIdx {
 	write::type_idx(host, param_idx, sld_param_idx);
 	write::icon(host, param_idx, blink_StdIcon_SampleOffset);
 	write::add_flags(host, param_idx, blink_ParamFlags_MovesDisplay);
-	write::name(host, param_idx, "Sample Offset");
+	write::name(host, param_idx, {"Sample Offset"});
 	write::slider(host, sld_param_idx, sld_idx);
 	write::uuid(host, param_idx, {BLINK_STD_UUID_SAMPLE_OFFSET});
 	return param_idx;
@@ -822,8 +816,8 @@ auto noise_width(Host* host) -> blink_ParamIdx {
 	write::type_idx(host, param_idx, sld_idx);
 	write::uuid(host, param_idx, {BLINK_STD_UUID_NOISE_WIDTH});
 	write::add_flags(host, param_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-	write::name(host, param_idx, "Noise Width");
-	write::short_name(host, param_idx, "Width");
+	write::name(host, param_idx, {"Noise Width"});
+	write::short_name(host, param_idx, {"Width"});
 	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
 	write::slider(host, sld_idx, add::slider::percentage(host->fns));
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
@@ -1113,11 +1107,17 @@ auto make_host_fns() -> blink_HostFns {
 	fns.write_param_icon = [](blink_ParamIdx param_idx, blink_StdIcon icon) {
 		write::icon(&the_host_instance, param_idx, icon);
 	};
+	fns.write_param_long_desc = [](blink_ParamIdx param_idx, blink_StaticString name) {
+		write::long_desc(&the_host_instance, param_idx, name);
+	};
 	fns.write_param_manip_delegate = [](blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) {
 		write::manip_delegate(&the_host_instance, param_idx, {delegate_idx});
 	};
-	fns.write_param_strings = [](blink_ParamIdx param_idx, blink_ParamStrings strings) {
-		write::strings(&the_host_instance, param_idx, strings);
+	fns.write_param_name = [](blink_ParamIdx param_idx, blink_StaticString name) {
+		write::name(&the_host_instance, param_idx, name);
+	};
+	fns.write_param_short_name = [](blink_ParamIdx param_idx, blink_StaticString name) {
+		write::short_name(&the_host_instance, param_idx, name);
 	};
 	fns.write_slider_int_default_value = [](blink_SliderIntIdx slider_idx, int64_t value) {
 		write::default_value(&the_host_instance, slider_idx, {value});

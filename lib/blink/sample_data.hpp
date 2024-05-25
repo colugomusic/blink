@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <blink_sampler.h>
 #include <blink/math.hpp>
 
 namespace blink {

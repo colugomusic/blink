@@ -1,6 +1,5 @@
 #pragma once 
 
-#include "blink_sampler.h"
 #include "blink/traverser.hpp"
 
 namespace blink {
