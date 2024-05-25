@@ -169,7 +169,6 @@ enum blink_ParamFlags {
 	blink_ParamFlags_MovesDisplay               = 1 << 10, // Editing should trigger a visual update
 	blink_ParamFlags_ShowButton                 = 1 << 11,
 	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
-	blink_ParamFlags_SonicPivot                 = 1 << 13,
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -191,15 +190,6 @@ typedef struct {
 	blink_SliderRealIdx step_size_slider;
 	float default_snap_amount;
 } blink_EnvSnapSettings;
-
-typedef struct {
-	// Full parameter name e.g. "Noise Amount"
-	blink_StaticString name; 
-	// Short parameter name to use in the context of a group, e.g. "Amount". Can be null
-	blink_StaticString short_name; 
-	// Long description of the parameter. Can be null
-	blink_StaticString long_desc; 
-} blink_ParamStrings;
 
 typedef struct {
 	size_t size;
@@ -297,48 +287,64 @@ typedef void                (*blink_host_write_env_max_slider)(blink_EnvIdx env_
 typedef void                (*blink_host_write_env_min_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef void                (*blink_host_write_env_snap_settings)(blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
 typedef void                (*blink_host_write_env_value_slider)(blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef void                (*blink_host_write_param_add_flags)(blink_ParamIdx param_idx, blink_ParamFlags flags);
+typedef void                (*blink_host_write_param_add_flags)(blink_ParamIdx param_idx, int flags);
 typedef void                (*blink_host_write_param_add_subparam)(blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
-typedef void                (*blink_host_write_param_manip_delegate)(blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
+typedef void                (*blink_host_write_param_env_clamp_range)(blink_ParamIdx param_idx, blink_Range range);
+typedef void                (*blink_host_write_param_env_env_idx)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_env_offset_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_env_override_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
 typedef void                (*blink_host_write_param_group)(blink_ParamIdx param_idx, blink_StaticString group_name);
 typedef void                (*blink_host_write_param_icon)(blink_ParamIdx param_idx, blink_StdIcon icon);
-typedef void                (*blink_host_write_param_strings)(blink_ParamIdx param_idx, blink_ParamStrings strings);
+typedef void                (*blink_host_write_param_long_desc)(blink_ParamIdx param_idx, blink_StaticString value);
+typedef void                (*blink_host_write_param_manip_delegate)(blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
+typedef void                (*blink_host_write_param_name)(blink_ParamIdx param_idx, blink_StaticString value);
+typedef void                (*blink_host_write_param_short_name)(blink_ParamIdx param_idx, blink_StaticString value);
+typedef void                (*blink_host_write_param_slider_real_offset_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_param_slider_real_override_env)(blink_ParamIdx param_idx, blink_EnvIdx env_idx);
 typedef void                (*blink_host_write_slider_int_default_value)(blink_SliderIntIdx sld_idx, int64_t value);
 typedef void                (*blink_host_write_slider_int_tweaker)(blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
 typedef void                (*blink_host_write_slider_real_default_value)(blink_SliderRealIdx sld_idx, float value);
 typedef void                (*blink_host_write_slider_real_tweaker)(blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
 
 struct blink_HostFns {
-	blink_host_add_env                           add_env;
-	blink_host_add_param_env                     add_param_env;
-	blink_host_add_param_option                  add_param_option;
-	blink_host_add_param_slider_int              add_param_slider_int;
-	blink_host_add_param_slider_real             add_param_slider_real;
-	blink_host_add_slider_int                    add_slider_int;
-	blink_host_add_slider_real                   add_slider_real;
-	blink_host_read_env_default_value            read_env_default_value;
-	blink_host_read_param_env_env_idx            read_param_env_env_idx;
-	blink_host_read_param_option_default_value   read_param_option_default_value;
-	blink_host_read_param_slider_int_slider_idx  read_param_slider_int_slider_idx;
-	blink_host_read_param_slider_real_slider_idx read_param_slider_real_slider_idx;
-	blink_host_read_slider_int_default_value     read_slider_int_default_value;
-	blink_host_read_slider_real_default_value    read_slider_real_default_value;
-	blink_host_write_env_default_value           write_env_default_value;
-	blink_host_write_env_fns                     write_env_fns;
-	blink_host_write_env_max_slider              write_env_max_slider;
-	blink_host_write_env_min_slider              write_env_min_slider;
-	blink_host_write_env_snap_settings           write_env_snap_settings;
-	blink_host_write_env_value_slider            write_env_value_slider;
-	blink_host_write_param_add_flags             write_param_add_flags;
-	blink_host_write_param_add_subparam          write_param_add_subparam;
-	blink_host_write_param_manip_delegate        write_param_manip_delegate;
-	blink_host_write_param_group                 write_param_group;
-	blink_host_write_param_icon                  write_param_icon;
-	blink_host_write_param_strings               write_param_strings;
-	blink_host_write_slider_int_tweaker          write_slider_int_tweaker;
-	blink_host_write_slider_int_default_value    write_slider_int_default_value;
-	blink_host_write_slider_real_tweaker         write_slider_real_tweaker;
-	blink_host_write_slider_real_default_value   write_slider_real_default_value;
+	blink_host_add_env                              add_env;
+	blink_host_add_param_env                        add_param_env;
+	blink_host_add_param_option                     add_param_option;
+	blink_host_add_param_slider_int                 add_param_slider_int;
+	blink_host_add_param_slider_real                add_param_slider_real;
+	blink_host_add_slider_int                       add_slider_int;
+	blink_host_add_slider_real                      add_slider_real;
+	blink_host_read_env_default_value               read_env_default_value;
+	blink_host_read_param_env_env_idx               read_param_env_env_idx;
+	blink_host_read_param_option_default_value      read_param_option_default_value;
+	blink_host_read_param_slider_int_slider_idx     read_param_slider_int_slider_idx;
+	blink_host_read_param_slider_real_slider_idx    read_param_slider_real_slider_idx;
+	blink_host_read_slider_int_default_value        read_slider_int_default_value;
+	blink_host_read_slider_real_default_value       read_slider_real_default_value;
+	blink_host_write_env_default_value              write_env_default_value;
+	blink_host_write_env_fns                        write_env_fns;
+	blink_host_write_env_max_slider                 write_env_max_slider;
+	blink_host_write_env_min_slider                 write_env_min_slider;
+	blink_host_write_env_snap_settings              write_env_snap_settings;
+	blink_host_write_env_value_slider               write_env_value_slider;
+	blink_host_write_param_add_flags                write_param_add_flags;
+	blink_host_write_param_add_subparam             write_param_add_subparam;
+	blink_host_write_param_env_clamp_range          write_param_env_clamp_range;
+	blink_host_write_param_env_env_idx              write_param_env_env_idx;
+	blink_host_write_param_env_offset_env           write_param_env_offset_env;
+	blink_host_write_param_env_override_env         write_param_env_override_env;
+	blink_host_write_param_group                    write_param_group;
+	blink_host_write_param_icon                     write_param_icon;
+	blink_host_write_param_long_desc                write_param_long_desc;
+	blink_host_write_param_manip_delegate           write_param_manip_delegate;
+	blink_host_write_param_name                     write_param_name;
+	blink_host_write_param_short_name               write_param_short_name;
+	blink_host_write_param_slider_real_offset_env   write_param_slider_real_offset_env;
+	blink_host_write_param_slider_real_override_env write_param_slider_real_override_env;
+	blink_host_write_slider_int_default_value       write_slider_int_default_value;
+	blink_host_write_slider_int_tweaker             write_slider_int_tweaker;
+	blink_host_write_slider_real_default_value      write_slider_real_default_value;
+	blink_host_write_slider_real_tweaker            write_slider_real_tweaker;
 };
 
 #ifdef BLINK_EXPORT

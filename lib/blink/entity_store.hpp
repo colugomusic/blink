@@ -67,6 +67,15 @@ struct DynamicEntityStore {
 		free_indices_.push_back(index);
 		size_--;
 	}
+	auto is_valid(size_t index) const -> bool {
+		if (index >= size_) {
+			return false;
+		}
+		if (std::find(free_indices_.begin(), free_indices_.end(), index) != free_indices_.end()) {
+			return false;
+		}
+		return true;
+	}
 	auto size() const -> size_t { return size_; }
 	template <typename T> [[nodiscard]] auto get() -> std::vector<T>& { return std::get<DynamicVec<T>>(data_).get(); }
 	template <typename T> [[nodiscard]] auto get() const -> const std::vector<T>& { return std::get<DynamicVec<T>>(data_).get(); }

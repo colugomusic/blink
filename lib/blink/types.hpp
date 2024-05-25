@@ -1,7 +1,9 @@
 #pragma once
 
 #include "blink.h"
+#include "blink_effect.h"
 #include "blink_sampler.h"
+#include "blink_synth.h"
 #include "block_positions.hpp"
 #include <functional>
 #include <optional>
@@ -79,9 +81,7 @@ struct ParamSliderIntIdx  { size_t value = 0; };
 struct ParamSliderRealIdx { size_t value = 0; };
 struct OverrideEnvIdx     { EnvIdx value; };
 struct ParamFlags         { blink_Flags value = {0}; };
-struct ParamGroup         { blink_StaticString value = {0}; };
 struct ParamIcon          { blink_StdIcon value = {blink_StdIcon_None}; };
-struct ParamStrings       { blink_ParamStrings value = {0}; };
 struct ParamTypeIdx       { size_t value = 0; };
 struct PluginIdx          { blink_PluginIdx value = {0}; };
 struct SR                 { blink_SR value = {0}; };
@@ -93,6 +93,12 @@ struct UnitVec            { std::vector<blink_UnitIdx> value; };
 struct ValueSliderIdx     { std::optional<blink_SliderRealIdx> value; };
 template <typename T> struct DefaultValue { T value = T(0); };
 
+struct ParamStrings {
+	blink_StaticString group      = {0};
+	blink_StaticString name       = {0};
+	blink_StaticString short_name = {0};
+	blink_StaticString long_desc  = {0};
+};
 struct InstanceProcess {
 	LocalInstanceIdx local_idx;
 	BufferID buffer_id;

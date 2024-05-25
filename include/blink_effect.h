@@ -45,13 +45,13 @@ struct blink_EffectUnitState
 	float scale;
 	int64_t data_offset;
 	// May be NULL, in which case plugins should act as if all parameters are default.
-	const blink_ParamData* parameter_data;
+	const blink_ParamData* param_data;
 };
 
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	EXPORTED blink_Error              blink_effect_process(blink_UnitIndex unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
-	EXPORTED blink_EffectInstanceInfo blink_effect_get_info(blink_InstanceIndex instance_idx);
+	EXPORTED blink_Error              blink_effect_process(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
+	EXPORTED blink_EffectInstanceInfo blink_effect_get_info(blink_InstanceIdx instance_idx);
 }
 #endif

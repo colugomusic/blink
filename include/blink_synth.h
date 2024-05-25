@@ -4,9 +4,9 @@
 
 #define BLINK_SYNTH
 
-typedef struct
-{
+typedef struct {
 	blink_BufferID buffer_id;
+	blink_SR SR;
 	blink_SR song_rate;
 	blink_Position* positions;
 } blink_SynthBuffer;
@@ -24,12 +24,12 @@ struct blink_SynthUnitState
 	float scale;
 	int64_t data_offset;
 	// May be NULL, in which case plugins should act as if all parameters are default.
-	const blink_ParamData* parameter_data;
+	const blink_ParamData* param_data;
 };
 
 #ifdef BLINK_EXPORT
 extern "C"
 {
-	EXPORTED blink_Error blink_synth_process(blink_UnitIndex unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
+	EXPORTED blink_Error blink_synth_process(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
 }
 #endif

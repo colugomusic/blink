@@ -2,7 +2,9 @@
 
 #include "blink.h"
 #include "block_positions.hpp"
+#include "common_impl.hpp"
 #include "entity_store.hpp"
+#include "resource_store.hpp"
 #include "types.hpp"
 
 namespace blink {
@@ -22,6 +24,7 @@ namespace ent {
 struct Plugin {
 	blink_PluginIdx index;
 	blink_HostFns host;
+	ResourceStore resource_store;
 };
 
 template <typename Instance, typename Unit>
@@ -104,27 +107,28 @@ auto get_std_error_string(blink_StdError error) -> const char* {
 	}
 }
 
+/* TODELETE:
 namespace add {
 namespace param {
 
 inline
 auto env(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_env(plugin->index, uuid);
+	return plugin->host.add_param_env(uuid);
 }
 
 inline
 auto option(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_option(plugin->index, uuid);
+	return plugin->host.add_param_option(uuid);
 }
 
 inline
 auto slider_int(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_slider_int(plugin->index, uuid);
+	return plugin->host.add_param_slider_int(uuid);
 }
 
 inline
 auto slider_real(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_slider_real(plugin->index, uuid);
+	return plugin->host.add_param_slider_real(uuid);
 }
 
 } // param
@@ -163,7 +167,7 @@ namespace env {
 
 [[nodiscard]] inline
 auto env_idx(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_EnvIdx {
-	return plugin.host.read_param_env_env_idx(plugin.index, param_idx);
+	return plugin.host.read_param_env_env_idx(param_idx);
 }
 
 [[nodiscard]] inline
@@ -176,7 +180,7 @@ namespace option {
 
 [[nodiscard]] inline
 auto default_value(const Plugin& plugin, blink_ParamIdx param_idx) -> int64_t {
-	return plugin.host.read_param_option_default_value(plugin.index, param_idx);
+	return plugin.host.read_param_option_default_value(param_idx);
 }
 
 } // option
@@ -184,7 +188,7 @@ namespace slider_int {
 
 [[nodiscard]] inline
 auto slider_int_idx(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_SliderIntIdx {
-	return plugin.host.read_param_slider_int_slider_idx(plugin.index, param_idx);
+	return plugin.host.read_param_slider_int_slider_idx(param_idx);
 }
 
 [[nodiscard]] inline
@@ -197,7 +201,7 @@ namespace slider_real {
 
 [[nodiscard]] inline
 auto slider_real_idx(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_SliderRealIdx {
-	return plugin.host.read_param_slider_real_slider_idx(plugin.index, param_idx);
+	return plugin.host.read_param_slider_real_slider_idx(param_idx);
 }
 
 [[nodiscard]] inline
@@ -213,27 +217,28 @@ namespace write {
 namespace param {
 
 inline
-auto add_flags(Plugin* plugin, blink_ParamIdx param_idx, blink_ParamFlags flags) -> void {
-	plugin->host.write_param_add_flags(plugin->index, param_idx, flags);
+auto add_flags(const blink_HostFns& host, blink_ParamIdx param_idx, int flags) -> void {
+	host.write_param_add_flags(param_idx, flags);
 }
 
 inline
 auto manip_delegate(Plugin* plugin, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) -> void {
-	plugin->host.write_param_delegate(plugin->index, param_idx, delegate_idx);
+	plugin->host.write_param_manip_delegate(param_idx, delegate_idx);
 }
 
 inline
 auto add_subparam(Plugin* plugin, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) -> void {
-	plugin->host.write_param_add_subparam(plugin->index, param_idx, subparam_idx);
+	plugin->host.write_param_add_subparam(param_idx, subparam_idx);
 }
 
 inline
 auto group(Plugin* plugin, blink_ParamIdx param_idx, blink_StaticString group_name) -> void {
-	plugin->host.write_param_group(plugin->index, param_idx, group_name);
+	plugin->host.write_param_group(param_idx, group_name);
 }
 
 } // param
 } // write
+*/
 
 [[nodiscard]] inline
 auto make_chord_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> ChordData {
@@ -255,7 +260,7 @@ auto make_real_value(const blink_RealPoints& points, float default_value) -> flo
 [[nodiscard]] inline
 auto make_env_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> EnvData {
 	EnvData out;
-	out.default_value = read::param::env::default_value(plugin, param_idx);
+	out.default_value = plugin.host.read_env_default_value(plugin.host.read_param_env_env_idx(param_idx));
 	if (param_data) {
 		out.data = &param_data->envelope;
 		out.value = make_real_value(out.data->points, out.default_value);
@@ -270,7 +275,7 @@ auto make_env_data(const Plugin& plugin, const blink_ParamData* param_data, blin
 [[nodiscard]] inline
 auto make_option_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> OptionData {
 	OptionData out;
-	out.default_value = read::param::option::default_value(plugin, param_idx);
+	out.default_value = plugin.host.read_param_option_default_value(param_idx);
 	if (param_data) {
 		out.data = &param_data->option;
 		out.value = make_int_value(out.data->points, out.default_value);
@@ -285,7 +290,7 @@ auto make_option_data(const Plugin& plugin, const blink_ParamData* param_data, b
 [[nodiscard]] inline
 auto make_slider_int_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> SliderIntData {
 	SliderIntData out;
-	out.default_value = read::param::slider_int::default_value(plugin, param_idx);
+	out.default_value = plugin.host.read_slider_int_default_value(plugin.host.read_param_slider_int_slider_idx(param_idx));
 	if (param_data) {
 		out.data = &param_data->slider_int;
 		out.value = make_int_value(out.data->points, out.default_value);
@@ -300,7 +305,7 @@ auto make_slider_int_data(const Plugin& plugin, const blink_ParamData* param_dat
 [[nodiscard]] inline
 auto make_slider_real_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> SliderRealData {
 	SliderRealData out;
-	out.default_value = read::param::slider_real::default_value(plugin, param_idx);
+	out.default_value = plugin.host.read_slider_real_default_value(plugin.host.read_param_slider_real_slider_idx(param_idx));
 	if (param_data) {
 		out.data = &param_data->slider_real;
 		out.value = make_real_value(out.data->points, out.default_value);
@@ -310,6 +315,17 @@ auto make_slider_real_data(const Plugin& plugin, const blink_ParamData* param_da
 		out.value = out.default_value;
 	}
 	return out;
+}
+
+template <class FileSystem> [[nodiscard]] inline
+auto get_resource_data(Plugin* plugin, const FileSystem& fs, const char* path) -> blink_ResourceData {
+	if (plugin->resource_store.has(path)) {
+		return plugin->resource_store.get(path);
+	}
+	if (!fs.exists(path)) return  { 0, 0 };
+	if (!fs.is_file(path)) return { 0, 0 };
+	const auto file = fs.open(path);
+	return plugin->resource_store.store(path, file);
 }
 
 } // blink

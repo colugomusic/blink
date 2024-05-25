@@ -3,6 +3,7 @@
 #include <blink.h>
 #include <blink_std.h>
 #include <cassert>
+#include "common_impl.hpp"
 #include "entity_store.hpp"
 #include "math.hpp"
 #include "tweak.hpp"
@@ -83,6 +84,7 @@ struct Host {
 	ent::Env env;
 	ent::SliderInt slider_int;
 	ent::SliderReal slider_real;
+	blink_HostFns fns;
 };
 
 // Define this somewhere in your host application.
@@ -348,22 +350,6 @@ auto amp(Host* host) -> blink_SliderRealIdx {
 	return idx;
 }
 
-template <int MIN = 0, int MAX = 100> [[nodiscard]]
-auto percentage(Host* host) -> blink_SliderRealIdx {
-	const auto idx = add::slider::empty_real(host);
-	write::default_value(host, {idx}, {0});
-	write::tweaker(host, {idx}, {tweak::percentage::tweaker<MIN, MAX>()});
-	return idx;
-}
-
-[[nodiscard]] inline
-auto percentage_bipolar(Host* host) -> blink_SliderRealIdx {
-	const auto idx = add::slider::empty_real(host);
-	write::default_value(host, idx, {0.0f});
-	write::tweaker(host, {idx}, {tweak::percentage::bipolar::tweaker()});
-	return idx;
-}
-
 [[nodiscard]] inline
 auto sample_offset(Host* host) -> blink_SliderIntIdx {
 	const auto idx = add::slider::empty_int(host);
@@ -398,29 +384,6 @@ auto amp(Host* host) -> blink_EnvIdx {
 	return idx;
 }
 
-template <int MIN = 0, int MAX = 100> [[nodiscard]]
-auto percentage(Host* host) -> blink_EnvIdx {
-	const auto idx = add::env::empty();
-	EnvFns fns;
-	fns.value.stepify   = tweak::percentage::stepify;
-	fns.value.to_string = tweak::percentage::to_string;
-	write::default_value(host, idx, {0.0f});
-	write::fns(host, idx, fns);
-	write::value_slider(host, idx, {add::slider::percentage<MIN, MAX>(host)});
-	return idx;
-}
-
-[[nodiscard]] inline
-auto percentage_bipolar(Host* host) -> blink_EnvIdx {
-	const auto idx = add::env::empty(host);
-	EnvFns fns;
-	fns.value.stepify   = tweak::percentage::stepify;
-	fns.value.to_string = tweak::percentage::to_string;
-	write::default_value(host, idx, {0.0f});
-	write::fns(host, idx, fns);
-	write::value_slider(host, idx, {add::slider::percentage_bipolar(host)});
-	return idx;
-}
 } // env
 
 namespace param {
@@ -601,7 +564,7 @@ auto std(Host* host, StdEnv std_env) -> blink_ParamIdx {
 auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
 	const auto param_idx     = add::param::empty(host);
 	const auto param_env_idx = add::param::env::empty(host);
-	const auto env_idx       = add::env::empty(host);
+	const auto env_idx       = add::env::empty(host->fns);
 	write::type_idx(host, param_idx, param_env_idx);
 	write::env(host, param_env_idx, env_idx);
 	write::uuid(host, param_idx, uuid);
@@ -737,7 +700,7 @@ auto std(Host* host, StdSliderInt std_sld) -> blink_ParamIdx {
 auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
 	const auto param_idx     = add::param::empty(host);
 	const auto param_sld_idx = add::param::slider_int::empty(host);
-	const auto sld_idx       = add::slider::empty_int(host);
+	const auto sld_idx       = add::slider::empty_int(host->fns);
 	write::type_idx(host, param_idx, param_sld_idx);
 	write::slider(host, param_sld_idx, sld_idx);
 	write::uuid(host, param_idx, uuid);
@@ -862,9 +825,9 @@ auto noise_width(Host* host) -> blink_ParamIdx {
 	write::name(host, param_idx, "Noise Width");
 	write::short_name(host, param_idx, "Width");
 	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
-	write::slider(host, sld_idx, add::slider::percentage(host));
-	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host)});
-	write::override_env(host, sld_idx, {add::env::percentage(host)});
+	write::slider(host, sld_idx, add::slider::percentage(host->fns));
+	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
+	write::override_env(host, sld_idx, {add::env::percentage(host->fns)});
 	return param_idx;
 }
 
@@ -946,7 +909,7 @@ auto std(Host* host, StdSliderReal std_sld) -> blink_ParamIdx {
 auto custom(Host* host, blink_UUID uuid) -> blink_ParamIdx {
 	const auto param_idx     = add::param::empty(host);
 	const auto param_sld_idx = add::param::slider_real::empty(host);
-	const auto sld_idx       = add::slider::empty_real(host);
+	const auto sld_idx       = add::slider::empty_real(host->fns);
 	write::type_idx(host, param_idx, param_sld_idx);
 	write::slider(host, param_sld_idx, sld_idx);
 	write::uuid(host, param_idx, uuid);
@@ -1138,7 +1101,7 @@ auto make_host_fns() -> blink_HostFns {
 	fns.write_env_value_slider = [](blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
 		write::value_slider(&the_host_instance, env_idx, {slider_idx});
 	};
-	fns.write_param_add_flags = [](blink_ParamIdx param_idx, blink_ParamFlags flags) {
+	fns.write_param_add_flags = [](blink_ParamIdx param_idx, int flags) {
 		write::add_flags(&the_host_instance, param_idx, {flags});
 	};
 	fns.write_param_add_subparam = [](blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) {

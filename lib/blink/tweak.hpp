@@ -1,13 +1,13 @@
 #pragma once
 
 #include <blink.h>
-#include <math.hpp>
 #include <cmath>
 #include <optional>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include "math.hpp"
 
 namespace blink {
 namespace tweak {
@@ -137,7 +137,7 @@ auto drag(T v, int amount) -> T {
 
 [[nodiscard]] inline
 auto write_string(std::string_view str, char buffer[BLINK_STRING_MAX]) -> void {
-	std::strncpy(buffer, str.data(), BLINK_STRING_MAX - 1);
+	str.copy(buffer, BLINK_STRING_MAX - 1);
 	buffer[BLINK_STRING_MAX - 1] = '\0';
 }
 
