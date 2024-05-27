@@ -11,8 +11,8 @@
 
 namespace blink {
 
-namespace ent {
-	using Plugin = ::ent::static_store<
+namespace e {
+	using Plugin = ent::static_store<
 		blink_PluginInfo,
 		blink_UUID,
 		PluginType,
@@ -20,17 +20,17 @@ namespace ent {
 		PluginInterface,
 		PluginParams
 	>;
-	using PluginSampler = ::ent::static_store<
+	using PluginSampler = ent::static_store<
 		blink_SamplerInfo
 	>;
-	using Instance = ::ent::dynamic_store<
+	using Instance = ent::dynamic_store<
 		InstanceProcess,
 		UnitVec
 	>;
-	using Unit = ::ent::dynamic_store<
+	using Unit = ent::dynamic_store<
 		UnitProcess
 	>;
-	using Param = ::ent::static_store<
+	using Param = ent::static_store<
 		blink_PluginIdx,
 		blink_UUID,
 		ManipDelegate,
@@ -40,28 +40,28 @@ namespace ent {
 		ParamTypeIdx,
 		SubParams
 	>;
-	using ParamEnv = ::ent::static_store<
+	using ParamEnv = ent::static_store<
 		ApplyOffsetFn,
 		ClampRange,
 		EnvIdx,
 		OffsetEnvIdx,
 		OverrideEnvIdx
 	>;
-	using ParamOption = ::ent::static_store<
+	using ParamOption = ent::static_store<
 		DefaultValue<int64_t>,
 		StringVec
 	>;
-	using ParamSliderInt = ::ent::static_store<
+	using ParamSliderInt = ent::static_store<
 		blink_SliderIntIdx
 	>;
-	using ParamSliderReal = ::ent::static_store<
+	using ParamSliderReal = ent::static_store<
 		ApplyOffsetFn,
 		blink_SliderRealIdx,
 		ClampRange,
 		OffsetEnvIdx,
 		OverrideEnvIdx
 	>;
-	using Env = ::ent::static_store<
+	using Env = ent::static_store<
 		DefaultValue<float>,
 		EnvFns,
 		EnvSnapSettings,
@@ -69,29 +69,29 @@ namespace ent {
 		MinSliderIdx,
 		ValueSliderIdx
 	>;
-	using SliderInt = ::ent::static_store<
+	using SliderInt = ent::static_store<
 		DefaultValue<int64_t>,
 		TweakerInt
 	>;
-	using SliderReal = ::ent::static_store<
+	using SliderReal = ent::static_store<
 		DefaultValue<float>,
 		TweakerReal
 	>;
-} // ent
+} // e
 
 struct Host {
-	ent::Plugin plugin;
-	ent::PluginSampler plugin_sampler;
-	ent::Instance instance;
-	ent::Unit unit;
-	ent::Param param;
-	ent::ParamEnv param_env;
-	ent::ParamOption param_option;
-	ent::ParamSliderInt param_slider_int;
-	ent::ParamSliderReal param_slider_real;
-	ent::Env env;
-	ent::SliderInt slider_int;
-	ent::SliderReal slider_real;
+	e::Plugin plugin;
+	e::PluginSampler plugin_sampler;
+	e::Instance instance;
+	e::Unit unit;
+	e::Param param;
+	e::ParamEnv param_env;
+	e::ParamOption param_option;
+	e::ParamSliderInt param_slider_int;
+	e::ParamSliderReal param_slider_real;
+	e::Env env;
+	e::SliderInt slider_int;
+	e::SliderReal slider_real;
 	std::optional<blink_PluginIdx> default_sampler;
 	blink_HostFns fns;
 };

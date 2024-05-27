@@ -10,17 +10,15 @@
 
 namespace blink {
 
-namespace ent {
-	template <typename... Ts>
-	using Instance = ::ent::dynamic_store<
-		UnitVec,
-		Ts...
-	>;
-	template <typename... Ts>
-	using Unit = ::ent::dynamic_store<
-		Ts...
-	>;
-} // ent
+template <typename... Ts>
+using Instance = ::ent::dynamic_store<
+	UnitVec,
+	Ts...
+>;
+template <typename... Ts>
+using Unit = ::ent::dynamic_store<
+	Ts...
+>;
 
 struct Plugin {
 	blink_PluginIdx index;
