@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ent.hpp>
 #include "blink.h"
 #include "block_positions.hpp"
 #include "common_impl.hpp"
@@ -11,12 +12,12 @@ namespace blink {
 
 namespace ent {
 	template <typename... Ts>
-	using Instance = DynamicEntityStore<
+	using Instance = ::ent::dynamic_store<
 		UnitVec,
 		Ts...
 	>;
 	template <typename... Ts>
-	using Unit = DynamicEntityStore<
+	using Unit = ::ent::dynamic_store<
 		Ts...
 	>;
 } // ent
@@ -107,138 +108,87 @@ auto get_std_error_string(blink_StdError error) -> const char* {
 	}
 }
 
-/* TODELETE:
 namespace add {
 namespace param {
 
 inline
-auto env(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_env(uuid);
+auto env(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
+	return plugin.host.add_param_env(plugin.host.usr, plugin.index, uuid);
 }
 
 inline
-auto option(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_option(uuid);
+auto option(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
+	return plugin.host.add_param_option(plugin.host.usr, plugin.index, uuid);
 }
 
 inline
-auto slider_int(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_slider_int(uuid);
+auto slider_int(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
+	return plugin.host.add_param_slider_int(plugin.host.usr, plugin.index, uuid);
 }
 
 inline
-auto slider_real(Plugin* plugin, blink_UUID uuid) -> blink_ParamIdx {
-	return plugin->host.add_param_slider_real(uuid);
+auto slider_real(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
+	return plugin.host.add_param_slider_real(plugin.host.usr, plugin.index, uuid);
 }
 
 } // param
 } // add
 
-namespace read {
-namespace env {
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_EnvIdx env_idx) -> float {
-	return plugin.host.read_env_default_value(env_idx);
-}
-
-} // env
-
-namespace slider_int {
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_SliderIntIdx slider_int_idx) -> int64_t {
-	return plugin.host.read_slider_int_default_value(slider_int_idx);
-}
-
-} // slider_int
-
-namespace slider_real {
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_SliderRealIdx slider_real_idx) -> float {
-	return plugin.host.read_slider_real_default_value(slider_real_idx);
-}
-
-} // slider_real
-
-namespace param {
-namespace env {
-
-[[nodiscard]] inline
-auto env_idx(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_EnvIdx {
-	return plugin.host.read_param_env_env_idx(param_idx);
-}
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_ParamIdx param_idx) -> float {
-	return read::env::default_value(plugin, env_idx(plugin, param_idx));
-}
-
-} // env
-namespace option {
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_ParamIdx param_idx) -> int64_t {
-	return plugin.host.read_param_option_default_value(param_idx);
-}
-
-} // option
-namespace slider_int {
-
-[[nodiscard]] inline
-auto slider_int_idx(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_SliderIntIdx {
-	return plugin.host.read_param_slider_int_slider_idx(param_idx);
-}
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_ParamIdx param_idx) -> int64_t {
-	return read::slider_int::default_value(plugin, slider_int_idx(plugin, param_idx));
-}
-
-} // slider_int
-namespace slider_real {
-
-[[nodiscard]] inline
-auto slider_real_idx(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_SliderRealIdx {
-	return plugin.host.read_param_slider_real_slider_idx(param_idx);
-}
-
-[[nodiscard]] inline
-auto default_value(const Plugin& plugin, blink_ParamIdx param_idx) -> float {
-	return read::slider_real::default_value(plugin, slider_real_idx(plugin, param_idx));
-}
-
-} // slider_real
-} // param
-} // read
-
 namespace write {
 namespace param {
 
 inline
-auto add_flags(const blink_HostFns& host, blink_ParamIdx param_idx, int flags) -> void {
-	host.write_param_add_flags(param_idx, flags);
+auto add_flags(const Plugin& plugin, blink_ParamIdx param_idx, int flags) -> void {
+	plugin.host.write_param_add_flags(plugin.host.usr, plugin.index, param_idx, flags);
 }
 
 inline
-auto manip_delegate(Plugin* plugin, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) -> void {
-	plugin->host.write_param_manip_delegate(param_idx, delegate_idx);
+auto manip_delegate(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) -> void {
+	plugin.host.write_param_manip_delegate(plugin.host.usr, plugin.index, param_idx, delegate_idx);
 }
 
 inline
-auto add_subparam(Plugin* plugin, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) -> void {
-	plugin->host.write_param_add_subparam(param_idx, subparam_idx);
+auto add_subparam(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) -> void {
+	plugin.host.write_param_add_subparam(plugin.host.usr, plugin.index, param_idx, subparam_idx);
 }
 
 inline
-auto group(Plugin* plugin, blink_ParamIdx param_idx, blink_StaticString group_name) -> void {
-	plugin->host.write_param_group(param_idx, group_name);
+auto group(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString group_name) -> void {
+	plugin.host.write_param_group(plugin.host.usr, plugin.index, param_idx, group_name);
+}
+
+inline
+auto name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void {
+	plugin.host.write_param_name(plugin.host.usr, plugin.index, param_idx, name);
+}
+
+inline
+auto short_name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void {
+	plugin.host.write_param_short_name(plugin.host.usr, plugin.index, param_idx, name);
+}
+
+inline
+auto env_env_idx(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+	plugin.host.write_param_env_env_idx(plugin.host.usr, plugin.index, param_idx, env_idx);
+}
+
+inline
+auto env_clamp_range(const Plugin& plugin, blink_ParamIdx param_idx, blink_Range range) -> void {
+	plugin.host.write_param_env_clamp_range(plugin.host.usr, plugin.index, param_idx, range);
+}
+
+inline
+auto env_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+	plugin.host.write_param_env_offset_env(plugin.host.usr, plugin.index, param_idx, env_idx);
+}
+
+inline
+auto env_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+	plugin.host.write_param_env_override_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }
 
 } // param
 } // write
-*/
 
 [[nodiscard]] inline
 auto make_chord_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> ChordData {

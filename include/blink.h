@@ -27,7 +27,7 @@ typedef struct {      size_t value; } blink_PluginIdx;
 typedef struct {      size_t value; } blink_SliderRealIdx;
 typedef struct {      size_t value; } blink_UnitIdx;
 typedef struct {     int32_t value; } blink_Flags;
-typedef struct {     int32_t value; } blink_ID;
+typedef struct {     int64_t value; } blink_ID;
 typedef struct {     uint8_t value; } blink_BitDepth;
 typedef struct {     uint8_t value; } blink_ChannelCount;
 typedef struct {    uint32_t value; } blink_ParamCount;
@@ -272,10 +272,10 @@ typedef struct {
 } blink_EnvFns;
 
 typedef blink_EnvIdx        (*blink_host_add_env)(void*);
-typedef blink_ParamIdx      (*blink_host_add_param_env)(void*, blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_option)(void*, blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(void*, blink_UUID uuid);
-typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(void*, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_env)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_option)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
+typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_SliderIntIdx  (*blink_host_add_slider_int)(void*);
 typedef blink_SliderRealIdx (*blink_host_add_slider_real)(void*);
 typedef float               (*blink_host_read_param_env_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
@@ -366,7 +366,7 @@ typedef struct {
 	blink_SR SR;
 	blink_BitDepth bit_depth; 
 	void* host;
-	blink_GetSampleDataCB get_data; // TODO: move this into HostFns?
+	blink_GetSampleDataCB get_data;
 } blink_SampleInfo;
 
 typedef struct {
@@ -510,7 +510,6 @@ extern "C"
 	EXPORTED blink_UnitIdx            blink_unit_add(blink_InstanceIdx instance_idx);
 	EXPORTED blink_Error              blink_unit_reset(blink_UnitIdx unit_idx);
 	EXPORTED blink_Error              blink_unit_stream_init(blink_UnitIdx unit_idx, blink_SR SR);
-	EXPORTED blink_SamplerInfo        blink_get_sampler_info();
 
 	// EFFECT PLUGIN INTERFACE ----------------------------------------
 	EXPORTED blink_Error              blink_effect_process(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
@@ -520,6 +519,7 @@ extern "C"
 	EXPORTED blink_Error              blink_synth_process(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
 
 	// SAMPLER PLUGIN INTERFACE ---------------------------------------
+	EXPORTED blink_SamplerInfo        blink_sampler_get_info();
 
 	// output pointer is aligned on a 16-byte boundary
 	// output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 

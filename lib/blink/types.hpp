@@ -6,6 +6,8 @@
 #include <optional>
 #include <vector>
 
+[[nodiscard]] inline auto operator<(const blink_PluginIdx& a, const blink_PluginIdx& b) { return a.value < b.value; }
+
 namespace blink {
 
 enum class StdEnv {
@@ -68,22 +70,25 @@ struct EnvIdx             { blink_EnvIdx value = {0}; };
 struct EnvSnapSettings    { blink_EnvSnapSettings value = {0, 1}; };
 struct LocalInstanceIdx   { blink_InstanceIdx value = {0}; };
 struct LocalUnitIdx       { blink_UnitIdx value = {0}; };
-struct ManipDelegate      { std::optional<blink_ParamIdx> value; };
 struct MaxSliderIdx       { std::optional<blink_SliderRealIdx> value; };
 struct MinSliderIdx       { std::optional<blink_SliderRealIdx> value; };
 struct OffsetEnvIdx       { EnvIdx value; };
 struct ParamEnvIdx        { size_t value = 0; };
+struct ParamGlobalIdx     { size_t value = 0; };
 struct ParamOptionIdx     { size_t value = 0; };
 struct ParamSliderIntIdx  { size_t value = 0; };
 struct ParamSliderRealIdx { size_t value = 0; };
+struct PluginParams       { std::vector<ParamGlobalIdx> global_indices; };
+struct ManipDelegate      { std::optional<ParamGlobalIdx> value; };
 struct OverrideEnvIdx     { EnvIdx value; };
 struct ParamFlags         { blink_Flags value = {0}; };
 struct ParamIcon          { blink_StdIcon value = {blink_StdIcon_None}; };
 struct ParamTypeIdx       { size_t value = 0; };
+struct PluginTypeIdx      { size_t value = 0; };
 struct PluginIdx          { blink_PluginIdx value = {0}; };
 struct SR                 { blink_SR value = {0}; };
 struct StringVec          { std::vector<std::string> value; };
-struct SubParams          { std::vector<blink_ParamIdx> value; };
+struct SubParams          { std::vector<ParamGlobalIdx> value; };
 struct TweakerInt         { blink_TweakerInt value {0}; };
 struct TweakerReal        { blink_TweakerReal value {0}; };
 struct UnitVec            { std::vector<blink_UnitIdx> value; };
@@ -135,28 +140,30 @@ struct PluginInterface {
 	unit_reset_fn           unit_reset;
 	unit_stream_init_fn     unit_stream_init;
 	struct Effect {
-		using effect_process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out)>;
-		effect_process_fn effect_process;
+		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out)>;
+		using get_info_fn = std::function<blink_EffectInstanceInfo(blink_InstanceIdx instance_idx)>;
+		get_info_fn get_info;
+		process_fn process;
 	} effect;
 	struct Sampler {
-		using get_sampler_info_fn = std::function<blink_SamplerInfo()>;
-		using sampler_process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out)>;
-		using sampler_preprocess_sample_fn = std::function<blink_Error(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info)>;
-		using sampler_sample_deleted_fn = std::function<blink_Error(blink_ID sample_id)>;
-		using sampler_draw_fn = std::function<blink_Error(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
+		using get_info_fn = std::function<blink_SamplerInfo()>;
+		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out)>;
+		using preprocess_sample_fn = std::function<blink_Error(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info)>;
+		using sample_deleted_fn = std::function<blink_Error(blink_ID sample_id)>;
+		using draw_fn = std::function<blink_Error(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
 		using get_sonic_fragment_at_block_position_fn = std::function<double(blink_Position block_position)>;
 		using block_position_for_sonic_fragment_fn = std::function<blink_Position(double fragment)>;
-		get_sampler_info_fn                     get_sampler_info;
-		sampler_process_fn                      sampler_process;
-		sampler_preprocess_sample_fn            sampler_preprocess_sample;
-		sampler_sample_deleted_fn               sampler_sample_deleted;
-		sampler_draw_fn                         sampler_draw;
-		get_sonic_fragment_at_block_position_fn get_sonic_fragment_at_block_position;
 		block_position_for_sonic_fragment_fn    block_position_for_sonic_fragment;
+		draw_fn                                 draw;
+		get_info_fn                             get_info;
+		get_sonic_fragment_at_block_position_fn get_sonic_fragment_at_block_position;
+		preprocess_sample_fn                    preprocess_sample;
+		process_fn                              process;
+		sample_deleted_fn                       sample_deleted;
 	} sampler;
 	struct Synth {
-		using synth_process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out)>;
-		synth_process_fn synth_process;
+		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out)>;
+		process_fn process;
 	} synth;
 };
 

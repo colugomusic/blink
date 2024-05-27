@@ -6,6 +6,13 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 include(CPM)
 
 CPMAddPackage(
+	NAME ent
+	GITHUB_REPOSITORY "colugomusic/ent"
+	GIT_TAG "master"
+	DOWNLOAD_ONLY YES
+)
+
+CPMAddPackage(
 	NAME snd
 	GITHUB_REPOSITORY "colugomusic/snd"
 	GIT_TAG "master"
@@ -20,10 +27,10 @@ CPMAddPackage(
 )
 
 CPMAddPackage(
-    NAME madronalib
-    GITHUB_REPOSITORY madronalabs/madronalib
-    GIT_TAG master
-    DOWNLOAD_ONLY YES
+	NAME madronalib
+	GITHUB_REPOSITORY "madronalabs/madronalib"
+	GIT_TAG "master"
+	DOWNLOAD_ONLY YES
 )
 
 add_library(${PROJECT_NAME} INTERFACE)
@@ -31,6 +38,7 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}
 	${CMAKE_CURRENT_LIST_DIR}/../include
+	${ent_SOURCE_DIR}/include
 	${snd_SOURCE_DIR}/include
 	${tweak_SOURCE_DIR}/include
 	${madronalib_SOURCE_DIR}/source
