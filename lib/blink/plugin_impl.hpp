@@ -66,6 +66,12 @@ auto init(Plugin* plugin, blink_PluginIdx plugin_index, blink_HostFns host_fns) 
 	plugin->host = host_fns;
 }
 
+inline
+auto init(Plugin* plugin, blink_PluginIdx plugin_index, blink_HostFns host_fns, blink_SamplerInfo sampler_info) -> void {
+	init(plugin, plugin_index, host_fns);
+	host_fns.write_sampler_info(host_fns.usr, plugin_index, sampler_info);
+}
+
 template <typename Instance, typename Unit> [[nodiscard]]
 auto terminate(Entities<Instance, Unit>* ents) -> blink_Error {
 	ents->instance.clear();

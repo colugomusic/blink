@@ -271,6 +271,17 @@ typedef struct {
 	blink_Tweak_ToStringReal to_string;
 } blink_EnvFns;
 
+typedef struct {
+	// True if the plugin needs to preprocess samples in some way.
+	// Preprocessing happens once per sample.
+	blink_Bool requires_preprocessing; 
+	// True if the waveform resulting from the sample transformation
+	// could be substantially different from the waveform generated
+	// by blink_sampler_draw(). If this is true then Blockhead will
+	// draw a second waveform for the baked block data.
+	blink_Bool baked_waveform_could_be_different;
+} blink_SamplerInfo;
+
 typedef blink_EnvIdx        (*blink_host_add_env)(void*);
 typedef blink_ParamIdx      (*blink_host_add_param_env)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_option)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
@@ -302,6 +313,7 @@ typedef void                (*blink_host_write_param_name)(void*, blink_PluginId
 typedef void                (*blink_host_write_param_short_name)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString value);
 typedef void                (*blink_host_write_param_slider_real_offset_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
 typedef void                (*blink_host_write_param_slider_real_override_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
+typedef void                (*blink_host_write_sampler_info)(void*, blink_PluginIdx plugin_idx, blink_SamplerInfo value);
 typedef void                (*blink_host_write_slider_int_default_value)(void*, blink_SliderIntIdx sld_idx, int64_t value);
 typedef void                (*blink_host_write_slider_int_tweaker)(void*, blink_SliderIntIdx sld_idx, blink_TweakerInt tweaker);
 typedef void                (*blink_host_write_slider_real_default_value)(void*, blink_SliderRealIdx sld_idx, float value);
@@ -340,6 +352,7 @@ struct blink_HostFns {
 	blink_host_write_param_short_name               write_param_short_name;
 	blink_host_write_param_slider_real_offset_env   write_param_slider_real_offset_env;
 	blink_host_write_param_slider_real_override_env write_param_slider_real_override_env;
+	blink_host_write_sampler_info                   write_sampler_info;
 	blink_host_write_slider_int_default_value       write_slider_int_default_value;
 	blink_host_write_slider_int_tweaker             write_slider_int_tweaker;
 	blink_host_write_slider_real_default_value      write_slider_real_default_value;
@@ -406,17 +419,6 @@ typedef struct {
 	// The amplitude after being transformed by parameter settings
 	float* amp;
 } blink_SamplerDrawInfo;
-
-typedef struct {
-	// True if the plugin needs to preprocess samples in some way.
-	// Preprocessing happens once per sample.
-	blink_Bool requires_preprocessing; 
-	// True if the waveform resulting from the sample transformation
-	// could be substantially different from the waveform generated
-	// by blink_sampler_draw(). If this is true then Blockhead will
-	// draw a second waveform for the baked block data.
-	blink_Bool baked_waveform_could_be_different;
-} blink_SamplerInfo;
 
 typedef struct {
 	// Blockhead uses these values to inform the user of any latency introduced
@@ -519,8 +521,6 @@ extern "C"
 	EXPORTED blink_Error              blink_synth_process(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
 
 	// SAMPLER PLUGIN INTERFACE ---------------------------------------
-	EXPORTED blink_SamplerInfo        blink_sampler_get_info();
-
 	// output pointer is aligned on a 16-byte boundary
 	// output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
 	EXPORTED blink_Error blink_sampler_process(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);

@@ -87,6 +87,7 @@ struct ParamIcon          { blink_StdIcon value = {blink_StdIcon_None}; };
 struct ParamTypeIdx       { size_t value = 0; };
 struct PluginTypeIdx      { size_t value = 0; };
 struct PluginIdx          { blink_PluginIdx value = {0}; };
+struct SamplerInfo        { blink_SamplerInfo value = {0}; };
 struct SR                 { blink_SR value = {0}; };
 struct StringVec          { std::vector<std::string> value; };
 struct SubParams          { std::vector<ParamGlobalIdx> value; };
@@ -147,7 +148,6 @@ struct PluginInterface {
 		process_fn process;
 	} effect;
 	struct Sampler {
-		using get_info_fn = std::function<blink_SamplerInfo()>;
 		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out)>;
 		using preprocess_sample_fn = std::function<blink_Error(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info)>;
 		using sample_deleted_fn = std::function<blink_Error(blink_ID sample_id)>;
@@ -156,7 +156,6 @@ struct PluginInterface {
 		using block_position_for_sonic_fragment_fn = std::function<blink_Position(double fragment)>;
 		block_position_for_sonic_fragment_fn    block_position_for_sonic_fragment;
 		draw_fn                                 draw;
-		get_info_fn                             get_info;
 		get_sonic_fragment_at_block_position_fn get_sonic_fragment_at_block_position;
 		preprocess_sample_fn                    preprocess_sample;
 		process_fn                              process;

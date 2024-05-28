@@ -22,7 +22,7 @@ namespace e {
 		PluginParams
 	>;
 	using PluginSampler = ent::static_store<
-		blink_SamplerInfo
+		SamplerInfo
 	>;
 	using Instance = ent::dynamic_store<
 		InstanceProcess,
@@ -166,6 +166,11 @@ auto iface(const Host& host, blink_PluginIdx plugin_idx) -> const PluginInterfac
 }
 
 [[nodiscard]] inline
+auto info(const Host& host, blink_PluginIdx plugin_idx) -> const blink_PluginInfo& {
+	return host.plugin.get<blink_PluginInfo>(plugin_idx.value);
+}
+
+[[nodiscard]] inline
 auto local_to_global(const Host& host, blink_PluginIdx plugin_idx, blink_ParamIdx local_idx) -> ParamGlobalIdx {
 	const auto& param_list = host.plugin.get<PluginParams>(plugin_idx.value).global_indices;
 	return param_list[local_idx.value];
@@ -192,10 +197,17 @@ auto type(const Host& host, blink_PluginIdx plugin_idx) -> PluginType {
 }
 
 [[nodiscard]] inline
+auto sampler_baked_waveform_could_be_different(const Host& host, blink_PluginIdx plugin_idx) -> bool {
+	const auto type_idx     = host.plugin.get<PluginTypeIdx>(plugin_idx.value).value;
+	const auto sampler_info = host.plugin_sampler.get<SamplerInfo>(type_idx);
+	return sampler_info.value.baked_waveform_could_be_different.value;
+}
+
+[[nodiscard]] inline
 auto sampler_requires_preprocessing(const Host& host, blink_PluginIdx plugin_idx) -> bool {
 	const auto type_idx     = host.plugin.get<PluginTypeIdx>(plugin_idx.value).value;
-	const auto sampler_info = host.plugin_sampler.get<blink_SamplerInfo>(type_idx);
-	return sampler_info.requires_preprocessing.value;
+	const auto sampler_info = host.plugin_sampler.get<SamplerInfo>(type_idx);
+	return sampler_info.value.requires_preprocessing.value;
 }
 
 [[nodiscard]] inline
@@ -234,42 +246,42 @@ auto add_subparam(Host* host, ParamGlobalIdx param_idx, ParamGlobalIdx subparam_
 
 inline
 auto apply_offset_fn(Host* host, ParamEnvIdx param_env_idx, blink_ApplyOffsetFn fn) -> void {
-	host->param_env.get<ApplyOffsetFn>(param_env_idx.value).fn = fn;
+	host->param_env.set(param_env_idx.value, ApplyOffsetFn{fn});
 }
 
 inline
 auto clamp_range(Host* host, ParamSliderRealIdx sld_idx, ClampRange value) -> void {
-	host->param_slider_real.get<ClampRange>(sld_idx.value) = value;
+	host->param_slider_real.set(sld_idx.value, value);
 }
 
 inline
 auto default_value(Host* host, blink_EnvIdx env_idx, DefaultValue<float> value) -> void {
-	host->env.get<DefaultValue<float>>(env_idx.value) = value;
+	host->env.set(env_idx.value, value);
 }
 
 inline
 auto default_value(Host* host, ParamOptionIdx option_idx, DefaultValue<int64_t> value) -> void {
-	host->param_option.get<DefaultValue<int64_t>>(option_idx.value) = value;
+	host->param_option.set(option_idx.value, value);
 }
 
 inline
 auto default_value(Host* host, blink_SliderIntIdx sld_idx, DefaultValue<int64_t> value) -> void {
-	host->slider_int.get<DefaultValue<int64_t>>(sld_idx.value) = value;
+	host->slider_int.set(sld_idx.value, value);
 }
 
 inline
 auto default_value(Host* host, blink_SliderRealIdx sld_idx, DefaultValue<float> value) -> void {
-	host->slider_real.get<DefaultValue<float>>(sld_idx.value) = value;
+	host->slider_real.set(sld_idx.value, value);
 }
 
 inline
 auto env(Host* host, ParamEnvIdx param_env_idx, blink_EnvIdx value) -> void {
-	host->param_env.get<EnvIdx>(param_env_idx.value).value = value;
+	host->param_env.set(param_env_idx.value, EnvIdx{value});
 }
 
 inline
 auto fns(Host* host, blink_EnvIdx env_idx, EnvFns fns) -> void {
-	host->env.get<EnvFns>(env_idx.value) = fns;
+	host->env.set(env_idx.value, fns);
 }
 
 inline
@@ -279,12 +291,12 @@ auto group(Host* host, ParamGlobalIdx param_idx, blink_StaticString group) -> vo
 
 inline
 auto icon(Host* host, ParamGlobalIdx param_idx, blink_StdIcon icon) -> void {
-	host->param.get<ParamIcon>(param_idx.value).value = icon;
+	host->param.set(param_idx.value, ParamIcon{icon});
 }
 
 inline
 auto info(Host* host, blink_PluginIdx plugin_idx, blink_PluginInfo info) -> void {
-	host->plugin.get<blink_PluginInfo>(plugin_idx.value) = info;
+	host->plugin.set(plugin_idx.value, info);
 }
 
 inline
@@ -294,47 +306,52 @@ auto long_desc(Host* host, ParamGlobalIdx param_idx, blink_StaticString desc) ->
 
 inline
 auto manip_delegate(Host* host, ParamGlobalIdx param_idx, ParamGlobalIdx delegate) -> void {
-	host->param.get<ManipDelegate>(param_idx.value).value = delegate;
+	host->param.set(param_idx.value, ManipDelegate{delegate});
 }
 
 inline
 auto max_slider(Host* host, blink_EnvIdx env_idx, MaxSliderIdx value) -> void {
-	host->env.get<MaxSliderIdx>(env_idx.value) = value;
+	host->env.set(env_idx.value, value);
 }
 
 inline
 auto min_slider(Host* host, blink_EnvIdx env_idx, MinSliderIdx value) -> void {
-	host->env.get<MinSliderIdx>(env_idx.value) = value;
+	host->env.set(env_idx.value, value);
 }
 
 inline
 auto offset_env(Host* host, ParamEnvIdx env_idx, OffsetEnvIdx value) -> void {
-	host->param_env.get<OffsetEnvIdx>(env_idx.value) = value;
+	host->param_env.set(env_idx.value, value);
 }
 
 inline
 auto offset_env(Host* host, ParamSliderRealIdx sld_idx, OffsetEnvIdx value) -> void {
-	host->param_slider_real.get<OffsetEnvIdx>(sld_idx.value) = value;
+	host->param_slider_real.set(sld_idx.value, value);
 }
 
 inline
 auto override_env(Host* host, ParamEnvIdx env_idx, OverrideEnvIdx value) -> void {
-	host->param_env.get<OverrideEnvIdx>(env_idx.value) = value;
+	host->param_env.set(env_idx.value, value);
 }
 
 inline
 auto override_env(Host* host, ParamSliderRealIdx sld_idx, OverrideEnvIdx value) -> void {
-	host->param_slider_real.get<OverrideEnvIdx>(sld_idx.value) = value;
+	host->param_slider_real.set(sld_idx.value, value);
 }
 
 inline
 auto plugin_interface(Host* host, blink_PluginIdx plugin_idx, PluginInterface iface) -> void {
-	host->plugin.get<PluginInterface>(plugin_idx.value) = iface;
+	host->plugin.set(plugin_idx.value, iface);
 }
 
 inline
 auto name(Host* host, ParamGlobalIdx param_idx, blink_StaticString name) -> void {
 	host->param.get<ParamStrings>(param_idx.value).name = name;
+}
+
+inline
+auto sampler_info(Host* host, blink_PluginIdx plugin_idx, blink_SamplerInfo info) -> void {
+	host->plugin_sampler.set(plugin_idx.value, SamplerInfo{info});
 }
 
 inline
@@ -344,17 +361,17 @@ auto short_name(Host* host, ParamGlobalIdx param_idx, blink_StaticString name) -
 
 inline
 auto slider(Host* host, ParamSliderIntIdx sld_idx, blink_SliderIntIdx value) -> void {
-	host->param_slider_int.get<blink_SliderIntIdx>(sld_idx.value) = value;
+	host->param_slider_int.set(sld_idx.value, value);
 }
 
 inline
 auto slider(Host* host, ParamSliderRealIdx sld_idx, blink_SliderRealIdx value) -> void {
-	host->param_slider_real.get<blink_SliderRealIdx>(sld_idx.value) = value;
+	host->param_slider_real.set(sld_idx.value, value);
 }
 
 inline
 auto snap_settings(Host* host, blink_EnvIdx env_idx, EnvSnapSettings value) -> void {
-	host->env.get<EnvSnapSettings>(env_idx.value) = value;
+	host->env.set(env_idx.value, value);
 }
 
 inline
@@ -364,42 +381,42 @@ auto strings(Host* host, ParamOptionIdx option_idx, StringVec strings) -> void {
 
 inline
 auto tweaker(Host* host, blink_SliderIntIdx sld_idx, TweakerInt value) -> void {
-	host->slider_int.get<TweakerInt>(sld_idx.value) = value;
+	host->slider_int.set(sld_idx.value, value);
 }
 
 inline
 auto tweaker(Host* host, blink_SliderRealIdx sld_idx, TweakerReal value) -> void {
-	host->slider_real.get<TweakerReal>(sld_idx.value) = value;
+	host->slider_real.set(sld_idx.value, value);
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamEnvIdx type_idx) -> void {
-	host->param.get<ParamTypeIdx>(param_idx.value).value = type_idx.value;
+	host->param.set(param_idx.value, type_idx.value);
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamOptionIdx type_idx) -> void {
-	host->param.get<ParamTypeIdx>(param_idx.value).value = type_idx.value;
+	host->param.set(param_idx.value, type_idx.value);
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamSliderIntIdx type_idx) -> void {
-	host->param.get<ParamTypeIdx>(param_idx.value).value = type_idx.value;
+	host->param.set(param_idx.value, type_idx.value);
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamSliderRealIdx type_idx) -> void {
-	host->param.get<ParamTypeIdx>(param_idx.value).value = type_idx.value;
+	host->param.set(param_idx.value, type_idx.value);
 }
 
 inline
 auto uuid(Host* host, ParamGlobalIdx param_idx, blink_UUID uuid) -> void {
-	host->param.get<blink_UUID>(param_idx.value) = uuid;
+	host->param.set(param_idx.value, uuid);
 }
 
 inline
 auto value_slider(Host* host, blink_EnvIdx env_idx, ValueSliderIdx value) -> void {
-	host->env.get<ValueSliderIdx>(env_idx.value) = value;
+	host->env.set(env_idx.value, value);
 }
 
 } // write
@@ -1059,6 +1076,12 @@ auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_EffectBuffer
 }
 
 inline
+auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error {
+	const auto& plugin = read::iface(host, plugin_idx);
+	return plugin.sampler.draw(&buffer, &unit_state, n, out);
+}
+
+inline
 auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, float* out) -> blink_Error {
 	auto process_fn = [unit_idx, &buffer, &unit_state, out](const PluginInterface& plugin_iface) -> blink_Error {
 		return plugin_iface.sampler.process(unit_idx, &buffer, &unit_state, out);
@@ -1348,6 +1371,9 @@ auto init(Host* host) -> void {
 	host->fns.write_param_short_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		write::short_name(host_ptr(usr), param_global_idx, name);
+	};
+	host->fns.write_sampler_info = [](void* usr, blink_PluginIdx plugin_idx, blink_SamplerInfo info) {
+		write::sampler_info(host_ptr(usr), plugin_idx, info);
 	};
 	host->fns.write_slider_int_default_value = [](void* usr, blink_SliderIntIdx slider_idx, int64_t value) {
 		write::default_value(host_ptr(usr), slider_idx, {value});
