@@ -8,6 +8,7 @@
 #include "math.hpp"
 #include "tweak.hpp"
 #include "types.hpp"
+#include "uuids.h"
 
 namespace blink {
 
@@ -125,6 +126,38 @@ auto default_value(const Host& host, ParamOptionIdx option_idx) -> int64_t {
 [[nodiscard]] inline
 auto env_idx(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx {
 	return host.param_env.get<EnvIdx>(param_env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto find_param(const Host& host, blink_PluginIdx plugin, uuids::t uuid) -> std::optional<blink_ParamIdx> {
+	const auto param_list = host.plugin.get<PluginParams>(plugin.value).global_indices;
+	const auto uuid_str   = uuids::to<std::string>(uuid);
+	if (!uuid_str) {
+		return std::nullopt;
+	}
+	for (const auto param_idx : param_list) {
+		const auto uuid = host.param.get<blink_UUID>(param_idx.value).value;
+		if (uuid == *uuid_str) {
+			return blink_ParamIdx{param_idx.value};
+		}
+	}
+	return std::nullopt;
+}
+
+[[nodiscard]] inline
+auto find_plugin(const Host& host, uuids::t uuid) -> std::optional<blink_PluginIdx> {
+	const auto uuid_str = uuids::to<std::string>(uuid);
+	if (!uuid_str) {
+		return std::nullopt;
+	}
+	const auto pred = [uuid_str = std::string_view{*uuid_str}](const blink_UUID& uuid) {
+		return uuid.value == uuid_str;
+	};
+	const auto idx = host.plugin.find<blink_UUID>(pred);
+	if (!idx) {
+		return std::nullopt;
+	}
+	return blink_PluginIdx{*idx};
 }
 
 [[nodiscard]] inline

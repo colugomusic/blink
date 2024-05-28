@@ -75,6 +75,7 @@ struct MinSliderIdx       { std::optional<blink_SliderRealIdx> value; };
 struct OffsetEnvIdx       { EnvIdx value; };
 struct ParamEnvIdx        { size_t value = 0; };
 struct ParamGlobalIdx     { size_t value = 0; };
+struct ParamLocalIdx      { size_t value = 0; };
 struct ParamOptionIdx     { size_t value = 0; };
 struct ParamSliderIntIdx  { size_t value = 0; };
 struct ParamSliderRealIdx { size_t value = 0; };
