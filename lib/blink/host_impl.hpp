@@ -10,6 +10,11 @@
 #include "types.hpp"
 #include "uuids.h"
 
+namespace std { template <> struct hash<blink_ParamIdx> { auto operator()(const blink_ParamIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+[[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value != b.value; }
+[[nodiscard]] inline auto operator<(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value < b.value; }
+
 namespace blink {
 
 namespace e {
@@ -158,6 +163,11 @@ auto find_plugin(const Host& host, uuids::t uuid) -> std::optional<blink_PluginI
 		return std::nullopt;
 	}
 	return blink_PluginIdx{*idx};
+}
+
+[[nodiscard]] inline
+auto flags(const Host& host, blink_ParamIdx param_idx) -> int {
+	return host.param.get<ParamFlags>(param_idx.value).value.value;
 }
 
 [[nodiscard]] inline
@@ -391,22 +401,22 @@ auto tweaker(Host* host, blink_SliderRealIdx sld_idx, TweakerReal value) -> void
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamEnvIdx type_idx) -> void {
-	host->param.set(param_idx.value, type_idx.value);
+	host->param.set(param_idx.value, ParamTypeIdx{type_idx.value});
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamOptionIdx type_idx) -> void {
-	host->param.set(param_idx.value, type_idx.value);
+	host->param.set(param_idx.value, ParamTypeIdx{type_idx.value});
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamSliderIntIdx type_idx) -> void {
-	host->param.set(param_idx.value, type_idx.value);
+	host->param.set(param_idx.value, ParamTypeIdx{type_idx.value});
 }
 
 inline
 auto type_idx(Host* host, ParamGlobalIdx param_idx, ParamSliderRealIdx type_idx) -> void {
-	host->param.set(param_idx.value, type_idx.value);
+	host->param.set(param_idx.value, ParamTypeIdx{type_idx.value});
 }
 
 inline
