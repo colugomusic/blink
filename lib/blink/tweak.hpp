@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <blink.h>
 #include <cmath>
 #include <optional>
@@ -712,7 +713,7 @@ auto drag(float v, int amount, bool precise) -> float {
 auto from_string(const char* cstr, float* out) -> blink_Bool {
 	std::string str = cstr;
 	std::string uppercase = str;
-	std::transform(str.begin(), str.end(), uppercase.begin(), std::toupper);
+	std::transform(str.begin(), str.end(), uppercase.begin(), ::toupper);
 	if (uppercase.find("FREEZE") != ::std::string::npos) { *out = FREEZE; return {true}; }
 	if (uppercase.find("NORMAL") != ::std::string::npos) { *out = NORMAL; return {true}; }
 	if (uppercase.find("DOUBLE") != ::std::string::npos) { *out = DOUBLE; return {true}; }

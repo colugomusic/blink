@@ -4,7 +4,6 @@
 #include "blink.h"
 #include "block_positions.hpp"
 #include "common_impl.hpp"
-#include "entity_store.hpp"
 #include "resource_store.hpp"
 #include "types.hpp"
 

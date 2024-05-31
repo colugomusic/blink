@@ -61,6 +61,7 @@ enum class StdSliderReal {
 	WET,
 };
 
+enum class ParamType { chord, env, option, slider_int, slider_real };
 enum class PluginType { effect, sampler, synth };
 
 struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
@@ -170,4 +171,12 @@ struct PluginInterface {
 	} synth;
 };
 
+[[nodiscard]] inline auto operator==(const ParamGlobalIdx& a, const ParamGlobalIdx& b) -> bool { return a.value == b.value; }
+
 } // blink
+
+namespace std { template <> struct hash<blink_ParamIdx> { auto operator()(const blink_ParamIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamGlobalIdx> { auto operator()(const blink::ParamGlobalIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+[[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value != b.value; }
+[[nodiscard]] inline auto operator<(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value < b.value; }

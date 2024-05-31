@@ -9,63 +9,52 @@
 namespace blink {
 namespace const_math {
 
-constexpr auto EPSILON = 0.001;
+template <typename T>
+constexpr auto EPSILON = T(0.001);
 
-[[nodiscard]] constexpr
-auto abs(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto abs(T x) -> T {
 	return x < 0.0 ? -x : x;
 }
 
-[[nodiscard]] constexpr
-auto square(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto square(T x) -> T {
 	return x * x;
 }
 
-[[nodiscard]] constexpr
-auto cube(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto cube(T x) -> T {
 	return x * x * x;
 }
 
-[[nodiscard]] constexpr
-auto sqrt_helper(double x, double g) -> double {
-	if constexpr (abs(g - x / g) < EPSILON) {
-		return g;
-	}
-	return sqrt_helper(x, (g + x / g) / 2);
+template <typename T> [[nodiscard]] constexpr
+auto sqrt_helper(T x, T g) -> T {
+	return abs(g - x / g) < EPSILON<T> ? g : sqrt_helper(x, (g + x / g) / 2);
 }
 
-[[nodiscard]] constexpr
-auto sqrt(double x) -> double {
-	return sqrt_helper(x, 1);
+template <typename T> [[nodiscard]] constexpr
+auto sqrt(T x) -> T {
+	return sqrt_helper(x, T(1));
 }
 
-[[nodiscard]] constexpr
-auto sin_helper(double x) -> double {
-	if constexpr (x < EPSILON) {
-		return x;
-	}
-	return 3 * sin_helper(x / 3) - 4 * cube(sin_helper(x / 3));
+template <typename T> [[nodiscard]] constexpr
+auto sin_helper(T x) -> T {
+	return x < EPSILON<T> ? x : 3 * sin_helper(x / 3) - 4 * cube(sin_helper(x / 3));
 }
 
-[[nodiscard]] constexpr
-auto sin(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto sin(T x) -> T {
 	return sin_helper(x < 0 ? -x + M_PI : x);
 }
 
-[[nodiscard]] constexpr
-auto sinh_helper(double x) -> double {
-	if constexpr (x < tol) {
-		return x;
-	}
-	return 3 * sinh_helper(x / 3) + 4 * cube(sinh_helper(x / 3));
+template <typename T> [[nodiscard]] constexpr
+auto sinh_helper(T x) -> T {
+	return x < EPSILON<T> ? x : 3 * sinh_helper(x / 3) + 4 * cube(sinh_helper(x / 3));
 }
 
-[[nodiscard]] constexpr
-auto sinh(double x) -> double {
-	if constexpr (x < 0) {
-		return -sinh_helper(-x);
-	}
-	return sinh_helper(x);
+template <typename T> [[nodiscard]] constexpr
+auto sinh(T x) -> T {
+	return x < 0 ? -sinh_helper(-x) : sinh_helper(x);
 }
 
 [[nodiscard]] constexpr
@@ -80,89 +69,63 @@ auto cosh(double x) -> double {
 
 [[nodiscard]] constexpr
 auto pow(double base, int exponent) -> double {
-	if constexpr (exponent < 0) {
-		return 1.0 / pow(base, -exponent);
-	}
-	if constexpr (exponent == 0) {
-		return 1.0;
-	}
-	if constexpr (exponent == 1) {
-		return base;
-	}
-	return base * pow(base, exponent-1);
+	return exponent < 0
+		? 1.0 / pow(base, -exponent)
+		: exponent == 0
+			? 1.0
+			: exponent == 1
+				? base
+				: base * pow(base, exponent-1);
 }
 
-[[nodiscard]] constexpr
-auto atan_poly_helper(double res, double num1, double den1, double delta) -> double {
-	if constexpr (res < tol) {
-		return res;
-	}
-	return res + atan_poly_helper((num1 * delta) / (den1 + 2) - num1 / den1, num1 * delta * delta, den1 + 4, delta);
+template <typename T> [[nodiscard]] constexpr
+auto atan_poly_helper(T res, T num1, T den1, T delta) -> T {
+	return res < EPSILON<T> ? res : res + atan_poly_helper((num1 * delta) / (den1 + 2) - num1 / den1, num1 * delta * delta, den1 + 4, delta);
 }
 
-[[nodiscard]] constexpr
-auto atan_poly(double x) -> double {
-	return x + atan_poly_helper(pow(x, 5) / 5 - pow(x, 3) / 3, pow(x, 7), 7, x * x);
+template <typename T> [[nodiscard]] constexpr
+auto atan_poly(T x) -> T {
+	return x + atan_poly_helper(pow(x, 5) / 5 - pow(x, 3) / 3, pow(x, 7), T(7), x * x);
 }
 
 [[nodiscard]] constexpr
 auto atan_identity(double x) -> double {
-	if constexpr (x <= (2.0 - sqrt(3.0))) {
-		return atan_poly(x);
-	}
-	return (M_PI_2 / 3) + atan_poly((sqrt(3) * x - 1) / (sqrt(3) + x));
+	return x <= (2.0 - sqrt(3.0)) ? atan_poly(x) : (M_PI_2 / 3) + atan_poly((sqrt(3) * x - 1) / (sqrt(3) + x));
 }
 
 [[nodiscard]] constexpr
 auto atan_cmplmntry(double x) -> double {
-	if constexpr (x < 1) {
-		return atan_identity(x);
-	}
-	return M_PI_2 - atan_identity(1 / x);
+	return x < 1 ? atan_identity(x) : M_PI_2 - atan_identity(1 / x);
 }
 
 [[nodiscard]] constexpr
 auto atan(double x) -> double {
-	if constexpr (x >= 0) {
-		return atan_cmplmntry(x);
-	}
-	return -atan_cmplmntry(-x);
+	return x >= 0 ? atan_cmplmntry(x) : -atan_cmplmntry(-x);
 }
 
 [[nodiscard]] constexpr
 auto atan2(double y, double x) -> double {
-	if constexpr (x > 0) {
-		return atan(y / x);
-	}
-	if constexpr (y >= 0 && x < 0) {
-		return atan(y / x) + M_PI;
-	}
-	if constexpr (y < 0 && x < 0) {
-		return atan(y / x) - M_PI;
-	}
-	if (constexpr (y > 0 && x == 0)) {
-		return M_PI_2;
-	}
-	if (constexpr (y < 0 && x == 0)) {
-		return -M_PI_2;
-	}
-	return 0;
+	return x > 0
+		? atan(y / x)
+		: y >= 0 && x < 0
+			? atan(y / x) + M_PI
+			: y < 0 && x < 0
+				? atan(y / x) - M_PI
+				: y > 0 && x == 0
+					? M_PI_2
+					: y < 0 && x == 0
+						? -M_PI_2
+						: 0;
 }
 
 [[nodiscard]] constexpr
 auto nearest(double x) -> double {
-	if constexpr ((x-0.5) > (int)(x)) {
-		return (int)(x + 0.5);
-	}
-	return (int)(x);
+	return (x - 0.5) > (int)(x) ? (int)(x + 0.5) : (int)(x);
 }
 
 [[nodiscard]] constexpr
 auto fraction(double x) -> double {
-	if constexpr ((x-0.5) > (int)(x)) {
-		return -(((double)(int)(x + 0.5)) - x) 
-	}
-	return x - ((double)(int)(x));
+	return (x - 0.5) > (int)(x) ? -(((double)(int)(x + 0.5)) - x) : x - ((double)(int)(x));
 }
 
 [[nodiscard]] constexpr
@@ -177,24 +140,12 @@ auto exp(double x) -> double {
 
 [[nodiscard]] constexpr
 auto mantissa(double x) -> double {
-	if constexpr (x >= 10) {
-		return mantissa(x / 10);
-	}
-	if constexpr (x < 1) {
-		return mantissa(x * 10);
-	}
-	return x;
+	return x >= 10 ? mantissa(x / 10) : x < 1 ? mantissa(x * 10) : x;
 }
 
 [[nodiscard]] constexpr
 auto exponent_helper(double x, int e) -> int {
-	if constexpr (x >= 10) {
-		return exponent_helper(x / 10, e + 1);
-	}
-	if constexpr (x < 1) {
-		return exponent_helper(x * 10, e - 1);
-	}
-	return e;
+	return x >= 10 ? exponent_helper(x / 10, e + 1) : x < 1 ? exponent_helper(x * 10, e - 1) : e;
 }
 
 [[nodiscard]] constexpr
@@ -214,13 +165,11 @@ auto log_helper(double x) -> double {
 
 [[nodiscard]] constexpr
 auto log(double x) -> double {
-	if constexpr (x == 0) {
-		return -std::numeric_limits<double>::infinity();
-	}
-	if constexpr (x < 0) {
-		return std::numeric_limits<double>::quiet_NaN();
-	}
-	return 2.0 * log_helper(sqrt(mantissa(x))) + 2.3025851 * exponent(x);
+	return x == 0
+		? -std::numeric_limits<double>::infinity()
+		: x < 0
+			? std::numeric_limits<double>::quiet_NaN()
+			: 2.0 * log_helper(sqrt(mantissa(x))) + 2.3025851 * exponent(x);
 }
 
 } // const_math

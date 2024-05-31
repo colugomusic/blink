@@ -4,9 +4,8 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <cmath>
-
 #include <snd/transport/frame_position.hpp>
-
+#include "const_math.hpp"
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
@@ -51,15 +50,13 @@ constexpr ml::DSPVectorArray<ROWS> stepify(const ml::DSPVectorArray<ROWS>& value
 
 namespace convert {
 
-template <class T>
-constexpr T linear_to_delay_time_ms(T linear)
-{
+template <class T> constexpr
+auto linear_to_delay_time_ms(T linear) -> T {
 	return T(2000) * (linear * linear * linear * linear);
 }
 
-template <class T>
-constexpr T delay_time_ms_to_linear(T ms)
-{
+template <class T> constexpr
+auto delay_time_ms_to_linear(T ms) -> T {
 	return const_math::sqrt(const_math::sqrt(ms / T(2000)));
 }
 
