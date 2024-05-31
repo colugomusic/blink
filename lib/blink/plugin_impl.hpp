@@ -116,6 +116,11 @@ namespace add {
 namespace param {
 
 inline
+auto chord(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
+	return plugin.host.add_param_chord(plugin.host.usr, plugin.index, uuid);
+}
+
+inline
 auto env(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
 	return plugin.host.add_param_env(plugin.host.usr, plugin.index, uuid);
 }

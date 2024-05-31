@@ -176,6 +176,14 @@ enum blink_ParamFlags {
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Envelope Flags
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+enum blink_EnvFlags {
+	blink_EnvFlags_None           = 1 << 0,
+	blink_EnvFlags_ShowGridLabels = 1 << 1,
+};
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Manipulator Settings
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
@@ -225,8 +233,8 @@ typedef struct {
 	blink_Bool enable_warp_markers; 
 } blink_PluginInfo;
 
-typedef blink_Bool (*blink_GetGridLine)(int index, float* out);
-typedef blink_Bool (*blink_GetStepLine)(int index, float step_size, float* out);
+typedef float      (*blink_GetGridLine)(int index);
+typedef float      (*blink_GetStepLine)(int index, float step_size);
 typedef float      (*blink_SnapValue)(float value, float step_size, float snap_amount);
 typedef float      (*blink_Tweak_ConstrainReal)(float value);
 typedef float      (*blink_Tweak_DecrementReal)(float value, bool precise);
@@ -283,6 +291,7 @@ typedef struct {
 } blink_SamplerInfo;
 
 typedef blink_EnvIdx        (*blink_host_add_env)(void*);
+typedef blink_ParamIdx      (*blink_host_add_param_chord)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_env)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_option)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_slider_int)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
@@ -293,6 +302,7 @@ typedef float               (*blink_host_read_param_env_default_value)(void*, bl
 typedef int64_t             (*blink_host_read_param_option_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef float               (*blink_host_read_param_slider_real_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef int64_t             (*blink_host_read_param_slider_int_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef void                (*blink_host_write_env_add_flags)(void*, blink_EnvIdx env_idx, int value);
 typedef void                (*blink_host_write_env_default_value)(void*, blink_EnvIdx env_idx, float value);
 typedef void                (*blink_host_write_env_fns)(void*, blink_EnvIdx env_idx, blink_EnvFns fns);
 typedef void                (*blink_host_write_env_max_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
@@ -322,6 +332,7 @@ typedef void                (*blink_host_write_slider_real_tweaker)(void*, blink
 struct blink_HostFns {
 	void* usr;
 	blink_host_add_env                              add_env;
+	blink_host_add_param_chord                      add_param_chord;
 	blink_host_add_param_env                        add_param_env;
 	blink_host_add_param_option                     add_param_option;
 	blink_host_add_param_slider_int                 add_param_slider_int;
@@ -332,6 +343,7 @@ struct blink_HostFns {
 	blink_host_read_param_option_default_value      read_param_option_default_value;
 	blink_host_read_param_slider_int_default_value  read_param_slider_int_default_value;
 	blink_host_read_param_slider_real_default_value read_param_slider_real_default_value;
+	blink_host_write_env_add_flags                  write_env_add_flags;
 	blink_host_write_env_default_value              write_env_default_value;
 	blink_host_write_env_fns                        write_env_fns;
 	blink_host_write_env_max_slider                 write_env_max_slider;

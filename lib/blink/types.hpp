@@ -10,6 +10,10 @@
 
 namespace blink {
 
+enum class StdChord {
+	SCALE,
+};
+
 enum class StdEnv {
 	AMP,
 	DELAY_TIME,
@@ -24,7 +28,6 @@ enum class StdEnv {
 	NOISE_WIDTH,
 	PAN,
 	PITCH,
-	SCALE,
 	SPEED,
 	WET,
 };
@@ -54,7 +57,6 @@ enum class StdSliderReal {
 	NOISE_WIDTH,
 	PAN,
 	PITCH,
-	SCALE,
 	SPEED,
 	WET,
 };
@@ -65,6 +67,7 @@ struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
 struct StepifyFn          { blink_Tweak_StepifyReal fn = nullptr; };
 struct BufferID           { blink_BufferID value = {0}; };
 struct ClampRange         { blink_Range value = {0}; };
+struct EnvFlags           { int value = 0; };
 struct EnvFns             { blink_EnvFns value = {0}; };
 struct EnvIdx             { blink_EnvIdx value = {0}; };
 struct EnvSnapSettings    { blink_EnvSnapSettings value = {0, 1}; };
