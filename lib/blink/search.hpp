@@ -1,7 +1,8 @@
 #pragma once
 
 #include <array>
-#include <blink/plugin_impl.hpp>
+#include <blink/block_positions.hpp>
+#include <blink/data.hpp>
 #include <blink/math.hpp>
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>

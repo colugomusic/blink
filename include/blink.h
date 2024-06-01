@@ -194,20 +194,16 @@ typedef struct {
 } blink_ManipSettings;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Envelope Snap Settings
+// Resource Data
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct {
-	// Step size is also a range with a value that
-	// can be configured by the user
-	blink_SliderRealIdx step_size_slider;
-	float default_snap_amount;
-} blink_EnvSnapSettings;
-
 typedef struct {
 	size_t size;
 	const char* data;
 } blink_ResourceData;
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Plugin Info
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
 	// Unique identifier for this plugin
 	blink_UUID uuid; 
@@ -303,11 +299,14 @@ typedef int64_t             (*blink_host_read_param_option_default_value)(void*,
 typedef float               (*blink_host_read_param_slider_real_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef int64_t             (*blink_host_read_param_slider_int_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef void                (*blink_host_write_env_add_flags)(void*, blink_EnvIdx env_idx, int value);
+typedef void                (*blink_host_write_env_default_max)(void*, blink_EnvIdx env_idx, float value);
+typedef void                (*blink_host_write_env_default_min)(void*, blink_EnvIdx env_idx, float value);
+typedef void                (*blink_host_write_env_default_snap_amount)(void*, blink_EnvIdx env_idx, float value);
 typedef void                (*blink_host_write_env_default_value)(void*, blink_EnvIdx env_idx, float value);
 typedef void                (*blink_host_write_env_fns)(void*, blink_EnvIdx env_idx, blink_EnvFns fns);
 typedef void                (*blink_host_write_env_max_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef void                (*blink_host_write_env_min_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
-typedef void                (*blink_host_write_env_snap_settings)(void*, blink_EnvIdx env_idx, blink_EnvSnapSettings settings);
+typedef void                (*blink_host_write_env_step_size_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef void                (*blink_host_write_env_value_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef void                (*blink_host_write_param_add_flags)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int flags);
 typedef void                (*blink_host_write_param_add_subparam)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
@@ -344,11 +343,14 @@ struct blink_HostFns {
 	blink_host_read_param_slider_int_default_value  read_param_slider_int_default_value;
 	blink_host_read_param_slider_real_default_value read_param_slider_real_default_value;
 	blink_host_write_env_add_flags                  write_env_add_flags;
+	blink_host_write_env_default_max                write_env_default_max;
+	blink_host_write_env_default_min                write_env_default_min;
+	blink_host_write_env_default_snap_amount        write_env_default_snap_amount;
 	blink_host_write_env_default_value              write_env_default_value;
 	blink_host_write_env_fns                        write_env_fns;
 	blink_host_write_env_max_slider                 write_env_max_slider;
 	blink_host_write_env_min_slider                 write_env_min_slider;
-	blink_host_write_env_snap_settings              write_env_snap_settings;
+	blink_host_write_env_step_size_slider           write_env_step_size_slider;
 	blink_host_write_env_value_slider               write_env_value_slider;
 	blink_host_write_param_add_flags                write_param_add_flags;
 	blink_host_write_param_add_subparam             write_param_add_subparam;

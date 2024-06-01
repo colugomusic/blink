@@ -66,12 +66,15 @@ namespace e {
 		OverrideEnvIdx
 	>;
 	using Env = ent::static_store<
+		DefaultMax<float>,
+		DefaultMin<float>,
 		DefaultValue<float>,
+		DefaultSnapAmount,
 		EnvFlags,
 		EnvFns,
-		EnvSnapSettings,
 		MaxSliderIdx,
 		MinSliderIdx,
+		StepSizeSliderIdx,
 		ValueSliderIdx
 	>;
 	using SliderInt = ent::static_store<
@@ -108,6 +111,41 @@ struct Host {
 namespace read {
 
 [[nodiscard]] inline
+auto apply_offset_fn(const Host& host, ParamEnvIdx param_env_idx) -> ApplyOffsetFn {
+	return host.param_env.get<ApplyOffsetFn>(param_env_idx.value);
+}
+
+[[nodiscard]] inline
+auto apply_offset_fn(const Host& host, ParamSliderRealIdx param_sld_idx) -> ApplyOffsetFn {
+	return host.param_slider_real.get<ApplyOffsetFn>(param_sld_idx.value);
+}
+
+[[nodiscard]] inline
+auto clamp_range(const Host& host, ParamEnvIdx param_env_idx) -> std::optional<blink_Range> {
+	return host.param_env.get<ClampRange>(param_env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto clamp_range(const Host& host, ParamSliderRealIdx param_sld_idx) -> std::optional<blink_Range> {
+	return host.param_slider_real.get<ClampRange>(param_sld_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto default_max(const Host& host, blink_EnvIdx env_idx) -> float {
+	return host.env.get<DefaultMax<float>>(env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto default_min(const Host& host, blink_EnvIdx env_idx) -> float {
+	return host.env.get<DefaultMin<float>>(env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto default_snap_amount(const Host& host, blink_EnvIdx env_idx) -> float {
+	return host.env.get<DefaultSnapAmount>(env_idx.value).value;
+}
+
+[[nodiscard]] inline
 auto default_value(const Host& host, blink_EnvIdx env_idx) -> float {
 	return host.env.get<DefaultValue<float>>(env_idx.value).value;
 }
@@ -128,8 +166,28 @@ auto default_value(const Host& host, ParamOptionIdx option_idx) -> int64_t {
 }
 
 [[nodiscard]] inline
-auto env_idx(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx {
+auto env(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx {
 	return host.param_env.get<EnvIdx>(param_env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto env_offset(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx {
+	return host.param_env.get<OffsetEnvIdx>(param_env_idx.value).value.value;
+}
+
+[[nodiscard]] inline
+auto env_offset(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_EnvIdx {
+	return host.param_slider_real.get<OffsetEnvIdx>(param_sld_idx.value).value.value;
+}
+
+[[nodiscard]] inline
+auto env_override(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx {
+	return host.param_env.get<OverrideEnvIdx>(param_env_idx.value).value.value;
+}
+
+[[nodiscard]] inline
+auto env_override(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_EnvIdx {
+	return host.param_slider_real.get<OverrideEnvIdx>(param_sld_idx.value).value.value;
 }
 
 [[nodiscard]] inline
@@ -165,8 +223,18 @@ auto find_plugin(const Host& host, uuids::t uuid) -> std::optional<blink_PluginI
 }
 
 [[nodiscard]] inline
+auto flags(const Host& host, blink_EnvIdx env_idx) -> int {
+	return host.env.get<EnvFlags>(env_idx.value).value;
+}
+
+[[nodiscard]] inline
 auto flags(const Host& host, blink_ParamIdx param_idx) -> int {
 	return host.param.get<ParamFlags>(param_idx.value).value.value;
+}
+
+[[nodiscard]] inline
+auto fns(const Host& host, blink_EnvIdx env_idx) -> blink_EnvFns {
+	return host.env.get<EnvFns>(env_idx.value).value;
 }
 
 [[nodiscard]] inline
@@ -203,6 +271,16 @@ auto long_desc(const Host& host, blink_ParamIdx param_idx) -> std::string_view {
 [[nodiscard]] inline
 auto manip_delegate(const Host& host, blink_ParamIdx param_idx) -> std::optional<ParamGlobalIdx> {
 	return host.param.get<ManipDelegate>(param_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto max_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_SliderRealIdx> {
+	return host.env.get<MaxSliderIdx>(env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto min_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_SliderRealIdx> {
+	return host.env.get<MinSliderIdx>(env_idx.value).value;
 }
 
 [[nodiscard]] inline
@@ -250,13 +328,23 @@ auto short_name(const Host& host, blink_ParamIdx param_idx) -> std::string_view 
 }
 
 [[nodiscard]] inline
-auto slider_idx(const Host& host, ParamSliderIntIdx param_env_idx) -> blink_SliderIntIdx {
+auto slider(const Host& host, ParamSliderIntIdx param_env_idx) -> blink_SliderIntIdx {
 	return host.param_slider_int.get<blink_SliderIntIdx>(param_env_idx.value);
 }
 
 [[nodiscard]] inline
-auto slider_idx(const Host& host, ParamSliderRealIdx param_env_idx) -> blink_SliderRealIdx {
+auto slider(const Host& host, ParamSliderRealIdx param_env_idx) -> blink_SliderRealIdx {
 	return host.param_slider_real.get<blink_SliderRealIdx>(param_env_idx.value);
+}
+
+[[nodiscard]] inline
+auto step_size_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_SliderRealIdx> {
+	return host.env.get<StepSizeSliderIdx>(env_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto strings(const Host& host, ParamOptionIdx option_idx) -> const std::vector<std::string>& {
+	return host.param_option.get<StringVec>(option_idx.value).value;
 }
 
 [[nodiscard]] inline
@@ -267,6 +355,11 @@ auto subparams(const Host& host, ParamGlobalIdx param_idx) -> const std::vector<
 [[nodiscard]] inline
 auto tweaker(const Host& host, blink_SliderIntIdx sld_idx) -> const blink_TweakerInt& {
 	return host.slider_int.get<TweakerInt>(sld_idx.value).value;
+}
+
+[[nodiscard]] inline
+auto tweaker(const Host& host, blink_SliderRealIdx sld_idx) -> const blink_TweakerReal& {
+	return host.slider_real.get<TweakerReal>(sld_idx.value).value;
 }
 
 [[nodiscard]] inline
@@ -282,6 +375,11 @@ auto type_idx(const Host& host, ParamGlobalIdx param_idx) -> size_t {
 [[nodiscard]] inline
 auto uuid(const Host& host, ParamGlobalIdx param_idx) -> blink_UUID {
 	return host.param.get<blink_UUID>(param_idx.value);
+}
+
+[[nodiscard]] inline
+auto value_slider(const Host& host, blink_EnvIdx env_idx) -> blink_SliderRealIdx {
+	return host.env.get<ValueSliderIdx>(env_idx.value).value;
 }
 
 } // read
@@ -311,6 +409,21 @@ auto clamp_range(Host* host, ParamEnvIdx param_env_idx, ClampRange value) -> voi
 inline
 auto clamp_range(Host* host, ParamSliderRealIdx param_sld_idx, ClampRange value) -> void {
 	host->param_slider_real.set(param_sld_idx.value, value);
+}
+
+inline
+auto default_max(Host* host, blink_EnvIdx env_idx, DefaultMax<float> value) -> void {
+	host->env.set(env_idx.value, value);
+}
+
+inline
+auto default_min(Host* host, blink_EnvIdx env_idx, DefaultMin<float> value) -> void {
+	host->env.set(env_idx.value, value);
+}
+
+inline
+auto default_snap_amount(Host* host, blink_EnvIdx env_idx, DefaultSnapAmount value) -> void {
+	host->env.set(env_idx.value, value);
 }
 
 inline
@@ -429,7 +542,7 @@ auto slider(Host* host, ParamSliderRealIdx sld_idx, blink_SliderRealIdx value) -
 }
 
 inline
-auto snap_settings(Host* host, blink_EnvIdx env_idx, EnvSnapSettings value) -> void {
+auto step_size_slider(Host* host, blink_EnvIdx env_idx, StepSizeSliderIdx value) -> void {
 	host->env.set(env_idx.value, value);
 }
 
@@ -521,6 +634,7 @@ auto delay_time(Host* host) -> blink_SliderRealIdx {
 	const auto idx = add::slider::empty_real(host);
 	write::default_value(host, idx, {math::convert::delay_time_ms_to_linear(100.0f)});
 	write::tweaker(host, idx, {tweak::delay_time::tweaker()});
+	return idx;
 }
 
 [[nodiscard]] inline
@@ -581,6 +695,8 @@ auto amp(Host* host) -> blink_EnvIdx {
 	};
 	fns.value.stepify   = tweak::amp::stepify;
 	fns.value.to_string = tweak::amp::to_string;
+	write::default_max(host, idx, {1.0f});
+	write::default_min(host, idx, {0.0f});
 	write::default_value(host, idx, {1.0f});
 	write::fns(host, idx, fns);
 	write::max_slider(host, idx, {add::slider::amp(host)});
@@ -595,9 +711,12 @@ auto delay_time(Host* host) -> blink_EnvIdx {
 	fns.value.snap_value = tweak::snap_value;
 	fns.value.stepify    = tweak::delay_time::stepify;
 	fns.value.to_string  = tweak::delay_time::to_string;
+	write::default_max(host, idx, {1.0f});
+	write::default_min(host, idx, {0.0f});
 	write::default_value(host, idx, {math::convert::delay_time_ms_to_linear(100.0f)});
 	write::fns(host, idx, fns);
 	write::value_slider(host, idx, {add::slider::delay_time(host)});
+	return idx;
 }
 
 [[nodiscard]] inline
@@ -611,6 +730,8 @@ auto feedback(Host* host) -> blink_EnvIdx {
 auto filter_frequency(Host* host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
 	EnvFns fn;
+	write::default_max(host, idx, {1.0f});
+	write::default_min(host, idx, {0.0f});
 	write::default_value(host, idx, {tweak::filter_frequency::DEFAULT_VALUE});
 	write::value_slider(host, idx, {add::slider::filter_frequency(host)});
 	fn.value.to_string = tweak::filter_frequency::to_string;
@@ -623,6 +744,8 @@ auto formant(Host* host) -> blink_EnvIdx {
 	EnvFns fns;
 	fns.value.stepify   = tweak::percentage::stepify;
 	fns.value.to_string = tweak::percentage::to_string;
+	write::default_max(host, idx, {1.0f});
+	write::default_min(host, idx, {-1.0f});
 	write::default_value(host, idx, {0.0f});
 	write::value_slider(host, idx, {add::slider::percentage_bipolar(host->fns)});
 	return idx;
@@ -634,6 +757,8 @@ auto pan(Host* host) -> blink_EnvIdx {
 	EnvFns fns;
 	fns.value.stepify   = tweak::pan::stepify;
 	fns.value.to_string = tweak::pan::to_string;
+	write::default_max(host, idx, {1.0f});
+	write::default_min(host, idx, {-1.0f});
 	write::default_value(host, idx, {0.0f});
 	write::value_slider(host, idx, {add::slider::pan(host)});
 	return idx;
@@ -656,11 +781,10 @@ auto pitch(Host* host) -> blink_EnvIdx {
 	fns.value.get_step_line = [](int index, float step_size) -> float {
 		return step_size * index;
 	};
-	EnvSnapSettings snap_settings;
-	snap_settings.value.default_snap_amount = 1.0f;
-	snap_settings.value.step_size_slider    = slider_step_size;
+	write::default_max(host, idx, {24.0f});
+	write::default_min(host, idx, {-24.0f});
+	write::default_snap_amount(host, idx, {1.0f});
 	write::default_value(host, idx, {0.0f});
-	write::snap_settings(host, idx, snap_settings);
 	write::max_slider(host, idx, {slider_max});
 	write::min_slider(host, idx, {slider_min});
 	write::value_slider(host, idx, {slider_value});
@@ -682,6 +806,8 @@ auto speed(Host* host) -> blink_EnvIdx {
 		return math::convert::linear_to_speed(float(index));
 	};
 	fns.value.to_string = tweak::speed::to_string;
+	write::default_max(host, idx, {tweak::speed::DOUBLE});
+	write::default_min(host, idx, {tweak::speed::FREEZE});
 	write::default_value(host, idx, {tweak::speed::NORMAL});
 	write::max_slider(host, idx, {slider_max});
 	write::min_slider(host, idx, {slider_min});
@@ -756,7 +882,7 @@ auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::name(host, param.global_idx, {"Mix"});
 	write::env(host, param_env_idx, env_idx);
 	write::default_value(host, env_idx, {1.0f});
-	write::clamp_range(host, param_env_idx, {0.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{0.0f, 1.0f}});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
 	write::offset_env(host, param_env_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, param_env_idx, {env_idx});
@@ -788,7 +914,7 @@ auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::name(host, param.global_idx, {"Time"});
 	write::long_desc(host, param.global_idx, {"Delay Time"});
 	write::env(host, param_env_idx, env_idx);
-	write::clamp_range(host, param_env_idx, {0.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{0.0f, 1.0f}});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
 	write::offset_env(host, param_env_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, param_env_idx, {env_idx});
@@ -812,7 +938,7 @@ auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_FEEDBACK});
 	write::name(host, param.global_idx, {"Feedback"});
 	write::env(host, param_env_idx, env_idx);
-	write::clamp_range(host, param_env_idx, {0.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{0.0f, 1.0f}});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
 	write::offset_env(host, param_env_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, param_env_idx, {env_idx});
@@ -827,7 +953,7 @@ auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx 
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_FILTER_FREQUENCY});
 	write::name(host, param.global_idx, {"Frequency"});
 	write::env(host, param_env_idx, env_idx);
-	write::clamp_range(host, param_env_idx, {0.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{0.0f, 1.0f}});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
 	write::offset_env(host, param_env_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, param_env_idx, {env_idx});
@@ -871,7 +997,7 @@ auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::name(host, param.global_idx, {"Noise Amount"});
 	write::short_name(host, param.global_idx, {"Amount"});
 	write::group(host, param.global_idx, {"Noise"});
-	write::clamp_range(host, param_env_idx, {0.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{0.0f, 1.0f}});
 	write::env(host, param_env_idx, env_idx);
 	write::add_flags(host, param.global_idx, blink_ParamFlags_HostClamp | blink_ParamFlags_CanManipulate);
 	write::offset_env(host, param_env_idx, {add::env::percentage_bipolar(host->fns)});
@@ -890,7 +1016,7 @@ auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::group(host, param.global_idx, {"Noise"});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
 	write::env(host, param_env_idx, env_idx);
-	write::clamp_range(host, param_env_idx, {-1.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{-1.0f, 1.0f}});
 	write::offset_env(host, param_env_idx, {env_idx});
 	write::override_env(host, param_env_idx, {env_idx});
 	return param.local_idx;
@@ -906,7 +1032,7 @@ auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::short_name(host, param.global_idx, {"Width"});
 	write::group(host, param.global_idx, {"Noise"});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-	write::clamp_range(host, param_env_idx, {0.0f, 1.0f});
+	write::clamp_range(host, param_env_idx, {blink_Range{0.0f, 1.0f}});
 	write::env(host, param_env_idx, env_idx);
 	write::offset_env(host, param_env_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, param_env_idx, {env_idx});
@@ -1181,7 +1307,7 @@ auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_DELAY_TIME});
 	write::name(host, param.global_idx, {"Time"});
 	write::long_desc(host, param.global_idx, {"Delay Time"});
-	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
+	write::clamp_range(host, sld_idx, {blink_Range{0.0f, 1.0f}});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
 	write::slider(host, sld_idx, add::slider::delay_time(host));
 	return param.local_idx;
@@ -1204,7 +1330,7 @@ auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_FEEDBACK});
 	write::name(host, param.global_idx, {"Feedback"});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
+	write::clamp_range(host, sld_idx, {blink_Range{0.0f, 1.0f}});
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, sld_idx, {add::env::feedback(host)});
 	write::slider(host, sld_idx, add::slider::percentage(host->fns));
@@ -1219,7 +1345,7 @@ auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx 
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_FILTER_FREQUENCY});
 	write::name(host, param.global_idx, {"Frequency"});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
+	write::clamp_range(host, sld_idx, {blink_Range{0.0f, 1.0f}});
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, sld_idx, {add::env::filter_frequency(host)});
 	write::slider(host, sld_idx, add::slider::filter_frequency(host));
@@ -1264,7 +1390,7 @@ auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::short_name(host, param.global_idx, {"Amount"});
 	write::group(host, param.global_idx, {"Noise"});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
+	write::clamp_range(host, sld_idx, {blink_Range{0.0f, 1.0f}});
 	write::slider(host, sld_idx, add::slider::percentage(host->fns));
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, sld_idx, {add::env::percentage(host->fns)});
@@ -1281,7 +1407,7 @@ auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::short_name(host, param.global_idx, {"Color"});
 	write::group(host, param.global_idx, {"Noise"});
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_HostClamp);
-	write::clamp_range(host, sld_idx, {{-1.0f, 1.0f}});
+	write::clamp_range(host, sld_idx, {blink_Range{-1.0f, 1.0f}});
 	write::slider(host, sld_idx, add::slider::percentage_bipolar(host->fns));
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
@@ -1298,7 +1424,7 @@ auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::name(host, param.global_idx, {"Noise Width"});
 	write::short_name(host, param.global_idx, {"Width"});
 	write::group(host, param.global_idx, {"Noise"});
-	write::clamp_range(host, sld_idx, {{0.0f, 1.0f}});
+	write::clamp_range(host, sld_idx, {blink_Range{0.0f, 1.0f}});
 	write::slider(host, sld_idx, add::slider::percentage(host->fns));
 	write::offset_env(host, sld_idx, {add::env::percentage_bipolar(host->fns)});
 	write::override_env(host, sld_idx, {add::env::percentage(host->fns)});
@@ -1696,7 +1822,7 @@ auto init(Host* host) -> void {
 	host->fns.read_param_env_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		const auto param_env_idx = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
-		const auto env_idx       = read::env_idx(*host_ptr(usr), param_env_idx);
+		const auto env_idx       = read::env(*host_ptr(usr), param_env_idx);
 		return read::default_value(*host_ptr(usr), env_idx);
 	};
 	host->fns.read_param_option_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
@@ -1707,14 +1833,23 @@ auto init(Host* host) -> void {
 	host->fns.read_param_slider_int_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		const auto param_slider_idx = ParamSliderIntIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
-		const auto slider_idx       = read::slider_idx(*host_ptr(usr), param_slider_idx);
+		const auto slider_idx       = read::slider(*host_ptr(usr), param_slider_idx);
 		return read::default_value(*host_ptr(usr), slider_idx);
 	};
 	host->fns.read_param_slider_real_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
-		const auto slider_idx       = read::slider_idx(*host_ptr(usr), param_slider_idx);
+		const auto slider_idx       = read::slider(*host_ptr(usr), param_slider_idx);
 		return read::default_value(*host_ptr(usr), slider_idx);
+	};
+	host->fns.write_env_default_max = [](void* usr, blink_EnvIdx env_idx, float value) {
+		write::default_max(host_ptr(usr), env_idx, {value});
+	};
+	host->fns.write_env_default_min = [](void* usr, blink_EnvIdx env_idx, float value) {
+		write::default_min(host_ptr(usr), env_idx, {value});
+	};
+	host->fns.write_env_default_snap_amount = [](void* usr, blink_EnvIdx env_idx, float value) {
+		write::default_snap_amount(host_ptr(usr), env_idx, {value});
 	};
 	host->fns.write_env_default_value = [](void* usr, blink_EnvIdx env_idx, float value) {
 		write::default_value(host_ptr(usr), env_idx, {value});
@@ -1728,8 +1863,8 @@ auto init(Host* host) -> void {
 	host->fns.write_env_min_slider = [](void* usr, blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
 		write::min_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
-	host->fns.write_env_snap_settings = [](void* usr, blink_EnvIdx env_idx, blink_EnvSnapSettings settings) {
-		write::snap_settings(host_ptr(usr), env_idx, {settings});
+	host->fns.write_env_step_size_slider = [](void* usr, blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
+		write::step_size_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
 	host->fns.write_env_value_slider = [](void* usr, blink_EnvIdx env_idx, blink_SliderRealIdx slider_idx) {
 		write::value_slider(host_ptr(usr), env_idx, {slider_idx});

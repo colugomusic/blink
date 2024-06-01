@@ -476,7 +476,7 @@ auto from_string(const char* str, float* out) -> blink_Bool {
 		return {true};
 	}
 	const auto negative = uppercase.find('L') != std::string::npos || uppercase.find('-') != std::string::npos;
-	const auto value = tweak::find_positive_number<int>(str);
+	const auto value = tweak::find_positive_number<int64_t>(str);
 	if (!value) return {false};
 	*out = (float(*value) / 100) * (negative ? -1 : 1);
 	return {true};

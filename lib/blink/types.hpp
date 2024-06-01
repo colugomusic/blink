@@ -67,11 +67,11 @@ enum class PluginType { effect, sampler, synth };
 struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
 struct StepifyFn          { blink_Tweak_StepifyReal fn = nullptr; };
 struct BufferID           { blink_BufferID value = {0}; };
-struct ClampRange         { blink_Range value = {0}; };
+struct ClampRange         { std::optional<blink_Range> value; };
+struct DefaultSnapAmount  { float value = 0.0f; };
 struct EnvFlags           { int value = 0; };
 struct EnvFns             { blink_EnvFns value = {0}; };
 struct EnvIdx             { blink_EnvIdx value = {0}; };
-struct EnvSnapSettings    { blink_EnvSnapSettings value = {0, 1}; };
 struct LocalInstanceIdx   { blink_InstanceIdx value = {0}; };
 struct LocalUnitIdx       { blink_UnitIdx value = {0}; };
 struct MaxSliderIdx       { std::optional<blink_SliderRealIdx> value; };
@@ -89,16 +89,19 @@ struct OverrideEnvIdx     { EnvIdx value; };
 struct ParamFlags         { blink_Flags value = {0}; };
 struct ParamIcon          { blink_StdIcon value = {blink_StdIcon_None}; };
 struct ParamTypeIdx       { size_t value = 0; };
-struct PluginTypeIdx      { size_t value = 0; };
 struct PluginIdx          { blink_PluginIdx value = {0}; };
+struct PluginTypeIdx      { size_t value = 0; };
 struct SamplerInfo        { blink_SamplerInfo value = {0}; };
 struct SR                 { blink_SR value = {0}; };
+struct StepSizeSliderIdx  { std::optional<blink_SliderRealIdx> value; };
 struct StringVec          { std::vector<std::string> value; };
 struct SubParams          { std::vector<ParamGlobalIdx> value; };
 struct TweakerInt         { blink_TweakerInt value {0}; };
 struct TweakerReal        { blink_TweakerReal value {0}; };
 struct UnitVec            { std::vector<blink_UnitIdx> value; };
-struct ValueSliderIdx     { std::optional<blink_SliderRealIdx> value; };
+struct ValueSliderIdx     { blink_SliderRealIdx value; };
+template <typename T> struct DefaultMax { T value = T(0); };
+template <typename T> struct DefaultMin { T value = T(0); };
 template <typename T> struct DefaultValue { T value = T(0); };
 
 struct ParamStrings {
@@ -172,11 +175,25 @@ struct PluginInterface {
 };
 
 [[nodiscard]] inline auto operator==(const ParamGlobalIdx& a, const ParamGlobalIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamEnvIdx& a, const ParamEnvIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamOptionIdx& a, const ParamOptionIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamSliderIntIdx& a, const ParamSliderIntIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamSliderRealIdx& a, const ParamSliderRealIdx& b) -> bool { return a.value == b.value; }
 
 } // blink
 
+namespace std { template <> struct hash<blink_EnvIdx> { auto operator()(const blink_EnvIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink_SliderIntIdx> { auto operator()(const blink_SliderIntIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink_SliderRealIdx> { auto operator()(const blink_SliderRealIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
 namespace std { template <> struct hash<blink_ParamIdx> { auto operator()(const blink_ParamIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
 namespace std { template <> struct hash<blink::ParamGlobalIdx> { auto operator()(const blink::ParamGlobalIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamEnvIdx> { auto operator()(const blink::ParamEnvIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamOptionIdx> { auto operator()(const blink::ParamOptionIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamSliderIntIdx> { auto operator()(const blink::ParamSliderIntIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamSliderRealIdx> { auto operator()(const blink::ParamSliderRealIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
+[[nodiscard]] inline auto operator==(const blink_EnvIdx& a, const blink_EnvIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_SliderIntIdx& a, const blink_SliderIntIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_SliderRealIdx& a, const blink_SliderRealIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value != b.value; }
 [[nodiscard]] inline auto operator<(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value < b.value; }

@@ -48,6 +48,8 @@ auto percentage(const blink_HostFns& host) -> blink_EnvIdx {
 	blink_EnvFns fns;
 	fns.stepify   = tweak::percentage::stepify;
 	fns.to_string = tweak::percentage::to_string;
+	host.write_env_default_max(host.usr, idx, 1.0f);
+	host.write_env_default_min(host.usr, idx, 0.0f);
 	host.write_env_default_value(host.usr, idx, 0.0f);
 	host.write_env_fns(host.usr, idx, fns);
 	host.write_env_value_slider(host.usr, idx, add::slider::percentage<MIN, MAX>(host));
@@ -60,6 +62,8 @@ auto percentage_bipolar(const blink_HostFns& host) -> blink_EnvIdx {
 	blink_EnvFns fns;
 	fns.stepify   = tweak::percentage::stepify;
 	fns.to_string = tweak::percentage::to_string;
+	host.write_env_default_max(host.usr, idx, 1.0f);
+	host.write_env_default_min(host.usr, idx, -1.0f);
 	host.write_env_default_value(host.usr, idx, 0.0f);
 	host.write_env_fns(host.usr, idx, fns);
 	host.write_env_value_slider(host.usr, idx, add::slider::percentage_bipolar(host));
