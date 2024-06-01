@@ -64,6 +64,11 @@ enum class StdSliderReal {
 enum class ParamType { chord, env, option, slider_int, slider_real };
 enum class PluginType { effect, sampler, synth };
 
+struct GroupInfo {
+	blink_StaticString name;
+	std::vector<blink_ParamIdx> params;
+};
+
 struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
 struct StepifyFn          { blink_Tweak_StepifyReal fn = nullptr; };
 struct BufferID           { blink_BufferID value = {0}; };

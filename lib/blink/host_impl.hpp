@@ -19,7 +19,8 @@ namespace e {
 		PluginType,
 		PluginTypeIdx,
 		PluginInterface,
-		PluginParams
+		PluginParams,
+		std::vector<GroupInfo>
 	>;
 	using PluginSampler = ent::static_store<
 		SamplerInfo
@@ -458,6 +459,19 @@ auto fns(Host* host, blink_EnvIdx env_idx, EnvFns fns) -> void {
 
 inline
 auto group(Host* host, ParamGlobalIdx param_idx, blink_StaticString group) -> void {
+	const auto plugin_idx = host->param.get<blink_PluginIdx>(param_idx.value);
+	auto& group_info_vec = host->plugin.get<std::vector<GroupInfo>>(plugin_idx.value);
+	auto find_group = [&group](const GroupInfo& info) {
+		return std::string_view(info.name.value) == std::string_view(group.value);
+	};
+	if (const auto pos = std::find_if(group_info_vec.begin(), group_info_vec.end(), find_group); pos == group_info_vec.end()) {
+		GroupInfo info;
+		info.name = group;
+		info.params.push_back({param_idx.value});
+		group_info_vec.push_back(info);
+	} else {
+		pos->params.push_back({param_idx.value});
+	}
 	host->param.get<ParamStrings>(param_idx.value).group = group;
 }
 
