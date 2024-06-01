@@ -45,7 +45,7 @@ auto empty(const blink_HostFns& host) -> blink_EnvIdx {
 template <int MIN = 0, int MAX = 100> [[nodiscard]]
 auto percentage(const blink_HostFns& host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
-	blink_EnvFns fns;
+	blink_EnvFns fns = {0};
 	fns.stepify   = tweak::percentage::stepify;
 	fns.to_string = tweak::percentage::to_string;
 	host.write_env_default_max(host.usr, idx, 1.0f);
@@ -59,7 +59,7 @@ auto percentage(const blink_HostFns& host) -> blink_EnvIdx {
 [[nodiscard]] inline
 auto percentage_bipolar(const blink_HostFns& host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
-	blink_EnvFns fns;
+	blink_EnvFns fns = {0};
 	fns.stepify   = tweak::percentage::stepify;
 	fns.to_string = tweak::percentage::to_string;
 	host.write_env_default_max(host.usr, idx, 1.0f);

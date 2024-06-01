@@ -149,22 +149,22 @@ auto short_name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticStri
 }
 
 inline
-auto env_env_idx(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
-	plugin.host.write_param_env_env_idx(plugin.host.usr, plugin.index, param_idx, env_idx);
+auto env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+	plugin.host.write_param_env_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }
 
 inline
-auto env_clamp_range(const Plugin& plugin, blink_ParamIdx param_idx, blink_Range range) -> void {
+auto clamp_range(const Plugin& plugin, blink_ParamIdx param_idx, blink_Range range) -> void {
 	plugin.host.write_param_env_clamp_range(plugin.host.usr, plugin.index, param_idx, range);
 }
 
 inline
-auto env_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+auto offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
 	plugin.host.write_param_env_offset_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }
 
 inline
-auto env_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+auto override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
 	plugin.host.write_param_env_override_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }
 
