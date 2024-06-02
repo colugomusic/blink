@@ -174,7 +174,7 @@ auto override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx e
 [[nodiscard]] inline
 auto make_chord_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> ChordData {
 	ChordData out;
-	out.data = &param_data->chord;
+	out.data = &param_data[param_idx.value].chord;
 	return out;
 }
 
@@ -193,7 +193,7 @@ auto make_env_data(const Plugin& plugin, const blink_ParamData* param_data, blin
 	EnvData out;
 	out.default_value = plugin.host.read_param_env_default_value(plugin.host.usr, plugin.index, param_idx);
 	if (param_data) {
-		out.data = &param_data->envelope;
+		out.data = &param_data[param_idx.value].envelope;
 		out.value = make_real_value(out.data->points, out.default_value);
 	}
 	else {
@@ -208,7 +208,7 @@ auto make_option_data(const Plugin& plugin, const blink_ParamData* param_data, b
 	OptionData out;
 	out.default_value = plugin.host.read_param_option_default_value(plugin.host.usr, plugin.index, param_idx);
 	if (param_data) {
-		out.data = &param_data->option;
+		out.data = &param_data[param_idx.value].option;
 		out.value = make_int_value(out.data->points, out.default_value);
 	}
 	else {
@@ -223,7 +223,7 @@ auto make_slider_int_data(const Plugin& plugin, const blink_ParamData* param_dat
 	SliderIntData out;
 	out.default_value = plugin.host.read_param_slider_int_default_value(plugin.host.usr, plugin.index, param_idx);
 	if (param_data) {
-		out.data = &param_data->slider_int;
+		out.data = &param_data[param_idx.value].slider_int;
 		out.value = make_int_value(out.data->points, out.default_value);
 	}
 	else {
@@ -238,7 +238,7 @@ auto make_slider_real_data(const Plugin& plugin, const blink_ParamData* param_da
 	SliderRealData out;
 	out.default_value = plugin.host.read_param_slider_real_default_value(plugin.host.usr, plugin.index, param_idx);
 	if (param_data) {
-		out.data = &param_data->slider_real;
+		out.data = &param_data[param_idx.value].slider_real;
 		out.value = make_real_value(out.data->points, out.default_value);
 	}
 	else {
