@@ -21,7 +21,7 @@ public:
 
 		struct
 		{
-			const blink_EnvelopeData* speed;
+			const blink_EnvData* speed;
 		} env;
 
 		struct

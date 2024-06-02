@@ -1,7 +1,8 @@
 #pragma once
 
-#include "blink/envelope_data.hpp"
+#include "blink/data.hpp"
 #include "blink/traverser.hpp"
+#include <algorithm>
 
 namespace blink {
 namespace transform {
@@ -33,7 +34,7 @@ class SpeedUnit {
 public: 
 	struct Config {
 		float speed { 0.0f };
-		const blink_EnvelopeData* env_speed { nullptr };
+		const blink_EnvData* env_speed { nullptr };
 	}; 
 	// We use this for both sample playback and waveform generation. This
 	// calculation needs to be fast, preferably O(n) or better.
@@ -54,7 +55,7 @@ public:
 			{
 			}
 		}; 
-		for (blink_Index i = point_search_index_; i < config.env_speed->points.count; i++) {
+		for (size_t i = point_search_index_; i < config.env_speed->points.count; i++) {
 			const FFPoint p1(config.env_speed->points.data[i], config.env_speed->points.min, config.env_speed->points.max, config.speed); 
 			if (block_position < p1.x) {
 				if (i == 0) {
@@ -107,7 +108,7 @@ public:
 	} 
 private: 
 	blink_Position segment_start_ = 0.0;
-	int point_search_index_       = 0;
+	size_t point_search_index_    = 0;
 };
 
 class Speed {
@@ -115,7 +116,7 @@ public:
 	struct Config {
 		uint64_t unit_state_id;
 		float speed;
-		const blink_EnvelopeData* env_speed; 
+		const blink_EnvData* env_speed; 
 		struct {
 			BlockPositions* positions;
 			ml::DSPVector* derivatives;

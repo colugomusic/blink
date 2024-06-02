@@ -295,6 +295,12 @@ auto one(const blink::SliderRealData& slider_data, const BlockPositions& block_p
 }
 
 [[nodiscard]] inline
+auto vec(const blink::ChordData& chord_data, const BlockPositions& block_positions) -> ml::DSPVectorInt {
+	if (!chord_data.data) { return 0; }
+	return vec(*chord_data.data, block_positions);
+}
+
+[[nodiscard]] inline
 auto vec(const blink::EnvData& env_data, const BlockPositions& block_positions) -> ml::DSPVector {
 	if (!env_data.data)                   { return env_data.value; }
 	if (env_data.data->points.count <= 1) { return env_data.value; }
