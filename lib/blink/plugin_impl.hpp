@@ -128,6 +128,16 @@ namespace write {
 namespace env {
 
 inline
+auto default_max(const Plugin& plugin, blink_EnvIdx env_idx, float value) -> void {
+	plugin.host.write_env_default_max(plugin.host.usr, env_idx, value);
+}
+
+inline
+auto default_min(const Plugin& plugin, blink_EnvIdx env_idx, float value) -> void {
+	plugin.host.write_env_default_min(plugin.host.usr, env_idx, value);
+}
+
+inline
 auto default_value(const Plugin& plugin, blink_EnvIdx env_idx, float value) -> void {
 	plugin.host.write_env_default_value(plugin.host.usr, env_idx, value);
 }
