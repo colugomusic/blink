@@ -84,6 +84,15 @@ auto get_std_error_string(blink_StdError error) -> const char* {
 	}
 }
 
+namespace read {
+
+inline
+auto env(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_EnvIdx {
+	return plugin.host.read_param_env_env(plugin.host.usr, plugin.index, param_idx);
+}
+
+} // read
+
 namespace add {
 namespace param {
 
@@ -116,6 +125,20 @@ auto slider_real(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
 } // add
 
 namespace write {
+namespace env {
+
+inline
+auto default_value(const Plugin& plugin, blink_EnvIdx env_idx, float value) -> void {
+	plugin.host.write_env_default_value(plugin.host.usr, env_idx, value);
+}
+
+inline
+auto fns(const Plugin& plugin, blink_EnvIdx env_idx, blink_EnvFns value) -> void {
+	plugin.host.write_env_fns(plugin.host.usr, env_idx, value);
+}
+
+} // env
+
 namespace param {
 
 inline

@@ -540,6 +540,14 @@ auto from_string(const char* str, float* out) -> blink_Bool {
 	return {true};
 };
 
+[[nodiscard]] inline
+auto fns() -> blink_EnvFns {
+	blink_EnvFns fns = {0};
+	fns.stepify   = tweak::percentage::stepify;
+	fns.to_string = tweak::percentage::to_string;
+	return fns;
+}
+
 template <int MIN = 0, int MAX = 100> [[nodiscard]]
 auto tweaker() -> blink_TweakerReal {
 	blink_TweakerReal out = {0};

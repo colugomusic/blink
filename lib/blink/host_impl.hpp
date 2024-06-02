@@ -1891,6 +1891,11 @@ auto init(Host* host) -> void {
 		const auto env_idx       = read::env(*host_ptr(usr), param_env_idx);
 		return read::default_value(*host_ptr(usr), env_idx);
 	};
+	host->fns.read_param_env_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_env_idx = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		return read::env(*host_ptr(usr), param_env_idx);
+	};
 	host->fns.read_param_option_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		const auto type_idx = read::type_idx(*host_ptr(usr), param_global_idx);

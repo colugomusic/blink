@@ -229,7 +229,7 @@ typedef struct {
 	blink_Bool enable_warp_markers; 
 } blink_PluginInfo;
 
-typedef float      (*blink_GetGridLine)(int index);
+typedef blink_Bool (*blink_GetGridLine)(int index, float* out);
 typedef float      (*blink_GetStepLine)(int index, float step_size);
 typedef float      (*blink_SnapValue)(float value, float step_size, float snap_amount);
 typedef float      (*blink_Tweak_ConstrainReal)(float value);
@@ -295,6 +295,7 @@ typedef blink_ParamIdx      (*blink_host_add_param_slider_real)(void*, blink_Plu
 typedef blink_SliderIntIdx  (*blink_host_add_slider_int)(void*);
 typedef blink_SliderRealIdx (*blink_host_add_slider_real)(void*);
 typedef float               (*blink_host_read_param_env_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
+typedef blink_EnvIdx        (*blink_host_read_param_env_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef int64_t             (*blink_host_read_param_option_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef float               (*blink_host_read_param_slider_real_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
 typedef int64_t             (*blink_host_read_param_slider_int_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx);
@@ -339,6 +340,7 @@ struct blink_HostFns {
 	blink_host_add_slider_int                       add_slider_int;
 	blink_host_add_slider_real                      add_slider_real;
 	blink_host_read_param_env_default_value         read_param_env_default_value;
+	blink_host_read_param_env_env                   read_param_env_env;
 	blink_host_read_param_option_default_value      read_param_option_default_value;
 	blink_host_read_param_slider_int_default_value  read_param_slider_int_default_value;
 	blink_host_read_param_slider_real_default_value read_param_slider_real_default_value;
