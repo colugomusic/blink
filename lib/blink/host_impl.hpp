@@ -729,8 +729,9 @@ auto empty(Host* host) -> blink_EnvIdx {
 auto amp(Host* host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
 	EnvFns fns;
-	fns.value.get_grid_line = [](int index) -> float {
-		return math::convert::linear_to_speed(float(index));
+	fns.value.get_grid_line = [](int index, float* out) -> blink_Bool {
+		*out = math::convert::linear_to_speed(float(index));
+		return {true};
 	};
 	fns.value.stepify   = tweak::amp::stepify;
 	fns.value.to_string = tweak::amp::to_string;
@@ -817,8 +818,9 @@ auto pitch(Host* host) -> blink_EnvIdx {
 	fns.value.stepify    = tweak::pitch::stepify;
 	fns.value.snap_value = tweak::snap_value;
 	fns.value.to_string  = tweak::to_string;
-	fns.value.get_grid_line = [](int index) -> float {
-		return float(index * 12);
+	fns.value.get_grid_line = [](int index, float* out) -> blink_Bool {
+		*out = float(index * 12);
+		return {true};
 	};
 	fns.value.get_step_line = [](int index, float step_size) -> float {
 		return step_size * index;
@@ -845,8 +847,9 @@ auto speed(Host* host) -> blink_EnvIdx {
 	const auto slider_min   = add::slider::speed(host);
 	const auto slider_value = add::slider::speed(host);
 	EnvFns fns;
-	fns.value.get_grid_line = [](int index) -> float {
-		return math::convert::linear_to_speed(float(index));
+	fns.value.get_grid_line = [](int index, float* out) -> blink_Bool {
+		*out = math::convert::linear_to_speed(float(index));
+		return {true};
 	};
 	fns.value.to_string = tweak::speed::to_string;
 	write::default_max(host, idx, {tweak::speed::DOUBLE});
@@ -1915,6 +1918,11 @@ auto init(Host* host) -> void {
 	};
 	host->fns.write_env_add_flags = [](void* usr, blink_EnvIdx env_idx, int flags) {
 		write::add_flags(host_ptr(usr), env_idx, {flags});
+	};
+	host->fns.write_param_env_apply_offset_fn = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		write::apply_offset_fn(host_ptr(usr), param_env_idx, {fn});
 	};
 	host->fns.write_param_env_clamp_range = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_Range range) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);

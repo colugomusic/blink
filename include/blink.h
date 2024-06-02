@@ -311,6 +311,7 @@ typedef void                (*blink_host_write_env_step_size_slider)(void*, blin
 typedef void                (*blink_host_write_env_value_slider)(void*, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx);
 typedef void                (*blink_host_write_param_add_flags)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int flags);
 typedef void                (*blink_host_write_param_add_subparam)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx);
+typedef void                (*blink_host_write_param_env_apply_offset_fn)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn);
 typedef void                (*blink_host_write_param_env_clamp_range)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_Range range);
 typedef void                (*blink_host_write_param_env_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
 typedef void                (*blink_host_write_param_env_offset_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
@@ -356,6 +357,7 @@ struct blink_HostFns {
 	blink_host_write_env_value_slider               write_env_value_slider;
 	blink_host_write_param_add_flags                write_param_add_flags;
 	blink_host_write_param_add_subparam             write_param_add_subparam;
+	blink_host_write_param_env_apply_offset_fn      write_param_env_apply_offset_fn;
 	blink_host_write_param_env_clamp_range          write_param_env_clamp_range;
 	blink_host_write_param_env_env                  write_param_env_env;
 	blink_host_write_param_env_offset_env           write_param_env_offset_env;

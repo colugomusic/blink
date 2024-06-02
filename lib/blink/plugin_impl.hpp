@@ -137,13 +137,57 @@ auto fns(const Plugin& plugin, blink_EnvIdx env_idx, blink_EnvFns value) -> void
 	plugin.host.write_env_fns(plugin.host.usr, env_idx, value);
 }
 
+inline
+auto max_slider(const Plugin& plugin, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx) -> void {
+	plugin.host.write_env_max_slider(plugin.host.usr, env_idx, sld_idx);
+}
+
+inline
+auto min_slider(const Plugin& plugin, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx) -> void {
+	plugin.host.write_env_min_slider(plugin.host.usr, env_idx, sld_idx);
+}
+
+inline
+auto value_slider(const Plugin& plugin, blink_EnvIdx env_idx, blink_SliderRealIdx sld_idx) -> void {
+	plugin.host.write_env_value_slider(plugin.host.usr, env_idx, sld_idx);
+}
+
 } // env
+
+namespace slider {
+
+inline
+auto default_value(const Plugin& plugin, blink_SliderIntIdx sld_idx, float value) -> void {
+	plugin.host.write_slider_int_default_value(plugin.host.usr, sld_idx, value);
+}
+
+inline
+auto default_value(const Plugin& plugin, blink_SliderRealIdx sld_idx, float value) -> void {
+	plugin.host.write_slider_real_default_value(plugin.host.usr, sld_idx, value);
+}
+
+inline
+auto tweaker(const Plugin& plugin, blink_SliderIntIdx sld_idx, blink_TweakerInt value) -> void {
+	plugin.host.write_slider_int_tweaker(plugin.host.usr, sld_idx, value);
+}
+
+inline
+auto tweaker(const Plugin& plugin, blink_SliderRealIdx sld_idx, blink_TweakerReal value) -> void {
+	plugin.host.write_slider_real_tweaker(plugin.host.usr, sld_idx, value);
+}
+
+} // slider
 
 namespace param {
 
 inline
 auto add_flags(const Plugin& plugin, blink_ParamIdx param_idx, int flags) -> void {
 	plugin.host.write_param_add_flags(plugin.host.usr, plugin.index, param_idx, flags);
+}
+
+inline
+auto apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void {
+	plugin.host.write_param_env_apply_offset_fn(plugin.host.usr, plugin.index, param_idx, fn);
 }
 
 inline
@@ -159,6 +203,11 @@ auto add_subparam(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx
 inline
 auto group(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString group_name) -> void {
 	plugin.host.write_param_group(plugin.host.usr, plugin.index, param_idx, group_name);
+}
+
+inline
+auto long_desc(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString long_desc) -> void {
+	plugin.host.write_param_long_desc(plugin.host.usr, plugin.index, param_idx, long_desc);
 }
 
 inline
