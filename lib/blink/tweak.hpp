@@ -165,8 +165,9 @@ auto snap_value(float v, float step_size, float snap_amount) {
 
 [[nodiscard]] inline
 auto write_string(std::string_view str, char buffer[BLINK_STRING_MAX]) -> void {
-	str.copy(buffer, BLINK_STRING_MAX - 1);
-	buffer[BLINK_STRING_MAX - 1] = '\0';
+	const auto n = std::min(size_t(BLINK_STRING_MAX - 1), str.size());
+	str.copy(buffer, n);
+	buffer[n] = '\0';
 }
 
 template <class T> [[nodiscard]] constexpr

@@ -398,6 +398,11 @@ auto value_slider(const Host& host, blink_EnvIdx env_idx) -> blink_SliderRealIdx
 	return host.env.get<ValueSliderIdx>(env_idx.value).value;
 }
 
+[[nodiscard]] inline
+auto version(const Host& host, blink_PluginIdx plugin_idx) -> std::string_view {
+	return host.plugin.get<blink_PluginInfo>(plugin_idx.value).version.value;
+}
+
 } // read
 
 namespace write {
@@ -763,12 +768,13 @@ auto feedback(Host* host) -> blink_EnvIdx {
 [[nodiscard]] inline
 auto filter_frequency(Host* host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
-	EnvFns fn;
+	EnvFns fns;
+	fns.value.to_string = tweak::filter_frequency::to_string;
 	write::default_max(host, idx, {1.0f});
 	write::default_min(host, idx, {0.0f});
 	write::default_value(host, idx, {tweak::filter_frequency::DEFAULT_VALUE});
 	write::value_slider(host, idx, {add::slider::filter_frequency(host)});
-	fn.value.to_string = tweak::filter_frequency::to_string;
+	write::fns(host, idx, fns);
 	return idx;
 }
 
@@ -781,6 +787,7 @@ auto formant(Host* host) -> blink_EnvIdx {
 	write::default_max(host, idx, {1.0f});
 	write::default_min(host, idx, {-1.0f});
 	write::default_value(host, idx, {0.0f});
+	write::fns(host, idx, fns);
 	write::value_slider(host, idx, {add::slider::percentage_bipolar(host->fns)});
 	return idx;
 }
@@ -794,6 +801,7 @@ auto pan(Host* host) -> blink_EnvIdx {
 	write::default_max(host, idx, {1.0f});
 	write::default_min(host, idx, {-1.0f});
 	write::default_value(host, idx, {0.0f});
+	write::fns(host, idx, fns);
 	write::value_slider(host, idx, {add::slider::pan(host)});
 	return idx;
 }
@@ -819,6 +827,7 @@ auto pitch(Host* host) -> blink_EnvIdx {
 	write::default_min(host, idx, {-24.0f});
 	write::default_snap_amount(host, idx, {1.0f});
 	write::default_value(host, idx, {0.0f});
+	write::fns(host, idx, fns);
 	write::max_slider(host, idx, {slider_max});
 	write::min_slider(host, idx, {slider_min});
 	write::value_slider(host, idx, {slider_value});
@@ -843,6 +852,7 @@ auto speed(Host* host) -> blink_EnvIdx {
 	write::default_max(host, idx, {tweak::speed::DOUBLE});
 	write::default_min(host, idx, {tweak::speed::FREEZE});
 	write::default_value(host, idx, {tweak::speed::NORMAL});
+	write::fns(host, idx, fns);
 	write::max_slider(host, idx, {slider_max});
 	write::min_slider(host, idx, {slider_min});
 	write::value_slider(host, idx, {slider_value});
@@ -861,6 +871,11 @@ struct NewParam {
 };
 
 [[nodiscard]] inline
+auto default_active(ParamType type) -> bool {
+	return type == ParamType::option || type == ParamType::slider_int || type == ParamType::slider_real;
+}
+
+[[nodiscard]] inline
 auto empty(Host* host, blink_PluginIdx plugin_idx, ParamType type) -> NewParam {
 	auto& param_list = host->plugin.get<PluginParams>(plugin_idx.value).global_indices;
 	const auto local_idx  = param_list.size();
@@ -868,6 +883,9 @@ auto empty(Host* host, blink_PluginIdx plugin_idx, ParamType type) -> NewParam {
 	host->param.set(global_idx, type);
 	host->param.set(global_idx, plugin_idx);
 	param_list.push_back({global_idx});
+	if (default_active(type)) {
+		write::add_flags(host, blink::ParamGlobalIdx{global_idx}, blink_ParamFlags_DefaultActive);
+	}
 	return {local_idx, {global_idx}};
 }
 
@@ -1238,6 +1256,7 @@ auto reverse_toggle(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 		blink_ParamFlags_MovesDisplay |
 		blink_ParamFlags_IconOnly;
 	write::type_idx(host, param.global_idx, option_idx);
+	write::add_flags(host, param.global_idx, flags);
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_REVERSE_TOGGLE});
 	write::name(host, param.global_idx, {"Reverse"});
 	write::icon(host, param.global_idx, blink_StdIcon_Reverse);
