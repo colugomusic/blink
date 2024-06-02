@@ -157,7 +157,7 @@ auto value_slider(const Plugin& plugin, blink_EnvIdx env_idx, blink_SliderRealId
 namespace slider {
 
 inline
-auto default_value(const Plugin& plugin, blink_SliderIntIdx sld_idx, float value) -> void {
+auto default_value(const Plugin& plugin, blink_SliderIntIdx sld_idx, int64_t value) -> void {
 	plugin.host.write_slider_int_default_value(plugin.host.usr, sld_idx, value);
 }
 
