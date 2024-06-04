@@ -296,7 +296,7 @@ auto one(const blink::SliderRealData& slider_data, const BlockPositions& block_p
 
 [[nodiscard]] inline
 auto vec(const blink::ChordData& chord_data, const BlockPositions& block_positions) -> ml::DSPVectorInt {
-	if (!chord_data.data) { return 0; }
+	if (!chord_data.data) { return ml::DSPVectorInt(0); }
 	return vec(*chord_data.data, block_positions);
 }
 

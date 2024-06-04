@@ -128,6 +128,11 @@ namespace write {
 namespace env {
 
 inline
+auto add_flags(const Plugin& plugin, blink_EnvIdx env_idx, int flags) -> void {
+	plugin.host.write_env_add_flags(plugin.host.usr, env_idx, flags);
+}
+
+inline
 auto default_max(const Plugin& plugin, blink_EnvIdx env_idx, float value) -> void {
 	plugin.host.write_env_default_max(plugin.host.usr, env_idx, value);
 }
@@ -248,6 +253,11 @@ auto offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env
 inline
 auto override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
 	plugin.host.write_param_env_override_env(plugin.host.usr, plugin.index, param_idx, env_idx);
+}
+
+inline
+auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> void {
+	plugin.host.write_param_uuid(plugin.host.usr, plugin.index, param_idx, uuid);
 }
 
 } // param

@@ -82,6 +82,16 @@ auto find_positive_number<int64_t>(std::string str) -> std::optional<int64_t> {
 }
 
 [[nodiscard]] inline
+auto positive_number_from_string(const char* str, float* out) -> blink_Bool {
+	auto value = tweak::find_positive_number<float>(str);
+	if (!value) {
+		return {false};
+	}
+	*out = *value;
+	return {true};
+}
+
+[[nodiscard]] inline
 auto from_string(const char* str, int64_t* out) -> blink_Bool {
 	auto value = tweak::find_number<int64_t>(str);
 	if (!value) {
@@ -168,6 +178,11 @@ auto write_string(std::string_view str, char buffer[BLINK_STRING_MAX]) -> void {
 	const auto n = std::min(size_t(BLINK_STRING_MAX - 1), str.size());
 	str.copy(buffer, n);
 	buffer[n] = '\0';
+}
+
+template <class T> [[nodiscard]] constexpr
+auto identity(T v) -> T {
+	return v;
 }
 
 template <class T> [[nodiscard]] constexpr

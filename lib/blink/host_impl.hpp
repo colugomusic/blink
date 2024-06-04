@@ -2029,6 +2029,10 @@ auto init(Host* host) -> void {
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::override_env(host_ptr(usr), param_slider_idx, {env_idx});
 	};
+	host->fns.write_param_uuid = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_UUID uuid) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		write::uuid(host_ptr(usr), param_global_idx, uuid);
+	};
 	host->fns.write_sampler_info = [](void* usr, blink_PluginIdx plugin_idx, blink_SamplerInfo info) {
 		write::sampler_info(host_ptr(usr), plugin_idx, info);
 	};
