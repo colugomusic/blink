@@ -431,6 +431,11 @@ auto add_flags(Host* host, ParamGlobalIdx param_idx, int flags) -> void {
 }
 
 inline
+auto add_string(Host* host, ParamOptionIdx option_idx, blink_TempString string) -> void {
+	host->param_option.get<StringVec>(option_idx.value).value.push_back(string.value);
+}
+
+inline
 auto add_subparam(Host* host, ParamGlobalIdx param_idx, ParamGlobalIdx subparam_idx) -> void {
 	host->param.get<SubParams>(param_idx.value).value.push_back(subparam_idx);
 }
@@ -804,6 +809,7 @@ auto formant(Host* host) -> blink_EnvIdx {
 	write::default_value(host, idx, {0.0f});
 	write::fns(host, idx, fns);
 	write::value_slider(host, idx, {add::slider::percentage_bipolar(host->fns)});
+	write::add_flags(host, idx, blink_EnvFlags_NoGridLabels);
 	return idx;
 }
 
@@ -818,6 +824,7 @@ auto pan(Host* host) -> blink_EnvIdx {
 	write::default_value(host, idx, {0.0f});
 	write::fns(host, idx, fns);
 	write::value_slider(host, idx, {add::slider::pan(host)});
+	write::add_flags(host, idx, blink_EnvFlags_NoGridLabels);
 	return idx;
 }
 
@@ -1087,6 +1094,7 @@ auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::percentage_bipolar(host->fns);
+	write::add_flags(host, env_idx, blink_EnvFlags_NoGridLabels);
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_NOISE_COLOR});
 	write::name(host, param.global_idx, {"Noise Color"});
 	write::short_name(host, param.global_idx, {"Color"});
@@ -2016,6 +2024,11 @@ auto init(Host* host) -> void {
 	host->fns.write_param_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		write::name(host_ptr(usr), param_global_idx, name);
+	};
+	host->fns.write_param_option_add_string = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_TempString string) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_option_idx = ParamOptionIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		write::add_string(host_ptr(usr), param_option_idx, string);
 	};
 	host->fns.write_param_short_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);

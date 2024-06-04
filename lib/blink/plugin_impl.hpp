@@ -236,6 +236,13 @@ auto short_name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticStri
 }
 
 inline
+auto strings(const Plugin& plugin, blink_ParamIdx option_idx, StringVec strings) -> void {
+	for (const auto string : strings.value) {
+		plugin.host.write_param_option_add_string(plugin.host.usr, plugin.index, option_idx, {string.c_str()});
+	}
+}
+
+inline
 auto env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
 	plugin.host.write_param_env_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }

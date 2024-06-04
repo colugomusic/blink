@@ -50,6 +50,18 @@ constexpr ml::DSPVectorArray<ROWS> stepify(const ml::DSPVectorArray<ROWS>& value
 
 namespace convert {
 
+template <class T>
+inline constexpr T linear_to_ratio(T x, T max = T(100)) {
+	if (x <= 0) return 1.0f; 
+	return ::std::pow(max, ::std::pow(x, T(2)));
+}
+
+template <class T>
+inline constexpr T ratio_to_linear(T x, T max = T(100)) {
+	if (x <= 1) return 0.0f; 
+	return ::std::sqrt(::std::log(x)) / ::std::sqrt(::std::log(max));
+}
+
 template <class T> constexpr
 auto linear_to_delay_time_ms(T linear) -> T {
 	return T(2000) * (linear * linear * linear * linear);
