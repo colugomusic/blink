@@ -1377,6 +1377,7 @@ auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::type_idx(host, param.global_idx, sld_param_idx);
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_AMP});
 	write::name(host, param.global_idx, {"Amp"});
+	write::icon(host, param.global_idx, blink_StdIcon_Amp);
 	write::slider(host, sld_param_idx, add::slider::amp(host));
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_MovesDisplay);
 	return param.local_idx;
@@ -1548,6 +1549,7 @@ auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_SPEED});
 	write::name(host, param.global_idx, {"Speed"});
 	write::slider(host, sld_idx, add::slider::speed(host));
+	write::icon(host, param.global_idx, blink_StdIcon_Speed);
 	write::add_flags(host, param.global_idx, blink_ParamFlags_CanManipulate | blink_ParamFlags_MovesDisplay);
 	return param.local_idx;
 }
