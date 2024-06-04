@@ -372,6 +372,65 @@ auto tweaker() -> blink_TweakerReal {
 
 } // delay_time
 
+namespace linear {
+
+template <int Resolution> [[nodiscard]] inline
+auto fns() -> blink_EnvFns {
+	blink_EnvFns fns = {0};
+	fns.stepify   = tweak::stepify<Resolution>;
+	fns.to_string = tweak::to_string;
+	return fns;
+}
+
+template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
+auto tweaker() -> blink_TweakerReal {
+	blink_TweakerReal out = {0};
+	out.stepify   = tweak::stepify<Resolution>;
+	out.constrain = [](float v) { return std::clamp(v, float(Min) / Resolution, float(Max) / Resolution); };
+	out.increment = [](float v, bool precise) { return v + (precise ? 1.0f / EditPrecision : 1.0f / Resolution); };
+	out.decrement = [](float v, bool precise) { return v - (precise ? 1.0f / EditPrecision : 1.0f / Resolution); };
+	out.drag      = [](float v, int amount, bool precise) { return v + (amount * (precise ? 1.0f / EditPrecision : 1.0f / Resolution)); };
+	out.to_string = tweak::to_string;
+	out.from_string = [](const char* str, float* out) -> blink_Bool {
+		auto number = tweak::find_number<float>(str);
+		if (!number) {
+			return {false};
+		}
+		*out = *number;
+		return {true};
+	};
+	return out;
+}
+
+} // linear
+
+namespace ms {
+
+template <int Resolution> [[nodiscard]] inline
+auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
+	std::stringstream ss;
+	ss << v << " ms";
+	tweak::write_string(ss.str(), buffer);
+}
+
+template <int Resolution> [[nodiscard]] inline
+auto fns() -> blink_EnvFns {
+	blink_EnvFns fns = {0};
+	fns.stepify   = tweak::stepify<Resolution>;
+	fns.to_string = tweak::ms::to_string<Resolution>;
+	return fns;
+}
+
+template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
+auto tweaker() -> blink_TweakerReal {
+	blink_TweakerReal out = linear::tweaker<Min, Max, Resolution, EditPrecision>();
+	out.to_string = ms::to_string<Resolution>;
+	out.from_string = tweak::positive_number_from_string;
+	return out;
+}
+
+} // ms
+
 namespace filter_frequency {
 
 static constexpr auto DEFAULT_VALUE = 0.52833f;
@@ -379,7 +438,7 @@ static constexpr auto DEFAULT_VALUE = 0.52833f;
 [[nodiscard]] inline
 auto constrain(float v) -> float {
 	return std::clamp(v, 0.0f, 1.0f);
-};
+}
 
 [[nodiscard]] inline
 auto increment(float v, bool precise) -> float {
