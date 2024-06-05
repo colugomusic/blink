@@ -17,6 +17,7 @@ using Instance = ::ent::dynamic_store<
 >;
 template <typename... Ts>
 using Unit = ::ent::dynamic_store<
+	blink_InstanceIdx,
 	Ts...
 >;
 
@@ -54,6 +55,7 @@ auto terminate(Entities<Instance, Unit>* ents) -> blink_Error {
 template <typename Instance, typename Unit> [[nodiscard]]
 auto add_unit(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_UnitIdx {
 	const auto index = blink_UnitIdx{ents->unit.add()};
+	ents->unit.get<blink_InstanceIdx>(index.value) = instance_idx;
 	auto& units = ents->instance.get<UnitVec>(instance_idx.value);
 	units.value.push_back(index);
 	return index;

@@ -202,6 +202,7 @@ namespace std { template <> struct hash<blink::ParamSliderRealIdx> { auto operat
 [[nodiscard]] inline auto operator==(const blink_SliderIntIdx& a, const blink_SliderIntIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_SliderRealIdx& a, const blink_SliderRealIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_UnitIdx& a, const blink_UnitIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value != b.value; }
 [[nodiscard]] inline auto operator<(const blink_ID& a, const blink_ID& b) -> bool { return a.value < b.value; }
 [[nodiscard]] inline auto operator<(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value < b.value; }
