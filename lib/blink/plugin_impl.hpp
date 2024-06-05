@@ -93,6 +93,11 @@ auto env(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_EnvIdx {
 	return plugin.host.read_param_env_env(plugin.host.usr, plugin.index, param_idx);
 }
 
+inline
+auto slider_real(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_SliderRealIdx {
+	return plugin.host.read_param_slider_real_slider(plugin.host.usr, plugin.index, param_idx);
+}
+
 } // read
 
 namespace add {
@@ -235,6 +240,11 @@ auto name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString nam
 inline
 auto short_name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void {
 	plugin.host.write_param_short_name(plugin.host.usr, plugin.index, param_idx, name);
+}
+
+inline
+auto slider(const Plugin& plugin, blink_ParamIdx param_idx, blink_SliderRealIdx sld_idx) -> void {
+	plugin.host.write_param_slider_real_slider(plugin.host.usr, plugin.index, param_idx, sld_idx);
 }
 
 inline

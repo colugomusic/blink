@@ -1013,7 +1013,7 @@ auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
-	const auto env_idx       = add::env::empty(host);
+	const auto env_idx       = add::env::feedback(host);
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_FEEDBACK});
 	write::name(host, param.global_idx, {"Feedback"});
 	write::type_idx(host, param.global_idx, param_env_idx);
@@ -1940,6 +1940,11 @@ auto init(Host* host) -> void {
 		const auto slider_idx       = read::slider(*host_ptr(usr), param_slider_idx);
 		return read::default_value(*host_ptr(usr), slider_idx);
 	};
+	host->fns.read_param_slider_real_slider = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		return read::slider(*host_ptr(usr), param_slider_idx);
+	};
 	host->fns.write_env_add_flags = [](void* usr, blink_EnvIdx env_idx, int flags) {
 		write::add_flags(host_ptr(usr), env_idx, {flags});
 	};
@@ -2043,6 +2048,11 @@ auto init(Host* host) -> void {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::override_env(host_ptr(usr), param_slider_idx, {env_idx});
+	};
+	host->fns.write_param_slider_real_slider = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_SliderRealIdx sld_idx) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_sld_idx    = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		write::slider(host_ptr(usr), param_sld_idx, sld_idx);
 	};
 	host->fns.write_param_uuid = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_UUID uuid) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);

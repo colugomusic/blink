@@ -644,7 +644,7 @@ auto constrain(float v) -> float {
 
 template <int MIN = 0, int MAX = 100> [[nodiscard]]
 auto tweaker() -> blink_TweakerReal {
-	blink_TweakerReal out;
+	blink_TweakerReal out = {0};
 	out.constrain   = tweak::percentage::bipolar::constrain;
 	out.increment   = tweak::percentage::increment;
 	out.decrement   = tweak::percentage::decrement;
