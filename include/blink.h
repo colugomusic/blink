@@ -323,6 +323,7 @@ typedef void                (*blink_host_write_param_long_desc)(void*, blink_Plu
 typedef void                (*blink_host_write_param_manip_delegate)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx);
 typedef void                (*blink_host_write_param_name)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString value);
 typedef void                (*blink_host_write_param_option_add_string)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_TempString value);
+typedef void                (*blink_host_write_param_option_default_value)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int64_t value);
 typedef void                (*blink_host_write_param_short_name)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString value);
 typedef void                (*blink_host_write_param_slider_real_offset_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
 typedef void                (*blink_host_write_param_slider_real_override_env)(void*, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx);
@@ -373,6 +374,7 @@ struct blink_HostFns {
 	blink_host_write_param_manip_delegate           write_param_manip_delegate;
 	blink_host_write_param_name                     write_param_name;
 	blink_host_write_param_option_add_string        write_param_option_add_string;
+	blink_host_write_param_option_default_value     write_param_option_default_value;
 	blink_host_write_param_short_name               write_param_short_name;
 	blink_host_write_param_slider_real_offset_env   write_param_slider_real_offset_env;
 	blink_host_write_param_slider_real_override_env write_param_slider_real_override_env;

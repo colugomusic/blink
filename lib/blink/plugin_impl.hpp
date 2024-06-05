@@ -233,6 +233,11 @@ auto long_desc(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticStrin
 }
 
 inline
+auto option_default_value(const Plugin& plugin, blink_ParamIdx option_idx, int64_t value) -> void {
+	plugin.host.write_param_option_default_value(plugin.host.usr, plugin.index, option_idx, value);
+}
+
+inline
 auto name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void {
 	plugin.host.write_param_name(plugin.host.usr, plugin.index, param_idx, name);
 }

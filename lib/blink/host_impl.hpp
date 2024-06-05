@@ -2035,6 +2035,11 @@ auto init(Host* host) -> void {
 		const auto param_option_idx = ParamOptionIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::add_string(host_ptr(usr), param_option_idx, string);
 	};
+	host->fns.write_param_option_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int64_t value) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_option_idx = ParamOptionIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		write::default_value(host_ptr(usr), param_option_idx, {value});
+	};
 	host->fns.write_param_short_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		write::short_name(host_ptr(usr), param_global_idx, name);
