@@ -97,7 +97,7 @@ auto float_points_forward(const blink_RealPoints& points, float default_value, b
 template <class SearchFunc> [[nodiscard]] [[nodiscard]]
 auto chord(const blink_ChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left, SearchFunc search) -> blink_Scale {
 	*left = 0; 
-	if (data.points.count < 2) return 0; 
+	if (data.points.count < 1) return 0; 
 	auto search_beg = data.points.data + search_beg_index;
 	auto search_end = data.points.data + data.points.count;
 	const auto pos = search(search_beg, search_end); 

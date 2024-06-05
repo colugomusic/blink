@@ -57,22 +57,22 @@ auto sinh(T x) -> T {
 	return x < 0 ? -sinh_helper(-x) : sinh_helper(x);
 }
 
-[[nodiscard]] constexpr
-auto cos (double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto cos (T x) -> T {
 	return sin(M_PI_2 - x);
 }
 
-[[nodiscard]] constexpr
-auto cosh(double x) -> double {
-	return sqrt(1.0 + square(sinh(x)));
+template <typename T> [[nodiscard]] constexpr
+auto cosh(T x) -> T {
+	return sqrt(T(1) + square(sinh(x)));
 }
 
-[[nodiscard]] constexpr
-auto pow(double base, int exponent) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto pow(T base, int exponent) -> T {
 	return exponent < 0
-		? 1.0 / pow(base, -exponent)
+		? T(1) / pow(base, -exponent)
 		: exponent == 0
-			? 1.0
+			? T(1)
 			: exponent == 1
 				? base
 				: base * pow(base, exponent-1);
@@ -88,23 +88,23 @@ auto atan_poly(T x) -> T {
 	return x + atan_poly_helper(pow(x, 5) / 5 - pow(x, 3) / 3, pow(x, 7), T(7), x * x);
 }
 
-[[nodiscard]] constexpr
-auto atan_identity(double x) -> double {
-	return x <= (2.0 - sqrt(3.0)) ? atan_poly(x) : (M_PI_2 / 3) + atan_poly((sqrt(3) * x - 1) / (sqrt(3) + x));
+template <typename T> [[nodiscard]] constexpr
+auto atan_identity(T x) -> T {
+	return x <= (T(2) - sqrt(T(3))) ? atan_poly(x) : (M_PI_2 / 3) + atan_poly((sqrt(3) * x - 1) / (sqrt(3) + x));
 }
 
-[[nodiscard]] constexpr
-auto atan_cmplmntry(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto atan_cmplmntry(T x) -> T {
 	return x < 1 ? atan_identity(x) : M_PI_2 - atan_identity(1 / x);
 }
 
-[[nodiscard]] constexpr
-auto atan(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto atan(T x) -> T {
 	return x >= 0 ? atan_cmplmntry(x) : -atan_cmplmntry(-x);
 }
 
-[[nodiscard]] constexpr
-auto atan2(double y, double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto atan2(T y, T x) -> T {
 	return x > 0
 		? atan(y / x)
 		: y >= 0 && x < 0
@@ -118,58 +118,58 @@ auto atan2(double y, double x) -> double {
 						: 0;
 }
 
-[[nodiscard]] constexpr
-auto nearest(double x) -> double {
-	return (x - 0.5) > (int)(x) ? (int)(x + 0.5) : (int)(x);
+template <typename T> [[nodiscard]] constexpr
+auto nearest(T x) -> T {
+	return (x - T(0.5)) > (int)(x) ? (int)(x + T(0.5)) : (int)(x);
 }
 
-[[nodiscard]] constexpr
-auto fraction(double x) -> double {
-	return (x - 0.5) > (int)(x) ? -(((double)(int)(x + 0.5)) - x) : x - ((double)(int)(x));
+template <typename T> [[nodiscard]] constexpr
+auto fraction(T x) -> T {
+	return (x - T(0.5)) > (int)(x) ? -(((T)(int)(x + T(0.5))) - x) : x - ((T)(int)(x));
 }
 
-[[nodiscard]] constexpr
-auto exp_helper(double r) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto exp_helper(T r) -> T {
 	return 1.0 + r + pow(r, 2) / 2 + pow(r, 3) / 6 + pow(r, 4) / 24 + pow(r, 5) / 120 + pow(r, 6) / 720 + pow(r, 7) / 5040;
 }
 
-[[nodiscard]] constexpr
-auto exp(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto exp(T x) -> T {
 	return pow(M_E, static_cast<int>(nearest(x))) * exp_helper(fraction(x));
 }
 
-[[nodiscard]] constexpr
-auto mantissa(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto mantissa(T x) -> T {
 	return x >= 10 ? mantissa(x / 10) : x < 1 ? mantissa(x * 10) : x;
 }
 
-[[nodiscard]] constexpr
-auto exponent_helper(double x, int e) -> int {
+template <typename T> [[nodiscard]] constexpr
+auto exponent_helper(T x, int e) -> int {
 	return x >= 10 ? exponent_helper(x / 10, e + 1) : x < 1 ? exponent_helper(x * 10, e - 1) : e;
 }
 
-[[nodiscard]] constexpr
-auto exponent(double x) -> int {
+template <typename T> [[nodiscard]] constexpr
+auto exponent(T x) -> int {
 	return exponent_helper(x, 0);
 }
 
-[[nodiscard]] constexpr
-auto log_helper2(double y) -> double {
-	return 2.0 * (y + pow(y, 3) / 3 + pow(y, 5) / 5 + pow(y, 7) / 7 + pow(y, 9) / 9 + pow(y, 11) / 11);
+template <typename T> [[nodiscard]] constexpr
+auto log_helper2(T y) -> T {
+	return T(2) * (y + pow(y, 3) / 3 + pow(y, 5) / 5 + pow(y, 7) / 7 + pow(y, 9) / 9 + pow(y, 11) / 11);
 }
 
-[[nodiscard]] constexpr
-auto log_helper(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto log_helper(T x) -> T {
 	return log_helper2((x - 1) / (x + 1));
 }
 
-[[nodiscard]] constexpr
-auto log(double x) -> double {
+template <typename T> [[nodiscard]] constexpr
+auto log(T x) -> T {
 	return x == 0
-		? -std::numeric_limits<double>::infinity()
+		? -std::numeric_limits<T>::infinity()
 		: x < 0
-			? std::numeric_limits<double>::quiet_NaN()
-			: 2.0 * log_helper(sqrt(mantissa(x))) + 2.3025851 * exponent(x);
+			? std::numeric_limits<T>::quiet_NaN()
+			: T(2) * log_helper(sqrt(mantissa(x))) + T(2.3025851) * exponent(x);
 }
 
 } // const_math
