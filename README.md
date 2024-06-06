@@ -52,4 +52,4 @@ There are five types of plugin parameter: Chord, Envelope, Option, SliderInt and
 
 Every parameter has a UUID associated with it. Some standard UUIDs are defined in [/include/blink_std.h](/include/blink_std.h).
 
-UUIDs are unique to particular concepts, not specific parameters. For example "ca2529db-e7bd-4019-9a07-22aee24526d1" is a unique identifier which refers to the general concept of "pitch". If two different plugins each expose an envelope parameter which use this same identifier, Blockhead will automatically associate them together, enabling features such as cross-plugin manipulation and hotswitching.
+UUIDs are unique to particular concepts, not specific parameters. For example "ca2529db-e7bd-4019-9a07-22aee24526d1" is a unique identifier which refers to the general concept of "pitch". If two or more plugins each expose a parameter of the same type, which each use this same identifier, Blockhead will automatically associate them together, enabling features such as cross-plugin manipulation and hotswitching.
