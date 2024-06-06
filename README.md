@@ -1,4 +1,4 @@
-# Blink (not an audio plugin format)
+# Blink
 
 Blink is Blockhead's native plugin format. There are three types of plugin: Effect, Sampler and Synth.
 
