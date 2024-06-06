@@ -319,6 +319,11 @@ auto name(const Host& host, blink_PluginIdx plugin_idx) -> std::string_view {
 }
 
 [[nodiscard]] inline
+auto plugin(const Host& host, blink_ParamIdx param_idx) -> blink_PluginIdx {
+	return host.param.get<blink_PluginIdx>(param_idx.value);
+}
+
+[[nodiscard]] inline
 auto plugin_count(const Host& host) -> size_t {
 	return host.plugin.size();
 }
