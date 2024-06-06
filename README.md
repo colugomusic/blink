@@ -9,12 +9,12 @@ Blink is NOT an attempt to create a new audio plugin format which competes with 
 ## Terminology
 
 ### Plugin
-A dynamic link library which implements the C API ([/include/blink.h](/include/blink.h))
+A dynamic link library which implements the C API ([/include/blink.h](/include/blink.h)).
 
 ### Instance
 The host application can create instances of a plugin. An instance is a collection of Units. Instances can be created in various different contexts. For example:
 - A workspace block in Blockhead which has a Blink plugin associated with it, will be backed by a single instance.
-- A baking operation in Blockhead which involves a Blink plugin, will create a temporary instance on-the-fly.
+- A baking operation in Blockhead which involves a Blink plugin, will create a temporary instance on-the-fly, which exists for the duration of the baking operation.
 
 ### Unit
 A unit is essentially the audio processor for a plugin. This is where the actual DSP code is. The host application may create more than one unit per instance. For example, Blockhead will create four units per block for the purposes of crossfading between them to avoid clicking artifacts when the project state changes, or the playback loops back to an earlier position.
