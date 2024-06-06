@@ -17,7 +17,7 @@ The host application can create instances of a plugin. An instance is a collecti
 - A baking operation in Blockhead which involves a Blink plugin, will create a temporary instance on-the-fly, which exists for the duration of the baking operation.
 
 ### Unit
-A unit is essentially the audio processor for a plugin. This is where the actual DSP code is. The host application may create more than one unit per instance. For example, Blockhead will create four units per block for the purposes of crossfading between them to avoid clicking artifacts when the project state changes, or the playback loops back to an earlier position.
+A unit is essentially the audio processor for a plugin. This is where the actual DSP code is. The host application may create more than one unit per instance. For example, Blockhead will create four units per block for the purposes of crossfading between them to avoid clicking artifacts when the project state changes, or when the playback loops back to an earlier position.
 
 Most of the time, only one unit per instance is actually doing any processing, but sometimes multiple units per instance may be processing simultaneously, contributing to the final audio output.
 
