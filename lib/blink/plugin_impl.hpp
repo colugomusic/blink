@@ -11,12 +11,12 @@
 namespace blink {
 
 template <typename... Ts>
-using Instance = ::ent::dynamic_store<
+using Instance = ent::flex_table<
 	UnitVec,
 	Ts...
 >;
 template <typename... Ts>
-using Unit = ::ent::dynamic_store<
+using Unit = ent::flex_table<
 	blink_InstanceIdx,
 	Ts...
 >;

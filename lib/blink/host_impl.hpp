@@ -13,7 +13,7 @@
 namespace blink {
 
 namespace e {
-	using Plugin = ent::static_store<
+	using Plugin = ent::table<
 		blink_PluginInfo,
 		PluginType,
 		PluginTypeIdx,
@@ -21,19 +21,19 @@ namespace e {
 		PluginParams,
 		std::vector<GroupInfo>
 	>;
-	using PluginSampler = ent::static_store<
+	using PluginSampler = ent::table<
 		SamplerInfo
 	>;
-	using Instance = ent::dynamic_store<
+	using Instance = ent::flex_table<
 		blink_PluginIdx,
 		InstanceProcess,
 		UnitVec
 	>;
-	using Unit = ent::dynamic_store<
+	using Unit = ent::flex_table<
 		blink_PluginIdx,
 		UnitProcess
 	>;
-	using Param = ent::static_store<
+	using Param = ent::table<
 		blink_PluginIdx,
 		blink_UUID,
 		ManipDelegate,
@@ -44,28 +44,28 @@ namespace e {
 		ParamTypeIdx,
 		SubParams
 	>;
-	using ParamEnv = ent::static_store<
+	using ParamEnv = ent::table<
 		ApplyOffsetFn,
 		ClampRange,
 		EnvIdx,
 		OffsetEnvIdx,
 		OverrideEnvIdx
 	>;
-	using ParamOption = ent::static_store<
+	using ParamOption = ent::table<
 		DefaultValue<int64_t>,
 		StringVec
 	>;
-	using ParamSliderInt = ent::static_store<
+	using ParamSliderInt = ent::table<
 		blink_SliderIntIdx
 	>;
-	using ParamSliderReal = ent::static_store<
+	using ParamSliderReal = ent::table<
 		ApplyOffsetFn,
 		blink_SliderRealIdx,
 		ClampRange,
 		OffsetEnvIdx,
 		OverrideEnvIdx
 	>;
-	using Env = ent::static_store<
+	using Env = ent::table<
 		DefaultMax<float>,
 		DefaultMin<float>,
 		DefaultValue<float>,
@@ -77,11 +77,11 @@ namespace e {
 		StepSizeSliderIdx,
 		ValueSliderIdx
 	>;
-	using SliderInt = ent::static_store<
+	using SliderInt = ent::table<
 		DefaultValue<int64_t>,
 		TweakerInt
 	>;
-	using SliderReal = ent::static_store<
+	using SliderReal = ent::table<
 		DefaultValue<float>,
 		TweakerReal
 	>;
