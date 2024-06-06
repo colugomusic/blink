@@ -20,13 +20,6 @@ CPMAddPackage(
 )
 
 CPMAddPackage(
-	NAME tweak
-	GITHUB_REPOSITORY "colugomusic/tweak"
-	GIT_TAG "master"
-	DOWNLOAD_ONLY YES
-)
-
-CPMAddPackage(
 	NAME madronalib
 	GITHUB_REPOSITORY "madronalabs/madronalib"
 	GIT_TAG "master"
@@ -40,6 +33,5 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 	${CMAKE_CURRENT_LIST_DIR}/../include
 	${ent_SOURCE_DIR}/include
 	${snd_SOURCE_DIR}/include
-	${tweak_SOURCE_DIR}/include
 	${madronalib_SOURCE_DIR}/source
 )
