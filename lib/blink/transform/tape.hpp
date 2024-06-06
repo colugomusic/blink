@@ -17,11 +17,11 @@ struct Tape {
 		float transpose {};
 		int64_t sample_offset {};
 		struct {
-			const blink_EnvData* pitch {};
+			const blink_UniformEnvData* pitch {};
 		} env; 
 		struct
 		{
-			const blink_OptionData* reverse {};
+			const blink_UniformOptionData* reverse {};
 		} option; 
 		const blink_WarpPoints* warp_points {};
 		struct {

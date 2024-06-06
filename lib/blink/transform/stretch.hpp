@@ -21,12 +21,12 @@ public:
 
 		struct
 		{
-			const blink_EnvData* speed;
+			const blink_UniformEnvData* speed;
 		} env;
 
 		struct
 		{
-			const blink_OptionData* reverse;
+			const blink_UniformOptionData* reverse;
 		} option;
 
 		const blink_WarpPoints* warp_points;

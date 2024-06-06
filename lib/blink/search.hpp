@@ -95,7 +95,7 @@ auto float_points_forward(const blink_RealPoints& points, float default_value, b
 //        in some scenarios this can be passed as search_beg_index to
 //        speed up the search in the next iteration
 template <class SearchFunc> [[nodiscard]] [[nodiscard]]
-auto chord(const blink_ChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left, SearchFunc search) -> blink_Scale {
+auto chord(const blink_UniformChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left, SearchFunc search) -> blink_Scale {
 	*left = 0; 
 	if (data.points.count < 1) return 0; 
 	auto search_beg = data.points.data + search_beg_index;
@@ -111,7 +111,7 @@ auto chord(const blink_ChordData& data, blink_Position block_position, size_t se
 
 // Use a binary search to locate the scale at the block position
 [[nodiscard]] inline
-auto chord_binary(const blink_ChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left) -> blink_Scale {
+auto chord_binary(const blink_UniformChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left) -> blink_Scale {
 	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end) {
 		const auto less = [](blink_Position position, blink_ChordBlock block) {
 			return position < block.x;
@@ -124,7 +124,7 @@ auto chord_binary(const blink_ChordData& data, blink_Position block_position, si
 // Use a forward search to locate the scale at the block position (can be
 // faster when block is being traversed forwards)
 [[nodiscard]] inline
-auto chord_forward(const blink_ChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left) -> blink_Scale {
+auto chord_forward(const blink_UniformChordData& data, blink_Position block_position, size_t search_beg_index, size_t* left) -> blink_Scale {
 	const auto find = [block_position](const blink_ChordBlock* beg, const blink_ChordBlock* end) {
 		const auto greater = [block_position](blink_ChordBlock block) {
 			return block.x > block_position;
@@ -216,7 +216,7 @@ auto vec(const U& data, const BlockPositions& block_positions, Searcher searcher
 } 
 
 [[nodiscard]] inline
-auto vec(const blink_ChordData& data, const BlockPositions& block_positions) -> ml::DSPVectorInt {
+auto vec(const blink_UniformChordData& data, const BlockPositions& block_positions) -> ml::DSPVectorInt {
 	ml::DSPVectorInt out;
 	std::array<blink_Scale, kFloatsPerDSPVector> buffer; 
 	vec(data, block_positions, make_searcher(chord_binary, chord_forward), buffer.data()); 
@@ -273,42 +273,42 @@ auto one(const blink_RealPoints& points, float default_value, blink_Position blo
 }
 
 [[nodiscard]] inline
-auto one(const blink::EnvData& env_data, blink_Position block_position) -> float {
+auto one(const blink::uniform::Env& env_data, blink_Position block_position) -> float {
 	if (!env_data.data) { return env_data.value; }
 	return one(env_data.data->points, env_data.default_value, block_position);
 }
 
 [[nodiscard]] inline
-auto one(const blink::EnvData& env_data, const BlockPositions& block_positions) -> float {
+auto one(const blink::uniform::Env& env_data, const BlockPositions& block_positions) -> float {
 	return one(env_data, block_positions.positions[0]);
 }
 
 [[nodiscard]] inline
-auto one(const blink::SliderRealData& slider_data, blink_Position block_position) -> float {
+auto one(const blink::uniform::SliderReal& slider_data, blink_Position block_position) -> float {
 	if (!slider_data.data) { return slider_data.value; }
 	return one(slider_data.data->points, slider_data.default_value, block_position);
 }
 
 [[nodiscard]] inline
-auto one(const blink::SliderRealData& slider_data, const BlockPositions& block_positions) -> float {
+auto one(const blink::uniform::SliderReal& slider_data, const BlockPositions& block_positions) -> float {
 	return one(slider_data, block_positions.positions[0]);
 }
 
 [[nodiscard]] inline
-auto vec(const blink::ChordData& chord_data, const BlockPositions& block_positions) -> ml::DSPVectorInt {
+auto vec(const blink::uniform::Chord& chord_data, const BlockPositions& block_positions) -> ml::DSPVectorInt {
 	if (!chord_data.data) { return ml::DSPVectorInt(0); }
 	return vec(*chord_data.data, block_positions);
 }
 
 [[nodiscard]] inline
-auto vec(const blink::EnvData& env_data, const BlockPositions& block_positions) -> ml::DSPVector {
+auto vec(const blink::uniform::Env& env_data, const BlockPositions& block_positions) -> ml::DSPVector {
 	if (!env_data.data)                   { return env_data.value; }
 	if (env_data.data->points.count <= 1) { return env_data.value; }
 	return vec(env_data.default_value, env_data.data->points, block_positions);
 }
 
 [[nodiscard]] inline
-auto vec(const blink::SliderRealData& slider_data, const BlockPositions& block_positions) -> ml::DSPVector {
+auto vec(const blink::uniform::SliderReal& slider_data, const BlockPositions& block_positions) -> ml::DSPVector {
 	if (!slider_data.data)                   { return slider_data.value; }
 	if (slider_data.data->points.count <= 1) { return slider_data.value; }
 	return vec(slider_data.default_value, slider_data.data->points, block_positions);

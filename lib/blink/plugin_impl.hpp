@@ -288,13 +288,6 @@ auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> vo
 } // write
 
 [[nodiscard]] inline
-auto make_chord_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> ChordData {
-	ChordData out;
-	out.data = &param_data[param_idx.value].chord;
-	return out;
-}
-
-[[nodiscard]] inline
 auto make_int_value(const blink_IntPoints& points, int64_t default_value) -> int64_t {
 	return points.count > 0 ? points.data[0].y : default_value;
 }
@@ -305,60 +298,76 @@ auto make_real_value(const blink_RealPoints& points, float default_value) -> flo
 }
 
 [[nodiscard]] inline
-auto make_env_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> EnvData {
-	EnvData out;
-	out.default_value = plugin.host.read_param_env_default_value(plugin.host.usr, plugin.index, param_idx);
+auto make_chord_data(const Plugin& plugin, const blink_UniformParamData* param_data, blink_ParamIdx param_idx) -> uniform::Chord {
+	uniform::Chord out;
 	if (param_data) {
-		out.data = &param_data[param_idx.value].envelope;
+		out.data = &param_data[param_idx.value].chord;
+	}
+	else {
+		out.data = nullptr;
+	}
+	return out;
+}
+
+[[nodiscard]] inline
+auto make_env_data(const Plugin& plugin, const blink_UniformParamData* param_data, blink_ParamIdx param_idx) -> uniform::Env {
+	uniform::Env out;
+	if (param_data) {
+		out.data = &param_data[param_idx.value].env;
+		out.default_value = out.data->default_value;
 		out.value = make_real_value(out.data->points, out.default_value);
 	}
 	else {
 		out.data = nullptr;
+		out.default_value = plugin.host.read_param_env_default_value(plugin.host.usr, plugin.index, param_idx);
 		out.value = out.default_value;
 	}
 	return out;
 }
 
 [[nodiscard]] inline
-auto make_option_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> OptionData {
-	OptionData out;
-	out.default_value = plugin.host.read_param_option_default_value(plugin.host.usr, plugin.index, param_idx);
+auto make_option_data(const Plugin& plugin, const blink_UniformParamData* param_data, blink_ParamIdx param_idx) -> uniform::Option {
+	uniform::Option out;
 	if (param_data) {
 		out.data = &param_data[param_idx.value].option;
+		out.default_value = out.data->default_value;
 		out.value = make_int_value(out.data->points, out.default_value);
 	}
 	else {
 		out.data = nullptr;
+		out.default_value = plugin.host.read_param_option_default_value(plugin.host.usr, plugin.index, param_idx);
 		out.value = out.default_value;
 	}
 	return out;
 }
 
 [[nodiscard]] inline
-auto make_slider_int_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> SliderIntData {
-	SliderIntData out;
-	out.default_value = plugin.host.read_param_slider_int_default_value(plugin.host.usr, plugin.index, param_idx);
+auto make_slider_int_data(const Plugin& plugin, const blink_UniformParamData* param_data, blink_ParamIdx param_idx) -> uniform::SliderInt {
+	uniform::SliderInt out;
 	if (param_data) {
 		out.data = &param_data[param_idx.value].slider_int;
+		out.default_value = out.data->default_value;
 		out.value = make_int_value(out.data->points, out.default_value);
 	}
 	else {
 		out.data = nullptr;
+		out.default_value = plugin.host.read_param_slider_int_default_value(plugin.host.usr, plugin.index, param_idx);
 		out.value = out.default_value;
 	}
 	return out;
 }
 
 [[nodiscard]] inline
-auto make_slider_real_data(const Plugin& plugin, const blink_ParamData* param_data, blink_ParamIdx param_idx) -> SliderRealData {
-	SliderRealData out;
-	out.default_value = plugin.host.read_param_slider_real_default_value(plugin.host.usr, plugin.index, param_idx);
+auto make_slider_real_data(const Plugin& plugin, const blink_UniformParamData* param_data, blink_ParamIdx param_idx) -> uniform::SliderReal {
+	uniform::SliderReal out;
 	if (param_data) {
 		out.data = &param_data[param_idx.value].slider_real;
+		out.default_value = out.data->default_value;
 		out.value = make_real_value(out.data->points, out.default_value);
 	}
 	else {
 		out.data = nullptr;
+		out.default_value = plugin.host.read_param_slider_real_default_value(plugin.host.usr, plugin.index, param_idx);
 		out.value = out.default_value;
 	}
 	return out;

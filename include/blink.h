@@ -18,12 +18,11 @@ typedef uint32_t blink_Scale;
 typedef float (*blink_ApplyOffsetFn)(float, float);
 
 typedef struct {      int8_t value; } blink_Bool;
-typedef struct {    uint64_t value; } blink_BufferID;
 typedef struct {      size_t value; } blink_EnvIdx;
 typedef struct {      size_t value; } blink_InstanceIdx;
-typedef struct {      size_t value; } blink_SliderIntIdx;
 typedef struct {      size_t value; } blink_ParamIdx;
 typedef struct {      size_t value; } blink_PluginIdx;
+typedef struct {      size_t value; } blink_SliderIntIdx;
 typedef struct {      size_t value; } blink_SliderRealIdx;
 typedef struct {      size_t value; } blink_UnitIdx;
 typedef struct {     int32_t value; } blink_Flags;
@@ -33,6 +32,7 @@ typedef struct {     uint8_t value; } blink_ChannelCount;
 typedef struct {    uint32_t value; } blink_ParamCount;
 typedef struct {    uint32_t value; } blink_SR;
 typedef struct {    uint64_t value; } blink_FrameCount;
+typedef struct {    uint64_t value; } blink_VectorID;
 typedef struct { const char* value; } blink_StaticString;
 typedef struct { const char* value; } blink_TempString;
 typedef struct { const char* value; } blink_UUID;
@@ -126,34 +126,48 @@ typedef struct {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 typedef struct {
 	blink_ChordBlocks points;
-} blink_ChordData;
+} blink_UniformChordData;
 
 typedef struct {
 	blink_RealPoints points;
 	float default_value;
-} blink_EnvData;
+} blink_UniformEnvData;
 
 typedef struct {
 	blink_IntPoints points;
 	int64_t default_value;
-} blink_OptionData;
+} blink_UniformOptionData;
 
 typedef struct {
 	blink_RealPoints points;
 	float default_value;
-} blink_SliderRealData;
+} blink_UniformSliderRealData;
 
 typedef struct {
 	blink_IntPoints points;
 	int64_t default_value;
-} blink_SliderIntData;
+} blink_UniformSliderIntData;
 
-union blink_ParamData {
-	blink_ChordData chord;
-	blink_EnvData envelope;
-	blink_OptionData option;
-	blink_SliderIntData slider_int;
-	blink_SliderRealData slider_real;
+typedef struct { blink_Scale value; } blink_VaryingChordData; 
+typedef struct { float value; } blink_VaryingEnvData; 
+typedef struct { int64_t value; } blink_VaryingOptionData; 
+typedef struct { int64_t value; } blink_VaryingSliderIntData; 
+typedef struct { float value; } blink_VaryingSliderRealData; 
+
+union blink_UniformParamData {
+	blink_UniformChordData chord;
+	blink_UniformEnvData env;
+	blink_UniformOptionData option;
+	blink_UniformSliderIntData slider_int;
+	blink_UniformSliderRealData slider_real;
+};
+
+union blink_VaryingParamData {
+	blink_VaryingChordData chord;
+	blink_VaryingEnvData env;
+	blink_VaryingOptionData option;
+	blink_VaryingSliderIntData slider_int;
+	blink_VaryingSliderRealData slider_real;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -173,6 +187,7 @@ enum blink_ParamFlags {
 	blink_ParamFlags_MovesDisplay               = 1 << 10, // Editing should trigger a visual update
 	blink_ParamFlags_ShowButton                 = 1 << 11,
 	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
+	blink_ParamFlags_Varying                    = 1 << 13,
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -182,16 +197,6 @@ enum blink_EnvFlags {
 	blink_EnvFlags_None         = 1 << 0,
 	blink_EnvFlags_NoGridLabels = 1 << 1,
 };
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Manipulator Settings
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-typedef struct {
-	// Either of these can be empty, but at least one must be defined
-	// if blink_ParamFlags_CanManipulate is set
-	blink_EnvIdx offset_envelope;
-	blink_EnvIdx override_envelope; 
-} blink_ManipSettings;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Resource Data
@@ -470,53 +475,42 @@ typedef struct {
 } blink_EffectInstanceInfo;
 
 typedef struct {
-	blink_BufferID buffer_id;
-	blink_SR song_rate;
+	// Increments by 1 each processing vector
+	blink_VectorID vector_id;
+	// Where are we relative to the left edge of the block?
 	blink_Position* positions;
-} blink_UnitBuffer;
+	// May be NULL
+	const blink_VaryingParamData* param_data;
+} blink_VaryingData;
 
-struct blink_UnitState {
-	uint64_t id; // Increments by at least one every time the unit state changes.
-	             // The same unit state might be passed in for multiple audio buffers, i.e.
-	             // this id might not change from one buffer to the next.
-	             // Could be used to optimize things like envelope traversals, for example
-	             // if the parameter state has not changed since the last audio buffer then
-	             // a plugin could continue searching from the previously hit envelope
-	             // point instead of searching from the beginning
+typedef struct {
+	// This ID increments by at least one every time the uniform data changes.
+	// The same uniform data might be passed in for multiple processing vectors,
+	// i.e. this id might not change from one vector to the next.
+	// Could be used to optimize things like envelope traversals, for example
+	// if the parameter state has not changed since the last processing vector
+	// then a plugin could continue searching from the previously hit envelope
+	// point instead of searching from the beginning
+	uint64_t id;
+	blink_SR song_rate;
 	float scale;
 	int64_t data_offset;
 	blink_Bool smooth_transitions;
 	const blink_WarpPoints* warp_points;
 	// May be NULL, in which case plugins should act as if all parameters are default.
-	const blink_ParamData* param_data;
-};
+	const blink_UniformParamData* param_data;
+} blink_UniformData;
 
 typedef struct {
-	blink_UnitBuffer unit;
-} blink_EffectBuffer;
-
-struct blink_EffectUnitState {
-	blink_UnitState unit;
-};
-
-typedef struct {
-	blink_UnitBuffer unit;
+	blink_VaryingData base;
 	const blink_SampleInfo* sample_info;
 	blink_Bool analysis_ready;
-} blink_SamplerBuffer;
+} blink_SamplerVaryingData;
 
-struct blink_SamplerUnitState {
-	blink_UnitState unit;
+typedef struct {
+	blink_UniformData base;
 	blink_ChannelMode channel_mode;
-};
-
-struct blink_SynthBuffer {
-	blink_UnitBuffer unit;
-};
-
-struct blink_SynthUnitState {
-	blink_UnitState unit;
-};
+} blink_SamplerUniformData;
 
 #ifdef BLINK_EXPORT
 
@@ -542,16 +536,16 @@ extern "C"
 	EXPORTED blink_Error              blink_unit_stream_init(blink_UnitIdx unit_idx, blink_SR SR);
 
 	// EFFECT PLUGIN INTERFACE ----------------------------------------
-	EXPORTED blink_Error              blink_effect_process(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out);
+	EXPORTED blink_Error              blink_effect_process(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, const float* in, float* out);
 	EXPORTED blink_EffectInstanceInfo blink_effect_get_info(blink_InstanceIdx instance_idx);
 
 	// SYNTH PLUGIN INTERFACE -----------------------------------------
-	EXPORTED blink_Error              blink_synth_process(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out);
+	EXPORTED blink_Error              blink_synth_process(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, float* out);
 
 	// SAMPLER PLUGIN INTERFACE ---------------------------------------
 	// output pointer is aligned on a 16-byte boundary
 	// output pointer is an array of size BLINK_VECTOR_SIZE * 2 for non-interleaved L and R channels 
-	EXPORTED blink_Error blink_sampler_process(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out);
+	EXPORTED blink_Error blink_sampler_process(blink_UnitIdx unit_idx, const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, float* out);
 
 	// Called by the host once per sample only if
 	// blink_SamplerInfo::requires_preprocessing is true
@@ -585,7 +579,7 @@ extern "C"
 
 	// The host takes care of actually rendering the waveform but relies on
 	// the plugin to calculate the waveform position at each pixel.
-	EXPORTED blink_Error blink_sampler_draw(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out);
+	EXPORTED blink_Error blink_sampler_draw(const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, blink_FrameCount n, blink_SamplerDrawInfo* out);
 }
 
 #endif

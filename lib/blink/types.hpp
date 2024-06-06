@@ -71,7 +71,6 @@ struct GroupInfo {
 
 struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
 struct StepifyFn          { blink_Tweak_StepifyReal fn = nullptr; };
-struct BufferID           { blink_BufferID value = {0}; };
 struct ClampRange         { std::optional<blink_Range> value; };
 struct DefaultSnapAmount  { float value = 0.0f; };
 struct EnvFlags           { int value = 0; };
@@ -105,6 +104,7 @@ struct TweakerInt         { blink_TweakerInt value {0}; };
 struct TweakerReal        { blink_TweakerReal value {0}; };
 struct UnitVec            { std::vector<blink_UnitIdx> value; };
 struct ValueSliderIdx     { blink_SliderRealIdx value; };
+struct VectorID           { blink_VectorID value = {0}; };
 template <typename T> struct DefaultMax { T value = T(0); };
 template <typename T> struct DefaultMin { T value = T(0); };
 template <typename T> struct DefaultValue { T value = T(0); };
@@ -117,7 +117,7 @@ struct ParamStrings {
 };
 struct InstanceProcess {
 	LocalInstanceIdx local_idx;
-	BufferID buffer_id;
+	VectorID vector_id;
 	int active_buffer_units = 0;
 };
 
@@ -125,7 +125,7 @@ struct UnitProcess {
 	PluginIdx plugin_idx;
 	LocalUnitIdx local_idx;
 	blink_InstanceIdx instance_idx;
-	BufferID buffer_id;
+	VectorID vector_id;
 };
 
 struct PluginInterface {
@@ -154,16 +154,16 @@ struct PluginInterface {
 	unit_reset_fn           unit_reset;
 	unit_stream_init_fn     unit_stream_init;
 	struct Effect {
-		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_EffectBuffer* buffer, const blink_EffectUnitState* unit_state, const float* in, float* out)>;
+		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, const float* in, float* out)>;
 		using get_info_fn = std::function<blink_EffectInstanceInfo(blink_InstanceIdx instance_idx)>;
 		get_info_fn get_info;
 		process_fn process;
 	} effect;
 	struct Sampler {
-		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, float* out)>;
+		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, float* out)>;
 		using preprocess_sample_fn = std::function<blink_Error(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info)>;
 		using sample_deleted_fn = std::function<blink_Error(blink_ID sample_id)>;
-		using draw_fn = std::function<blink_Error(const blink_SamplerBuffer* buffer, const blink_SamplerUnitState* unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
+		using draw_fn = std::function<blink_Error(const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
 		using get_sonic_fragment_at_block_position_fn = std::function<double(blink_Position block_position)>;
 		using block_position_for_sonic_fragment_fn = std::function<blink_Position(double fragment)>;
 		block_position_for_sonic_fragment_fn    block_position_for_sonic_fragment;
@@ -174,7 +174,7 @@ struct PluginInterface {
 		sample_deleted_fn                       sample_deleted;
 	} sampler;
 	struct Synth {
-		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SynthBuffer* buffer, const blink_SynthUnitState* unit_state, float* out)>;
+		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, float* out)>;
 		process_fn process;
 	} synth;
 };

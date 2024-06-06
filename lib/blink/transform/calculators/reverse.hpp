@@ -16,7 +16,7 @@ public:
 
 	struct Config
 	{
-		const blink_OptionData* reversal_data;
+		const blink_UniformOptionData* reversal_data;
 		std::function<blink_Position(blink_Position, float*)> transform_position;
 		CorrectionGrains* correction_grains {};
 	};
@@ -224,7 +224,7 @@ public:
 
 		struct
 		{
-			const blink_OptionData* reverse;
+			const blink_UniformOptionData* reverse;
 		} option;
 
 		struct

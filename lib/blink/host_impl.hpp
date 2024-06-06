@@ -1611,62 +1611,62 @@ auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_Pa
 } // add
 
 inline
-auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_InstanceIdx instance_idx, blink_BufferID buffer_id) -> void {
+auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_InstanceIdx instance_idx, blink_VectorID vector_id) -> void {
 	auto& process = read::process(host, instance_idx);
-	if (buffer_id.value > process.buffer_id.value.value) {
-		if (buffer_id.value > process.buffer_id.value.value + 1 || process.active_buffer_units == 0) {
+	if (vector_id.value > process.vector_id.value.value) {
+		if (vector_id.value > process.vector_id.value.value + 1 || process.active_buffer_units == 0) {
 			// instance is reset at the start of the buffer if we have gone
 			// at least one buffer with no units being processed
 			plugin.instance_reset(process.local_idx.value);
 		}
-		process.buffer_id.value     = buffer_id;
+		process.vector_id.value     = vector_id;
 		process.active_buffer_units = 0;
 	}
 	process.active_buffer_units++;
 }
 
 template <typename ProcessFn> inline
-auto unit_process(Host* host, blink_UnitIdx unit_idx, const blink_UnitBuffer& buffer, const blink_UnitState& unit_state, ProcessFn&& process_fn) -> blink_Error {
+auto unit_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData& varying, ProcessFn&& process_fn) -> blink_Error {
 	auto& process      = host->unit.get<UnitProcess>(unit_idx.value);
 	const auto& plugin = read::iface(*host, process.plugin_idx.value);
-	begin_unit_process(host, plugin, process.instance_idx, buffer.buffer_id);
-	if (buffer.buffer_id.value > process.buffer_id.value.value + 1) {
+	begin_unit_process(host, plugin, process.instance_idx, varying.vector_id);
+	if (varying.vector_id.value > process.vector_id.value.value + 1) {
 		// unit is reset at the start of the buffer if we have gone
 		// at least one buffer without processing this unit
 		plugin.unit_reset(process.local_idx.value);
 	}
-	process.buffer_id.value = buffer.buffer_id;
+	process.vector_id.value = varying.vector_id;
 	return process_fn(plugin, process.local_idx);
 }
 
 inline
-auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_EffectBuffer& buffer, const blink_EffectUnitState& unit_state, const float* in, float* out) -> blink_Error {
-	auto process_fn = [&buffer, &unit_state, in, out](const PluginInterface& plugin_iface, blink::LocalUnitIdx local_idx) -> blink_Error {
-		return plugin_iface.effect.process(local_idx.value, &buffer, &unit_state, in, out);
+auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData& varying, const blink_UniformData& uniform, const float* in, float* out) -> blink_Error {
+	auto process_fn = [&varying, &uniform, in, out](const PluginInterface& plugin_iface, blink::LocalUnitIdx local_idx) -> blink_Error {
+		return plugin_iface.effect.process(local_idx.value, &varying, &uniform, in, out);
 	};
-	return unit_process(host, unit_idx, buffer.unit, unit_state.unit, std::move(process_fn));
+	return unit_process(host, unit_idx, varying, std::move(process_fn));
 }
 
 inline
-auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error {
+auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error {
 	const auto& plugin = read::iface(host, plugin_idx);
-	return plugin.sampler.draw(&buffer, &unit_state, n, out);
+	return plugin.sampler.draw(&varying, &uniform, n, out);
 }
 
 inline
-auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerBuffer& buffer, const blink_SamplerUnitState& unit_state, float* out) -> blink_Error {
-	auto process_fn = [&buffer, &unit_state, out](const PluginInterface& plugin_iface, blink::LocalUnitIdx local_idx) -> blink_Error {
-		return plugin_iface.sampler.process(local_idx.value, &buffer, &unit_state, out);
+auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, float* out) -> blink_Error {
+	auto process_fn = [&varying, &uniform, out](const PluginInterface& plugin_iface, blink::LocalUnitIdx local_idx) -> blink_Error {
+		return plugin_iface.sampler.process(local_idx.value, &varying, &uniform, out);
 	};
-	return unit_process(host, unit_idx, buffer.unit, unit_state.unit, std::move(process_fn));
+	return unit_process(host, unit_idx, varying.base, std::move(process_fn));
 }
 
 inline
-auto synth_process(Host* host, blink_UnitIdx unit_idx, const blink_SynthBuffer& buffer, const blink_SynthUnitState& unit_state, float* out) -> blink_Error {
-	auto process_fn = [&buffer, &unit_state, out](const PluginInterface& plugin_iface, blink::LocalUnitIdx local_idx) -> blink_Error {
-		return plugin_iface.synth.process(local_idx.value, &buffer, &unit_state, out);
+auto synth_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData& varying, const blink_UniformData& uniform, float* out) -> blink_Error {
+	auto process_fn = [&varying, &uniform, out](const PluginInterface& plugin_iface, blink::LocalUnitIdx local_idx) -> blink_Error {
+		return plugin_iface.synth.process(local_idx.value, &varying, &uniform, out);
 	};
-	return unit_process(host, unit_idx, buffer.unit, unit_state.unit, std::move(process_fn));
+	return unit_process(host, unit_idx, varying, std::move(process_fn));
 }
 
 inline

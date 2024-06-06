@@ -34,7 +34,7 @@ class SpeedUnit {
 public: 
 	struct Config {
 		float speed { 0.0f };
-		const blink_EnvData* env_speed { nullptr };
+		const blink_UniformEnvData* env_speed { nullptr };
 	}; 
 	// We use this for both sample playback and waveform generation. This
 	// calculation needs to be fast, preferably O(n) or better.
@@ -116,7 +116,7 @@ public:
 	struct Config {
 		uint64_t unit_state_id;
 		float speed;
-		const blink_EnvData* env_speed; 
+		const blink_UniformEnvData* env_speed; 
 		struct {
 			BlockPositions* positions;
 			ml::DSPVector* derivatives;

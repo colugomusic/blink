@@ -3,33 +3,45 @@
 #include <blink.h>
 
 namespace blink {
+namespace uniform {
 
-struct ChordData {
-	const blink_ChordData* data;
+struct Chord {
+	const blink_UniformChordData* data;
 };
 
-struct EnvData {
-	const blink_EnvData* data;
+struct Env {
+	const blink_UniformEnvData* data;
 	float default_value;
 	float value;
 };
 
-struct OptionData {
-	const blink_OptionData* data;
+struct Option {
+	const blink_UniformOptionData* data;
 	int64_t value;
 	int64_t default_value;
 };
 
-struct SliderIntData {
-	const blink_SliderIntData* data;
+struct SliderInt {
+	const blink_UniformSliderIntData* data;
 	int64_t value;
 	int64_t default_value;
 };
 
-struct SliderRealData {
-	const blink_SliderRealData* data;
+struct SliderReal {
+	const blink_UniformSliderRealData* data;
 	float value;
 	float default_value;
 };
 
+} // uniform
+
+namespace varying {
+
+struct Chord { blink_Scale value; };
+struct Env { float value; };
+struct Option { int64_t value; };
+struct SliderInt { int64_t value; };
+struct SliderReal { float value; };
+
+} // varying
 } // blink

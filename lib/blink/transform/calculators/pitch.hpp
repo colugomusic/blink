@@ -60,7 +60,7 @@ auto make_pitch_point(const blink_RealPoint& p, float min, float max, float tran
 struct PitchUnit {
 	struct Config {
 		float transpose            = 0.0f;
-		const blink_EnvData* pitch = nullptr;
+		const blink_UniformEnvData* pitch = nullptr;
 	};
 	// We use this for both sample playback and waveform generation. This
 	// calculation needs to be fast, preferably O(n) or better.
@@ -126,7 +126,7 @@ struct Pitch {
 	struct Config {
 		uint64_t unit_state_id;
 		float transpose;
-		const blink_EnvData* pitch; 
+		const blink_UniformEnvData* pitch; 
 		struct {
 			BlockPositions* positions;
 			ml::DSPVector* derivatives;

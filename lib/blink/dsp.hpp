@@ -31,7 +31,7 @@ inline auto stereo_pan(const ml::DSPVectorArray<2>& in, float pan, ml::DSPVector
 inline auto stereo_pan(
 	const ml::DSPVectorArray<2>& in,
 	float pan,
-	const EnvData& pan_envelope,
+	const uniform::Env& pan_envelope,
 	const BlockPositions& block_positions) -> ml::DSPVectorArray<2>
 {
 	return stereo_pan(in, pan, blink::search::vec(pan_envelope, block_positions));
