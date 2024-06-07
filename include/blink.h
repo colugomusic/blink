@@ -150,12 +150,6 @@ typedef struct {
 	int64_t default_value;
 } blink_UniformSliderIntData;
 
-typedef struct { blink_Scale value; } blink_VaryingChordData; 
-typedef struct { float value; } blink_VaryingEnvData; 
-typedef struct { int64_t value; } blink_VaryingOptionData; 
-typedef struct { int64_t value; } blink_VaryingSliderIntData; 
-typedef struct { float value; } blink_VaryingSliderRealData; 
-
 union blink_UniformParamData {
 	blink_UniformChordData chord;
 	blink_UniformEnvData env;
@@ -164,12 +158,20 @@ union blink_UniformParamData {
 	blink_UniformSliderRealData slider_real;
 };
 
+enum blink_VaryingValueMode {
+	blink_VaryingValueMode_Offset   = 1 << 0,
+	blink_VaryingValueMode_Override = 1 << 1,
+};
+
+typedef struct {
+	blink_ParamIdx param_idx;
+	blink_VaryingValueMode mode;
+	float value;
+} blink_VaryingValue;
+
 union blink_VaryingParamData {
-	blink_VaryingChordData chord;
-	blink_VaryingEnvData env;
-	blink_VaryingOptionData option;
-	blink_VaryingSliderIntData slider_int;
-	blink_VaryingSliderRealData slider_real;
+	size_t count;
+	const blink_VaryingValue* values;
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -481,8 +483,7 @@ typedef struct {
 	blink_VectorID vector_id;
 	// Where are we relative to the left edge of the block?
 	blink_Position* positions;
-	// May be NULL
-	const blink_VaryingParamData* param_data;
+	blink_VaryingParamData param_data;
 } blink_VaryingData;
 
 typedef struct {
