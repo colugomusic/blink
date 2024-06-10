@@ -10,13 +10,19 @@
 
 namespace blink {
 
+// I have no idea how this should be tuned.
+static constexpr auto BLOCK_SIZE = 500;
+
 template <typename... Ts>
-using Instance = ent::flex_table<
+using Instance = ent::sparse_table<
+	BLOCK_SIZE,
 	UnitVec,
 	Ts...
 >;
+
 template <typename... Ts>
-using Unit = ent::flex_table<
+using Unit = ent::sparse_table<
+	BLOCK_SIZE,
 	blink_InstanceIdx,
 	Ts...
 >;
