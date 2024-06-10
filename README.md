@@ -32,7 +32,7 @@ It's a C API. If you produce a dynamic link library which correctly implements t
 - Functions beginning with `blink_sampler_` only need to be implemented by sampler plugins.
 - Functions beginning with `blink_synth_` only need to be implemented by synth plugins.
 
-The host application will deduce the type of the plugin from which of these functions are implemented by the library.
+The host application will deduce the type of the plugin by checking which of these functions are implemented by the library.
 
 Blockhead searches the `./blink/` directory (`/Frameworks/blink/` on macOS) for plugins matching the following filename format:
 
