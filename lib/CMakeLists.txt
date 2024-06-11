@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(blink_lib)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 include(CPM)
 
