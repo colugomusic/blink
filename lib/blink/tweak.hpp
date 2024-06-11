@@ -173,7 +173,7 @@ auto snap_value(float v, float step_size, float snap_amount) {
 	return math::lerp(down, up, curve);
 }
 
-[[nodiscard]] inline
+inline
 auto write_string(std::string_view str, char buffer[BLINK_STRING_MAX]) -> void {
 	const auto n = std::min(size_t(BLINK_STRING_MAX - 1), str.size());
 	str.copy(buffer, n);
@@ -311,7 +311,7 @@ auto stepify(float v) -> float {
 	return v;
 }
 
-[[nodiscard]] inline
+inline
 auto to_string(float value, char buffer[BLINK_STRING_MAX]) -> void {
 	std::stringstream ss;
 	ss << math::convert::linear_to_delay_time_ms(value) << " ms";
@@ -406,7 +406,7 @@ auto tweaker() -> blink_TweakerReal {
 
 namespace ms {
 
-template <int Resolution> [[nodiscard]] inline
+template <int Resolution> inline
 auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
 	std::stringstream ss;
 	ss << v << " ms";
@@ -472,7 +472,7 @@ auto from_string(const char* str, float* out) -> blink_Bool {
 	return {true};
 }
 
-[[nodiscard]] inline
+inline
 auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
 	std::stringstream ss;
 	const auto hz = math::convert::linear_to_filter_hz(v);
@@ -511,7 +511,7 @@ auto constrain(float v) -> float {
 	return std::clamp(v, -1.0f, 1.0f);
 }
 
-[[nodiscard]] inline
+inline
 auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
 	std::stringstream ss;
 	if (v < 0.0f) {
@@ -584,7 +584,7 @@ auto stepify(float v) -> float {
 	return tweak::stepify<1000>(v);
 }
 
-[[nodiscard]] inline
+inline
 auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
 	std::stringstream ss;
 	ss << stepify(v * 100.0f) << "%";
@@ -815,7 +815,7 @@ auto from_string(const char* cstr, float* out) -> blink_Bool {
 	return {true};
 }
 
-[[nodiscard]] inline
+inline
 auto to_string(float v, char buffer[BLINK_STRING_MAX]) -> void {
 	constexpr auto THRESHOLD = 0.001f;
 	const auto milestone_hit = [THRESHOLD](float value, float milestone) {
