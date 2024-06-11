@@ -26,12 +26,23 @@ CPMAddPackage(
 	DOWNLOAD_ONLY YES
 )
 
+if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+	CPMAddPackage(
+		NAME sse2neon
+		GITHUB_REPOSITORY DLTcollab/sse2neon
+		GIT_TAG master
+		DOWNLOAD_ONLY YES
+	)
+	list(APPEND extra_include_dirs ${sse2neon_SOURCE_DIR})
+endif()
+
 add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME} INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}
+	${CMAKE_CURRENT_LIST_DIR}
 	${CMAKE_CURRENT_LIST_DIR}/../include
 	${ent_SOURCE_DIR}/include
 	${snd_SOURCE_DIR}/include
 	${madronalib_SOURCE_DIR}/source
+	${extra_include_dirs}
 )
