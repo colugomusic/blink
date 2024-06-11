@@ -8,6 +8,10 @@ set(PLATFORM_DIR $<IF:${on_windows},win64,$<IF:${on_macos},macos,linux>>)
 
 include(CMakeRC)
 
+if (NOT TARGET blink_lib)
+	add_subdirectory(${blink_SOURCE_DIR}/lib blink_lib)
+endif()
+
 function(blink_plugin_get_base_filename out_var name type)
 	set(${out_var} ${type}.${name}.v${PROJECT_VERSION}.${PLATFORM_DIR}$<${debug_build}:.dbg> PARENT_SCOPE)
 endfunction()
