@@ -9,7 +9,7 @@ set(PLATFORM_DIR $<IF:${on_windows},win64,$<IF:${on_macos},macos,linux>>)
 include(CMakeRC)
 
 if (NOT TARGET blink_lib)
-	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. blink_lib)
+	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../.. blink_lib)
 endif()
 
 function(blink_plugin_get_base_filename out_var name type)
