@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.14)
 project(blink_plugin)
 
 set(PLUGIN_OUTPUT_DIR bin CACHE PATH "plugin output directory")
-set(on_windows $<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>)
-set(on_macos $<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>)
-set(on_linux $<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>)
-set(debug_build $<OR:$<CONFIG:Debug>,$<STREQUAL:${CMAKE_BUILD_TYPE},Debug}>>)
-set(PLATFORM_DIR $<IF:${on_windows},win64,$<IF:${on_macos},macos,linux>>)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 
 include(CPM)
@@ -55,7 +50,11 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 )
 
 function(blink_plugin_get_base_filename out_var name type)
+  set(on_windows $<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>)
+  set(on_macos $<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>)
+  set(on_linux $<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>)
   set(debug_build $<OR:$<CONFIG:Debug>,$<STREQUAL:${CMAKE_BUILD_TYPE},Debug}>>)
+  set(PLATFORM_DIR $<IF:${on_windows},win64,$<IF:${on_macos},macos,linux>>)
 	set(${out_var} ${type}.${name}.v${PROJECT_VERSION}.${PLATFORM_DIR}$<${debug_build}:.dbg> PARENT_SCOPE)
 endfunction()
 
