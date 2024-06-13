@@ -11,7 +11,7 @@
 namespace blink {
 
 // I have no idea how this should be tuned.
-static constexpr auto BLOCK_SIZE = 500;
+static constexpr auto BLOCK_SIZE = 100;
 
 template <typename... Ts>
 using Instance = ent::sparse_table<

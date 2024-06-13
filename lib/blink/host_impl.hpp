@@ -24,12 +24,14 @@ namespace e {
 	using PluginSampler = ent::table<
 		SamplerInfo
 	>;
-	using Instance = ent::flex_table<
+	using Instance = ent::sparse_table<
+		1000,
 		blink_PluginIdx,
 		InstanceProcess,
 		UnitVec
 	>;
-	using Unit = ent::flex_table<
+	using Unit = ent::sparse_table<
+		1000,
 		blink_PluginIdx,
 		UnitProcess
 	>;
@@ -1842,12 +1844,15 @@ auto stream_init(const Host& host, blink_SR SR) -> void {
 	};
 	::std::vector<InstanceInit> instances;
 	::std::vector<UnitInit> units;
-	for (size_t idx = 0; idx < host.instance.size(); idx++) {
+	std::vector<size_t> indices;
+	host.instance.get_living_elements(&indices);
+	for (const auto idx : indices) {
 		const auto plugin = host.instance.get<blink_PluginIdx>(idx);
 		const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
 		instances.push_back({{idx}, iface.instance_stream_init});
 	}
-	for (size_t idx = 0; idx < host.unit.size(); idx++) {
+	host.unit.get_living_elements(&indices);
+	for (const auto idx : indices) {
 		const auto plugin = host.unit.get<blink_PluginIdx>(idx);
 		const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
 		units.push_back({{idx}, iface.unit_stream_init});
