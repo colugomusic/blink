@@ -46,6 +46,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 	${ent_SOURCE_DIR}/include
 	${snd_SOURCE_DIR}/include
 	${madronalib_SOURCE_DIR}/source
+	${madronalib_SOURCE_DIR}/source/app
 	${extra_include_dirs}
 )
 
