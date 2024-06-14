@@ -61,8 +61,8 @@ auto terminate(Entities<Instance, Unit>* ents) -> blink_Error {
 template <typename Instance, typename Unit> [[nodiscard]]
 auto add_unit(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_UnitIdx {
 	const auto index = blink_UnitIdx{ents->unit.add()};
-	ents->unit.get<blink_InstanceIdx>(index.value) = instance_idx;
-	auto& units = ents->instance.get<UnitVec>(instance_idx.value);
+	ents->unit.template get<blink_InstanceIdx>(index.value) = instance_idx;
+	auto& units = ents->instance.template get<UnitVec>(instance_idx.value);
 	units.value.push_back(index);
 	return index;
 }
@@ -74,7 +74,7 @@ auto make_instance(Entities<Instance, Unit>* ents) -> blink_InstanceIdx {
 
 template <typename Instance, typename Unit> [[nodiscard]]
 auto destroy_instance(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_Error {
-	for (auto unit_idx : ents->instance.get<UnitVec>(instance_idx.value).value) {
+	for (auto unit_idx : ents->instance.template get<UnitVec>(instance_idx.value).value) {
 		ents->unit.erase(unit_idx.value);
 	}
 	ents->instance.erase(instance_idx.value);
