@@ -1956,12 +1956,12 @@ auto init(Host* host) -> void {
 		return read::slider(*host_ptr(usr), param_slider_idx);
 	};
 	host->fns.write_env_add_flags = [](void* usr, blink_EnvIdx env_idx, int flags) {
-		write::add_flags(host_ptr(usr), env_idx, {flags});
+		write::add_flags(host_ptr(usr), env_idx, flags);
 	};
 	host->fns.write_param_env_apply_offset_fn = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
 		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
-		write::apply_offset_fn(host_ptr(usr), param_env_idx, {fn});
+		write::apply_offset_fn(host_ptr(usr), param_env_idx, fn);
 	};
 	host->fns.write_param_env_clamp_range = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_Range range) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
@@ -2012,7 +2012,7 @@ auto init(Host* host) -> void {
 	};
 	host->fns.write_param_add_flags = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int flags) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
-		write::add_flags(host_ptr(usr), param_global_idx, {flags});
+		write::add_flags(host_ptr(usr), param_global_idx, flags);
 	};
 	host->fns.write_param_add_subparam = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) {
 		const auto param_global_idx    = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
