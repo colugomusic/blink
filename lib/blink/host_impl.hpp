@@ -1807,7 +1807,10 @@ auto destroy_instance(Host* host, blink_PluginIdx plugin_idx, blink_InstanceIdx 
 
 [[nodiscard]] inline
 auto get_effect_info(const Host& host, blink_PluginIdx plugin_idx, blink_InstanceIdx instance_idx) -> blink_EffectInstanceInfo {
-	return read::iface(host, plugin_idx).effect.get_info(instance_idx);
+	const auto& plugin_iface  = read::iface(host, plugin_idx);
+	const auto& instance_proc = host.instance.get<InstanceProcess>(instance_idx.value);
+	const auto local_inst_idx = instance_proc.local_idx;
+	return plugin_iface.effect.get_info(local_inst_idx.value);
 };
 
 [[nodiscard]] inline
