@@ -10,9 +10,7 @@ class SampleData
 public:
 
 	SampleData() = default;
-	SampleData(SampleData&& rhs) = default;
 	SampleData(const blink_SampleInfo* info, blink_ChannelMode channel_mode);
-	SampleData& operator=(SampleData&& rhs) = default;
 
 	blink_SR get_SR() const { return info_->SR; }
 	blink_FrameCount get_num_frames() const { return info_->num_frames; }
