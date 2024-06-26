@@ -39,6 +39,12 @@ typedef struct { const char* value; } blink_StaticString;
 typedef struct { const char* value; } blink_TempString;
 typedef struct { const char* value; } blink_UUID;
 
+enum blink_AnalysisResult {
+	blink_AnalysisResult_OK = 0,
+	blink_AnalysisResult_Abort = 1,
+	blink_AnalysisResult_Error = 2,
+};
+
 enum blink_ChannelMode {
 	blink_ChannelMode_Left = 0,
 	blink_ChannelMode_Right = 1,
@@ -285,9 +291,9 @@ typedef struct {
 } blink_EnvFns;
 
 typedef struct {
-	// True if the plugin needs to preprocess samples in some way.
-	// Preprocessing happens once per sample.
-	blink_Bool requires_preprocessing; 
+	// True if the plugin needs to analyze samples in some way.
+	// Analysis happens once per sample.
+	blink_Bool requires_sample_analysis; 
 	// True if the waveform resulting from the sample transformation
 	// could be substantially different from the waveform generated
 	// by blink_sampler_draw(). If this is true then Blockhead will
@@ -396,13 +402,13 @@ struct blink_HostFns {
 	blink_host_write_slider_real_tweaker            write_slider_real_tweaker;
 };
 
-typedef bool (*blink_Preprocess_ShouldAbort)(void* host);
-typedef void (*blink_Preprocess_ReportProgress)(void* host, float progress);
+typedef bool (*blink_Analysis_ShouldAbort)(void* host);
+typedef void (*blink_Analysis_ReportProgress)(void* host, float progress);
 
 typedef struct {
-	blink_Preprocess_ShouldAbort should_abort;
-	blink_Preprocess_ReportProgress report_progress;
-} blink_PreprocessCallbacks;
+	blink_Analysis_ShouldAbort should_abort;
+	blink_Analysis_ReportProgress report_progress;
+} blink_AnalysisCallbacks;
 
 typedef blink_FrameCount (*blink_GetSampleDataCB)(void* host, blink_ChannelCount channel, blink_FrameCount index, blink_FrameCount size, float* buffer);
 
@@ -551,24 +557,24 @@ extern "C"
 	EXPORTED blink_Error blink_sampler_process(blink_UnitIdx unit_idx, const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, float* out);
 
 	// Called by the host once per sample only if
-	// blink_SamplerInfo::requires_preprocessing is true
+	// blink_SamplerInfo::requires_sample_analysis is true
 	//
 	// This function will be called in a separate thread from everything else.
 	//
 	// The plugin should periodically call the ShouldAbort callback and stop
-	// preprocessing if it returns true.
+	// analysis if it returns true.
 	//
 	// The plugin should periodically report the completion percentage by
 	// calling the ReportProgress callback with a value between 0 and 1.
 	//
 	// The process() function may be called in the audio thread before
-	// preprocessing has finished. Blockhead will pass in BLINK_FALSE for
+	// analysis has finished. Blockhead will pass in BLINK_FALSE for
 	// blink_SampleInfo.analysis_ready until this function returns
 	// BLINK_OK.
 	//
 	// If the plugin allocates any memory for the sample it should
 	// be freed when the host calls blink_sampler_sample_deleted().
-	EXPORTED blink_Error blink_sampler_preprocess_sample(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info);
+	EXPORTED blink_AnalysisResult blink_sampler_analyze_sample(void* host, blink_AnalysisCallbacks callbacks, const blink_SampleInfo* sample_info);
 
 	// Called when a sample is deleted by Blockhead. The plugin should free
 	// any data associated with the sample.

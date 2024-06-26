@@ -161,7 +161,7 @@ struct PluginInterface {
 	} effect;
 	struct Sampler {
 		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, float* out)>;
-		using preprocess_sample_fn = std::function<blink_Error(void* host, blink_PreprocessCallbacks callbacks, const blink_SampleInfo* sample_info)>;
+		using analyze_sample_fn = std::function<blink_AnalysisResult(void* host, blink_AnalysisCallbacks callbacks, const blink_SampleInfo* sample_info)>;
 		using sample_deleted_fn = std::function<blink_Error(blink_ID sample_id)>;
 		using draw_fn = std::function<blink_Error(const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
 		using get_sonic_fragment_at_block_position_fn = std::function<double(blink_Position block_position)>;
@@ -169,7 +169,7 @@ struct PluginInterface {
 		block_position_for_sonic_fragment_fn    block_position_for_sonic_fragment;
 		draw_fn                                 draw;
 		get_sonic_fragment_at_block_position_fn get_sonic_fragment_at_block_position;
-		preprocess_sample_fn                    preprocess_sample;
+		analyze_sample_fn                       analyze_sample;
 		process_fn                              process;
 		sample_deleted_fn                       sample_deleted;
 	} sampler;
@@ -202,6 +202,7 @@ namespace std { template <> struct hash<blink::ParamSliderRealIdx> { auto operat
 [[nodiscard]] inline auto operator==(const blink_SliderIntIdx& a, const blink_SliderIntIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_SliderRealIdx& a, const blink_SliderRealIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_PluginIdx& a, const blink_PluginIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_UnitIdx& a, const blink_UnitIdx& b) -> bool { return a.value == b.value; }
 [[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value != b.value; }
 [[nodiscard]] inline auto operator<(const blink_ID& a, const blink_ID& b) -> bool { return a.value < b.value; }

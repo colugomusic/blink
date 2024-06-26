@@ -9,6 +9,11 @@
 #include "tweak.hpp"
 #include "types.hpp"
 #include "uuids.h"
+#include <cs_lr_guarded.h>
+#include <unordered_map>
+#include <vector>
+
+namespace lg = libguarded;
 
 namespace blink {
 
@@ -89,6 +94,17 @@ namespace e {
 	>;
 } // e
 
+struct SampleInfo {
+	std::vector<blink_PluginIdx> registered_plugins;
+	std::vector<blink_PluginIdx> completed_analysis;
+};
+
+using SampleInfoMap = std::unordered_map<blink_ID, SampleInfo>;
+
+struct SampleAnalysis {
+	lg::lr_guarded<SampleInfoMap> sample_info;
+};
+
 struct Host {
 	e::Plugin plugin;
 	e::PluginSampler plugin_sampler;
@@ -103,6 +119,7 @@ struct Host {
 	e::SliderInt slider_int;
 	e::SliderReal slider_real;
 	std::optional<blink_PluginIdx> default_sampler;
+	SampleAnalysis sample_analysis;
 	blink_HostFns fns;
 };
 
@@ -348,10 +365,10 @@ auto sampler_baked_waveform_could_be_different(const Host& host, blink_PluginIdx
 }
 
 [[nodiscard]] inline
-auto sampler_requires_preprocessing(const Host& host, blink_PluginIdx plugin_idx) -> bool {
+auto sampler_requires_sample_analysis(const Host& host, blink_PluginIdx plugin_idx) -> bool {
 	const auto type_idx     = host.plugin.get<PluginTypeIdx>(plugin_idx.value).value;
 	const auto sampler_info = host.plugin_sampler.get<SamplerInfo>(type_idx);
-	return sampler_info.value.requires_preprocessing.value;
+	return sampler_info.value.requires_sample_analysis.value;
 }
 
 [[nodiscard]] inline
@@ -1824,12 +1841,6 @@ auto make_instance(Host* host, blink_PluginIdx plugin_idx, blink_SR SR) -> blink
 }
 
 inline
-auto sampler_preprocess(const Host& host, blink_PluginIdx plugin_idx, void* usr, blink_PreprocessCallbacks callbacks, const blink_SampleInfo& info) -> void {
-	const auto& plugin_iface = read::iface(host, plugin_idx);
-	plugin_iface.sampler.preprocess_sample(usr, callbacks, &info);
-}
-
-inline
 auto sampler_sample_deleted(const Host& host, blink_PluginIdx plugin_idx, blink_ID sample_id) -> void {
 	const auto& plugin_iface = read::iface(host, plugin_idx);
 	plugin_iface.sampler.sample_deleted(sample_id);
@@ -2092,5 +2103,81 @@ auto init(Host* host) -> void {
 		write::tweaker(host_ptr(usr), slider_idx, {tweaker});
 	};
 }
+
+[[nodiscard]] inline
+auto is_sample_analysis_ready(const Host& host, blink_ID sample_id, blink_PluginIdx plugin_idx) -> bool {
+	const auto map       = host.sample_analysis.sample_info.lock_shared();
+	const auto find_info = map->find(sample_id);
+	if (find_info == map->end()) {
+		return false;
+	}
+	const auto& info = find_info->second;
+	return std::find(info.completed_analysis.begin(), info.completed_analysis.end(), plugin_idx) != info.completed_analysis.end();
+}
+
+[[nodiscard]] inline
+auto has_registered_plugin(const Host& host, blink_ID sample_id, blink_PluginIdx plugin_idx) -> bool {
+	const auto map       = host.sample_analysis.sample_info.lock_shared();
+	const auto find_info = map->find(sample_id);
+	if (find_info == map->end()) {
+		return false;
+	}
+	const auto& info = find_info->second;
+	return std::find(info.registered_plugins.begin(), info.registered_plugins.end(), plugin_idx) != info.registered_plugins.end();
+}
+
+[[nodiscard]] inline
+auto get_registered_plugins(const Host& host, blink_ID sample_id) -> const std::vector<blink_PluginIdx> {
+	const auto map       = host.sample_analysis.sample_info.lock_shared();
+	const auto find_info = map->find(sample_id);
+	if (find_info == map->end()) {
+		static const std::vector<blink_PluginIdx> empty;
+		return empty;
+	}
+	const auto& info = find_info->second;
+	return info.registered_plugins;
+}
+
+inline
+auto register_sample_plugin(Host* host, blink_ID sample_id, blink_PluginIdx plugin_idx) -> void {
+	if (has_registered_plugin(*host, sample_id, plugin_idx)) {
+		return;
+	}
+	host->sample_analysis.sample_info.modify([sample_id, plugin_idx](SampleInfoMap& map) {
+		map[sample_id].registered_plugins.push_back(plugin_idx);
+	});
+}
+
+inline
+auto sample_deleted(Host* host, blink_ID sample_id) -> void {
+	host->sample_analysis.sample_info.modify([host, sample_id](SampleInfoMap& map) {
+		const auto find_info = map.find(sample_id);
+		if (find_info == map.end()) {
+			return;
+		}
+		auto& info = find_info->second;
+		for (const auto plugin_idx : info.registered_plugins) {
+			const auto& plugin_iface = read::iface(*host, plugin_idx);
+			plugin_iface.sampler.sample_deleted(sample_id);
+		}
+		map.erase(find_info);
+	});
+}
+
+namespace sample_analysis_thread {
+
+inline
+auto sampler_analyze(Host* host, blink_PluginIdx plugin_idx, void* usr, blink_AnalysisCallbacks callbacks, const blink_SampleInfo& info) -> blink_AnalysisResult {
+	const auto& plugin_iface = read::iface(*host, plugin_idx);
+	const auto result = plugin_iface.sampler.analyze_sample(usr, callbacks, &info);
+	if (result == blink_AnalysisResult_OK) {
+		host->sample_analysis.sample_info.modify([sample_id = info.id, plugin_idx](SampleInfoMap& map){
+			map[sample_id].completed_analysis.push_back(plugin_idx);
+		});
+	}
+	return result;
+}
+
+} // sample_analysis_thread
 
 } // blink
