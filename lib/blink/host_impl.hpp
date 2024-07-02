@@ -878,6 +878,7 @@ auto pitch(Host* host) -> blink_EnvIdx {
 	write::max_slider(host, idx, {slider_max});
 	write::min_slider(host, idx, {slider_min});
 	write::value_slider(host, idx, {slider_value});
+	write::step_size_slider(host, idx, {slider_step_size});
 	write::default_value(host, slider_max, {24.0f});
 	write::default_value(host, slider_min, {-24.0f});
 	write::default_value(host, slider_step_size, {1.0f});
