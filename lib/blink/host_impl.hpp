@@ -17,7 +17,7 @@ namespace lg = libguarded;
 
 namespace blink {
 
-struct alive { bool value = false; };
+struct IsAlive { bool value = false; };
 
 using PluginTable = ent::table<
 	blink_PluginInfo,
@@ -34,7 +34,7 @@ using PluginSamplerTable = ent::table<
 
 using InstanceTable = ent::sparse_table<
 	1000,
-	alive,
+	IsAlive,
 	blink_PluginIdx,
 	InstanceProcess,
 	UnitVec
@@ -42,7 +42,7 @@ using InstanceTable = ent::sparse_table<
 
 using UnitTable = ent::sparse_table<
 	1000,
-	alive,
+	IsAlive,
 	blink_PluginIdx,
 	UnitProcess
 >;
@@ -138,7 +138,7 @@ struct Host {
 
 // Just for convenience. You could define this in your application somewhere and have it
 // auto declared anywhere that this header is included.
-[[nodiscard]] extern auto host() -> Host&;
+[[nodiscard]] auto host() -> Host&;
 
 namespace read {
 
@@ -1873,14 +1873,14 @@ auto stream_init(const Host& host, blink_SR SR) -> void {
 	::std::vector<InstanceInit> instances;
 	::std::vector<UnitInit> units;
 	for (size_t idx = 0; idx < host.instance.capacity(); idx++) {
-		if (host.instance.get<alive>(idx).value) {
+		if (host.instance.get<IsAlive>(idx).value) {
 			const auto plugin = host.instance.get<blink_PluginIdx>(idx);
 			const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
 			instances.push_back({{idx}, iface.instance_stream_init});
 		}
 	}
 	for (size_t idx = 0; idx < host.unit.capacity(); idx++) {
-		if (host.unit.get<alive>(idx).value) {
+		if (host.unit.get<IsAlive>(idx).value) {
 			const auto plugin = host.unit.get<blink_PluginIdx>(idx);
 			const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
 			units.push_back({{idx}, iface.unit_stream_init});
