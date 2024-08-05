@@ -17,82 +17,95 @@ namespace lg = libguarded;
 
 namespace blink {
 
-namespace e {
-	using Plugin = ent::table<
-		blink_PluginInfo,
-		PluginType,
-		PluginTypeIdx,
-		PluginInterface,
-		PluginParams,
-		std::vector<GroupInfo>
-	>;
-	using PluginSampler = ent::table<
-		SamplerInfo
-	>;
-	using Instance = ent::sparse_table<
-		1000,
-		blink_PluginIdx,
-		InstanceProcess,
-		UnitVec
-	>;
-	using Unit = ent::sparse_table<
-		1000,
-		blink_PluginIdx,
-		UnitProcess
-	>;
-	using Param = ent::table<
-		blink_PluginIdx,
-		blink_UUID,
-		ManipDelegate,
-		ParamFlags,
-		ParamIcon,
-		ParamStrings,
-		ParamType,
-		ParamTypeIdx,
-		SubParams
-	>;
-	using ParamEnv = ent::table<
-		ApplyOffsetFn,
-		ClampRange,
-		EnvIdx,
-		OffsetEnvIdx,
-		OverrideEnvIdx
-	>;
-	using ParamOption = ent::table<
-		DefaultValue<int64_t>,
-		StringVec
-	>;
-	using ParamSliderInt = ent::table<
-		blink_SliderIntIdx
-	>;
-	using ParamSliderReal = ent::table<
-		ApplyOffsetFn,
-		blink_SliderRealIdx,
-		ClampRange,
-		OffsetEnvIdx,
-		OverrideEnvIdx
-	>;
-	using Env = ent::table<
-		DefaultMax<float>,
-		DefaultMin<float>,
-		DefaultValue<float>,
-		DefaultSnapAmount,
-		EnvFlags,
-		EnvFns,
-		MaxSliderIdx,
-		MinSliderIdx,
-		StepSizeSliderIdx,
-		ValueSliderIdx
-	>;
-	using SliderInt = ent::table<
-		DefaultValue<int64_t>,
-		TweakerInt
-	>;
-	using SliderReal = ent::table<
-		DefaultValue<float>,
-		TweakerReal
-	>;
-} // e
+struct alive { bool value = false; };
+
+using PluginTable = ent::table<
+	blink_PluginInfo,
+	PluginType,
+	PluginTypeIdx,
+	PluginInterface,
+	PluginParams,
+	std::vector<GroupInfo>
+>;
+
+using PluginSamplerTable = ent::table<
+	SamplerInfo
+>;
+
+using InstanceTable = ent::sparse_table<
+	1000,
+	alive,
+	blink_PluginIdx,
+	InstanceProcess,
+	UnitVec
+>;
+
+using UnitTable = ent::sparse_table<
+	1000,
+	alive,
+	blink_PluginIdx,
+	UnitProcess
+>;
+
+using ParamTable = ent::table<
+	blink_PluginIdx,
+	blink_UUID,
+	ManipDelegate,
+	ParamFlags,
+	ParamIcon,
+	ParamStrings,
+	ParamType,
+	ParamTypeIdx,
+	SubParams
+>;
+
+using ParamEnvTable = ent::table<
+	ApplyOffsetFn,
+	ClampRange,
+	EnvIdx,
+	OffsetEnvIdx,
+	OverrideEnvIdx
+>;
+
+using ParamOptionTable = ent::table<
+	DefaultValue<int64_t>,
+	StringVec
+>;
+
+using ParamSliderIntTable = ent::table<
+	blink_SliderIntIdx
+>;
+
+using ParamSliderRealTable = ent::table<
+	ApplyOffsetFn,
+	blink_SliderRealIdx,
+	ClampRange,
+	OffsetEnvIdx,
+	OverrideEnvIdx
+>;
+
+using EnvTable = ent::table<
+	DefaultMax<float>,
+	DefaultMin<float>,
+	DefaultValue<float>,
+	DefaultSnapAmount,
+	EnvFlags,
+	EnvFns,
+	MaxSliderIdx,
+	MinSliderIdx,
+	StepSizeSliderIdx,
+	ValueSliderIdx
+>;
+
+using SliderIntTable = ent::table<
+	DefaultValue<int64_t>,
+	TweakerInt
+>;
+
+using SliderRealTable = ent::table<
+	DefaultValue<float>,
+	TweakerReal
+>;
 
 struct SampleInfo {
 	std::vector<blink_PluginIdx> registered_plugins;
@@ -106,18 +119,18 @@ struct SampleAnalysis {
 };
 
 struct Host {
-	e::Plugin plugin;
-	e::PluginSampler plugin_sampler;
-	e::Instance instance;
-	e::Unit unit;
-	e::Param param;
-	e::ParamEnv param_env;
-	e::ParamOption param_option;
-	e::ParamSliderInt param_slider_int;
-	e::ParamSliderReal param_slider_real;
-	e::Env env;
-	e::SliderInt slider_int;
-	e::SliderReal slider_real;
+	PluginTable plugin;
+	PluginSamplerTable plugin_sampler;
+	InstanceTable instance;
+	UnitTable unit;
+	ParamTable param;
+	ParamEnvTable param_env;
+	ParamOptionTable param_option;
+	ParamSliderIntTable param_slider_int;
+	ParamSliderRealTable param_slider_real;
+	EnvTable env;
+	SliderIntTable slider_int;
+	SliderRealTable slider_real;
 	std::optional<blink_PluginIdx> default_sampler;
 	SampleAnalysis sample_analysis;
 	blink_HostFns fns;
@@ -1859,18 +1872,19 @@ auto stream_init(const Host& host, blink_SR SR) -> void {
 	};
 	::std::vector<InstanceInit> instances;
 	::std::vector<UnitInit> units;
-	std::vector<size_t> indices;
-	host.instance.get_living_elements(&indices);
-	for (const auto idx : indices) {
-		const auto plugin = host.instance.get<blink_PluginIdx>(idx);
-		const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
-		instances.push_back({{idx}, iface.instance_stream_init});
+	for (size_t idx = 0; idx < host.instance.capacity(); idx++) {
+		if (host.instance.get<alive>(idx).value) {
+			const auto plugin = host.instance.get<blink_PluginIdx>(idx);
+			const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
+			instances.push_back({{idx}, iface.instance_stream_init});
+		}
 	}
-	host.unit.get_living_elements(&indices);
-	for (const auto idx : indices) {
-		const auto plugin = host.unit.get<blink_PluginIdx>(idx);
-		const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
-		units.push_back({{idx}, iface.unit_stream_init});
+	for (size_t idx = 0; idx < host.unit.capacity(); idx++) {
+		if (host.unit.get<alive>(idx).value) {
+			const auto plugin = host.unit.get<blink_PluginIdx>(idx);
+			const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
+			units.push_back({{idx}, iface.unit_stream_init});
+		}
 	}
 	for (const auto& instance : instances) {
 		instance.fn(instance.idx, SR);
