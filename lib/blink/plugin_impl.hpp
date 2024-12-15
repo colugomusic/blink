@@ -14,14 +14,14 @@ namespace blink {
 static constexpr auto BLOCK_SIZE = 100;
 
 template <typename... Ts>
-using Instance = ent::sparse_table<
+using Instance = ent::table<
 	BLOCK_SIZE,
 	UnitVec,
 	Ts...
 >;
 
 template <typename... Ts>
-using Unit = ent::sparse_table<
+using Unit = ent::table<
 	BLOCK_SIZE,
 	blink_InstanceIdx,
 	Ts...
@@ -53,14 +53,14 @@ auto init(Plugin* plugin, blink_PluginIdx plugin_index, blink_HostFns host_fns, 
 
 template <typename Instance, typename Unit> [[nodiscard]]
 auto terminate(Entities<Instance, Unit>* ents) -> blink_Error {
-	ents->instance.clear();
-	ents->unit.clear();
+	ents->instance.clear(ent::lock);
+	ents->unit.clear(ent::lock);
 	return BLINK_OK;
 }
 
 template <typename Instance, typename Unit> [[nodiscard]]
 auto add_unit(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_UnitIdx {
-	const auto index = blink_UnitIdx{ents->unit.add()};
+	const auto index = blink_UnitIdx{ents->unit.acquire(ent::lock)};
 	ents->unit.template get<blink_InstanceIdx>(index.value) = instance_idx;
 	auto& units = ents->instance.template get<UnitVec>(instance_idx.value);
 	units.value.push_back(index);
@@ -69,15 +69,15 @@ auto add_unit(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) ->
 
 template <typename Instance, typename Unit> [[nodiscard]]
 auto make_instance(Entities<Instance, Unit>* ents) -> blink_InstanceIdx {
-	return {ents->instance.add()};
+	return {ents->instance.acquire(ent::lock)};
 }
 
 template <typename Instance, typename Unit> [[nodiscard]]
 auto destroy_instance(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_Error {
 	for (auto unit_idx : ents->instance.template get<UnitVec>(instance_idx.value).value) {
-		ents->unit.erase(unit_idx.value);
+		ents->unit.release(ent::lock, unit_idx.value);
 	}
-	ents->instance.erase(instance_idx.value);
+	ents->instance.release(ent::lock, instance_idx.value);
 	return BLINK_OK;
 }
 

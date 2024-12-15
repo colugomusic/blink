@@ -19,7 +19,7 @@ namespace blink {
 
 struct IsAlive { bool value = false; };
 
-using PluginTable = ent::table<
+using PluginTable = ent::simple_table<
 	blink_PluginInfo,
 	PluginType,
 	PluginTypeIdx,
@@ -28,11 +28,11 @@ using PluginTable = ent::table<
 	std::vector<GroupInfo>
 >;
 
-using PluginSamplerTable = ent::table<
+using PluginSamplerTable = ent::simple_table<
 	SamplerInfo
 >;
 
-using InstanceTable = ent::sparse_table<
+using InstanceTable = ent::table<
 	1000,
 	IsAlive,
 	blink_PluginIdx,
@@ -40,14 +40,14 @@ using InstanceTable = ent::sparse_table<
 	UnitVec
 >;
 
-using UnitTable = ent::sparse_table<
+using UnitTable = ent::table<
 	1000,
 	IsAlive,
 	blink_PluginIdx,
 	UnitProcess
 >;
 
-using ParamTable = ent::table<
+using ParamTable = ent::simple_table<
 	blink_PluginIdx,
 	blink_UUID,
 	ManipDelegate,
@@ -59,7 +59,7 @@ using ParamTable = ent::table<
 	SubParams
 >;
 
-using ParamEnvTable = ent::table<
+using ParamEnvTable = ent::simple_table<
 	ApplyOffsetFn,
 	ClampRange,
 	EnvIdx,
@@ -67,16 +67,16 @@ using ParamEnvTable = ent::table<
 	OverrideEnvIdx
 >;
 
-using ParamOptionTable = ent::table<
+using ParamOptionTable = ent::simple_table<
 	DefaultValue<int64_t>,
 	StringVec
 >;
 
-using ParamSliderIntTable = ent::table<
+using ParamSliderIntTable = ent::simple_table<
 	blink_SliderIntIdx
 >;
 
-using ParamSliderRealTable = ent::table<
+using ParamSliderRealTable = ent::simple_table<
 	ApplyOffsetFn,
 	blink_SliderRealIdx,
 	ClampRange,
@@ -84,7 +84,7 @@ using ParamSliderRealTable = ent::table<
 	OverrideEnvIdx
 >;
 
-using EnvTable = ent::table<
+using EnvTable = ent::simple_table<
 	DefaultMax<float>,
 	DefaultMin<float>,
 	DefaultValue<float>,
@@ -97,12 +97,12 @@ using EnvTable = ent::table<
 	ValueSliderIdx
 >;
 
-using SliderIntTable = ent::table<
+using SliderIntTable = ent::simple_table<
 	DefaultValue<int64_t>,
 	TweakerInt
 >;
 
-using SliderRealTable = ent::table<
+using SliderRealTable = ent::simple_table<
 	DefaultValue<float>,
 	TweakerReal
 >;
@@ -1812,7 +1812,7 @@ auto add_unit(Host* host, blink_PluginIdx plugin_idx, blink_InstanceIdx instance
 	const auto& plugin_iface  = read::iface(*host, plugin_idx);
 	const auto& instance_proc = host->instance.get<InstanceProcess>(instance_idx.value);
 	const auto local_inst_idx = instance_proc.local_idx;
-	const auto idx            = host->unit.add();
+	const auto idx            = host->unit.acquire(ent::lock);
 	auto& instance_units      = host->instance.get<UnitVec>(instance_idx.value).value;
 	auto& unit_proc           = host->unit.get<UnitProcess>(idx);
 	unit_proc.instance_idx    = instance_idx;
@@ -1830,9 +1830,9 @@ auto destroy_instance(Host* host, blink_PluginIdx plugin_idx, blink_InstanceIdx 
 	const auto local_inst_idx = instance_proc.local_idx;
 	const auto& units         = host->instance.get<UnitVec>(instance_idx.value).value;
 	for (auto unit_idx : units) {
-		host->unit.erase(unit_idx.value);
+		host->unit.release(ent::lock, unit_idx.value);
 	}
-	host->instance.erase(instance_idx.value);
+	host->instance.release(ent::lock, instance_idx.value);
 	plugin_iface.instance_destroy(local_inst_idx.value);
 }
 
@@ -1847,7 +1847,7 @@ auto get_effect_info(const Host& host, blink_PluginIdx plugin_idx, blink_Instanc
 [[nodiscard]] inline
 auto make_instance(Host* host, blink_PluginIdx plugin_idx, blink_SR SR) -> blink_InstanceIdx {
 	const auto& plugin_iface = read::iface(*host, plugin_idx);
-	const auto idx       = host->instance.add();
+	const auto idx       = host->instance.acquire(ent::lock);
 	auto& proc           = host->instance.get<InstanceProcess>(idx);
 	proc.local_idx.value = plugin_iface.instance_make();
 	plugin_iface.instance_stream_init(proc.local_idx.value, SR);
@@ -1872,14 +1872,14 @@ auto stream_init(const Host& host, blink_SR SR) -> void {
 	};
 	::std::vector<InstanceInit> instances;
 	::std::vector<UnitInit> units;
-	for (size_t idx = 0; idx < host.instance.capacity(); idx++) {
+	for (size_t idx = 0; idx < host.instance.get_capacity(); idx++) {
 		if (host.instance.get<IsAlive>(idx).value) {
 			const auto plugin = host.instance.get<blink_PluginIdx>(idx);
 			const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
 			instances.push_back({{idx}, iface.instance_stream_init});
 		}
 	}
-	for (size_t idx = 0; idx < host.unit.capacity(); idx++) {
+	for (size_t idx = 0; idx < host.unit.get_capacity(); idx++) {
 		if (host.unit.get<IsAlive>(idx).value) {
 			const auto plugin = host.unit.get<blink_PluginIdx>(idx);
 			const auto& iface = host.plugin.get<PluginInterface>(plugin.value);
