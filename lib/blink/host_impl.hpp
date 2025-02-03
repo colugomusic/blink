@@ -6,6 +6,7 @@
 #include <ent.hpp>
 #include "common_impl.hpp"
 #include "math.hpp"
+#include "report.h"
 #include "tweak.hpp"
 #include "types.hpp"
 #include "uuids.h"
@@ -224,14 +225,12 @@ auto env_override(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_E
 
 [[nodiscard]] inline
 auto find_param(const Host& host, blink_PluginIdx plugin, uuids::t uuid) -> std::optional<blink_ParamIdx> {
+	// FIXME: uuids:: namespace is actually from blockhead codebase!
 	const auto param_list = host.plugin.get<PluginParams>(plugin.value).global_indices;
 	const auto uuid_str   = uuids::to<std::string>(uuid);
-	if (!uuid_str) {
-		return std::nullopt;
-	}
 	for (const auto param_idx : param_list) {
 		const auto uuid = host.param.get<blink_UUID>(param_idx.value).value;
-		if (uuid == *uuid_str) {
+		if (uuid == uuid_str) {
 			return blink_ParamIdx{param_idx.value};
 		}
 	}
@@ -241,10 +240,7 @@ auto find_param(const Host& host, blink_PluginIdx plugin, uuids::t uuid) -> std:
 [[nodiscard]] inline
 auto find_plugin(const Host& host, uuids::t uuid) -> std::optional<blink_PluginIdx> {
 	const auto uuid_str = uuids::to<std::string>(uuid);
-	if (!uuid_str) {
-		return std::nullopt;
-	}
-	const auto pred = [uuid_str = std::string_view{*uuid_str}](const blink_PluginInfo& info) {
+	const auto pred = [uuid_str = std::string_view{uuid_str}](const blink_PluginInfo& info) {
 		return info.uuid.value && std::string_view{info.uuid.value} == uuid_str;
 	};
 	const auto idx = host.plugin.find<blink_PluginInfo>(pred);
