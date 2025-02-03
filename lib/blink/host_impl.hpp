@@ -6,7 +6,6 @@
 #include <ent.hpp>
 #include "common_impl.hpp"
 #include "math.hpp"
-#include "report.h"
 #include "tweak.hpp"
 #include "types.hpp"
 #include "uuids.h"
