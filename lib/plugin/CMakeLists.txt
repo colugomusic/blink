@@ -4,51 +4,24 @@ project(blink_plugin)
 set(PLUGIN_OUTPUT_DIR bin CACHE PATH "plugin output directory")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 
-include(CPM)
 include(CMakeRC)
-
-CPMAddPackage(
-	NAME ent
-	GITHUB_REPOSITORY "colugomusic/ent"
-	GIT_TAG "main"
-	DOWNLOAD_ONLY YES
-)
-
-CPMAddPackage(
-	NAME snd
-	GITHUB_REPOSITORY "colugomusic/snd"
-	GIT_TAG "master"
-	DOWNLOAD_ONLY YES
-)
-
-CPMAddPackage(
-	NAME madronalib
-	GITHUB_REPOSITORY "madronalabs/madronalib"
-	GIT_TAG "master"
-	DOWNLOAD_ONLY YES
-)
-
-if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-	CPMAddPackage(
-		NAME sse2neon
-		GITHUB_REPOSITORY DLTcollab/sse2neon
-		GIT_TAG master
-		DOWNLOAD_ONLY YES
-	)
-	list(APPEND extra_include_dirs ${sse2neon_SOURCE_DIR})
-endif()
 
 add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME} INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}/..
-  ${CMAKE_CURRENT_LIST_DIR}/../../include
-	${ent_SOURCE_DIR}/include
-	${snd_SOURCE_DIR}/include
-	${madronalib_SOURCE_DIR}/source
-	${madronalib_SOURCE_DIR}/source/app
-	${extra_include_dirs}
+	..
+	../../include
+	../extern/submodules/ent/include
+	../extern/submodules/snd/include
+	../extern/submodules/madronalib/source
+	../extern/submodules/madronalib/source/app
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+	target_include_directories(${PROJECT_NAME} INTERFACE
+		../extern/submodules/sse2neon
+	)
+endif()
 
 function(blink_plugin_get_base_filename out_var name type)
   set(on_windows $<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>)
