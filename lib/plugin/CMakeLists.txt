@@ -6,6 +6,16 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 
 include(CMakeRC)
 
+add_library(adhoc-madronalib INTERFACE)
+add_library(adhoc::madronalib ALIAS adhoc-madronalib)
+target_sources(adhoc-madronalib INTERFACE
+	FILE_SET adhoc_madronalib
+	TYPE HEADERS
+	BASE_DIRS
+		../extern/submodules/madronalib/source
+		../extern/submodules/madronalib/source/app
+)
+
 add_library(${PROJECT_NAME} INTERFACE)
 
 add_subdirectory(../extern/submodules/ent ent)
@@ -13,14 +23,13 @@ add_subdirectory(../extern/submodules/snd snd)
 
 target_link_libraries(${PROJECT_NAME} INTERFACE
 	ent::ent
+	adhoc::madronalib
 	snd::snd
 )
 
 target_include_directories(${PROJECT_NAME} INTERFACE
 	..
 	../../include
-	../extern/submodules/madronalib/source
-	../extern/submodules/madronalib/source/app
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
