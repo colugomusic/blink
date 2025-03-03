@@ -34,7 +34,7 @@ endif()
 
 set(_version 2.0.0)
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.12)
 include(CMakeParseArguments)
 
 if(COMMAND cmrc_add_resource_library)
@@ -247,15 +247,15 @@ public:
             return !(*this == rhs);
         }
 
-        iterator operator++() noexcept {
+        iterator& operator++() noexcept {
+            ++_base_iter;
+            return *this;
+        }
+
+        iterator operator++(int) noexcept {
             auto cp = *this;
             ++_base_iter;
             return cp;
-        }
-
-        iterator& operator++(int) noexcept {
-            ++_base_iter;
-            return *this;
         }
     };
 
@@ -585,7 +585,7 @@ function(cmrc_add_resources name)
         endif()
         get_filename_component(dirpath "${ARG_PREFIX}${relpath}" DIRECTORY)
         _cmrc_register_dirs("${name}" "${dirpath}")
-        get_filename_component(abs_out "${libdir}/intermediate/${relpath}.cpp" ABSOLUTE)
+        get_filename_component(abs_out "${libdir}/intermediate/${ARG_PREFIX}${relpath}.cpp" ABSOLUTE)
         # Generate a symbol name relpath the file's character array
         _cm_encode_fpath(sym "${relpath}")
         # Get the symbol name for the parent directory
