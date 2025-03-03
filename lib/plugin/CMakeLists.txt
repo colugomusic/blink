@@ -1,40 +1,45 @@
 cmake_minimum_required(VERSION 3.14)
-project(blink_plugin)
+project(blink-plugin)
 
 set(PLUGIN_OUTPUT_DIR bin CACHE PATH "plugin output directory")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 
 include(CMakeRC)
 
-add_library(adhoc-madronalib INTERFACE)
-add_library(adhoc::madronalib ALIAS adhoc-madronalib)
-target_sources(adhoc-madronalib INTERFACE
-	FILE_SET adhoc_madronalib
-	TYPE HEADERS
-	BASE_DIRS
-		../extern/submodules/madronalib/source
-		../extern/submodules/madronalib/source/app
-)
+if (NOT TARGET ent::ent)
+	add_subdirectory(../extern/submodules/ent ent)
+endif()
+if (NOT TARGET snd::snd)
+	add_subdirectory(../extern/submodules/snd snd)
+endif()
 
-add_library(${PROJECT_NAME} INTERFACE)
+if (NOT TARGET blink::adhoc::madronalib)
+	add_library(blink-adhoc-madronalib INTERFACE)
+	add_library(blink::adhoc::madronalib ALIAS blink-adhoc-madronalib)
+	target_sources(blink-adhoc-madronalib INTERFACE
+		FILE_SET blink_adhoc_madronalib
+		TYPE HEADERS
+		BASE_DIRS
+			../extern/submodules/madronalib/source
+			../extern/submodules/madronalib/source/app
+	)
+endif()
 
-add_subdirectory(../extern/submodules/ent ent)
-add_subdirectory(../extern/submodules/snd snd)
-
-target_link_libraries(${PROJECT_NAME} INTERFACE
-	ent::ent
-	adhoc::madronalib
-	snd::snd
-)
-
-target_include_directories(${PROJECT_NAME} INTERFACE
-	..
-	../../include
-)
-
-if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-	target_include_directories(${PROJECT_NAME} INTERFACE
-		../extern/submodules/sse2neon
+if (NOT TARGET blink::plugin)
+	add_library(blink-plugin INTERFACE)
+	add_library(blink::plugin ALIAS blink-plugin)
+	target_sources(blink-plugin INTERFACE
+		FILE_SET blink_plugin
+		TYPE HEADERS
+		BASE_DIRS
+			..
+			../../include
+			$<$<PLATFORM_ID:Darwin>:../extern/submodules/sse2neon>
+	)
+	target_link_libraries(blink-plugin INTERFACE
+		blink::adhoc::madronalib
+		ent::ent
+		snd::snd
 	)
 endif()
 
@@ -56,7 +61,7 @@ function(blink_plugin_add name type src resources)
 	blink_plugin_get_target_name(target_name ${name} ${type})
 	cmrc_add_resource_library(${target_name}_resources ALIAS ${target_name}::rc NAMESPACE plugin ${resources})
 	add_library(${target_name} SHARED ${src})
-	target_link_libraries(${target_name} PRIVATE blink_plugin ${target_name}::rc)
+	target_link_libraries(${target_name} PRIVATE blink::plugin ${target_name}::rc)
 	target_include_directories(${target_name} PRIVATE ${extra_include_dirs})
 	set_target_properties(${target_name} PROPERTIES
 		OUTPUT_NAME ${output_name}
