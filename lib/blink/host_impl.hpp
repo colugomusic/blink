@@ -20,6 +20,7 @@ namespace blink {
 struct IsAlive { bool value = false; };
 
 using PluginTable = ent::simple_table<
+	"blink:host:plugin-table",
 	blink_PluginInfo,
 	PluginType,
 	PluginTypeIdx,
@@ -29,10 +30,12 @@ using PluginTable = ent::simple_table<
 >;
 
 using PluginSamplerTable = ent::simple_table<
+	"blink:host:plugin-sampler-table",
 	SamplerInfo
 >;
 
 using InstanceTable = ent::table<
+	"blink:host:instance-table",
 	1000,
 	IsAlive,
 	blink_PluginIdx,
@@ -41,6 +44,7 @@ using InstanceTable = ent::table<
 >;
 
 using UnitTable = ent::table<
+	"blink:host:unit-table",
 	1000,
 	IsAlive,
 	blink_PluginIdx,
@@ -48,6 +52,7 @@ using UnitTable = ent::table<
 >;
 
 using ParamTable = ent::simple_table<
+	"blink:host:param-table",
 	blink_PluginIdx,
 	blink_UUID,
 	ManipDelegate,
@@ -60,6 +65,7 @@ using ParamTable = ent::simple_table<
 >;
 
 using ParamEnvTable = ent::simple_table<
+	"blink:host:param-env-table",
 	ApplyOffsetFn,
 	ClampRange,
 	EnvIdx,
@@ -68,15 +74,18 @@ using ParamEnvTable = ent::simple_table<
 >;
 
 using ParamOptionTable = ent::simple_table<
+	"blink:host:param-option-table",
 	DefaultValue<int64_t>,
 	StringVec
 >;
 
 using ParamSliderIntTable = ent::simple_table<
+	"blink:host:param-slider-int-table",
 	blink_SliderIntIdx
 >;
 
 using ParamSliderRealTable = ent::simple_table<
+	"blink:host:param-slider-real-table",
 	ApplyOffsetFn,
 	blink_SliderRealIdx,
 	ClampRange,
@@ -85,6 +94,7 @@ using ParamSliderRealTable = ent::simple_table<
 >;
 
 using EnvTable = ent::simple_table<
+	"blink:host:env-table",
 	DefaultMax<float>,
 	DefaultMin<float>,
 	DefaultValue<float>,
@@ -98,11 +108,13 @@ using EnvTable = ent::simple_table<
 >;
 
 using SliderIntTable = ent::simple_table<
+	"blink:host:slider-int-table",
 	DefaultValue<int64_t>,
 	TweakerInt
 >;
 
 using SliderRealTable = ent::simple_table<
+	"blink:host:slider-real-table",
 	DefaultValue<float>,
 	TweakerReal
 >;
