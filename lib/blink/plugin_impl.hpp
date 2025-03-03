@@ -15,6 +15,7 @@ static constexpr auto BLOCK_SIZE = 100;
 
 template <typename... Ts>
 using Instance = ent::table<
+	"blink:plugin:instance",
 	BLOCK_SIZE,
 	UnitVec,
 	Ts...
@@ -22,6 +23,7 @@ using Instance = ent::table<
 
 template <typename... Ts>
 using Unit = ent::table<
+	"blink:plugin:unit",
 	BLOCK_SIZE,
 	blink_InstanceIdx,
 	Ts...

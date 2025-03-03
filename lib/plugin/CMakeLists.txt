@@ -60,7 +60,11 @@ function(blink_plugin_add name type src resources)
 		CXX_STANDARD 17
 	)
 	set_target_properties(${target_name}_resources PROPERTIES FOLDER "plugins/${type}s/resources")
-	target_compile_definitions(${target_name} PRIVATE PLUGIN_VERSION="${PROJECT_VERSION}")
+	target_compile_definitions(
+		${target_name} PRIVATE
+		PLUGIN_VERSION="${PROJECT_VERSION}"
+		_USE_MATH_DEFINES
+	)
 endfunction()
 
 function(blink_plugin_add_effect name src resources)
