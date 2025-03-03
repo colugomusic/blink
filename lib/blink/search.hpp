@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <blink/block_positions.hpp>
 #include <blink/data.hpp>
