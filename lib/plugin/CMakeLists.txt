@@ -7,16 +7,21 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 include(CMakeRC)
 
 add_library(${PROJECT_NAME} INTERFACE)
+
 add_subdirectory(../extern/submodules/ent ent)
+add_subdirectory(../extern/submodules/snd snd)
+
+target_link_libraries(${PROJECT_NAME} INTERFACE
+	ent::ent
+	snd::snd
+)
 
 target_include_directories(${PROJECT_NAME} INTERFACE
 	..
 	../../include
-	../extern/submodules/snd/include
 	../extern/submodules/madronalib/source
 	../extern/submodules/madronalib/source/app
 )
-target_link_libraries(${PROJECT_NAME} INTERFACE ent::ent)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	target_include_directories(${PROJECT_NAME} INTERFACE
