@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define BLINK_VECTOR_SIZE 64
 #define BLINK_OK 0
@@ -39,20 +40,20 @@ typedef struct { const char* value; } blink_StaticString;
 typedef struct { const char* value; } blink_TempString;
 typedef struct { const char* value; } blink_UUID;
 
-enum blink_AnalysisResult {
+typedef enum {
 	blink_AnalysisResult_OK = 0,
 	blink_AnalysisResult_Abort = 1,
 	blink_AnalysisResult_Error = 2,
-};
+} blink_AnalysisResult;
 
-enum blink_ChannelMode {
+typedef enum {
 	blink_ChannelMode_Left = 0,
 	blink_ChannelMode_Right = 1,
 	blink_ChannelMode_Stereo = 2,
 	blink_ChannelMode_StereoSwap = 3,
-};
+} blink_ChannelMode;
 
-enum blink_StdIcon {
+typedef enum {
 	blink_StdIcon_None = 0,
 	blink_StdIcon_Amp = 1,
 	blink_StdIcon_Pan = 2,
@@ -62,7 +63,7 @@ enum blink_StdIcon {
 	blink_StdIcon_Loop = 6,
 	blink_StdIcon_Reverse = 7,
 	blink_StdIcon_PianoRoll = 8,
-};
+} blink_StdIcon;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Standard error codes
@@ -156,18 +157,18 @@ typedef struct {
 	int64_t default_value;
 } blink_UniformSliderIntData;
 
-union blink_UniformParamData {
+typedef union {
 	blink_UniformChordData chord;
 	blink_UniformEnvData env;
 	blink_UniformOptionData option;
 	blink_UniformSliderIntData slider_int;
 	blink_UniformSliderRealData slider_real;
-};
+} blink_UniformParamData;
 
-enum blink_VaryingValueMode {
+typedef enum {
 	blink_VaryingValueMode_Offset   = 1 << 0,
 	blink_VaryingValueMode_Override = 1 << 1,
-};
+} blink_VaryingValueMode;
 
 typedef struct {
 	blink_ParamIdx param_idx;
@@ -175,15 +176,15 @@ typedef struct {
 	float value;
 } blink_VaryingValue;
 
-union blink_VaryingParamData {
+typedef union {
 	size_t count;
 	const blink_VaryingValue* values;
-};
+} blink_VaryingParamData;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Param Flags
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-enum blink_ParamFlags {
+typedef enum {
 	blink_ParamFlags_None                       = 1 << 0,
 	blink_ParamFlags_AlwaysShowWhenGroupVisible = 1 << 1,  // Will not appear in modulator tree
 	blink_ParamFlags_CanManipulate              = 1 << 2,  // Has no effect for int sliders
@@ -198,15 +199,15 @@ enum blink_ParamFlags {
 	blink_ParamFlags_ShowButton                 = 1 << 11,
 	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
 	blink_ParamFlags_Varying                    = 1 << 13,
-};
+} blink_ParamFlags;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Envelope Flags
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-enum blink_EnvFlags {
+typedef enum {
 	blink_EnvFlags_None         = 1 << 0,
 	blink_EnvFlags_NoGridLabels = 1 << 1,
-};
+} blink_EnvFlags;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Resource Data
@@ -350,7 +351,7 @@ typedef void                (*blink_host_write_slider_int_tweaker)(void*, blink_
 typedef void                (*blink_host_write_slider_real_default_value)(void*, blink_SliderRealIdx sld_idx, float value);
 typedef void                (*blink_host_write_slider_real_tweaker)(void*, blink_SliderRealIdx sld_idx, blink_TweakerReal tweaker);
 
-struct blink_HostFns {
+typedef struct {
 	void* usr;
 	blink_host_add_env                              add_env;
 	blink_host_add_param_chord                      add_param_chord;
@@ -400,7 +401,7 @@ struct blink_HostFns {
 	blink_host_write_slider_int_tweaker             write_slider_int_tweaker;
 	blink_host_write_slider_real_default_value      write_slider_real_default_value;
 	blink_host_write_slider_real_tweaker            write_slider_real_tweaker;
-};
+} blink_HostFns;
 
 typedef bool (*blink_Analysis_ShouldAbort)(void* host);
 typedef void (*blink_Analysis_ReportProgress)(void* host, float progress);
