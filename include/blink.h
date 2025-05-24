@@ -1,10 +1,5 @@
 #pragma once
 
-// This is meant to be a C interface. I have only ever compiled it with C++ compilers though so
-// it's probably not. If you want to help me fix the C-ness of it then pull requests are welcome.
-// Or if you try compiling this with a C compiler and it works then let me know and I can remove
-// this comment.
-
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
