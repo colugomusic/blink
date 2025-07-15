@@ -32,9 +32,9 @@ if (NOT TARGET blink::plugin)
 		FILE_SET blink_plugin
 		TYPE HEADERS
 		BASE_DIRS
-			..
-			../../include
-			$<$<PLATFORM_ID:Darwin>:../extern/submodules/sse2neon>
+			${CMAKE_CURRENT_LIST_DIR}/../..
+			${CMAKE_CURRENT_LIST_DIR}/../../include
+			$<$<PLATFORM_ID:Darwin>:${CMAKE_CURRENT_LIST_DIR}/../extern/submodules/sse2neon>
 	)
 	target_link_libraries(blink-plugin INTERFACE
 		blink::adhoc::madronalib
