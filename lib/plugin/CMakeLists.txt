@@ -32,7 +32,7 @@ if (NOT TARGET blink::plugin)
 		FILE_SET blink_plugin
 		TYPE HEADERS
 		BASE_DIRS
-			${CMAKE_CURRENT_LIST_DIR}/../..
+			${CMAKE_CURRENT_LIST_DIR}/..
 			${CMAKE_CURRENT_LIST_DIR}/../../include
 			$<$<PLATFORM_ID:Darwin>:${CMAKE_CURRENT_LIST_DIR}/../extern/submodules/sse2neon>
 	)
