@@ -16,20 +16,19 @@ class AdsConanFile(ConanFile):
 		cmake_layout(self)
 
 	def requirements(self):
+		self.requires("ent/[>=0]")
 		self.requires("madronalib/[>=0]")
+		self.requires("snd/[>=0]")
 
 	def validate(self):
 		if self.settings.get_safe("compiler.cppstd"):
 			check_min_cppstd(self, 20)
 
 	def build(self):
-		cmake = CMake(self)
-		cmake.configure()
-		cmake.build()
+		pass
 
 	def package(self):
-		cmake = CMake(self)
-		cmake.install()
+		pass
 	
 	def package_info(self):
-		self.cpp_info.includedirs = ["include"]
+		self.cpp_info.includedirs = ["include", "lib/blink"]
