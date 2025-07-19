@@ -1,16 +1,18 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy
+from os.path import join
 
 class AdsConanFile(ConanFile):
-	name = "snd"
+	name = "blink"
 	version = "1.0.0"
 	license = "MIT"
 	author = "ColugoMusic"
 	url = "https://github.com/colugomusic/blink"
 	settings = "os", "compiler", "build_type", "arch"
 	generators = "CMakeDeps", "CMakeToolchain"
-	exports_sources = "CMakeLists.txt", "include/*", "lib/*"
+	exports_sources = "include/*", "lib/*"
 
 	def layout(self):
 		cmake_layout(self)
@@ -28,7 +30,8 @@ class AdsConanFile(ConanFile):
 		pass
 
 	def package(self):
-		pass
+		copy(self, "*.h", src=join(self.source_folder, "include"), dst=join(self.package_folder, "include"))
+		copy(self, "*", src=join(self.source_folder, "lib"), dst=join(self.package_folder, "lib"))
 	
 	def package_info(self):
 		self.cpp_info.includedirs = ["include", "lib/blink"]
