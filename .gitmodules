@@ -10,3 +10,9 @@
 [submodule "lib/extern/submodules/madronalib"]
 	path = lib/extern/submodules/madronalib
 	url = https://github.com/madronalabs/madronalib
+[submodule "dope/madronalib"]
+	path = dope/madronalib
+	url = git@github.com:colugomusic/dope-madronalib.git
+[submodule "scripts/dope"]
+	path = scripts/dope
+	url = git@github.com:colugomusic/dope.git

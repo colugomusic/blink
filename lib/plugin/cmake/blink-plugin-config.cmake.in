@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(ent)
+find_dependency(madronalib)
+find_dependency(snd)
+
+include(${CMAKE_CURRENT_LIST_DIR}/blink-plugin-targets.cmake)
