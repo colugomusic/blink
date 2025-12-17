@@ -148,15 +148,20 @@ inline auto SampleData::get_interp_pos(snd::frame_vec<64> pos, bool loop) const 
 		pos = get_loop_pos(pos);
 	}
 
-	out.next = math::ceil(pos);
-	out.prev = math::floor(pos);
+	const auto next  = math::ceil(pos);
+	const auto prev  = math::floor(pos);
+	const auto fract = math::fract(pos);
+
+	for (int i = 0; i < kFloatsPerDSPVector; i++) {
+		out.next[i] = static_cast<int>(next[i]);
+		out.prev[i] = static_cast<int>(prev[i]);
+		out.x[i]    = static_cast<float>(fract[i]);
+	}
 
 	if (loop)
 	{
 		out.next[kFloatsPerDSPVector - 1] %= info_->num_frames.value;
 	}
-
-	out.x = pos.fract;
 
 	return out;
 }

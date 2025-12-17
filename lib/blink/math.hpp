@@ -264,6 +264,12 @@ auto floor(snd::frame_vec<64> x) -> snd::frame_vec<64> {
 	return update(x, fn);
 }
 
+[[nodiscard]] inline
+auto fract(snd::frame_vec<64> x) -> snd::frame_vec<64> {
+	auto fn = [](snd::frame_pos v) { return std::modf(v, nullptr); };
+	return update(x, fn);
+}
+
 template <size_t ROWS> [[nodiscard]]
 auto wrap(snd::frame_vec_array<64, ROWS> x, snd::frame_pos y) -> snd::frame_vec_array<64, ROWS> {
 	auto fn = [y](snd::frame_pos v) { return v - y * std::floor(v / y); };
