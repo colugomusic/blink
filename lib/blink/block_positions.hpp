@@ -2,7 +2,7 @@
 
 #include <blink.h>
 #include <limits>
-#include <snd/frame-pos.h>
+#include <snd/frame-pos.hpp>
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
