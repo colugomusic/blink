@@ -266,7 +266,7 @@ auto floor(snd::frame_vec<64> x) -> snd::frame_vec<64> {
 
 [[nodiscard]] inline
 auto fract(snd::frame_vec<64> x) -> snd::frame_vec<64> {
-	auto fn = [](snd::frame_pos v) { return std::modf(v, nullptr); };
+	auto fn = [](snd::frame_pos v) { double dummy; return std::modf(v, &dummy); };
 	return update(x, fn);
 }
 
