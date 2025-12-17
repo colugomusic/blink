@@ -6,7 +6,7 @@
 #include "calculators/warp.hpp"
 #include "correction_grains.hpp"
 #include "blink/traverser.hpp"
-#include <snd/transport/frame_position.hpp>
+#include <snd/frame-pos.hpp>
 
 namespace blink {
 namespace transform {

@@ -14,7 +14,7 @@ struct BlockPositions {
 	snd::frame_pos prev_pos = std::numeric_limits<snd::frame_pos>::max();
 	int count = BLINK_VECTOR_SIZE;
 	BlockPositions() {
-		positions.set(count - 1, std::numeric_limits<snd::frame_pos>::max());
+		positions[count - 1] = std::numeric_limits<snd::frame_pos>::max());
 	}
 	BlockPositions(const snd::frame_vec<64>& positions_, snd::frame_pos prev_pos_ = std::numeric_limits<snd::frame_pos>::max())
 		: positions(positions_)
@@ -25,7 +25,7 @@ struct BlockPositions {
 		: count(count_)
 	{
 		for (int i = 0; i < count_; i++) {
-			positions.set(i, blink_positions[i]);
+			positions[i] = blink_positions[i];
 		}
 	}
 	auto rotate_prev_pos() -> void {
