@@ -248,7 +248,7 @@ inline std::int64_t wrap(std::int64_t x, std::int64_t y)
 
 template <size_t ROWS> [[nodiscard]]
 auto wrap(snd::frame_vec_array<64, ROWS> x, snd::frame_pos y) -> snd::frame_vec_array<64, ROWS> {
-	auto fn = [y](snd::frame_pos v) { return v - y * std::floor(v / y)); };
+	auto fn = [y](snd::frame_pos v) { return v - y * std::floor(v / y); };
 	return update(x, fn);
 }
 
