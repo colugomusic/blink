@@ -1,12 +1,3 @@
-[submodule "lib/extern/submodules/ent"]
-	path = lib/extern/submodules/ent
-	url = https://github.com/colugomusic/ent
-[submodule "lib/extern/submodules/sse2neon"]
-	path = lib/extern/submodules/sse2neon
-	url = https://github.com/DLTcollab/sse2neon
-[submodule "lib/extern/submodules/madronalib"]
-	path = lib/extern/submodules/madronalib
-	url = https://github.com/madronalabs/madronalib
 [submodule "dope/madronalib"]
 	path = dope/madronalib
 	url = git@github.com:colugomusic/dope-madronalib.git
