@@ -246,31 +246,22 @@ inline std::int64_t wrap(std::int64_t x, std::int64_t y)
 	return x;
 }
 
-template <size_t ROWS>
-snd::transport::DSPVectorArrayFramePosition<ROWS> wrap(const snd::transport::DSPVectorArrayFramePosition<ROWS>& x, float y)
-{
-	snd::transport::DSPVectorArrayFramePosition<ROWS> out;
-
-	for (int i = 0; i < kFloatsPerDSPVector; i++)
-	{
-		out.set(i, std::fmod(double(x[i]), double(y)));
-
-		if (out[i] < 0) out.set(i, out[i] + y);
-	}
-
-	return out;
+template <size_t ROWS> [[nodiscard]]
+auto wrap(snd::frame_vec_array<64, ROWS> x, snd::frame_pos y) -> snd::frame_vec_array<64, ROWS> {
+	auto fn = [y](snd::frame_pos v) { return v - y * std::floor(v / y)); };
+	return update(x, fn);
 }
 
-template <size_t ROWS>
-ml::DSPVectorArrayInt<ROWS> ceil(const snd::transport::DSPVectorArrayFramePosition<ROWS>& in)
-{
-	return (in + 1).pos;
+template <size_t ROWS> [[nodiscard]]
+auto ceil(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
+	auto fn = [y](snd::frame_pos v) { return std::ceil(v); };
+	return update(x, fn);
 }
 
-template <size_t ROWS>
-ml::DSPVectorArrayInt<ROWS> floor(const snd::transport::DSPVectorArrayFramePosition<ROWS>& in)
-{
-	return in.pos;
+template <size_t ROWS> [[nodiscard]]
+auto floor(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
+	auto fn = [y](snd::frame_pos v) { return std::ceil(v); };
+	return update(x, fn);
 }
 
 template <size_t ROWS>

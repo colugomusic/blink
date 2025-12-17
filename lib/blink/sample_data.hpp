@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <blink/math.hpp>
+#include <snd/frame-pos.hpp>
 
 namespace blink {
 
@@ -18,13 +19,13 @@ public:
 	float read_frame(blink_ChannelCount channel, int pos) const;
 	float read_frame_interp(blink_ChannelCount channel, float pos, bool loop = false) const;
 	ml::DSPVector read_frames(blink_ChannelCount channel, const ml::DSPVectorInt& pos) const;
-	ml::DSPVector read_frames_interp(blink_ChannelCount channel, const snd::transport::DSPVectorFramePosition& pos, bool loop) const;
+	ml::DSPVector read_frames_interp(blink_ChannelCount channel, const snd::frame_vec<64>& pos, bool loop) const;
 
 	float get_loop_pos(float pos) const;
-	snd::transport::DSPVectorFramePosition get_loop_pos(const snd::transport::DSPVectorFramePosition& pos) const;
+	snd::frame_vec<64> get_loop_pos(const snd::frame_vec<64>& pos) const;
 
 	template <std::size_t ROWS>
-	ml::DSPVectorArray<ROWS> read_frames_interp(const snd::transport::DSPVectorFramePosition& pos, bool loop) const;
+	ml::DSPVectorArray<ROWS> read_frames_interp(const snd::frame_vec<64>& pos, bool loop) const;
 
 	blink_ChannelMode get_channel_mode() const { return channel_mode_; }
 
@@ -45,7 +46,7 @@ private:
 	};
 
 	InterpPos get_interp_pos(float pos, bool loop = false) const;
-	InterpVectorPos get_interp_pos(snd::transport::DSPVectorFramePosition pos, bool loop) const;
+	InterpVectorPos get_interp_pos(snd::frame_vec<64> pos, bool loop) const;
 
 	const blink_SampleInfo* info_;
 	blink_FrameCount loop_length_;
@@ -111,7 +112,7 @@ inline float SampleData::get_loop_pos(float pos) const
 	return math::wrap(pos - info_->loop_points[0].value, float(loop_length_.value)) + info_->loop_points[0].value;
 }
 
-inline snd::transport::DSPVectorFramePosition SampleData::get_loop_pos(const snd::transport::DSPVectorFramePosition& pos) const
+inline snd::frame_vec<64> SampleData::get_loop_pos(const snd::frame_vec<64>& pos) const
 {
 	if (!info_->loop_points)
 	{
@@ -138,7 +139,7 @@ inline auto SampleData::get_interp_pos(float pos, bool loop) const -> InterpPos
 	return out;
 }
 
-inline auto SampleData::get_interp_pos(snd::transport::DSPVectorFramePosition pos, bool loop) const -> InterpVectorPos
+inline auto SampleData::get_interp_pos(snd::frame_vec<64> pos, bool loop) const -> InterpVectorPos
 {
 	InterpVectorPos out;
 
@@ -170,7 +171,7 @@ inline float SampleData::read_frame_interp(blink_ChannelCount channel, float pos
 	return (interp_pos.x * (next_value - prev_value)) + prev_value;
 }
 
-inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, const snd::transport::DSPVectorFramePosition& pos, bool loop) const
+inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, const snd::frame_vec<64>& pos, bool loop) const
 {
 	const auto interp_pos = get_interp_pos(pos, loop);
 
@@ -181,7 +182,7 @@ inline ml::DSPVector SampleData::read_frames_interp(blink_ChannelCount channel, 
 }
 
 template <std::size_t ROWS> [[nodiscard]]
-auto SampleData::read_frames_interp(const snd::transport::DSPVectorFramePosition& pos, bool loop) const -> ml::DSPVectorArray<ROWS> {
+auto SampleData::read_frames_interp(const snd::frame_vec<64>& pos, bool loop) const -> ml::DSPVectorArray<ROWS> {
 	ml::DSPVectorArray<ROWS> out; 
 	const auto interp_pos = get_interp_pos(pos, loop); 
 	for (int r = 0; r < ROWS; r++) {
