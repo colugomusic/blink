@@ -268,7 +268,7 @@ public:
 
 			const auto position { unit_calculator_(unit_config, i, block_positions.positions[i]) };
 
-			config.outputs.positions->positions.set(i, position);
+			config.outputs.positions->positions[i] = position;
 		}
 	}
 

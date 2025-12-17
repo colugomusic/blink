@@ -149,7 +149,7 @@ public:
 			} 
 			const auto out_derivative { config.outputs.derivatives ? &config.outputs.derivatives->getBuffer()[i] : nullptr };
 			const auto position { unit_calculator_( unit_config, block_positions.positions[i], out_derivative) }; 
-			config.outputs.positions->positions.set(i, position);
+			config.outputs.positions->positions[i] = position;
 		}
 	} 
 private: 
