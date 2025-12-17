@@ -254,13 +254,13 @@ auto wrap(snd::frame_vec<64> x, snd::frame_pos y) -> snd::frame_vec<64> {
 
 [[nodiscard]] inline
 auto ceil(snd::frame_vec<64> x) -> snd::frame_vec<64> {
-	auto fn = [y](snd::frame_pos v) { return std::ceil(v); };
+	auto fn = [](snd::frame_pos v) { return std::ceil(v); };
 	return update(x, fn);
 }
 
 [[nodiscard]] inline
 auto floor(snd::frame_vec<64> x) -> snd::frame_vec<64> {
-	auto fn = [y](snd::frame_pos v) { return std::floor(v); };
+	auto fn = [](snd::frame_pos v) { return std::floor(v); };
 	return update(x, fn);
 }
 
