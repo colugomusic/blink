@@ -34,7 +34,7 @@ struct BlockPositions {
 	auto add(const blink_Position* blink_positions, int count_) -> void {
 		prev_pos = positions[count - 1]; 
 		for (int i = 0; i < count_; i++) {
-			positions.set(i, blink_positions[i]);
+			positions[i] = blink_positions[i];
 		}
 		count = count_;
 	}
