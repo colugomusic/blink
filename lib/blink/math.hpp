@@ -254,13 +254,13 @@ auto wrap(snd::frame_vec_array<64, ROWS> x, snd::frame_pos y) -> snd::frame_vec_
 
 template <size_t ROWS> [[nodiscard]]
 auto ceil(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
-	auto fn = [y](snd::frame_pos v) { return std::ceil(v); };
+	auto fn = [](snd::frame_pos v) { return std::ceil(v); };
 	return update(x, fn);
 }
 
 template <size_t ROWS> [[nodiscard]]
 auto floor(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
-	auto fn = [y](snd::frame_pos v) { return std::ceil(v); };
+	auto fn = [](snd::frame_pos v) { return std::ceil(v); };
 	return update(x, fn);
 }
 
