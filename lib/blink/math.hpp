@@ -249,25 +249,37 @@ inline std::int64_t wrap(std::int64_t x, std::int64_t y)
 [[nodiscard]] inline
 auto wrap(snd::frame_vec<64> x, snd::frame_pos y) -> snd::frame_vec<64> {
 	auto fn = [y](snd::frame_pos v) { return v - y * std::floor(v / y); };
-	return snd::update(x, fn);
+	return update(x, fn);
+}
+
+[[nodiscard]] inline
+auto ceil(snd::frame_vec<64> x) -> snd::frame_vec<64> {
+	auto fn = [y](snd::frame_pos v) { return std::ceil(v); };
+	return update(x, fn);
+}
+
+[[nodiscard]] inline
+auto floor(snd::frame_vec<64> x) -> snd::frame_vec<64> {
+	auto fn = [y](snd::frame_pos v) { return std::floor(v); };
+	return update(x, fn);
 }
 
 template <size_t ROWS> [[nodiscard]]
 auto wrap(snd::frame_vec_array<64, ROWS> x, snd::frame_pos y) -> snd::frame_vec_array<64, ROWS> {
 	auto fn = [y](snd::frame_pos v) { return v - y * std::floor(v / y); };
-	return snd::update(x, fn);
+	return update(x, fn);
 }
 
 template <size_t ROWS> [[nodiscard]]
 auto ceil(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
 	auto fn = [](snd::frame_pos v) { return std::ceil(v); };
-	return snd::update(x, fn);
+	return update(x, fn);
 }
 
 template <size_t ROWS> [[nodiscard]]
 auto floor(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
 	auto fn = [](snd::frame_pos v) { return std::ceil(v); };
-	return snd::update(x, fn);
+	return update(x, fn);
 }
 
 template <size_t ROWS>
