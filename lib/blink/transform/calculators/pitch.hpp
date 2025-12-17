@@ -143,7 +143,7 @@ struct Pitch {
 				return std::clamp(0.0f, min, max);
 			};
 			const auto ff             = math::convert::p_to_ff(get_pitch() + config.transpose);
-			*config.outputs.positions = snd::operator*(block_positions.positions, ff);
+			*config.outputs.positions = block_positions.positions * ff;
 			if (config.outputs.derivatives) {
 				*config.outputs.derivatives = ff;
 			} 

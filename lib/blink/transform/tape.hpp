@@ -81,7 +81,7 @@ inline void Tape::apply_pitch(const Config& config, const BlockPositions& block_
 }
 
 inline void Tape::apply_sample_offset(const Config& config) {
-	snd::operator-=(stage_.positions.pitched.positions, config.sample_offset);
+	stage_.positions.pitched.positions -= config.sample_offset;
 }
 
 inline void Tape::apply_warp(const Config& config, int count) {
