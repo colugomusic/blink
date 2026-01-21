@@ -41,6 +41,7 @@ target_sources(blink-common INTERFACE
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/traverser.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/tweak.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/types.hpp
+		${CMAKE_CURRENT_LIST_DIR}/lib/blink/quiet-include.hpp
 )
 target_link_libraries(blink-common INTERFACE
 	ent::ent
