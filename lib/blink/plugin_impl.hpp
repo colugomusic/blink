@@ -7,6 +7,7 @@
 #include "data.hpp"
 #include "resource_store.hpp"
 #include "types.hpp"
+#include "quiet-include.hpp"
 
 namespace blink {
 
