@@ -19,7 +19,8 @@
 		_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"") \
 		_Pragma("GCC diagnostic ignored \"-Wold-style-cast\"") \
 		_Pragma("GCC diagnostic ignored \"-Wshadow\"") \
-		_Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
+		_Pragma("GCC diagnostic ignored \"-Wunused-parameter\"") \
+		_Pragma("GCC diagnostic ignored \"-Wstringop-overflow\"")
 #	define BLINK_QUIET_INCLUDE_END \
 		_Pragma("GCC diagnostic pop")
 #else
