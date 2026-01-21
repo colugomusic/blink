@@ -4,6 +4,7 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <cmath>
+#include <cstdint>
 #include <snd/frame-pos.hpp>
 #include "const_math.hpp"
 #pragma warning(push, 0)
