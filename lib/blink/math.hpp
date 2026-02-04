@@ -285,7 +285,7 @@ auto ceil(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
 
 template <size_t ROWS> [[nodiscard]]
 auto floor(snd::frame_vec_array<64, ROWS> x) -> snd::frame_vec_array<64, ROWS> {
-	auto fn = [](snd::frame_pos v) { return std::ceil(v); };
+	auto fn = [](snd::frame_pos v) { return std::floor(v); };
 	return update(x, fn);
 }
 
