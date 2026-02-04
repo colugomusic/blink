@@ -43,6 +43,8 @@ function(blink_plugin_add name type src resources)
 		LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PLUGIN_OUTPUT_DIR}
 		LIBRARY_OUTPUT_DIRECTORY                ${PLUGIN_OUTPUT_DIR}
 		CXX_STANDARD 17
+		CXX_VISIBILITY_PRESET hidden
+		VISIBILITY_INLINES_HIDDEN ON
 	)
 	set_target_properties(${target_name}_resources PROPERTIES FOLDER "plugins/${type}s/resources")
 	target_compile_definitions(
