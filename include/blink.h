@@ -522,7 +522,7 @@ typedef struct {
 #ifdef _WIN32
 # define EXPORTED  __declspec( dllexport )
 #else
-# define EXPORTED  __attribute__((visibility("default")))
+# define EXPORTED
 #endif
 
 extern "C"
