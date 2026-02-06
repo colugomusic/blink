@@ -1,5 +1,6 @@
 - name:           ent
   git:            https://github.com/colugomusic/ent.git
+  track:          true
 
 - name:           madronalib
   git:            https://github.com/madronalabs/madronalib.git
@@ -7,3 +8,4 @@
 
 - name:           snd
   git:            https://github.com/colugomusic/snd.git
+  track:          true
