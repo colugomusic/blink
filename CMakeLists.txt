@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 project(blink)
+enable_testing()
 
 find_package(ent REQUIRED CONFIG)
 find_package(madronalib REQUIRED CONFIG)

@@ -1,12 +1,9 @@
 #pragma once
 
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
 #include <cmath>
 #include <cstdint>
 #include <snd/frame-pos.hpp>
-#include "const_math.hpp"
+#include <tweak/math.hpp>
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
@@ -14,38 +11,8 @@
 namespace blink {
 namespace math {
 
-template <class T>
-constexpr T midpoint(T a, T b)
-{
-	return (a + b) / T(2);
-}
-
-template <class T>
-constexpr T lerp(T a, T b, T x)
-{
-	return (x * (b - a)) + a;
-}
-
-template <class T>
-constexpr T inverse_lerp(T a, T b, T x)
-{
-	return (x - a) / (b - a);
-}
-
-template <class T>
-constexpr T stepify(T value, T step)
-{
-	if (step != 0)
-	{
-		value = std::floor(value / step + T(0.5)) * step;
-	}
-
-	return value;
-}
-
 template <size_t ROWS>
-constexpr ml::DSPVectorArray<ROWS> stepify(const ml::DSPVectorArray<ROWS>& value, const ml::DSPVectorArray<ROWS>& step)
-{
+constexpr ml::DSPVectorArray<ROWS> stepify(const ml::DSPVectorArray<ROWS>& value, const ml::DSPVectorArray<ROWS>& step) {
 	return ml::select(ml::intToFloat(ml::truncateFloatToInt((value / step) + 0.5f)) * step, value, ml::greaterThan(step, ml::DSPVectorArray<ROWS>(0.0f)));
 }
 
@@ -70,7 +37,7 @@ auto linear_to_delay_time_ms(T linear) -> T {
 
 template <class T> constexpr
 auto delay_time_ms_to_linear(T ms) -> T {
-	return const_math::sqrt(const_math::sqrt(ms / T(2000)));
+	return tweak::const_math::sqrt(tweak::const_math::sqrt(ms / T(2000)));
 }
 
 template <class T>
@@ -112,19 +79,16 @@ inline ml::DSPVector linear_to_filter_hz(const ml::DSPVector& linear)
 	return pitch_to_frequency(lerp({frequency_to_pitch(float(FREQ_MIN))}, {frequency_to_pitch(float(FREQ_MAX))}, linear));
 }
 
-inline float linear_to_filter_hz(float linear)
-{
-	return pitch_to_frequency(lerp(-8.513f, 135.076f, linear));
+inline float linear_to_filter_hz(float linear) {
+	return pitch_to_frequency(std::lerp(-8.513f, 135.076f, linear));
 }
 
-inline ml::DSPVector linear_to_filter_hz(const ml::DSPVector& linear)
-{
+inline ml::DSPVector linear_to_filter_hz(const ml::DSPVector& linear) {
 	return pitch_to_frequency(ml::lerp(ml::DSPVector(-8.513f), ml::DSPVector(135.076f), linear));
 }
 
-inline float filter_hz_to_linear(float hz)
-{
-	return inverse_lerp(-8.513f, 135.076f, frequency_to_pitch(hz));
+inline float filter_hz_to_linear(float hz) {
+	return tweak::math::inverse_lerp(-8.513f, 135.076f, frequency_to_pitch(hz));
 }
 
 inline double linear_to_db(double linear)

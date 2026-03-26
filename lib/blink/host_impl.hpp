@@ -8,7 +8,6 @@
 #include "math.hpp"
 #include "tweak.hpp"
 #include "types.hpp"
-#include "uuids.h"
 #include <cs_lr_guarded.h>
 #include <unordered_map>
 #include <vector>
@@ -235,10 +234,8 @@ auto env_override(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_E
 }
 
 [[nodiscard]] inline
-auto find_param(const Host& host, blink_PluginIdx plugin, uuids::t uuid) -> std::optional<blink_ParamIdx> {
-	// FIXME: uuids:: namespace is actually from blockhead codebase!
+auto find_param(const Host& host, blink_PluginIdx plugin, std::string_view uuid_str) -> std::optional<blink_ParamIdx> {
 	const auto param_list = host.plugin.get<PluginParams>(plugin.value).global_indices;
-	const auto uuid_str   = uuids::to<std::string>(uuid);
 	for (const auto param_idx : param_list) {
 		const auto uuid = host.param.get<blink_UUID>(param_idx.value).value;
 		if (uuid == uuid_str) {
@@ -249,9 +246,8 @@ auto find_param(const Host& host, blink_PluginIdx plugin, uuids::t uuid) -> std:
 }
 
 [[nodiscard]] inline
-auto find_plugin(const Host& host, uuids::t uuid) -> std::optional<blink_PluginIdx> {
-	const auto uuid_str = uuids::to<std::string>(uuid);
-	const auto pred = [uuid_str = std::string_view{uuid_str}](const blink_PluginInfo& info) {
+auto find_plugin(const Host& host, std::string_view uuid_str) -> std::optional<blink_PluginIdx> {
+	const auto pred = [uuid_str](const blink_PluginInfo& info) {
 		return info.uuid.value && std::string_view{info.uuid.value} == uuid_str;
 	};
 	const auto idx = host.plugin.find<blink_PluginInfo>(pred);
@@ -774,7 +770,7 @@ auto sample_offset(Host* host) -> blink_SliderIntIdx {
 [[nodiscard]] inline
 auto speed(Host* host) -> blink_SliderRealIdx {
 	const auto idx = add::slider::empty_real(host);
-	write::default_value(host, idx, {tweak::speed::NORMAL});
+	write::default_value(host, idx, {::tweak::std_::speed::NORMAL});
 	write::tweaker(host, idx, {tweak::speed::tweaker()});
 	return idx;
 }
@@ -811,7 +807,7 @@ auto amp(Host* host) -> blink_EnvIdx {
 auto delay_time(Host* host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
 	EnvFns fns;
-	fns.value.snap_value = tweak::snap_value;
+	fns.value.snap_value = ::tweak::snap_value<float>;
 	fns.value.stepify    = tweak::delay_time::stepify;
 	fns.value.to_string  = tweak::delay_time::to_string;
 	write::default_max(host, idx, {1.0f});

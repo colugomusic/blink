@@ -1,0 +1,29 @@
+{
+    "version": 8,
+	"configurePresets": [
+		{
+			"name": "cfg-chris-windows-dbg",
+			"displayName": "Chris: Windows: Debug",
+			"binaryDir": "z:/dv/_bld/blink-dbg",
+			"inherits": "cfg-windows-ninja-cl",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE":  "Debug",
+				"CMAKE_PREFIX_PATH": "z:/dv/blockhead-deps/install/dbg"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "bld-chris-windows-dbg",
+			"displayName": "Chris: Windows: Debug",
+			"configurePreset": "cfg-chris-windows-dbg"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "bld-chris-windows-dbg",
+			"displayName": "Run blink Tests",
+			"configurePreset": "cfg-chris-windows-dbg"
+		}
+	]
+}

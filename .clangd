@@ -1,0 +1,8 @@
+CompileFlags:
+  CompilationDatabase: z:/dv/_bld/blink-dbg
+  Add: -Wunused-function
+
+Diagnostics:
+  ClangTidy:
+    Enable: true
+    Add: bugprone-use-after-move

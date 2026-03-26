@@ -11,8 +11,14 @@ target_sources(blink-plugin INTERFACE
 	FILES
 		${CMAKE_CURRENT_LIST_DIR}/../blink/plugin_impl.hpp
 )
+target_compile_definitions(blink-plugin INTERFACE
+	_USE_MATH_DEFINES
+)
 target_link_libraries(blink-plugin INTERFACE blink::common)
 set_target_properties(blink-plugin PROPERTIES EXPORT_NAME plugin)
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif()
 include(CMakePackageConfigHelpers)
 install(TARGETS blink-plugin EXPORT blink-plugin-targets FILE_SET HEADERS)
 install(EXPORT blink-plugin-targets FILE blink-plugin-targets.cmake NAMESPACE blink:: DESTINATION lib/cmake/blink-plugin)

@@ -1,11 +1,24 @@
-- name:           ent
-  git:            https://github.com/colugomusic/ent.git
-  track:          true
+- name: ent
+  git: https://github.com/colugomusic/ent.git
+  tag: b1972727407054b02ab9dcdaf8286e6fee62face
+  track: true
 
-- name:           madronalib
-  git:            https://github.com/madronalabs/madronalib.git
-  tag:            2ea21d383f7073663fdb5df235d7d692801a1687
+- name: madronalib
+  git: https://github.com/madronalabs/madronalib.git
+  tag: 2ea21d383f7073663fdb5df235d7d692801a1687
 
-- name:           snd
-  git:            https://github.com/colugomusic/snd.git
-  track:          true
+- name: snd
+  git: https://github.com/colugomusic/snd.git
+  tag: adbae2d3f11a0ffd8a9d3b564494c5da59024cb1
+  track: true
+
+- name: tweak
+  git: https://github.com/colugomusic/tweak.git
+  tag: 71472f4e9d5c0db63355df12aedae1ef843c2805
+  track: true
+
+- name: cs_libguarded
+  git: https://github.com/colugomusic/cs_libguarded.git
+  tag: ca6e266caf2fdb62178a49a28801595a83817e04
+  track: true
+  find-package-name: CsLibGuarded
