@@ -877,7 +877,7 @@ auto pitch(Host* host) -> blink_EnvIdx {
 	const auto slider_step_size = add::slider::empty_real(host);
 	EnvFns fns;
 	fns.value.stepify    = tweak::pitch::stepify;
-	fns.value.snap_value = tweak::snap_value;
+	fns.value.snap_value = ::tweak::snap_value<float>;
 	fns.value.to_string  = tweak::to_string;
 	fns.value.get_grid_line = [](int index, float* out) -> blink_Bool {
 		*out = float(index * 12);
@@ -914,15 +914,15 @@ auto speed(Host* host) -> blink_EnvIdx {
 		return {true};
 	};
 	fns.value.to_string = tweak::speed::to_string;
-	write::default_max(host, idx, {tweak::speed::DOUBLE});
-	write::default_min(host, idx, {tweak::speed::FREEZE});
-	write::default_value(host, idx, {tweak::speed::NORMAL});
+	write::default_max(host, idx, {::tweak::std_::speed::DOUBLE});
+	write::default_min(host, idx, {::tweak::std_::speed::FREEZE});
+	write::default_value(host, idx, {::tweak::std_::speed::NORMAL});
 	write::fns(host, idx, fns);
 	write::max_slider(host, idx, {slider_max});
 	write::min_slider(host, idx, {slider_min});
 	write::value_slider(host, idx, {slider_value});
 	write::default_value(host, slider_max, {2.0f});
-	write::default_value(host, slider_min, {tweak::speed::FREEZE});
+	write::default_value(host, slider_min, {::tweak::std_::speed::FREEZE});
 	return idx;
 }
 
