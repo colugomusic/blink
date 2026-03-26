@@ -70,13 +70,13 @@ inline float frequency_to_pitch(float frequency)
 template <int FREQ_MIN, int FREQ_MAX>
 inline float linear_to_filter_hz(float linear)
 {
-	return pitch_to_frequency(lerp(frequency_to_pitch(float(FREQ_MIN)), frequency_to_pitch(float(FREQ_MAX)), linear));
+	return pitch_to_frequency(std::lerp(frequency_to_pitch(float(FREQ_MIN)), frequency_to_pitch(float(FREQ_MAX)), linear));
 }
 
 template <int FREQ_MIN, int FREQ_MAX>
 inline ml::DSPVector linear_to_filter_hz(const ml::DSPVector& linear)
 {
-	return pitch_to_frequency(lerp({frequency_to_pitch(float(FREQ_MIN))}, {frequency_to_pitch(float(FREQ_MAX))}, linear));
+	return pitch_to_frequency(std::lerp({frequency_to_pitch(float(FREQ_MIN))}, {frequency_to_pitch(float(FREQ_MAX))}, linear));
 }
 
 inline float linear_to_filter_hz(float linear) {

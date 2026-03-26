@@ -5,6 +5,7 @@
 #include <blink/block_positions.hpp>
 #include <blink/data.hpp>
 #include <blink/math.hpp>
+#include <tweak/math.hpp>
 #pragma warning(push, 0)
 #include <DSP/MLDSPOps.h>
 #pragma warning(pop)
@@ -61,7 +62,7 @@ auto float_points(const blink_RealPoints& points, float default_value, blink_Pos
 	const auto segment_size = p1.x - p0.x;	// Should never be zero
 	const auto r = (block_position - p0.x) / segment_size; 
 	*left = int(std::distance<const blink_RealPoint*>(points.data, (pos - 1))); 
-	return math::lerp(clamp(p0.y), clamp(p1.y), float(r));
+	return std::lerp(clamp(p0.y), clamp(p1.y), float(r));
 }
 
 // Use a binary search to locate the envelope position
