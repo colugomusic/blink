@@ -32,7 +32,6 @@ target_sources(blink-common INTERFACE
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/bits.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/block_positions.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/common_impl.hpp
-		${CMAKE_CURRENT_LIST_DIR}/lib/blink/const_math.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/data.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/dsp.hpp
 		${CMAKE_CURRENT_LIST_DIR}/lib/blink/math.hpp
