@@ -58,7 +58,7 @@ public:
 						}
 					}
 
-					return math::lerp(float(p0.x), float(p1.x), float(x));
+					return std::lerp(float(p0.x), float(p1.x), float(x));
 				}
 			}
 		}

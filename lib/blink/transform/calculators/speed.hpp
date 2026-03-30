@@ -68,7 +68,7 @@ public:
 				auto segment_size = p1.x - p0.x; 
 				if (segment_size > 0.0f) {
 					point_search_index_ = i; 
-					if (derivative) *derivative = float(math::lerp(p0.ff, p1.ff, n / segment_size)); 
+					if (derivative) *derivative = float(std::lerp(p0.ff, p1.ff, n / segment_size)); 
 					const auto f0 = p0.ff;
 					const auto f1 = p1.ff; 
 					return spooky_maths(f0, f1, segment_size, double(n), double(segment_start_));
