@@ -14,7 +14,7 @@
 
 - name: tweak
   git: https://github.com/colugomusic/tweak.git
-  tag: 54737779918754cd62727feef2a45b9c40de95a3
+  tag: 121f05decc20179a53bd4923f7e2e01631e168ce
   track: true
 
 - name: cs_libguarded

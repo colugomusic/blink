@@ -37,7 +37,7 @@ auto linear_to_delay_time_ms(T linear) -> T {
 
 template <class T> constexpr
 auto delay_time_ms_to_linear(T ms) -> T {
-	return tweak::const_math::sqrt(tweak::const_math::sqrt(ms / T(2000)));
+	return std::sqrt(std::sqrt(ms / T(2000)));
 }
 
 template <class T>
