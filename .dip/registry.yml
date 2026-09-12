@@ -1,0 +1,25 @@
+-
+  name: ent
+  git: https://github.com/colugomusic/ent.git
+  track: main
+  commit: b1972727407054b02ab9dcdaf8286e6fee62face
+-
+  name: madronalib
+  git: https://github.com/colugomusic/madronalib.git
+  track: main
+  commit: a2197647412c0d779908a3da4f3762b36e86a801
+-
+  name: snd
+  git: https://github.com/colugomusic/snd.git
+  track: master
+  commit: adbae2d3f11a0ffd8a9d3b564494c5da59024cb1
+-
+  name: tweak
+  git: https://github.com/colugomusic/tweak.git
+  track: master
+  commit: 1de0584cbbd24d3d5bf1577392a786dbf68be130
+-
+  name: CsLibGuarded
+  git: https://github.com/colugomusic/cs_libguarded.git
+  track: master
+  commit: ca6e266caf2fdb62178a49a28801595a83817e04

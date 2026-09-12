@@ -1,0 +1,8 @@
+name: blink
+cmake-options: |
+  -DBUILD_SHARED_LIBS=OFF
+  -DCMAKE_DEBUG_POSTFIX=d
+  -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+cmake-configs:
+  - Debug
+  - RelWithDebInfo
