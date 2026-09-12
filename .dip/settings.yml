@@ -1,4 +1,8 @@
 name: blink
+package-names:
+  - blink-common
+  - blink-host
+  - blink-plugin
 cmake-options: |
   -DBUILD_SHARED_LIBS=OFF
   -DCMAKE_DEBUG_POSTFIX=d
