@@ -142,6 +142,7 @@ struct PluginInterface {
 	using unit_add_fn             = std::function<blink_UnitIdx(blink_InstanceIdx instance_idx)>;
 	using unit_reset_fn           = std::function<blink_Error(blink_UnitIdx unit_idx)>;
 	using unit_stream_init_fn     = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
+	frequency_response_fn   frequency_response;
 	get_error_string_fn     get_error_string;
 	get_plugin_info_fn      get_plugin_info;
 	get_resource_data_fn    get_resource_data;
