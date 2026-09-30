@@ -129,18 +129,19 @@ struct UnitProcess {
 };
 
 struct PluginInterface {
-	using get_error_string_fn = std::function<blink_TempString(blink_Error error)>;
-	using get_plugin_info_fn = std::function<blink_PluginInfo()>;
-	using get_resource_data_fn = std::function<blink_ResourceData(const char* path)>;
-	using init_fn = std::function<blink_Error(blink_PluginIdx plugin_idx, blink_HostFns host)>;
-	using instance_destroy_fn = std::function<blink_Error(blink_InstanceIdx instance_idx)>;
-	using instance_make_fn = std::function<blink_InstanceIdx()>;
-	using instance_reset_fn = std::function<blink_Error(blink_InstanceIdx instance_idx)>;
+	using frequency_response_fn   = std::function<blink_Error(const blink_UniformData* uniform, blink_FrameCount n, float* in_frequency, float* out_magnitude)>;
+	using get_error_string_fn     = std::function<blink_TempString(blink_Error error)>;
+	using get_plugin_info_fn      = std::function<blink_PluginInfo()>;
+	using get_resource_data_fn    = std::function<blink_ResourceData(const char* path)>;
+	using init_fn                 = std::function<blink_Error(blink_PluginIdx plugin_idx, blink_HostFns host)>;
+	using instance_destroy_fn     = std::function<blink_Error(blink_InstanceIdx instance_idx)>;
+	using instance_make_fn        = std::function<blink_InstanceIdx()>;
+	using instance_reset_fn       = std::function<blink_Error(blink_InstanceIdx instance_idx)>;
 	using instance_stream_init_fn = std::function<blink_Error(blink_InstanceIdx instance_idx, blink_SR SR)>;
-	using terminate_fn = std::function<blink_Error()>;
-	using unit_add_fn = std::function<blink_UnitIdx(blink_InstanceIdx instance_idx)>;
-	using unit_reset_fn = std::function<blink_Error(blink_UnitIdx unit_idx)>;
-	using unit_stream_init_fn = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
+	using terminate_fn            = std::function<blink_Error()>;
+	using unit_add_fn             = std::function<blink_UnitIdx(blink_InstanceIdx instance_idx)>;
+	using unit_reset_fn           = std::function<blink_Error(blink_UnitIdx unit_idx)>;
+	using unit_stream_init_fn     = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
 	get_error_string_fn     get_error_string;
 	get_plugin_info_fn      get_plugin_info;
 	get_resource_data_fn    get_resource_data;
@@ -154,18 +155,18 @@ struct PluginInterface {
 	unit_reset_fn           unit_reset;
 	unit_stream_init_fn     unit_stream_init;
 	struct Effect {
-		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, const float* in, float* out)>;
+		using process_fn  = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, const float* in, float* out)>;
 		using get_info_fn = std::function<blink_EffectInstanceInfo(blink_InstanceIdx instance_idx)>;
 		get_info_fn get_info;
 		process_fn process;
 	} effect;
 	struct Sampler {
-		using process_fn = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, float* out)>;
-		using analyze_sample_fn = std::function<blink_AnalysisResult(void* host, blink_AnalysisCallbacks callbacks, const blink_SampleInfo* sample_info)>;
-		using sample_deleted_fn = std::function<blink_Error(blink_ID sample_id)>;
-		using draw_fn = std::function<blink_Error(const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
+		using process_fn                              = std::function<blink_Error(blink_UnitIdx unit_idx, const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, float* out)>;
+		using analyze_sample_fn                       = std::function<blink_AnalysisResult(void* host, blink_AnalysisCallbacks callbacks, const blink_SampleInfo* sample_info)>;
+		using sample_deleted_fn                       = std::function<blink_Error(blink_ID sample_id)>;
+		using draw_fn                                 = std::function<blink_Error(const blink_SamplerVaryingData* varying, const blink_SamplerUniformData* uniform, blink_FrameCount n, blink_SamplerDrawInfo* out)>;
 		using get_sonic_fragment_at_block_position_fn = std::function<double(blink_Position block_position)>;
-		using block_position_for_sonic_fragment_fn = std::function<blink_Position(double fragment)>;
+		using block_position_for_sonic_fragment_fn    = std::function<blink_Position(double fragment)>;
 		block_position_for_sonic_fragment_fn    block_position_for_sonic_fragment;
 		draw_fn                                 draw;
 		get_sonic_fragment_at_block_position_fn get_sonic_fragment_at_block_position;

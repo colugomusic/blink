@@ -7,7 +7,6 @@
 #include "data.hpp"
 #include "resource_store.hpp"
 #include "types.hpp"
-#include "quiet-include.hpp"
 
 namespace blink {
 
@@ -110,7 +109,15 @@ auto slider_real(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_Slider
 } // read
 
 namespace add {
-namespace param {
+
+inline
+auto frequency_response(const Plugin& plugin, const blink_FrequencyResponseInfo& info) -> blink_FrequencyResponseIdx {
+	return plugin.host.add_frequency_response(plugin.host.usr, plugin.index, &info);
+}
+
+} // add
+
+namespace add::param {
 
 inline
 auto chord(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
@@ -137,11 +144,9 @@ auto slider_real(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
 	return plugin.host.add_param_slider_real(plugin.host.usr, plugin.index, uuid);
 }
 
-} // param
-} // add
+} // add::param
 
-namespace write {
-namespace env {
+namespace write::env {
 
 inline
 auto add_flags(const Plugin& plugin, blink_EnvIdx env_idx, int flags) -> void {
@@ -183,9 +188,9 @@ auto value_slider(const Plugin& plugin, blink_EnvIdx env_idx, blink_SliderRealId
 	plugin.host.write_env_value_slider(plugin.host.usr, env_idx, sld_idx);
 }
 
-} // env
+} // write::env
 
-namespace slider {
+namespace write::slider {
 
 inline
 auto default_value(const Plugin& plugin, blink_SliderIntIdx sld_idx, int64_t value) -> void {
@@ -207,9 +212,9 @@ auto tweaker(const Plugin& plugin, blink_SliderRealIdx sld_idx, blink_TweakerRea
 	plugin.host.write_slider_real_tweaker(plugin.host.usr, sld_idx, value);
 }
 
-} // slider
+} // write::slider
 
-namespace param {
+namespace write::param {
 
 inline
 auto add_flags(const Plugin& plugin, blink_ParamIdx param_idx, int flags) -> void {
@@ -293,8 +298,7 @@ auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> vo
 	plugin.host.write_param_uuid(plugin.host.usr, plugin.index, param_idx, uuid);
 }
 
-} // param
-} // write
+} // write::param
 
 [[nodiscard]] inline
 auto make_int_value(const blink_IntPoints& points, int64_t default_value) -> int64_t {

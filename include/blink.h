@@ -19,6 +19,7 @@ typedef struct {      int8_t value; } blink_Bool;
 typedef struct {      size_t value; } blink_EnvIdx;
 typedef struct {      size_t value; } blink_InstanceIdx;
 typedef struct {      size_t value; } blink_ParamIdx;
+typedef struct {      size_t value; } blink_FrequencyResponseIdx;
 typedef struct {      size_t value; } blink_PluginIdx;
 typedef struct {      size_t value; } blink_SliderIntIdx;
 typedef struct {      size_t value; } blink_SliderRealIdx;
@@ -297,7 +298,23 @@ typedef struct {
 	blink_Bool baked_waveform_could_be_different;
 } blink_SamplerInfo;
 
+typedef struct {
+	// How many bands are there?
+	size_t band_count;
+	// Array of {band_count} option parameters to use for enabling/disabling bands.
+	const blink_ParamIdx* enabled;
+	// Array of {band_count} slider-real parameters to use for frequency.
+	const blink_ParamIdx* frequency;
+	// Array of {band_count} slider-real parameters to use for magnitude.
+	const blink_ParamIdx* magnitude;
+	// How many extra per-band parameters are there? This could be things like bandwidth (Q) or curve type (bell/shelf etc.)
+	size_t extra_count;
+	// Array of {extra_count} arrays of {band_count} parameters for the extra controls.
+	const blink_ParamIdx** extra;
+} blink_FrequencyResponseInfo;
+
 typedef blink_EnvIdx        (*blink_host_add_env)(void*);
+typedef void                (*blink_host_add_frequency_response)(void*, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info);
 typedef blink_ParamIdx      (*blink_host_add_param_chord)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_env)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
 typedef blink_ParamIdx      (*blink_host_add_param_option)(void*, blink_PluginIdx plugin_idx, blink_UUID uuid);
@@ -349,6 +366,7 @@ typedef void                (*blink_host_write_slider_real_tweaker)(void*, blink
 typedef struct {
 	void* usr;
 	blink_host_add_env                              add_env;
+	blink_host_add_frequency_response               add_frequency_response;
 	blink_host_add_param_chord                      add_param_chord;
 	blink_host_add_param_env                        add_param_env;
 	blink_host_add_param_option                     add_param_option;
@@ -527,6 +545,7 @@ typedef struct {
 
 extern "C"
 {
+	EXPORTED blink_Error              blink_frequency_response(const blink_UniformData* uniform, blink_FrameCount n, float* in_frequency, float* out_magnitude);
 	EXPORTED blink_TempString         blink_get_error_string(blink_Error error);
 	EXPORTED blink_PluginInfo         blink_get_plugin_info();
 	EXPORTED blink_ResourceData       blink_get_resource_data(const char* path); // Optional

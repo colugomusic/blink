@@ -7,6 +7,7 @@
   name: madronalib
   git: https://github.com/colugomusic/madronalib-legacy.git
   track: master
+  commit: b1b21d77ed803effdd0c9f8b8dd4c7445c2292cd
 -
   name: snd
   git: https://github.com/colugomusic/snd.git
