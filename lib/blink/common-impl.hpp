@@ -1,0 +1,74 @@
+#pragma once
+
+#include "blink.h"
+#include "tweak.hpp"
+
+namespace blink::add::slider {
+
+[[nodiscard]] auto empty_int(const blink_HostFns& host) -> blink_SliderIntIdx;
+[[nodiscard]] auto empty_real(const blink_HostFns& host) -> blink_SliderRealIdx;
+[[nodiscard]] auto filter_frequency(const blink_HostFns& host, float default_value) -> blink_SliderRealIdx;
+[[nodiscard]] auto percentage_bipolar(const blink_HostFns& host) -> blink_SliderRealIdx;
+
+template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
+auto linear(const blink_HostFns& host, float default_value) -> blink_SliderRealIdx {
+	const auto idx = add::slider::empty_real(host);
+	host.write_slider_real_default_value(host.usr, idx, default_value);
+	host.write_slider_real_tweaker(host.usr, idx, tweak::linear::tweaker<Min, Max, Resolution, EditPrecision>());
+	return idx;
+}
+
+template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
+auto ms(const blink_HostFns& host, float default_value) -> blink_SliderRealIdx {
+	const auto idx = add::slider::empty_real(host);
+	host.write_slider_real_default_value(host.usr, idx, default_value);
+	host.write_slider_real_tweaker(host.usr, idx, tweak::ms::tweaker<Min, Max, Resolution, EditPrecision>());
+	return idx;
+}
+
+template <int MIN = 0, int MAX = 100> [[nodiscard]]
+auto percentage(const blink_HostFns& host) -> blink_SliderRealIdx {
+	const auto idx = add::slider::empty_real(host);
+	host.write_slider_real_default_value(host.usr, idx, 0.0f);
+	host.write_slider_real_tweaker(host.usr, idx, tweak::percentage::tweaker<MIN, MAX>());
+	return idx;
+}
+
+} // namespace blink::add::slider
+
+namespace blink::add::env {
+
+[[nodiscard]] auto empty(const blink_HostFns& host) -> blink_EnvIdx;
+[[nodiscard]] auto percentage_bipolar(const blink_HostFns& host) -> blink_EnvIdx;
+
+template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
+auto linear(const blink_HostFns& host, float default_value) -> blink_EnvIdx {
+	const auto idx = add::env::empty(host);
+	host.write_env_default_max(host.usr, idx, float(Max) / Resolution);
+	host.write_env_default_min(host.usr, idx, float(Min) / Resolution);
+	host.write_env_default_value(host.usr, idx, default_value);
+	host.write_env_fns(host.usr, idx, tweak::linear::fns<Resolution>());
+	host.write_env_value_slider(host.usr, idx, add::slider::linear<Min, Max, Resolution, EditPrecision>(host, default_value));
+	return idx;
+}
+
+template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
+auto ms(const blink_HostFns& host, float default_value) -> blink_EnvIdx {
+	const auto idx = linear<Min, Max, Resolution, EditPrecision>(host, default_value);
+	host.write_env_fns(host.usr, idx, tweak::ms::fns<Resolution>());
+	host.write_env_value_slider(host.usr, idx, add::slider::ms<Min, Max, Resolution, EditPrecision>(host, default_value));
+	return idx;
+}
+
+template <int MIN = 0, int MAX = 100> [[nodiscard]]
+auto percentage(const blink_HostFns& host) -> blink_EnvIdx {
+	const auto idx = add::env::empty(host);
+	host.write_env_default_max(host.usr, idx, 1.0f);
+	host.write_env_default_min(host.usr, idx, 0.0f);
+	host.write_env_default_value(host.usr, idx, 0.0f);
+	host.write_env_fns(host.usr, idx, blink::tweak::percentage::fns());
+	host.write_env_value_slider(host.usr, idx, add::slider::percentage<MIN, MAX>(host));
+	return idx;
+}
+
+} // blink::add::env

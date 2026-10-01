@@ -3,7 +3,7 @@
 #include <ent.hpp>
 #include "blink.h"
 #include "block_positions.hpp"
-#include "common_impl.hpp"
+#include "common-impl.hpp"
 #include "data.hpp"
 #include "resource_store.hpp"
 #include "types.hpp"
