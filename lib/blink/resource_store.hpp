@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <blink.h>
-#include <cmrc/cmrc.hpp>
 
 namespace blink {
 
