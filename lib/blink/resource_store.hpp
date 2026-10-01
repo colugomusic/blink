@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <cmrc/cmrc.hpp>
 #include <blink.h>
 
 namespace blink {

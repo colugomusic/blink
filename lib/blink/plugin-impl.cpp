@@ -1,89 +1,17 @@
-#pragma once
-
-#include <ent.hpp>
-#include "blink.h"
-#include "block_positions.hpp"
-#include "common_impl.hpp"
-#include "data.hpp"
-#include "resource_store.hpp"
-#include "types.hpp"
+#include "plugin-impl.hpp"
 
 namespace blink {
 
-// I have no idea how this should be tuned.
-static constexpr auto BLOCK_SIZE = 100;
-
-template <typename... Ts>
-using Instance = ent::table<
-	"blink:plugin:instance",
-	BLOCK_SIZE,
-	UnitVec,
-	Ts...
->;
-
-template <typename... Ts>
-using Unit = ent::table<
-	"blink:plugin:unit",
-	BLOCK_SIZE,
-	blink_InstanceIdx,
-	Ts...
->;
-
-struct Plugin {
-	blink_PluginIdx index;
-	blink_HostFns host;
-	ResourceStore resource_store;
-};
-
-template <typename Instance, typename Unit>
-struct Entities {
-	Instance instance;
-	Unit unit;
-};
-
-inline
 auto init(Plugin* plugin, blink_PluginIdx plugin_index, blink_HostFns host_fns) -> void {
 	plugin->index = plugin_index;
 	plugin->host = host_fns;
 }
 
-inline
 auto init(Plugin* plugin, blink_PluginIdx plugin_index, blink_HostFns host_fns, blink_SamplerInfo sampler_info) -> void {
 	init(plugin, plugin_index, host_fns);
 	host_fns.write_sampler_info(host_fns.usr, plugin_index, sampler_info);
 }
 
-template <typename Instance, typename Unit> [[nodiscard]]
-auto terminate(Entities<Instance, Unit>* ents) -> blink_Error {
-	ents->instance.clear(ent::lock);
-	ents->unit.clear(ent::lock);
-	return BLINK_OK;
-}
-
-template <typename Instance, typename Unit> [[nodiscard]]
-auto add_unit(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_UnitIdx {
-	const auto index = blink_UnitIdx{ents->unit.acquire(ent::lock)};
-	ents->unit.template get<blink_InstanceIdx>(index.value) = instance_idx;
-	auto& units = ents->instance.template get<UnitVec>(instance_idx.value);
-	units.value.push_back(index);
-	return index;
-}
-
-template <typename Instance, typename Unit> [[nodiscard]]
-auto make_instance(Entities<Instance, Unit>* ents) -> blink_InstanceIdx {
-	return {ents->instance.acquire(ent::lock)};
-}
-
-template <typename Instance, typename Unit> [[nodiscard]]
-auto destroy_instance(Entities<Instance, Unit>* ents, blink_InstanceIdx instance_idx) -> blink_Error {
-	for (auto unit_idx : ents->instance.template get<UnitVec>(instance_idx.value).value) {
-		ents->unit.release(ent::lock, unit_idx.value);
-	}
-	ents->instance.release(ent::lock, instance_idx.value);
-	return BLINK_OK;
-}
-
-[[nodiscard]] inline
 auto get_std_error_string(blink_StdError error) -> const char* {
 	switch (error) {
 		case blink_StdError_AlreadyInitialized: return "already initialized";
@@ -94,7 +22,9 @@ auto get_std_error_string(blink_StdError error) -> const char* {
 	}
 }
 
-namespace read {
+} // blink
+
+namespace blink::read {
 
 inline
 auto env(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_EnvIdx {
@@ -106,18 +36,18 @@ auto slider_real(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_Slider
 	return plugin.host.read_param_slider_real_slider(plugin.host.usr, plugin.index, param_idx);
 }
 
-} // read
+} // blink::read
 
-namespace add {
+namespace blink::add {
 
 inline
 auto frequency_response(const Plugin& plugin, const blink_FrequencyResponseInfo& info) -> blink_FrequencyResponseIdx {
 	return plugin.host.add_frequency_response(plugin.host.usr, plugin.index, &info);
 }
 
-} // add
+} // blink::add
 
-namespace add::param {
+namespace blink::add::param {
 
 inline
 auto chord(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
@@ -144,9 +74,9 @@ auto slider_real(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx {
 	return plugin.host.add_param_slider_real(plugin.host.usr, plugin.index, uuid);
 }
 
-} // add::param
+} // blink::add::param
 
-namespace write::env {
+namespace blink::write::env {
 
 inline
 auto add_flags(const Plugin& plugin, blink_EnvIdx env_idx, int flags) -> void {
@@ -188,9 +118,9 @@ auto value_slider(const Plugin& plugin, blink_EnvIdx env_idx, blink_SliderRealId
 	plugin.host.write_env_value_slider(plugin.host.usr, env_idx, sld_idx);
 }
 
-} // write::env
+} // blink::write::env
 
-namespace write::slider {
+namespace blink::write::slider {
 
 inline
 auto default_value(const Plugin& plugin, blink_SliderIntIdx sld_idx, int64_t value) -> void {
@@ -212,9 +142,9 @@ auto tweaker(const Plugin& plugin, blink_SliderRealIdx sld_idx, blink_TweakerRea
 	plugin.host.write_slider_real_tweaker(plugin.host.usr, sld_idx, value);
 }
 
-} // write::slider
+} // blink::write::slider
 
-namespace write::param {
+namespace blink::write::param {
 
 inline
 auto add_flags(const Plugin& plugin, blink_ParamIdx param_idx, int flags) -> void {
@@ -298,7 +228,9 @@ auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> vo
 	plugin.host.write_param_uuid(plugin.host.usr, plugin.index, param_idx, uuid);
 }
 
-} // write::param
+} // blink::write::param
+
+namespace blink {
 
 [[nodiscard]] inline
 auto make_int_value(const blink_IntPoints& points, int64_t default_value) -> int64_t {
@@ -384,17 +316,6 @@ auto make_slider_real_data(const Plugin& plugin, const blink_UniformParamData* p
 		out.value = out.default_value;
 	}
 	return out;
-}
-
-template <class FileSystem> [[nodiscard]] inline
-auto get_resource_data(Plugin* plugin, const FileSystem& fs, const char* path) -> blink_ResourceData {
-	if (plugin->resource_store.has(path)) {
-		return plugin->resource_store.get(path);
-	}
-	if (!fs.exists(path)) return  { 0, 0 };
-	if (!fs.is_file(path)) return { 0, 0 };
-	const auto file = fs.open(path);
-	return plugin->resource_store.store(path, file);
 }
 
 } // blink

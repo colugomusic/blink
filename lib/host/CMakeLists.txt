@@ -1,20 +1,23 @@
 cmake_minimum_required(VERSION 3.30)
 project(blink-host)
 find_package(CsLibGuarded REQUIRED CONFIG)
-add_library(blink-host INTERFACE)
+add_library(blink-host)
 add_library(blink::host ALIAS blink-host)
-target_sources(blink-host INTERFACE
+target_sources(blink-host PUBLIC
 	FILE_SET HEADERS
 	BASE_DIRS
 		..
 		../../include
 	FILES
-		../blink/host_impl.hpp
+		../blink/host-impl.hpp
 )
-target_compile_definitions(blink-host INTERFACE
+target_sources(blink-host PRIVATE
+	../blink/host-impl.cpp
+)
+target_compile_definitions(blink-host PUBLIC
 	_USE_MATH_DEFINES
 )
-target_link_libraries(blink-host INTERFACE
+target_link_libraries(blink-host PUBLIC
 	blink::common
 	CsLibGuarded::CsLibGuarded
 )

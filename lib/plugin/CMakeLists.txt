@@ -1,20 +1,23 @@
 cmake_minimum_required(VERSION 3.30)
 project(blink-plugin)
 
-add_library(blink-plugin INTERFACE)
+add_library(blink-plugin)
 add_library(blink::plugin ALIAS blink-plugin)
-target_sources(blink-plugin INTERFACE
+target_sources(blink-plugin PUBLIC
 	FILE_SET HEADERS
 	BASE_DIRS
 		${CMAKE_CURRENT_LIST_DIR}/..
 		${CMAKE_CURRENT_LIST_DIR}/../../include
 	FILES
-		${CMAKE_CURRENT_LIST_DIR}/../blink/plugin_impl.hpp
+		${CMAKE_CURRENT_LIST_DIR}/../blink/plugin-impl.hpp
 )
-target_compile_definitions(blink-plugin INTERFACE
+target_sources(blink-plugin PRIVATE
+	${CMAKE_CURRENT_LIST_DIR}/../blink/plugin-impl.cpp
+)
+target_compile_definitions(blink-plugin PUBLIC
 	_USE_MATH_DEFINES
 )
-target_link_libraries(blink-plugin INTERFACE blink::common)
+target_link_libraries(blink-plugin PUBLIC blink::common)
 set_target_properties(blink-plugin PROPERTIES EXPORT_NAME plugin)
 if (BUILD_TESTING)
 	add_subdirectory(test)

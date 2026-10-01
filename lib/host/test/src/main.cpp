@@ -1,6 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#include <blink/host_impl.hpp>
+#include <blink/host-impl.hpp>
 
 TEST_CASE("no test") {
 	auto host = blink::Host{};
