@@ -121,12 +121,14 @@ using SliderRealTable = ent::simple_table<
 
 using FrequencyResponseTable = ent::simple_table<
 	"blink:host:frequency-response-table",
-	FRBandCount,
-	FRExtraCount,
-	FREnabledParams,
-	FRFrequencyParams,
-	FRMagnitudeParams,
-	FRExtraParams
+	FrBandCount,
+	FrExtraCount,
+	FrEnabledParams,
+	FrMbHzParams,
+	FrMbVtParams,
+	FrMbHzCtrlParams,
+	FrMbVtCtrlParams,
+	FrExtraParams
 >;
 
 struct SampleInfo {

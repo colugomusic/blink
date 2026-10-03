@@ -14,25 +14,37 @@ auto local_to_global(const Host& host, blink_PluginIdx plugin, std::span<const b
 }
 
 [[nodiscard]]
-auto make_fr_enabled_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FREnabledParams {
+auto make_fr_enabled_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrEnabledParams {
 	auto span = std::span<const blink_ParamIdx>{info.enabled, info.band_count};
 	return {local_to_global(host, plugin, span)};
 }
 
 [[nodiscard]]
-auto make_fr_frequency_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FRFrequencyParams {
-	auto span = std::span<const blink_ParamIdx>{info.frequency, info.band_count};
+auto make_fr_mb_hz_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbHzParams {
+	auto span = std::span<const blink_ParamIdx>{info.mb_left_horizontal, info.band_count};
 	return {local_to_global(host, plugin, span)};
 }
 
 [[nodiscard]]
-auto make_fr_magnitude_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FRMagnitudeParams {
-	auto span = std::span<const blink_ParamIdx>{info.magnitude, info.band_count};
+auto make_fr_mb_vt_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbVtParams {
+	auto span = std::span<const blink_ParamIdx>{info.mb_left_vertical, info.band_count};
 	return {local_to_global(host, plugin, span)};
 }
 
 [[nodiscard]]
-auto make_fr_extra_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FRExtraParams {
+auto make_fr_mb_hz_ctrl_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbHzCtrlParams {
+	auto span = std::span<const blink_ParamIdx>{info.mb_left_horizontal_ctrl, info.band_count};
+	return {local_to_global(host, plugin, span)};
+}
+
+[[nodiscard]]
+auto make_fr_mb_vt_ctrl_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbVtCtrlParams {
+	auto span = std::span<const blink_ParamIdx>{info.mb_left_vertical_ctrl, info.band_count};
+	return {local_to_global(host, plugin, span)};
+}
+
+[[nodiscard]]
+auto make_fr_extra_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrExtraParams {
 	auto list = std::vector<std::vector<ParamGlobalIdx>>{};
 	auto span = std::span<const blink_ParamIdx*>{info.extra, info.extra_count};
 	auto fn_xform = [&host, plugin, band_count = info.band_count](const blink_ParamIdx* params) {
@@ -499,11 +511,13 @@ auto frequency_response(Host* host, blink_PluginIdx plugin_idx, const blink_Freq
 	auto& fr_list         = host->plugin.get<PluginFRs>(plugin_idx.value).global_indices;
 	const auto local_idx  = fr_list.size();
 	const auto global_idx = host->frequency_response.push_back();
-	host->frequency_response.set(global_idx, FRBandCount{info->band_count});
-	host->frequency_response.set(global_idx, FRExtraCount{info->extra_count});
+	host->frequency_response.set(global_idx, FrBandCount{info->band_count});
+	host->frequency_response.set(global_idx, FrExtraCount{info->extra_count});
 	host->frequency_response.set(global_idx, make_fr_enabled_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_frequency_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_magnitude_param_list(*host, plugin_idx, *info));
+	host->frequency_response.set(global_idx, make_fr_mb_hz_param_list(*host, plugin_idx, *info));
+	host->frequency_response.set(global_idx, make_fr_mb_vt_param_list(*host, plugin_idx, *info));
+	host->frequency_response.set(global_idx, make_fr_mb_hz_ctrl_param_list(*host, plugin_idx, *info));
+	host->frequency_response.set(global_idx, make_fr_mb_vt_ctrl_param_list(*host, plugin_idx, *info));
 	host->frequency_response.set(global_idx, make_fr_extra_param_list(*host, plugin_idx, *info));
 	fr_list.push_back({global_idx});
 	return {local_idx};
