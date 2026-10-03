@@ -121,6 +121,7 @@ using SliderRealTable = ent::simple_table<
 
 using FrequencyResponseTable = ent::simple_table<
 	"blink:host:frequency-response-table",
+	blink_PluginIdx,
 	FrBandCount,
 	FrExtraCount,
 	FrEnabledParams,

@@ -511,6 +511,7 @@ auto frequency_response(Host* host, blink_PluginIdx plugin_idx, const blink_Freq
 	auto& fr_list         = host->plugin.get<PluginFRs>(plugin_idx.value).global_indices;
 	const auto local_idx  = fr_list.size();
 	const auto global_idx = host->frequency_response.push_back();
+	host->frequency_response.set(global_idx, plugin_idx);
 	host->frequency_response.set(global_idx, FrBandCount{info->band_count});
 	host->frequency_response.set(global_idx, FrExtraCount{info->extra_count});
 	host->frequency_response.set(global_idx, make_fr_enabled_param_list(*host, plugin_idx, *info));
