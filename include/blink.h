@@ -303,14 +303,22 @@ typedef struct {
 	size_t band_count;
 	// Array of {band_count} option parameters to use for enabling/disabling bands.
 	const blink_ParamIdx* enabled;
-	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally.
-	const blink_ParamIdx* mb_left_horizontal;
-	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically.
-	const blink_ParamIdx* mb_left_vertical;
+	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally (this is assumed to be the band frequency.)
+	const blink_ParamIdx* frequency;
+	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically (this is assumed to be the band magnitude.)
+	const blink_ParamIdx* magnitude;
+	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally.
+	const blink_ParamIdx* mb_right_horizontal;
+	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically.
+	const blink_ParamIdx* mb_right_vertical;
 	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally while Ctrl/Command is held down.
 	const blink_ParamIdx* mb_left_horizontal_ctrl;
 	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically while Ctrl/Command is held down.
 	const blink_ParamIdx* mb_left_vertical_ctrl;
+	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally while Ctrl/Command is held down.
+	const blink_ParamIdx* mb_right_horizontal_ctrl;
+	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically while Ctrl/Command is held down.
+	const blink_ParamIdx* mb_right_vertical_ctrl;
 	// How many extra per-band parameters are there? Blockhead will generate extra controls to be shown when the band is selected.
 	size_t extra_count;
 	// Array of {extra_count} arrays of {band_count} parameters for the extra controls.
