@@ -39,12 +39,12 @@ auto make_fr_magnitude_param_list(const Host& host, blink_PluginIdx plugin, cons
 }
 
 [[nodiscard]]
-auto make_fr_mb_right_hz_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRHzCtrlParams {
+auto make_fr_mb_right_hz_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRHzParams {
 	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_right_horizontal)};
 }
 
 [[nodiscard]]
-auto make_fr_mb_right_vt_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbLVtCtrlParams {
+auto make_fr_mb_right_vt_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRVtParams {
 	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_right_vertical)};
 }
 
