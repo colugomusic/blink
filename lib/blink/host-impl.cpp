@@ -16,8 +16,11 @@ auto local_to_global(const Host& host, blink_PluginIdx plugin, std::span<const b
 
 [[nodiscard]]
 auto make_fr_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info, auto field) -> std::vector<ParamGlobalIdx> {
-	auto span = std::span<const blink_ParamIdx>{info.*field, info.band_count};
-	return local_to_global(host, plugin, span);
+	if (const auto array = info.*field) {
+		auto span = std::span<const blink_ParamIdx>{array, info.band_count};
+		return local_to_global(host, plugin, span);
+	}
+	return {};
 }
 
 [[nodiscard]]
