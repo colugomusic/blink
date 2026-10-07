@@ -125,10 +125,14 @@ using FrequencyResponseTable = ent::simple_table<
 	FrBandCount,
 	FrExtraCount,
 	FrEnabledParams,
-	FrMbHzParams,
-	FrMbVtParams,
-	FrMbHzCtrlParams,
-	FrMbVtCtrlParams,
+	FrFrequencyParams,
+	FrMagnitudeParams,
+	FrMbRHzParams,
+	FrMbRVtParams,
+	FrMbLHzCtrlParams,
+	FrMbLVtCtrlParams,
+	FrMbRHzCtrlParams,
+	FrMbRVtCtrlParams,
 	FrExtraParams
 >;
 

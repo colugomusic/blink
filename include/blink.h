@@ -303,9 +303,9 @@ typedef struct {
 	size_t band_count;
 	// Array of {band_count} option parameters to use for enabling/disabling bands.
 	const blink_ParamIdx* enabled;
-	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally (this is assumed to be the band frequency.)
+	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally (this is assumed to be the band frequency stored as a linear value from 0 to 1.)
 	const blink_ParamIdx* frequency;
-	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically (this is assumed to be the band magnitude.)
+	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically (this is assumed to be the band magnitude stored as a linear value from -1 to +1.)
 	const blink_ParamIdx* magnitude;
 	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally.
 	const blink_ParamIdx* mb_right_horizontal;
