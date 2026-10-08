@@ -1459,6 +1459,11 @@ auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData&
 	return unit_process(host, unit_idx, varying, std::move(process_fn));
 }
 
+auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformData& uniform, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error {
+	const auto& plugin = read::iface(host, plugin_idx);
+	return plugin.frequency_response(&uniform, fr_idx, n, in_x_01, out_y_01);
+}
+
 auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error {
 	const auto& plugin = read::iface(host, plugin_idx);
 	return plugin.sampler.draw(&varying, &uniform, n, out);

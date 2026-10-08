@@ -557,7 +557,7 @@ typedef struct {
 
 extern "C"
 {
-	EXPORTED blink_Error              blink_frequency_response(const blink_UniformData* uniform, blink_FrameCount n, float* in_frequency, float* out_magnitude);
+	EXPORTED blink_Error              blink_frequency_response(const blink_UniformData* uniform, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01);
 	EXPORTED blink_TempString         blink_get_error_string(blink_Error error);
 	EXPORTED blink_PluginInfo         blink_get_plugin_info();
 	EXPORTED blink_ResourceData       blink_get_resource_data(const char* path); // Optional

@@ -144,7 +144,7 @@ struct UnitProcess {
 };
 
 struct PluginInterface {
-	using frequency_response_fn   = std::function<blink_Error(const blink_UniformData* uniform, blink_FrameCount n, float* in_frequency, float* out_magnitude)>;
+	using frequency_response_fn   = std::function<blink_Error(const blink_UniformData* uniform, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01)>;
 	using get_error_string_fn     = std::function<blink_TempString(blink_Error error)>;
 	using get_plugin_info_fn      = std::function<blink_PluginInfo()>;
 	using get_resource_data_fn    = std::function<blink_ResourceData(const char* path)>;

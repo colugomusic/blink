@@ -403,6 +403,7 @@ namespace blink {
 
 auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_InstanceIdx instance_idx, blink_VectorID vector_id) -> void;
 auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData& varying, const blink_UniformData& uniform, const float* in, float* out) -> blink_Error;
+auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformData& uniform, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error;
 auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error;
 auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, float* out) -> blink_Error;
 auto synth_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData& varying, const blink_UniformData& uniform, float* out) -> blink_Error;
