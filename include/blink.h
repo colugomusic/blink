@@ -195,6 +195,7 @@ typedef enum {
 	blink_ParamFlags_ShowButton                 = 1 << 11,
 	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
 	blink_ParamFlags_Varying                    = 1 << 13,
+	blink_ParamFlags_UpdateVisibility           = 1 << 14, // The host should call blink_param_visibility when this parameter is created and whenever its value changes.
 } blink_ParamFlags;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -307,22 +308,34 @@ typedef struct {
 	const blink_ParamIdx* frequency;
 	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically (this is assumed to be the band magnitude stored as a linear value from -1 to +1.)
 	const blink_ParamIdx* magnitude;
-	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally.
-	const blink_ParamIdx* mb_right_horizontal;
-	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically.
-	const blink_ParamIdx* mb_right_vertical;
-	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally while Ctrl/Command is held down.
-	const blink_ParamIdx* mb_left_horizontal_ctrl;
-	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically while Ctrl/Command is held down.
-	const blink_ParamIdx* mb_left_vertical_ctrl;
-	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally while Ctrl/Command is held down.
-	const blink_ParamIdx* mb_right_horizontal_ctrl;
-	// Array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically while Ctrl/Command is held down.
-	const blink_ParamIdx* mb_right_vertical_ctrl;
 	// How many extra per-band parameters are there? Blockhead will generate extra controls to be shown when the band is selected.
 	size_t extra_count;
 	// Array of {extra_count} arrays of {band_count} parameters for the extra controls.
 	const blink_ParamIdx** extra;
+	// Which one of the extra per-band parameters should be adjusted when the user right-clicks and drags a point horizontally?
+	// This is an index into the {extra} array, not a parameter index.
+	// -1 to disable this behavior.
+	int64_t mb_right_horizontal;
+	// Which one of the extra per-band parameters should be adjusted when the user right-clicks and drags a point vertically?
+	// This is an index into the {extra} array, not a parameter index.
+	// -1 to disable this behavior.
+	int64_t mb_right_vertical;
+	// Which one of the extra per-band parameters should be adjusted when the user left-clicks and drags a point horizontally while the Ctrl key is held down (or the Command key on macOS)?
+	// This is an index into the {extra} array, not a parameter index.
+	// -1 to disable this behavior.
+	int64_t mb_left_horizontal_ctrl;
+	// Which one of the extra per-band parameters should be adjusted when the user left-clicks and drags a point vertically while the Ctrl key is held down (or the Command key on macOS)?
+	// This is an index into the {extra} array, not a parameter index.
+	// -1 to disable this behavior.
+	int64_t mb_left_vertical_ctrl;
+	// Which one of the extra per-band parameters should be adjusted when the user right-clicks and drags a point horizontally while the Ctrl key is held down (or the Command key on macOS)?
+	// This is an index into the {extra} array, not a parameter index.
+	// -1 to disable this behavior.
+	int64_t mb_right_horizontal_ctrl;
+	// Which one of the extra per-band parameters should be adjusted when the user right-clicks and drags a point vertically while the Ctrl key is held down (or the Command key on macOS)?
+	// This is an index into the {extra} array, not a parameter index.
+	// -1 to disable this behavior.
+	int64_t mb_right_vertical_ctrl;
 } blink_FrequencyResponseInfo;
 
 typedef blink_EnvIdx               (*blink_host_add_env)(void*);
@@ -547,6 +560,20 @@ typedef struct {
 	blink_ChannelMode channel_mode;
 } blink_SamplerUniformData;
 
+// The host can call blink_param_visibility with the current blink_UniformParamData
+// to ask the plugin which parameters should be visible/invisible based on the current
+// parameter values.
+// This can be used, for example, to turn off contextual parameters in response
+// to the "mode" specified by another parameter changing.
+// The host should call blink_param_visibility and respond accordingly any time a
+// blink_ParamFlags_UpdateVisibility parameter is created or its value changes.
+typedef struct {
+	// Array of parameters which should be visible.
+	// Any other parameters should be invisible.
+	const blink_ParamIdx* visible;
+	size_t visible_count;
+} blink_ParamVisibilityUpdate;
+
 #ifdef BLINK_EXPORT
 
 #ifdef _WIN32
@@ -570,6 +597,7 @@ extern "C"
 	EXPORTED blink_UnitIdx            blink_unit_add(blink_InstanceIdx instance_idx);
 	EXPORTED blink_Error              blink_unit_reset(blink_UnitIdx unit_idx);
 	EXPORTED blink_Error              blink_unit_stream_init(blink_UnitIdx unit_idx, blink_SR SR);
+	EXPORTED blink_Error              blink_param_visibility(const blink_UniformParamData* param_data, blink_ParamVisibilityUpdate* update);
 
 	// EFFECT PLUGIN INTERFACE ----------------------------------------
 	EXPORTED blink_Error              blink_effect_process(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, const float* in, float* out);
