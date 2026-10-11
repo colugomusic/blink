@@ -35,6 +35,7 @@ typedef struct {    uint64_t value; } blink_VectorID;
 typedef struct { const char* value; } blink_StaticString;
 typedef struct { const char* value; } blink_TempString;
 typedef struct { const char* value; } blink_UUID;
+typedef struct { const blink_ParamIdx* data; size_t size; } blink_ParamIdxArray;
 
 typedef enum {
 	blink_AnalysisResult_OK = 0,
@@ -570,8 +571,7 @@ typedef struct {
 typedef struct {
 	// Array of parameters which should be visible.
 	// Any other parameters should be invisible.
-	const blink_ParamIdx* visible;
-	size_t visible_count;
+	blink_ParamIdxArray visible_params;
 } blink_ParamVisibilityUpdate;
 
 #ifdef BLINK_EXPORT

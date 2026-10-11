@@ -127,13 +127,13 @@ using FrequencyResponseTable = ent::simple_table<
 	FrEnabledParams,
 	FrFrequencyParams,
 	FrMagnitudeParams,
-	FrMbRHzParams,
-	FrMbRVtParams,
-	FrMbLHzCtrlParams,
-	FrMbLVtCtrlParams,
-	FrMbRHzCtrlParams,
-	FrMbRVtCtrlParams,
-	FrExtraParams
+	FrExtraParams,
+	FrMbRightHz,
+	FrMbRightVt,
+	FrMbLeftHzCtrl,
+	FrMbLeftVtCtrl,
+	FrMbRightHzCtrl,
+	FrMbRightVtCtrl
 >;
 
 struct SampleInfo {
