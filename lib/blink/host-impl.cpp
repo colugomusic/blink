@@ -6,6 +6,7 @@ namespace blink {
 
 namespace { // -----------------------------------------------------------------------------------------------
 
+/* @TODO: delete this
 [[nodiscard]]
 auto local_to_global(const Host& host, blink_PluginIdx plugin, std::span<const blink_ParamIdx> local_indices) -> std::vector<ParamGlobalIdx> {
 	auto list     = std::vector<ParamGlobalIdx>{};
@@ -79,6 +80,7 @@ auto make_fr_extra_param_list(const Host& host, blink_PluginIdx plugin, const bl
 	std::ranges::transform(span, std::back_inserter(list), fn_xform);
 	return {list};
 }
+*/
 
 } // ---------------------------------------------------------------------------------------------------------
 
@@ -531,27 +533,28 @@ auto value_slider(Host* host, blink_EnvIdx env_idx, ValueSliderIdx value) -> voi
 
 namespace blink::add {
 
-[[nodiscard]]
-auto frequency_response(Host* host, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) -> blink_FrequencyResponseIdx {
-	auto& fr_list         = host->plugin.get<PluginFRs>(plugin_idx.value).global_indices;
-	const auto local_idx  = fr_list.size();
-	const auto global_idx = host->frequency_response.push_back();
-	host->frequency_response.set(global_idx, plugin_idx);
-	host->frequency_response.set(global_idx, FrBandCount{info->band_count});
-	host->frequency_response.set(global_idx, FrExtraCount{info->extra_count});
-	host->frequency_response.set(global_idx, make_fr_enabled_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_frequency_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_left_vt_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_right_hz_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_right_vt_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_left_hz_ctrl_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_left_vt_ctrl_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_right_hz_ctrl_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_mb_right_vt_ctrl_param_list(*host, plugin_idx, *info));
-	host->frequency_response.set(global_idx, make_fr_extra_param_list(*host, plugin_idx, *info));
-	fr_list.push_back({global_idx});
-	return {local_idx};
-}
+// @TODO: delete this
+// [[nodiscard]]
+// auto frequency_response(Host* host, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) -> blink_FrequencyResponseIdx {
+// 	auto& fr_list         = host->plugin.get<PluginFRs>(plugin_idx.value).global_indices;
+// 	const auto local_idx  = fr_list.size();
+// 	const auto global_idx = host->frequency_response.push_back();
+// 	host->frequency_response.set(global_idx, plugin_idx);
+// 	host->frequency_response.set(global_idx, FrBandCount{info->band_count});
+// 	host->frequency_response.set(global_idx, FrExtraCount{info->extra_count});
+// 	host->frequency_response.set(global_idx, make_fr_enabled_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_frequency_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_left_vt_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_right_hz_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_right_vt_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_left_hz_ctrl_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_left_vt_ctrl_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_right_hz_ctrl_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_mb_right_vt_ctrl_param_list(*host, plugin_idx, *info));
+// 	host->frequency_response.set(global_idx, make_fr_extra_param_list(*host, plugin_idx, *info));
+// 	fr_list.push_back({global_idx});
+// 	return {local_idx};
+// }
 
 auto plugin(Host* host, PluginType type) -> blink_PluginIdx {
 	const auto plugin_idx = host->plugin.push_back();
@@ -1459,7 +1462,7 @@ auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData&
 	return unit_process(host, unit_idx, varying, std::move(process_fn));
 }
 
-auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformParamData& param_data, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error {
+auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformParamData& param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error {
 	const auto& plugin = read::iface(host, plugin_idx);
 	return plugin.frequency_response(&param_data, fr_idx, n, in_x_01, out_y_01);
 }
@@ -1664,9 +1667,10 @@ auto init(Host* host) -> void {
 	host->fns.add_env = [](void* usr) {
 		return add::env::empty(host_ptr(usr));
 	};
-	host->fns.add_frequency_response = [](void* usr, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) {
-		return add::frequency_response(host_ptr(usr), plugin_idx, info);
-	};
+	// @TODO: delete this
+	// host->fns.add_frequency_response = [](void* usr, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) {
+	// 	return add::frequency_response(host_ptr(usr), plugin_idx, info);
+	// };
 	host->fns.add_param_chord = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_chord(uuid)) {
 			return add::param::chord::std(host_ptr(usr), plugin_idx, *std_param);

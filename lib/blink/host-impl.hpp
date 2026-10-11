@@ -119,22 +119,23 @@ using SliderRealTable = ent::simple_table<
 	TweakerReal
 >;
 
-using FrequencyResponseTable = ent::simple_table<
-	"blink:host:frequency-response-table",
-	blink_PluginIdx,
-	FrBandCount,
-	FrExtraCount,
-	FrEnabledParams,
-	FrFrequencyParams,
-	FrMbLVtParams,
-	FrMbRHzParams,
-	FrMbRVtParams,
-	FrMbLHzCtrlParams,
-	FrMbLVtCtrlParams,
-	FrMbRHzCtrlParams,
-	FrMbRVtCtrlParams,
-	FrExtraParams
->;
+// @TODO: delete this
+// using FrequencyResponseTable = ent::simple_table<
+// 	"blink:host:frequency-response-table",
+// 	blink_PluginIdx,
+// 	FrBandCount,
+// 	FrExtraCount,
+// 	FrEnabledParams,
+// 	FrFrequencyParams,
+// 	FrMbLVtParams,
+// 	FrMbRHzParams,
+// 	FrMbRVtParams,
+// 	FrMbLHzCtrlParams,
+// 	FrMbLVtCtrlParams,
+// 	FrMbRHzCtrlParams,
+// 	FrMbRVtCtrlParams,
+// 	FrExtraParams
+// >;
 
 struct SampleInfo {
 	std::vector<blink_PluginIdx> registered_plugins;
@@ -160,7 +161,8 @@ struct Host {
 	EnvTable env;
 	SliderIntTable slider_int;
 	SliderRealTable slider_real;
-	FrequencyResponseTable frequency_response;
+	// @TODO: delete this
+	// FrequencyResponseTable frequency_response;
 	std::optional<blink_PluginIdx> default_sampler;
 	SampleAnalysis sample_analysis;
 	blink_HostFns fns;
@@ -279,7 +281,6 @@ auto value_slider(Host* host, blink_EnvIdx env_idx, ValueSliderIdx value) -> voi
 
 namespace blink::add {
 
-auto frequency_response(Host* host, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) -> blink_FrequencyResponseIdx;
 auto plugin(Host* host, PluginType type) -> blink_PluginIdx;
 
 } // blink::add
@@ -417,7 +418,7 @@ namespace blink {
 auto begin_unit_process(Host* host, const PluginInterface& plugin, blink_InstanceIdx instance_idx, blink_VectorID vector_id) -> void;
 auto destroy_instance(Host* host, blink_PluginIdx plugin_idx, blink_InstanceIdx instance_idx) -> void;
 auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData& varying, const blink_UniformData& uniform, const float* in, float* out) -> blink_Error;
-auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformParamData& param_data, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error;
+auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformParamData& param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error;
 auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error;
 auto sampler_process(Host* host, blink_UnitIdx unit_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, float* out) -> blink_Error;
 auto sampler_sample_deleted(const Host& host, blink_PluginIdx plugin_idx, blink_ID sample_id) -> void;

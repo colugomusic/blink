@@ -108,18 +108,6 @@ struct TweakerReal        { blink_TweakerReal value {0}; };
 struct UnitVec            { std::vector<blink_UnitIdx> value; };
 struct ValueSliderIdx     { blink_SliderRealIdx value; };
 struct VectorID           { blink_VectorID value = {0}; };
-struct FrBandCount        { size_t value = 0; };
-struct FrExtraCount       { size_t value = 0; };
-struct FrEnabledParams    { std::vector<ParamGlobalIdx> value; };
-struct FrFrequencyParams  { std::vector<ParamGlobalIdx> value; };
-struct FrMbLVtParams      { std::vector<ParamGlobalIdx> value; };
-struct FrMbRHzParams      { std::vector<ParamGlobalIdx> value; };
-struct FrMbRVtParams      { std::vector<ParamGlobalIdx> value; };
-struct FrMbLHzCtrlParams  { std::vector<ParamGlobalIdx> value; };
-struct FrMbLVtCtrlParams  { std::vector<ParamGlobalIdx> value; };
-struct FrMbRHzCtrlParams  { std::vector<ParamGlobalIdx> value; };
-struct FrMbRVtCtrlParams  { std::vector<ParamGlobalIdx> value; };
-struct FrExtraParams      { std::vector<std::vector<ParamGlobalIdx>> value; };
 template <typename T> struct DefaultMax { T value = T(0); };
 template <typename T> struct DefaultMin { T value = T(0); };
 template <typename T> struct DefaultValue { T value = T(0); };
@@ -144,7 +132,7 @@ struct UnitProcess {
 };
 
 struct PluginInterface {
-	using frequency_response_fn   = std::function<blink_Error(const blink_UniformParamData* param_data, blink_FrequencyResponseIdx fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01)>;
+	using frequency_response_fn   = std::function<blink_Error(const blink_UniformParamData* param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01)>;
 	using get_error_string_fn     = std::function<blink_TempString(blink_Error error)>;
 	using get_plugin_info_fn      = std::function<blink_PluginInfo()>;
 	using get_resource_data_fn    = std::function<blink_ResourceData(const char* path)>;

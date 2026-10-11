@@ -85,12 +85,6 @@ auto slider_real(const Plugin& plugin, blink_ParamIdx param_idx) -> blink_Slider
 
 } // blink::read
 
-namespace blink::add {
-
-auto frequency_response(const Plugin& plugin, const blink_FrequencyResponseInfo& info) -> blink_FrequencyResponseIdx;
-
-} // blink::add
-
 namespace blink::add::param {
 
 auto chord(const Plugin& plugin, blink_UUID uuid) -> blink_ParamIdx;
