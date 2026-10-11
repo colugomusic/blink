@@ -2,90 +2,6 @@
 #include "blink/types.hpp"
 #include <span>
 
-namespace blink {
-
-namespace { // -----------------------------------------------------------------------------------------------
-
-/* @TODO: delete this
-[[nodiscard]]
-auto local_to_global(const Host& host, blink_PluginIdx plugin, std::span<const blink_ParamIdx> local_indices) -> std::vector<ParamGlobalIdx> {
-	auto list     = std::vector<ParamGlobalIdx>{};
-	auto fn_xform = [&host, plugin](blink_ParamIdx local_idx) { return blink::read::local_to_global(host, plugin, local_idx); };
-	std::ranges::transform(local_indices, std::back_inserter(list), fn_xform);
-	return list;
-}
-
-[[nodiscard]]
-auto make_fr_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info, auto field) -> std::vector<ParamGlobalIdx> {
-	if (const auto array = info.*field) {
-		auto span = std::span<const blink_ParamIdx>{array, info.band_count};
-		return local_to_global(host, plugin, span);
-	}
-	return {};
-}
-
-[[nodiscard]]
-auto make_fr_enabled_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrEnabledParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::enabled)};
-}
-
-[[nodiscard]]
-auto make_fr_frequency_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrFrequencyParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::frequency)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_left_vt_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbLVtParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_left_vertical)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_right_hz_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRHzParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_right_horizontal)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_right_vt_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRVtParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_right_vertical)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_left_hz_ctrl_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbLHzCtrlParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_left_horizontal_ctrl)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_left_vt_ctrl_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbLVtCtrlParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_left_vertical_ctrl)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_right_hz_ctrl_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRHzCtrlParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_right_horizontal_ctrl)};
-}
-
-[[nodiscard]]
-auto make_fr_mb_right_vt_ctrl_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrMbRVtCtrlParams {
-	return {make_fr_param_list(host, plugin, info, &blink_FrequencyResponseInfo::mb_right_vertical_ctrl)};
-}
-
-[[nodiscard]]
-auto make_fr_extra_param_list(const Host& host, blink_PluginIdx plugin, const blink_FrequencyResponseInfo& info) -> FrExtraParams {
-	auto list = std::vector<std::vector<ParamGlobalIdx>>{};
-	auto span = std::span<const blink_ParamIdx*>{info.extra, info.extra_count};
-	auto fn_xform = [&host, plugin, band_count = info.band_count](const blink_ParamIdx* params) {
-		auto span = std::span<const blink_ParamIdx>{params, band_count};
-		return local_to_global(host, plugin, span);
-	};
-	std::ranges::transform(span, std::back_inserter(list), fn_xform);
-	return {list};
-}
-*/
-
-} // ---------------------------------------------------------------------------------------------------------
-
-} // blink
-
 namespace blink::read {
 
 auto apply_offset_fn(const Host& host, ParamEnvIdx param_env_idx) -> ApplyOffsetFn {
@@ -532,29 +448,6 @@ auto value_slider(Host* host, blink_EnvIdx env_idx, ValueSliderIdx value) -> voi
 } // blink::write
 
 namespace blink::add {
-
-// @TODO: delete this
-// [[nodiscard]]
-// auto frequency_response(Host* host, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) -> blink_FrequencyResponseIdx {
-// 	auto& fr_list         = host->plugin.get<PluginFRs>(plugin_idx.value).global_indices;
-// 	const auto local_idx  = fr_list.size();
-// 	const auto global_idx = host->frequency_response.push_back();
-// 	host->frequency_response.set(global_idx, plugin_idx);
-// 	host->frequency_response.set(global_idx, FrBandCount{info->band_count});
-// 	host->frequency_response.set(global_idx, FrExtraCount{info->extra_count});
-// 	host->frequency_response.set(global_idx, make_fr_enabled_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_frequency_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_left_vt_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_right_hz_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_right_vt_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_left_hz_ctrl_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_left_vt_ctrl_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_right_hz_ctrl_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_mb_right_vt_ctrl_param_list(*host, plugin_idx, *info));
-// 	host->frequency_response.set(global_idx, make_fr_extra_param_list(*host, plugin_idx, *info));
-// 	fr_list.push_back({global_idx});
-// 	return {local_idx};
-// }
 
 auto plugin(Host* host, PluginType type) -> blink_PluginIdx {
 	const auto plugin_idx = host->plugin.push_back();
@@ -1667,10 +1560,6 @@ auto init(Host* host) -> void {
 	host->fns.add_env = [](void* usr) {
 		return add::env::empty(host_ptr(usr));
 	};
-	// @TODO: delete this
-	// host->fns.add_frequency_response = [](void* usr, blink_PluginIdx plugin_idx, const blink_FrequencyResponseInfo* info) {
-	// 	return add::frequency_response(host_ptr(usr), plugin_idx, info);
-	// };
 	host->fns.add_param_chord = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_chord(uuid)) {
 			return add::param::chord::std(host_ptr(usr), plugin_idx, *std_param);

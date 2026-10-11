@@ -195,7 +195,7 @@ typedef enum {
 	blink_ParamFlags_ShowButton                 = 1 << 11,
 	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
 	blink_ParamFlags_Varying                    = 1 << 13,
-	blink_ParamFlags_UpdateParamsWhenChanged    = 1 << 14, // The host should call blink_param_update when this parameter's value changes.
+	blink_ParamFlags_UpdateParamSettings        = 1 << 14, // The host should call blink_param_update when this parameter's value changes.
 } blink_ParamFlags;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -548,19 +548,23 @@ typedef struct {
 	blink_ChannelMode channel_mode;
 } blink_SamplerUniformData;
 
-// The host can call blink_param_update with the current blink_UniformParamData
-// to update the following parameter settings based on the current parameter values:
+// The host can call blink_get_param_settings with the current blink_UniformParamData
+// to retrieve the following parameter settings based on the current parameter values:
 //  - visiblity of parameters.
 //  - frequency response settings.
-// The host should call blink_param_update and respond accordingly any time the value
-// of a blink_ParamFlags_UpdateParamsWhenChanged parameter changes.
+// The host should call blink_get_param_settings and respond accordingly any time the
+// value of a blink_ParamFlags_UpdateParamSettings parameter changes.
+// This can be used to, for example, show or hide parameters based on a switch or mode
+// that some option parameter controls.
 typedef struct {
 	// Array of parameters which should be visible.
 	// Any other parameters should be invisible.
 	blink_ParamIdxArray visible_params;
-	// Frequency response settings.
+	// Array of frequency response settings.
+	// (Plugins may define more than one frequency response though more than one is not
+	// currently supported by Blockhead at the time of writing.)
 	blink_FrequencyResponseInfoArray frequency_responses;
-} blink_ParamUpdate;
+} blink_ParamSettings;
 
 #ifdef BLINK_EXPORT
 
@@ -588,12 +592,13 @@ extern "C"
 	EXPORTED blink_ResourceData       blink_get_resource_data(const char* path);
 
 	// Optional.
+	// [fr_idx] corresponds to the index of the frequency response in the blink_ParamSettings array.
 	EXPORTED blink_Error              blink_frequency_response(const blink_UniformParamData* param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01);
 
 	// Optional. Plugins only need to provide this if:
 	//  - They have parameters which can dynamically appear/disappear.
 	//  - They define any frequency responses.
-	EXPORTED blink_Error              blink_param_update(const blink_UniformParamData* param_data, blink_ParamUpdate* update);
+	EXPORTED blink_Error              blink_get_param_settings(const blink_UniformParamData* param_data, blink_ParamSettings* out_settings);
 
 	// EFFECT PLUGIN INTERFACE ----------------------------------------
 	EXPORTED blink_Error              blink_effect_process(blink_UnitIdx unit_idx, const blink_VaryingData* varying, const blink_UniformData* uniform, const float* in, float* out);

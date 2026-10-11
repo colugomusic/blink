@@ -119,24 +119,6 @@ using SliderRealTable = ent::simple_table<
 	TweakerReal
 >;
 
-// @TODO: delete this
-// using FrequencyResponseTable = ent::simple_table<
-// 	"blink:host:frequency-response-table",
-// 	blink_PluginIdx,
-// 	FrBandCount,
-// 	FrExtraCount,
-// 	FrEnabledParams,
-// 	FrFrequencyParams,
-// 	FrMbLVtParams,
-// 	FrMbRHzParams,
-// 	FrMbRVtParams,
-// 	FrMbLHzCtrlParams,
-// 	FrMbLVtCtrlParams,
-// 	FrMbRHzCtrlParams,
-// 	FrMbRVtCtrlParams,
-// 	FrExtraParams
-// >;
-
 struct SampleInfo {
 	std::vector<blink_PluginIdx> registered_plugins;
 	std::vector<blink_PluginIdx> completed_analysis;
@@ -161,8 +143,6 @@ struct Host {
 	EnvTable env;
 	SliderIntTable slider_int;
 	SliderRealTable slider_real;
-	// @TODO: delete this
-	// FrequencyResponseTable frequency_response;
 	std::optional<blink_PluginIdx> default_sampler;
 	SampleAnalysis sample_analysis;
 	blink_HostFns fns;
