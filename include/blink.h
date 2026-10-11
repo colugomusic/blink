@@ -494,17 +494,17 @@ typedef struct {
 	// Blockhead uses these values to inform the user of any latency introduced
 	// by the block due to buffering or whatever. Latency compensation is
 	// dealt with manually by the end user (for now)
-	// 
+	//
 	// A value of -1 means "unknown"
 	// If all values are -1, it means the block does not introduce any latency
-	// 
+	//
 	// Not all of these need to be filled. Blockhead will use:
 	//  - exact_delay if it is set, otherwise
 	//  - the (min/max)_delay pair if they are both set, otherwise
 	//  - min_delay, otherwise
 	//  - max_delay, otherwise
-	// 	- approximate_delay
-	// 
+	//  - approximate_delay
+	//
 	int exact_delay;       // Exact latency (in frames) introduced by the block
 	int min_delay;         // Minimum latency (in frames)
 	int max_delay;         // Maximum latency (in frames)
@@ -572,10 +572,8 @@ typedef struct {
 
 extern "C"
 {
-	EXPORTED blink_Error              blink_frequency_response(const blink_UniformParamData* param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01);
 	EXPORTED blink_TempString         blink_get_error_string(blink_Error error);
 	EXPORTED blink_PluginInfo         blink_get_plugin_info();
-	EXPORTED blink_ResourceData       blink_get_resource_data(const char* path); // Optional
 	EXPORTED blink_Error              blink_init(blink_PluginIdx plugin_idx, blink_HostFns host);
 	EXPORTED blink_Error              blink_instance_destroy(blink_InstanceIdx instance_idx);
 	EXPORTED blink_InstanceIdx        blink_instance_make();
@@ -585,6 +583,16 @@ extern "C"
 	EXPORTED blink_UnitIdx            blink_unit_add(blink_InstanceIdx instance_idx);
 	EXPORTED blink_Error              blink_unit_reset(blink_UnitIdx unit_idx);
 	EXPORTED blink_Error              blink_unit_stream_init(blink_UnitIdx unit_idx, blink_SR SR);
+
+	// Optional.
+	EXPORTED blink_ResourceData       blink_get_resource_data(const char* path);
+
+	// Optional.
+	EXPORTED blink_Error              blink_frequency_response(const blink_UniformParamData* param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01);
+
+	// Optional. Plugins only need to provide this if:
+	//  - They have parameters which can dynamically appear/disappear.
+	//  - They define any frequency responses.
 	EXPORTED blink_Error              blink_param_update(const blink_UniformParamData* param_data, blink_ParamUpdate* update);
 
 	// EFFECT PLUGIN INTERFACE ----------------------------------------
