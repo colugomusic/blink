@@ -73,7 +73,7 @@ auto find_param(const Host& host, blink_PluginIdx plugin, std::string_view uuid_
 	for (const auto param_idx : param_list) {
 		const auto uuid = host.param.get<blink_UUID>(param_idx.value).value;
 		if (uuid == uuid_str) {
-			return blink_ParamIdx{param_idx.value};
+			return blink_ParamIdx{static_cast<int64_t>(param_idx.value)};
 		}
 	}
 	return std::nullopt;
@@ -332,10 +332,10 @@ auto group(Host* host, ParamGlobalIdx param_idx, blink_StaticString group) -> vo
 	if (const auto pos = std::find_if(group_info_vec.begin(), group_info_vec.end(), find_group); pos == group_info_vec.end()) {
 		GroupInfo info;
 		info.name = group;
-		info.params.push_back({param_idx.value});
+		info.params.push_back({static_cast<int64_t>(param_idx.value)});
 		group_info_vec.push_back(info);
 	} else {
-		pos->params.push_back({param_idx.value});
+		pos->params.push_back({static_cast<int64_t>(param_idx.value)});
 	}
 	host->param.get<ParamStrings>(param_idx.value).group = group;
 }
@@ -683,7 +683,7 @@ auto empty(Host* host, blink_PluginIdx plugin_idx, ParamType type) -> NewParam {
 	if (default_active(type)) {
 		write::add_flags(host, blink::ParamGlobalIdx{global_idx}, blink_ParamFlags_DefaultActive);
 	}
-	return {local_idx, {global_idx}};
+	return {static_cast<int64_t>(local_idx), {global_idx}};
 }
 
 } // blink::add::param

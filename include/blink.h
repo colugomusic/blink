@@ -18,7 +18,7 @@ typedef float (*blink_ApplyOffsetFn)(float, float);
 typedef struct {      int8_t value; } blink_Bool;
 typedef struct {      size_t value; } blink_EnvIdx;
 typedef struct {      size_t value; } blink_InstanceIdx;
-typedef struct {      size_t value; } blink_ParamIdx;
+typedef struct {     int64_t value; } blink_ParamIdx;
 typedef struct {      size_t value; } blink_PluginIdx;
 typedef struct {      size_t value; } blink_SliderIntIdx;
 typedef struct {      size_t value; } blink_SliderRealIdx;
