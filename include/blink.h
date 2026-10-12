@@ -548,14 +548,20 @@ typedef struct {
 	blink_ChannelMode channel_mode;
 } blink_SamplerUniformData;
 
-// The host can call blink_get_param_settings with the current blink_UniformParamData
+// The host can call blink_get_param_settings with an instance's blink_UniformParamData
 // to retrieve the following parameter settings based on the current parameter values:
+//
 //  - visiblity of parameters.
 //  - frequency response settings.
+//
 // The host should call blink_get_param_settings and respond accordingly any time the
 // value of a blink_ParamFlags_UpdateParamSettings parameter changes.
+//
 // This can be used to, for example, show or hide parameters based on a switch or mode
 // that some option parameter controls.
+//
+// The plugin must ensure that the pointers in this struct remain valid only until the
+// next call to blink_get_param_settings.
 typedef struct {
 	// Array of parameters which should be visible.
 	// Any other parameters should be invisible.
@@ -593,7 +599,16 @@ extern "C"
 
 	// Optional.
 	// [fr_idx] corresponds to the index of the frequency response in the blink_ParamSettings array.
-	EXPORTED blink_Error              blink_frequency_response(const blink_UniformParamData* param_data, size_t fr_idx, blink_FrameCount n, const float* in_x_01, float* out_y_01);
+	// Returns an opaque pointer to some frequency response data that can be used to query the frequency
+	// response (this is probably the filter coefficients based on the parameter data.) The plugin must
+	// ensure that the returned pointer remains valid only until the next call to
+	// blink_get_frequency_response_data().
+	EXPORTED blink_Error              blink_get_frequency_response_data(const blink_UniformParamData* param_data, size_t fr_idx) -> void*;
+
+	// Optional.
+	// [in_x_01]: Input array of [n] frequency values normalized to 0..1.
+	// [out_y_01]: Output array of [n] magnitude values normalized to 0..1.
+	EXPORTED blink_Error              blink_frequency_response(void* fr_data, blink_FrameCount n, const float* in_x_01, float* out_y_01);
 
 	// Optional. Plugins only need to provide this if:
 	//  - They have parameters which can dynamically appear/disappear.
