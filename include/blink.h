@@ -603,7 +603,7 @@ extern "C"
 	// response (this is probably the filter coefficients based on the parameter data.) The plugin must
 	// ensure that the returned pointer remains valid only until the next call to
 	// blink_get_frequency_response_data().
-	EXPORTED blink_Error              blink_get_frequency_response_data(const blink_UniformParamData* param_data, size_t fr_idx) -> void*;
+	EXPORTED const void*              blink_get_frequency_response_data(const blink_UniformParamData* param_data, size_t fr_idx);
 
 	// Optional.
 	// [in_x_01]: Input array of [n] frequency values normalized to 0..1.
