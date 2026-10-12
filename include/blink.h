@@ -608,7 +608,7 @@ extern "C"
 	// Optional.
 	// [in_x_01]: Input array of [n] frequency values normalized to 0..1.
 	// [out_y_01]: Output array of [n] magnitude values normalized to 0..1.
-	EXPORTED blink_Error              blink_frequency_response(void* fr_data, blink_FrameCount n, const float* in_x_01, float* out_y_01);
+	EXPORTED blink_Error              blink_frequency_response(const void* fr_data, blink_FrameCount n, const float* in_x_01, float* out_y_01);
 
 	// Optional. Plugins only need to provide this if:
 	//  - They have parameters which can dynamically appear/disappear.
