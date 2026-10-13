@@ -1355,14 +1355,25 @@ auto effect_process(Host* host, blink_UnitIdx unit_idx, const blink_VaryingData&
 	return unit_process(host, unit_idx, varying, std::move(process_fn));
 }
 
+auto get_param_settings(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformParamData& param_data, blink_ParamSettings* out_settings) -> blink_Error {
+	if (const auto& plugin = read::iface(host, plugin_idx); plugin.get_param_settings) {
+		return plugin.get_param_settings(&param_data, out_settings);
+	}
+	return blink_StdError_NotImplemented;
+}
+
 auto get_frequency_response_data(const Host& host, blink_PluginIdx plugin_idx, const blink_UniformParamData& param_data, size_t fr_idx) -> void* {
-	const auto& plugin = read::iface(host, plugin_idx);
-	return plugin.get_frequency_response_data(&param_data, fr_idx);
+	if (const auto& plugin = read::iface(host, plugin_idx); plugin.get_frequency_response_data) {
+		return plugin.get_frequency_response_data(&param_data, fr_idx);
+	}
+	return nullptr;
 }
 
 auto frequency_response(const Host& host, blink_PluginIdx plugin_idx, const void* fr_data, blink_FrameCount n, const float* in_x_01, float* out_y_01) -> blink_Error {
-	const auto& plugin = read::iface(host, plugin_idx);
-	return plugin.frequency_response(fr_data, n, in_x_01, out_y_01);
+	if (const auto& plugin = read::iface(host, plugin_idx); plugin.frequency_response) {
+		return plugin.frequency_response(fr_data, n, in_x_01, out_y_01);
+	}
+	return blink_StdError_NotImplemented;
 }
 
 auto sampler_draw(const Host& host, blink_PluginIdx plugin_idx, const blink_SamplerVaryingData& varying, const blink_SamplerUniformData& uniform, blink_FrameCount n, blink_SamplerDrawInfo* out) -> blink_Error {

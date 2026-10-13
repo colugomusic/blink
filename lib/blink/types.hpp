@@ -132,6 +132,7 @@ struct UnitProcess {
 };
 
 struct PluginInterface {
+	using get_param_settings_fn          = std::function<blink_Error(const blink_UniformParamData* param_data, blink_ParamSettings* out)>;
 	using get_frequency_response_data_fn = std::function<void*(const blink_UniformParamData* param_data, size_t fr_idx)>;
 	using frequency_response_fn          = std::function<blink_Error(const void* fr_data, blink_FrameCount n, const float* in_x_01, float* out_y_01)>;
 	using get_error_string_fn            = std::function<blink_TempString(blink_Error error)>;
@@ -146,6 +147,7 @@ struct PluginInterface {
 	using unit_add_fn                    = std::function<blink_UnitIdx(blink_InstanceIdx instance_idx)>;
 	using unit_reset_fn                  = std::function<blink_Error(blink_UnitIdx unit_idx)>;
 	using unit_stream_init_fn            = std::function<blink_Error(blink_UnitIdx unit_idx, blink_SR SR)>;
+	get_param_settings_fn          get_param_settings;
 	get_frequency_response_data_fn get_frequency_response_data;
 	frequency_response_fn          frequency_response;
 	get_error_string_fn            get_error_string;
