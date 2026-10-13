@@ -320,10 +320,8 @@ typedef struct {
 	const blink_ParamIdx* mb_right_horizontal_ctrl;
 	// Optional array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically while the Ctrl key is held down (or the Comamnd key on macOS.)
 	const blink_ParamIdx* mb_right_vertical_ctrl;
-	// How many extra per-band parameters are there? Blockhead will generate extra controls to be shown when the band is selected.
-	size_t extra_count;
-	// Optional array of {extra_count} arrays of {band_count} parameters for the extra controls.
-	const blink_ParamIdx** extra;
+	// Optional array of {band_count} parameter lists for the extra per-band parameters. Blockhead will generate extra controls to be shown when the band is selected.
+	const blink_ParamIdxArray* extra;
 } blink_FrequencyResponseInfo;
 
 typedef struct { const blink_FrequencyResponseInfo* data; size_t size; } blink_FrequencyResponseInfoArray;
