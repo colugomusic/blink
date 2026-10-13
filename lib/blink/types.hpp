@@ -64,11 +64,6 @@ enum class StdSliderReal {
 enum class ParamType { chord, env, option, slider_int, slider_real };
 enum class PluginType { effect, sampler, synth };
 
-struct GroupInfo {
-	blink_StaticString name;
-	std::vector<blink_ParamIdx> params;
-};
-
 struct ApplyOffsetFn      { blink_ApplyOffsetFn fn = nullptr; };
 struct StepifyFn          { blink_Tweak_StepifyReal fn = nullptr; };
 struct ClampRange         { std::optional<blink_Range> value; };
@@ -111,6 +106,11 @@ struct VectorID           { blink_VectorID value = {0}; };
 template <typename T> struct DefaultMax { T value = T(0); };
 template <typename T> struct DefaultMin { T value = T(0); };
 template <typename T> struct DefaultValue { T value = T(0); };
+
+struct GroupInfo {
+	blink_StaticString name;
+	std::vector<ParamGlobalIdx> params;
+};
 
 struct ParamStrings {
 	blink_StaticString group      = {0};
