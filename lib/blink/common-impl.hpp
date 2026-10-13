@@ -2,6 +2,13 @@
 
 #include "blink.h"
 #include "tweak.hpp"
+#include "types.hpp"
+
+namespace blink {
+
+[[nodiscard]] auto as_global_idx(blink_ParamIdx v) -> blink::ParamGlobalIdx;
+
+} // blink
 
 namespace blink::add::slider {
 

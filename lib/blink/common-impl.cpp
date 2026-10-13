@@ -1,5 +1,13 @@
 #include "common-impl.hpp"
 
+namespace blink {
+
+auto as_global_idx(blink_ParamIdx v) -> blink::ParamGlobalIdx {
+	return {static_cast<uint32_t>(v.value)};
+}
+
+} // blink
+
 namespace blink::add::slider {
 
 auto empty_int(const blink_HostFns& host) -> blink_SliderIntIdx {

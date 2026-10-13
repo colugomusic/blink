@@ -186,32 +186,32 @@ struct PluginInterface {
 	} synth;
 };
 
-[[nodiscard]] inline auto operator==(const ParamGlobalIdx& a, const ParamGlobalIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const ParamEnvIdx& a, const ParamEnvIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const ParamOptionIdx& a, const ParamOptionIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const ParamSliderIntIdx& a, const ParamSliderIntIdx& b) -> bool { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamGlobalIdx& a, const ParamGlobalIdx& b) -> bool         { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamEnvIdx& a, const ParamEnvIdx& b) -> bool               { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamOptionIdx& a, const ParamOptionIdx& b) -> bool         { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const ParamSliderIntIdx& a, const ParamSliderIntIdx& b) -> bool   { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const ParamSliderRealIdx& a, const ParamSliderRealIdx& b) -> bool { return a.value == b.value; }
 
 } // blink
 
-namespace std { template <> struct hash<blink_EnvIdx> { auto operator()(const blink_EnvIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink_ID> { auto operator()(const blink_ID& id) const -> size_t { return std::hash<int64_t>{}(id.value); } }; }
-namespace std { template <> struct hash<blink_SliderIntIdx> { auto operator()(const blink_SliderIntIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink_SliderRealIdx> { auto operator()(const blink_SliderRealIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink_ParamIdx> { auto operator()(const blink_ParamIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink::ParamGlobalIdx> { auto operator()(const blink::ParamGlobalIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink::ParamEnvIdx> { auto operator()(const blink::ParamEnvIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink::ParamOptionIdx> { auto operator()(const blink::ParamOptionIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink::ParamSliderIntIdx> { auto operator()(const blink::ParamSliderIntIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-namespace std { template <> struct hash<blink::ParamSliderRealIdx> { auto operator()(const blink::ParamSliderRealIdx& idx) const -> size_t { return std::hash<size_t>{}(idx.value); } }; }
-[[nodiscard]] inline auto operator==(const blink_EnvIdx& a, const blink_EnvIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const blink_ID& a, const blink_ID& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const blink_SliderIntIdx& a, const blink_SliderIntIdx& b) -> bool { return a.value == b.value; }
+namespace std { template <> struct hash<blink_EnvIdx>              { auto operator()(const blink_EnvIdx& idx) const -> size_t              { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink_ID>                  { auto operator()(const blink_ID& id) const -> size_t                   { return std::hash<int64_t> { }(id.value); } }; }
+namespace std { template <> struct hash<blink_SliderIntIdx>        { auto operator()(const blink_SliderIntIdx& idx) const -> size_t        { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink_SliderRealIdx>       { auto operator()(const blink_SliderRealIdx& idx) const -> size_t       { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink_ParamIdx>            { auto operator()(const blink_ParamIdx& idx) const -> size_t            { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamGlobalIdx>     { auto operator()(const blink::ParamGlobalIdx& idx) const -> size_t     { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamEnvIdx>        { auto operator()(const blink::ParamEnvIdx& idx) const -> size_t        { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamOptionIdx>     { auto operator()(const blink::ParamOptionIdx& idx) const -> size_t     { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamSliderIntIdx>  { auto operator()(const blink::ParamSliderIntIdx& idx) const -> size_t  { return std::hash<size_t>  { }(idx.value); } }; }
+namespace std { template <> struct hash<blink::ParamSliderRealIdx> { auto operator()(const blink::ParamSliderRealIdx& idx) const -> size_t { return std::hash<size_t>  { }(idx.value); } }; }
+[[nodiscard]] inline auto operator==(const blink_EnvIdx& a, const blink_EnvIdx& b) -> bool               { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_ID& a, const blink_ID& b) -> bool                       { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_SliderIntIdx& a, const blink_SliderIntIdx& b) -> bool   { return a.value == b.value; }
 [[nodiscard]] inline auto operator==(const blink_SliderRealIdx& a, const blink_SliderRealIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const blink_PluginIdx& a, const blink_PluginIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator==(const blink_UnitIdx& a, const blink_UnitIdx& b) -> bool { return a.value == b.value; }
-[[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value != b.value; }
-[[nodiscard]] inline auto operator<(const blink_ID& a, const blink_ID& b) -> bool { return a.value < b.value; }
-[[nodiscard]] inline auto operator<(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool { return a.value < b.value; }
-inline auto operator++(blink_ChannelCount& a, int) -> blink_ChannelCount { a.value += 1; return a; }
+[[nodiscard]] inline auto operator==(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool           { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_PluginIdx& a, const blink_PluginIdx& b) -> bool         { return a.value == b.value; }
+[[nodiscard]] inline auto operator==(const blink_UnitIdx& a, const blink_UnitIdx& b) -> bool             { return a.value == b.value; }
+[[nodiscard]] inline auto operator!=(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool           { return a.value != b.value; }
+[[nodiscard]] inline auto operator<(const blink_ID& a, const blink_ID& b) -> bool                        { return a.value < b.value; }
+[[nodiscard]] inline auto operator<(const blink_ParamIdx& a, const blink_ParamIdx& b) -> bool            { return a.value < b.value; }
+inline auto operator++(blink_ChannelCount& a, int) -> blink_ChannelCount                                 { a.value += 1; return a; }
