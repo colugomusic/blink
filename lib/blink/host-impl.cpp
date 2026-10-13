@@ -68,12 +68,12 @@ auto env_override(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_E
 	return host.param_slider_real.get<OverrideEnvIdx>(param_sld_idx.value).value.value;
 }
 
-auto find_param(const Host& host, blink_PluginIdx plugin, std::string_view uuid_str) -> std::optional<blink_ParamIdx> {
+auto find_param(const Host& host, blink_PluginIdx plugin, std::string_view uuid_str) -> std::optional<ParamGlobalIdx> {
 	const auto param_list = host.plugin.get<PluginParams>(plugin.value).global_indices;
 	for (const auto param_idx : param_list) {
 		const auto uuid = host.param.get<blink_UUID>(param_idx.value).value;
 		if (uuid == uuid_str) {
-			return blink_ParamIdx{static_cast<int64_t>(param_idx.value)};
+			return param_idx;
 		}
 	}
 	return std::nullopt;
@@ -94,7 +94,7 @@ auto flags(const Host& host, blink_EnvIdx env_idx) -> int {
 	return host.env.get<EnvFlags>(env_idx.value).value;
 }
 
-auto flags(const Host& host, blink_ParamIdx param_idx) -> int {
+auto flags(const Host& host, ParamGlobalIdx param_idx) -> int {
 	return host.param.get<ParamFlags>(param_idx.value).value.value;
 }
 
@@ -114,7 +114,7 @@ auto global_to_local(const Host& host, ParamGlobalIdx global_idx) -> ParamLocalI
 	return {};
 }
 
-auto group_name(const Host& host, blink_ParamIdx param_idx) -> std::string_view {
+auto group_name(const Host& host, ParamGlobalIdx param_idx) -> std::string_view {
 	const auto& strings = host.param.get<ParamStrings>(param_idx.value);
 	if (strings.group.value) {
 		return strings.group.value;
@@ -122,7 +122,7 @@ auto group_name(const Host& host, blink_ParamIdx param_idx) -> std::string_view 
 	return {};
 }
 
-auto icon(const Host& host, blink_ParamIdx param_idx) -> blink_StdIcon {
+auto icon(const Host& host, ParamGlobalIdx param_idx) -> blink_StdIcon {
 	return host.param.get<ParamIcon>(param_idx.value).value;
 }
 
@@ -134,12 +134,12 @@ auto info(const Host& host, blink_PluginIdx plugin_idx) -> const blink_PluginInf
 	return host.plugin.get<blink_PluginInfo>(plugin_idx.value);
 }
 
-auto local_to_global(const Host& host, blink_PluginIdx plugin_idx, blink_ParamIdx local_idx) -> ParamGlobalIdx {
+auto local_to_global(const Host& host, blink_PluginIdx plugin_idx, ParamLocalIdx local_idx) -> ParamGlobalIdx {
 	const auto& param_list = host.plugin.get<PluginParams>(plugin_idx.value).global_indices;
 	return param_list[local_idx.value];
 }
 
-auto long_desc(const Host& host, blink_ParamIdx param_idx) -> std::string_view {
+auto long_desc(const Host& host, ParamGlobalIdx param_idx) -> std::string_view {
 	const auto& strings = host.param.get<ParamStrings>(param_idx.value);
 	if (strings.long_desc.value) {
 		return strings.long_desc.value;
@@ -147,7 +147,7 @@ auto long_desc(const Host& host, blink_ParamIdx param_idx) -> std::string_view {
 	return {};
 }
 
-auto manip_delegate(const Host& host, blink_ParamIdx param_idx) -> std::optional<ParamGlobalIdx> {
+auto manip_delegate(const Host& host, ParamGlobalIdx param_idx) -> std::optional<ParamGlobalIdx> {
 	return host.param.get<ManipDelegate>(param_idx.value).value;
 }
 
@@ -159,7 +159,7 @@ auto min_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_S
 	return host.env.get<MinSliderIdx>(env_idx.value).value;
 }
 
-auto name(const Host& host, blink_ParamIdx param_idx) -> std::string_view {
+auto name(const Host& host, ParamGlobalIdx param_idx) -> std::string_view {
 	const auto& strings = host.param.get<ParamStrings>(param_idx.value);
 	if (strings.name.value) {
 		return strings.name.value;
@@ -171,7 +171,7 @@ auto name(const Host& host, blink_PluginIdx plugin_idx) -> std::string_view {
 	return host.plugin.get<blink_PluginInfo>(plugin_idx.value).name.value;
 }
 
-auto plugin(const Host& host, blink_ParamIdx param_idx) -> blink_PluginIdx {
+auto plugin(const Host& host, ParamGlobalIdx param_idx) -> blink_PluginIdx {
 	return host.param.get<blink_PluginIdx>(param_idx.value);
 }
 
@@ -199,7 +199,7 @@ auto sampler_requires_sample_analysis(const Host& host, blink_PluginIdx plugin_i
 	return sampler_info.value.requires_sample_analysis.value;
 }
 
-auto short_name(const Host& host, blink_ParamIdx param_idx) -> std::string_view {
+auto short_name(const Host& host, ParamGlobalIdx param_idx) -> std::string_view {
 	const auto& strings = host.param.get<ParamStrings>(param_idx.value);
 	if (strings.short_name.value) {
 		return strings.short_name.value;
@@ -683,14 +683,14 @@ auto empty(Host* host, blink_PluginIdx plugin_idx, ParamType type) -> NewParam {
 	if (default_active(type)) {
 		write::add_flags(host, blink::ParamGlobalIdx{global_idx}, blink_ParamFlags_DefaultActive);
 	}
-	return {static_cast<int64_t>(local_idx), {global_idx}};
+	return {{local_idx}, {global_idx}};
 }
 
 } // blink::add::param
 
 namespace blink::add::param::chord {
 
-auto scale(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto scale(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param = add::param::empty(host, plugin_idx, ParamType::chord);
 	write::uuid(host, param.global_idx, {BLINK_STD_UUID_SCALE});
 	write::name(host, param.global_idx, {"Scale"});
@@ -698,7 +698,7 @@ auto scale(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto std(Host* host, blink_PluginIdx plugin_idx, StdChord std_chord) -> blink_ParamIdx {
+auto std(Host* host, blink_PluginIdx plugin_idx, StdChord std_chord) -> ParamLocalIdx {
 	switch (std_chord) {
 		case StdChord::SCALE: { return scale(host, plugin_idx); }
 	}
@@ -706,7 +706,7 @@ auto std(Host* host, blink_PluginIdx plugin_idx, StdChord std_chord) -> blink_Pa
 	return {0};
 }
 
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx {
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx {
 	const auto param = add::param::empty(host, plugin_idx, ParamType::chord);
 	write::uuid(host, param.global_idx, uuid);
 	return param.local_idx;
@@ -720,7 +720,7 @@ auto empty(Host* host) -> ParamEnvIdx {
 	return {host->param_env.push_back()};
 }
 
-auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto mix(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::percentage(host->fns);
@@ -736,7 +736,7 @@ auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto amp(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto flags = blink_ParamFlags_CanManipulate | blink_ParamFlags_MovesDisplay;
@@ -752,7 +752,7 @@ auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::delay_time(host);
@@ -768,7 +768,7 @@ auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto dry(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param = add::param::env::mix(host, plugin_idx);
 	const auto global_idx = read::local_to_global(*host, plugin_idx, param);
 	write::uuid(host, global_idx, {BLINK_STD_UUID_DRY});
@@ -776,7 +776,7 @@ auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param;
 }
 
-auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto feedback(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::feedback(host);
@@ -791,7 +791,7 @@ auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::filter_frequency(host);
@@ -806,7 +806,7 @@ auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx 
 	return param.local_idx;
 }
 
-auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::percentage(host->fns);
@@ -820,7 +820,7 @@ auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx 
 	return param.local_idx;
 }
 
-auto formant(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto formant(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::formant(host);
@@ -834,7 +834,7 @@ auto formant(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::percentage(host->fns);
@@ -851,7 +851,7 @@ auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::percentage_bipolar(host->fns);
@@ -869,7 +869,7 @@ auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::percentage(host->fns);
@@ -886,7 +886,7 @@ auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto pan(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto pan(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::pan(host);
@@ -900,7 +900,7 @@ auto pan(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto pitch(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto pitch(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::pitch(host);
@@ -914,7 +914,7 @@ auto pitch(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto speed(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::speed(host);
@@ -928,7 +928,7 @@ auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto wet(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto wet(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param = add::param::env::mix(host, plugin_idx);
 	const auto global_idx = read::local_to_global(*host, plugin_idx, param);
 	write::uuid(host, global_idx, {BLINK_STD_UUID_WET});
@@ -936,7 +936,7 @@ auto wet(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param;
 }
 
-auto std(Host* host, blink_PluginIdx plugin_idx, StdEnv std_env) -> blink_ParamIdx {
+auto std(Host* host, blink_PluginIdx plugin_idx, StdEnv std_env) -> ParamLocalIdx {
 	switch (std_env) {
 		case StdEnv::AMP:              { return amp(host, plugin_idx); }
 		case StdEnv::DELAY_TIME:       { return delay_time(host, plugin_idx); }
@@ -958,7 +958,7 @@ auto std(Host* host, blink_PluginIdx plugin_idx, StdEnv std_env) -> blink_ParamI
 	return {0};
 }
 
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx {
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::env);
 	const auto param_env_idx = add::param::env::empty(host);
 	const auto env_idx       = add::env::empty(host->fns);
@@ -976,7 +976,7 @@ auto empty(Host* host) -> ParamOptionIdx {
 	return {host->param_option.push_back()};
 }
 
-auto loop(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto loop(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::option);
 	const auto option_idx = add::param::option::empty(host);
 	const auto flags = 
@@ -994,7 +994,7 @@ auto loop(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_mode(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_mode(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::option);
 	const auto option_idx = add::param::option::empty(host);
 	write::type_idx(host, param.global_idx, option_idx);
@@ -1007,7 +1007,7 @@ auto noise_mode(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto reverse_mode(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto reverse_mode(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::option);
 	const auto option_idx = add::param::option::empty(host);
 	write::type_idx(host, param.global_idx, option_idx);
@@ -1019,7 +1019,7 @@ auto reverse_mode(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto reverse_toggle(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto reverse_toggle(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::option);
 	const auto option_idx = add::param::option::empty(host);
 	const auto flags =
@@ -1038,7 +1038,7 @@ auto reverse_toggle(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto std(Host* host, blink_PluginIdx plugin_idx, StdOption std_option) -> blink_ParamIdx {
+auto std(Host* host, blink_PluginIdx plugin_idx, StdOption std_option) -> ParamLocalIdx {
 	switch (std_option) {
 		case StdOption::LOOP:           { return loop(host, plugin_idx); }
 		case StdOption::NOISE_MODE:     { return noise_mode(host, plugin_idx); }
@@ -1049,7 +1049,7 @@ auto std(Host* host, blink_PluginIdx plugin_idx, StdOption std_option) -> blink_
 	return {0};
 }
 
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx {
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::option);
 	const auto option_idx = add::param::option::empty(host);
 	write::type_idx(host, param.global_idx, option_idx);
@@ -1065,7 +1065,7 @@ auto empty(Host* host) -> ParamSliderIntIdx {
 	return {host->param_slider_int.push_back()};
 }
 
-auto sample_offset(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto sample_offset(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::slider_int);
 	const auto sld_param_idx = add::param::slider_int::empty(host);
 	const auto sld_idx       = add::slider::sample_offset(host);
@@ -1078,7 +1078,7 @@ auto sample_offset(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderInt std_sld) -> blink_ParamIdx {
+auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderInt std_sld) -> ParamLocalIdx {
 	switch (std_sld) {
 		case StdSliderInt::SAMPLE_OFFSET: { return sample_offset(host, plugin_idx); }
 	}
@@ -1086,7 +1086,7 @@ auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderInt std_sld) -> blink_
 	return {0};
 }
 
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx {
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::slider_int);
 	const auto param_sld_idx = add::param::slider_int::empty(host);
 	const auto sld_idx       = add::slider::empty_int(host->fns);
@@ -1104,7 +1104,7 @@ auto empty(Host* host) -> ParamSliderRealIdx {
 	return {host->param_slider_real.push_back()};
 }
 
-auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto mix(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto param_sld_idx = add::param::slider_real::empty(host);
 	const auto sld_idx       = add::slider::percentage(host->fns);
@@ -1119,7 +1119,7 @@ auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto amp(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_param_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_param_idx);
@@ -1131,7 +1131,7 @@ auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1144,7 +1144,7 @@ auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto dry(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param = add::param::slider_real::mix(host, plugin_idx);
 	const auto global_idx = read::local_to_global(*host, plugin_idx, param);
 	write::uuid(host, global_idx, {BLINK_STD_UUID_DRY});
@@ -1152,7 +1152,7 @@ auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param;
 }
 
-auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto feedback(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1166,7 +1166,7 @@ auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1180,7 +1180,7 @@ auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx 
 	return param.local_idx;
 }
 
-auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1193,7 +1193,7 @@ auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx 
 	return param.local_idx;
 }
 
-auto formant(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto formant(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1206,7 +1206,7 @@ auto formant(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1222,7 +1222,7 @@ auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1238,7 +1238,7 @@ auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1254,7 +1254,7 @@ auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto pan(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto pan(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1266,7 +1266,7 @@ auto pan(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto pitch(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto pitch(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param   = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1278,7 +1278,7 @@ auto pitch(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto speed(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param      = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto sld_idx = add::param::slider_real::empty(host);
 	write::type_idx(host, param.global_idx, sld_idx);
@@ -1290,7 +1290,7 @@ auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param.local_idx;
 }
 
-auto wet(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
+auto wet(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	const auto param = add::param::slider_real::mix(host, plugin_idx);
 	const auto global_idx = read::local_to_global(*host, plugin_idx, param);
 	write::uuid(host, global_idx, {BLINK_STD_UUID_WET});
@@ -1298,7 +1298,7 @@ auto wet(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx {
 	return param;
 }
 
-auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderReal std_sld) -> blink_ParamIdx {
+auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderReal std_sld) -> ParamLocalIdx {
 	switch (std_sld) {
 		case StdSliderReal::AMP:              { return amp(host, plugin_idx); }
 		case StdSliderReal::DELAY_TIME:       { return delay_time(host, plugin_idx); }
@@ -1320,7 +1320,7 @@ auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderReal std_sld) -> blink
 	return {0};
 }
 
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx {
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx {
 	const auto param         = add::param::empty(host, plugin_idx, ParamType::slider_real);
 	const auto param_sld_idx = add::param::slider_real::empty(host);
 	const auto sld_idx       = add::slider::empty_real(host->fns);
@@ -1567,42 +1567,42 @@ auto init(Host* host) -> void {
 	};
 	host->fns.add_param_chord = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_chord(uuid)) {
-			return add::param::chord::std(host_ptr(usr), plugin_idx, *std_param);
+			return as_generic_idx(add::param::chord::std(host_ptr(usr), plugin_idx, *std_param));
 		}
 		else {
-			return add::param::chord::custom(host_ptr(usr), plugin_idx, uuid);
+			return as_generic_idx(add::param::chord::custom(host_ptr(usr), plugin_idx, uuid));
 		}
 	};
 	host->fns.add_param_env = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_env(uuid)) {
-			return add::param::env::std(host_ptr(usr), plugin_idx, *std_param);
+			return as_generic_idx(add::param::env::std(host_ptr(usr), plugin_idx, *std_param));
 		}
 		else {
-			return add::param::env::custom(host_ptr(usr), plugin_idx, uuid);
+			return as_generic_idx(add::param::env::custom(host_ptr(usr), plugin_idx, uuid));
 		}
 	};
 	host->fns.add_param_option = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_option(uuid)) {
-			return add::param::option::std(host_ptr(usr), plugin_idx, *std_param);
+			return as_generic_idx(add::param::option::std(host_ptr(usr), plugin_idx, *std_param));
 		}
 		else {
-			return add::param::option::custom(host_ptr(usr), plugin_idx, uuid);
+			return as_generic_idx(add::param::option::custom(host_ptr(usr), plugin_idx, uuid));
 		}
 	};
 	host->fns.add_param_slider_int = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_slider_int(uuid)) {
-			return add::param::slider_int::std(host_ptr(usr), plugin_idx, *std_param);
+			return as_generic_idx(add::param::slider_int::std(host_ptr(usr), plugin_idx, *std_param));
 		}
 		else {
-			return add::param::slider_int::custom(host_ptr(usr), plugin_idx, uuid);
+			return as_generic_idx(add::param::slider_int::custom(host_ptr(usr), plugin_idx, uuid));
 		}
 	};
 	host->fns.add_param_slider_real = [](void* usr, blink_PluginIdx plugin_idx, blink_UUID uuid) {
 		if (const auto std_param = get_std_slider_real(uuid)) {
-			return add::param::slider_real::std(host_ptr(usr), plugin_idx, *std_param);
+			return as_generic_idx(add::param::slider_real::std(host_ptr(usr), plugin_idx, *std_param));
 		}
 		else {
-			return add::param::slider_real::custom(host_ptr(usr), plugin_idx, uuid);
+			return as_generic_idx(add::param::slider_real::custom(host_ptr(usr), plugin_idx, uuid));
 		}
 	};
 	host->fns.add_slider_int = [](void* usr) {
@@ -1612,35 +1612,35 @@ auto init(Host* host) -> void {
 		return add::slider::empty_real(host_ptr(usr));
 	};
 	host->fns.read_param_env_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		const auto env_idx       = read::env(*host_ptr(usr), param_env_idx);
 		return read::default_value(*host_ptr(usr), env_idx);
 	};
 	host->fns.read_param_env_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		return read::env(*host_ptr(usr), param_env_idx);
 	};
 	host->fns.read_param_option_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto type_idx = read::type_idx(*host_ptr(usr), param_global_idx);
 		return read::default_value(*host_ptr(usr), ParamOptionIdx{type_idx});
 	};
 	host->fns.read_param_slider_int_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_slider_idx = ParamSliderIntIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		const auto slider_idx       = read::slider(*host_ptr(usr), param_slider_idx);
 		return read::default_value(*host_ptr(usr), slider_idx);
 	};
 	host->fns.read_param_slider_real_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		const auto slider_idx       = read::slider(*host_ptr(usr), param_slider_idx);
 		return read::default_value(*host_ptr(usr), slider_idx);
 	};
 	host->fns.read_param_slider_real_slider = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		return read::slider(*host_ptr(usr), param_slider_idx);
 	};
@@ -1648,12 +1648,12 @@ auto init(Host* host) -> void {
 		write::add_flags(host_ptr(usr), env_idx, flags);
 	};
 	host->fns.write_param_env_apply_offset_fn = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::apply_offset_fn(host_ptr(usr), param_env_idx, fn);
 	};
 	host->fns.write_param_env_clamp_range = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_Range range) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::clamp_range(host_ptr(usr), param_env_idx, {range});
 	};
@@ -1670,7 +1670,7 @@ auto init(Host* host) -> void {
 		write::default_value(host_ptr(usr), env_idx, {value});
 	};
 	host->fns.write_param_env_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::env(host_ptr(usr), param_env_idx, env_idx);
 	};
@@ -1684,12 +1684,12 @@ auto init(Host* host) -> void {
 		write::min_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
 	host->fns.write_param_env_offset_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::offset_env(host_ptr(usr), param_env_idx, {env_idx});
 	};
 	host->fns.write_param_env_override_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_env_idx    = ParamEnvIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::override_env(host_ptr(usr), param_env_idx, {env_idx});
 	};
@@ -1700,66 +1700,66 @@ auto init(Host* host) -> void {
 		write::value_slider(host_ptr(usr), env_idx, {slider_idx});
 	};
 	host->fns.write_param_add_flags = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int flags) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::add_flags(host_ptr(usr), param_global_idx, flags);
 	};
 	host->fns.write_param_add_subparam = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) {
-		const auto param_global_idx    = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
-		const auto subparam_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, subparam_idx);
+		const auto param_global_idx    = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
+		const auto subparam_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(subparam_idx));
 		write::add_subparam(host_ptr(usr), param_global_idx, {subparam_global_idx});
 	};
 	host->fns.write_param_group = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString group) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::group(host_ptr(usr), param_global_idx, group);
 	};
 	host->fns.write_param_icon = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StdIcon icon) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::icon(host_ptr(usr), param_global_idx, icon);
 	};
 	host->fns.write_param_long_desc = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::long_desc(host_ptr(usr), param_global_idx, name);
 	};
 	host->fns.write_param_manip_delegate = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
-		const auto deleg_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, delegate_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
+		const auto deleg_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(delegate_idx));
 		write::manip_delegate(host_ptr(usr), param_global_idx, {deleg_global_idx});
 	};
 	host->fns.write_param_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::name(host_ptr(usr), param_global_idx, name);
 	};
 	host->fns.write_param_option_add_string = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_TempString string) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_option_idx = ParamOptionIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::add_string(host_ptr(usr), param_option_idx, string);
 	};
 	host->fns.write_param_option_default_value = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, int64_t value) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_option_idx = ParamOptionIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::default_value(host_ptr(usr), param_option_idx, {value});
 	};
 	host->fns.write_param_short_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::short_name(host_ptr(usr), param_global_idx, name);
 	};
 	host->fns.write_param_slider_real_offset_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::offset_env(host_ptr(usr), param_slider_idx, {env_idx});
 	};
 	host->fns.write_param_slider_real_override_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::override_env(host_ptr(usr), param_slider_idx, {env_idx});
 	};
 	host->fns.write_param_slider_real_slider = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_SliderRealIdx sld_idx) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		const auto param_sld_idx    = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
 		write::slider(host_ptr(usr), param_sld_idx, sld_idx);
 	};
 	host->fns.write_param_uuid = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_UUID uuid) {
-		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, param_idx);
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::uuid(host_ptr(usr), param_global_idx, uuid);
 	};
 	host->fns.write_sampler_info = [](void* usr, blink_PluginIdx plugin_idx, blink_SamplerInfo info) {

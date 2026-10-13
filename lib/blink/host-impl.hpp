@@ -172,30 +172,30 @@ auto env_offset(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx;
 auto env_offset(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_EnvIdx;
 auto env_override(const Host& host, ParamEnvIdx param_env_idx) -> blink_EnvIdx;
 auto env_override(const Host& host, ParamSliderRealIdx param_sld_idx) -> blink_EnvIdx;
-auto find_param(const Host& host, blink_PluginIdx plugin, std::string_view uuid_str) -> std::optional<blink_ParamIdx>;
+auto find_param(const Host& host, blink_PluginIdx plugin, std::string_view uuid_str) -> std::optional<ParamGlobalIdx>;
 auto find_plugin(const Host& host, std::string_view uuid_str) -> std::optional<blink_PluginIdx>;
 auto flags(const Host& host, blink_EnvIdx env_idx) -> int;
-auto flags(const Host& host, blink_ParamIdx param_idx) -> int;
+auto flags(const Host& host, ParamGlobalIdx param_idx) -> int;
 auto fns(const Host& host, blink_EnvIdx env_idx) -> blink_EnvFns;
 auto global_to_local(const Host& host, ParamGlobalIdx global_idx) -> ParamLocalIdx;
-auto group_name(const Host& host, blink_ParamIdx param_idx) -> std::string_view;
-auto icon(const Host& host, blink_ParamIdx param_idx) -> blink_StdIcon;
+auto group_name(const Host& host, ParamGlobalIdx param_idx) -> std::string_view;
+auto icon(const Host& host, ParamGlobalIdx param_idx) -> blink_StdIcon;
 auto iface(const Host& host, blink_PluginIdx plugin_idx) -> const PluginInterface&;
 auto info(const Host& host, blink_PluginIdx plugin_idx) -> const blink_PluginInfo&;
-auto local_to_global(const Host& host, blink_PluginIdx plugin_idx, blink_ParamIdx local_idx) -> ParamGlobalIdx;
-auto long_desc(const Host& host, blink_ParamIdx param_idx) -> std::string_view;
-auto manip_delegate(const Host& host, blink_ParamIdx param_idx) -> std::optional<ParamGlobalIdx>;
+auto local_to_global(const Host& host, blink_PluginIdx plugin_idx, ParamLocalIdx local_idx) -> ParamGlobalIdx;
+auto long_desc(const Host& host, ParamGlobalIdx param_idx) -> std::string_view;
+auto manip_delegate(const Host& host, ParamGlobalIdx param_idx) -> std::optional<ParamGlobalIdx>;
 auto max_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_SliderRealIdx>;
 auto min_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_SliderRealIdx>;
-auto name(const Host& host, blink_ParamIdx param_idx) -> std::string_view;
+auto name(const Host& host, ParamGlobalIdx param_idx) -> std::string_view;
 auto name(const Host& host, blink_PluginIdx plugin_idx) -> std::string_view;
-auto plugin(const Host& host, blink_ParamIdx param_idx) -> blink_PluginIdx;
+auto plugin(const Host& host, ParamGlobalIdx param_idx) -> blink_PluginIdx;
 auto plugin_count(const Host& host) -> size_t;
 auto process(Host* host, blink_InstanceIdx instance_idx) -> InstanceProcess&;
 auto type(const Host& host, blink_PluginIdx plugin_idx) -> PluginType;
 auto sampler_baked_waveform_could_be_different(const Host& host, blink_PluginIdx plugin_idx) -> bool;
 auto sampler_requires_sample_analysis(const Host& host, blink_PluginIdx plugin_idx) -> bool;
-auto short_name(const Host& host, blink_ParamIdx param_idx) -> std::string_view;
+auto short_name(const Host& host, ParamGlobalIdx param_idx) -> std::string_view;
 auto slider(const Host& host, ParamSliderIntIdx param_env_idx) -> blink_SliderIntIdx;
 auto slider(const Host& host, ParamSliderRealIdx param_env_idx) -> blink_SliderRealIdx;
 auto step_size_slider(const Host& host, blink_EnvIdx env_idx) -> std::optional<blink_SliderRealIdx>;
@@ -296,7 +296,7 @@ auto speed(Host* host) -> blink_EnvIdx;
 namespace blink::add::param {
 
 struct NewParam {
-	blink_ParamIdx local_idx;
+	ParamLocalIdx local_idx;
 	ParamGlobalIdx global_idx;
 };
 
@@ -307,76 +307,76 @@ auto empty(Host* host, blink_PluginIdx plugin_idx, ParamType type) -> NewParam;
 
 namespace blink::add::param::chord {
 
-auto scale(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto std(Host* host, blink_PluginIdx plugin_idx, StdChord std_chord) -> blink_ParamIdx;
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx;
+auto scale(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto std(Host* host, blink_PluginIdx plugin_idx, StdChord std_chord) -> ParamLocalIdx;
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx;
 
 } // blink::add::param::chord
 
 namespace blink::add::param::env {
 
 auto empty(Host* host) -> ParamEnvIdx;
-auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto formant(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto pan(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto pitch(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto wet(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto std(Host* host, blink_PluginIdx plugin_idx, StdEnv std_env) -> blink_ParamIdx;
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx;
+auto mix(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto amp(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto dry(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto feedback(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto formant(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto pan(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto pitch(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto speed(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto wet(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto std(Host* host, blink_PluginIdx plugin_idx, StdEnv std_env) -> ParamLocalIdx;
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx;
 
 } // blink::add::param::param::env
 
 namespace blink::add::param::option {
 
 auto empty(Host* host) -> ParamOptionIdx;
-auto loop(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_mode(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto reverse_mode(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto reverse_toggle(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto std(Host* host, blink_PluginIdx plugin_idx, StdOption std_option) -> blink_ParamIdx;
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx;
+auto loop(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_mode(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto reverse_mode(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto reverse_toggle(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto std(Host* host, blink_PluginIdx plugin_idx, StdOption std_option) -> ParamLocalIdx;
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx;
 
 } // blink::add::param::option
 
 namespace blink::add::param::slider_int {
 
 auto empty(Host* host) -> ParamSliderIntIdx;
-auto sample_offset(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderInt std_sld) -> blink_ParamIdx;
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx;
+auto sample_offset(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderInt std_sld) -> ParamLocalIdx;
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx;
 
 } // blink::add::param::slider_int
 
 namespace blink::add::param::slider_real {
 
 auto empty(Host* host) -> ParamSliderRealIdx;
-auto mix(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto amp(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto dry(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto feedback(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto formant(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto pan(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto pitch(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto speed(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto wet(Host* host, blink_PluginIdx plugin_idx) -> blink_ParamIdx;
-auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderReal std_sld) -> blink_ParamIdx;
-auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> blink_ParamIdx;
+auto mix(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto amp(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto delay_time(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto dry(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto feedback(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto filter_frequency(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto filter_resonance(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto formant(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_amount(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_color(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto noise_width(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto pan(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto pitch(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto speed(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto wet(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx;
+auto std(Host* host, blink_PluginIdx plugin_idx, StdSliderReal std_sld) -> ParamLocalIdx;
+auto custom(Host* host, blink_PluginIdx plugin_idx, blink_UUID uuid) -> ParamLocalIdx;
 
 } // blink::add::param::slider_real
 

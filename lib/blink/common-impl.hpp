@@ -6,7 +6,10 @@
 
 namespace blink {
 
-[[nodiscard]] auto as_global_idx(blink_ParamIdx v) -> blink::ParamGlobalIdx;
+[[nodiscard]] auto as_global_idx(blink_ParamIdx v) -> ParamGlobalIdx;
+[[nodiscard]] auto as_local_idx(blink_ParamIdx v) -> ParamLocalIdx;
+[[nodiscard]] auto as_generic_idx(ParamGlobalIdx v) -> blink_ParamIdx;
+[[nodiscard]] auto as_generic_idx(ParamLocalIdx v) -> blink_ParamIdx;
 
 } // blink
 

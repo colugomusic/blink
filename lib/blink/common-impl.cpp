@@ -1,9 +1,24 @@
 #include "common-impl.hpp"
+#include <cassert>
 
 namespace blink {
 
 auto as_global_idx(blink_ParamIdx v) -> blink::ParamGlobalIdx {
+	assert (v.value >= 0);
 	return {static_cast<uint32_t>(v.value)};
+}
+
+auto as_local_idx(blink_ParamIdx v) -> blink::ParamLocalIdx {
+	assert (v.value >= 0);
+	return {static_cast<uint32_t>(v.value)};
+}
+
+auto as_generic_idx(ParamGlobalIdx v) -> blink_ParamIdx {
+	return {static_cast<int64_t>(v.value)};
+}
+
+auto as_generic_idx(ParamLocalIdx v) -> blink_ParamIdx {
+	return {static_cast<int64_t>(v.value)};
 }
 
 } // blink
