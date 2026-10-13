@@ -332,10 +332,10 @@ auto group(Host* host, ParamGlobalIdx param_idx, blink_StaticString group) -> vo
 	if (const auto pos = std::find_if(group_info_vec.begin(), group_info_vec.end(), find_group); pos == group_info_vec.end()) {
 		GroupInfo info;
 		info.name = group;
-		info.params.push_back({static_cast<int64_t>(param_idx.value)});
+		info.params.push_back(param_idx);
 		group_info_vec.push_back(info);
 	} else {
-		pos->params.push_back({static_cast<int64_t>(param_idx.value)});
+		pos->params.push_back(param_idx);
 	}
 	host->param.get<ParamStrings>(param_idx.value).group = group;
 }
