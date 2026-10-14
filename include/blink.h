@@ -195,7 +195,8 @@ typedef enum {
 	blink_ParamFlags_ShowButton                 = 1 << 11,
 	blink_ParamFlags_ShowInContextMenu          = 1 << 12,
 	blink_ParamFlags_Varying                    = 1 << 13,
-	blink_ParamFlags_UpdateParamSettings        = 1 << 14, // The host should call blink_get_param_settings and respond accordingly whenever this parameter's value changes.
+	blink_ParamFlags_FrequencyResponseBandParam = 1 << 14, // Should only be shown when the associated band is selected.
+	blink_ParamFlags_UpdateParamSettings        = 1 << 15, // The host should call blink_get_param_settings and respond accordingly whenever this parameter's value changes.
 } blink_ParamFlags;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
