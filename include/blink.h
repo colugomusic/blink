@@ -307,20 +307,12 @@ typedef struct {
 	const blink_ParamIdx* enabled;
 	// Array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally (this is assumed to be the band frequency stored as a value from 0 to 1.)
 	const blink_ParamIdx* frequency;
-	// Optional array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically.
+	// Optional array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically (probably the gain sliders.)
 	const blink_ParamIdx* mb_left_vertical;
-	// Optional array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally.
-	const blink_ParamIdx* mb_right_horizontal;
-	// Optional array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically.
-	const blink_ParamIdx* mb_right_vertical;
-	// Optional array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally while the Ctrl key is held down (or the Comamnd key on macOS.)
+	// Optional array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point horizontally while the Ctrl key is held down (or the Command key on macOS.)
 	const blink_ParamIdx* mb_left_horizontal_ctrl;
-	// Optional array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically while the Ctrl key is held down (or the Comamnd key on macOS.)
+	// Optional array of {band_count} slider-real parameters to adjust when the user left-clicks and drags a point vertically while the Ctrl key is held down (or the Command key on macOS.)
 	const blink_ParamIdx* mb_left_vertical_ctrl;
-	// Optional array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point horizontally while the Ctrl key is held down (or the Comamnd key on macOS.)
-	const blink_ParamIdx* mb_right_horizontal_ctrl;
-	// Optional array of {band_count} slider-real parameters to adjust when the user right-clicks and drags a point vertically while the Ctrl key is held down (or the Comamnd key on macOS.)
-	const blink_ParamIdx* mb_right_vertical_ctrl;
 	// Optional array of {band_count} parameter lists for the extra per-band parameters. Blockhead will generate extra controls to be shown when the band is selected.
 	const blink_ParamIdxArray* extra;
 } blink_FrequencyResponseInfo;
