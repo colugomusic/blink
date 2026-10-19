@@ -91,25 +91,13 @@ inline float filter_hz_to_linear(float hz) {
 	return tweak::math::inverse_lerp(-8.513f, 135.076f, frequency_to_pitch(hz));
 }
 
-inline double linear_to_db(double linear)
-{
-	return std::log(linear) * 8.6858896380650365530225783783321;
-}
+inline double linear_to_db(double linear) { return std::log(linear) * 8.6858896380650365530225783783321; }
+inline float linear_to_db(float linear)   { return std::log(linear) * 8.6858896380650365530225783783321f; }
+inline double db_to_linear(double db)     { return std::exp(db * 0.11512925464970228420089957273422); }
+inline float db_to_linear(float db)       { return std::exp(db * 0.11512925464970228420089957273422f); }
 
-inline float linear_to_db(float linear)
-{
-	return std::log(linear) * 8.6858896380650365530225783783321f;
-}
-
-inline double db_to_linear(double db)
-{
-	return std::exp(db * 0.11512925464970228420089957273422);
-}
-
-inline float db_to_linear(float db)
-{
-	return std::exp(db * 0.11512925464970228420089957273422f);
-}
+template <typename T> auto db_to_linear(T db) -> T     { return exp(db * T(0.11512925464970228420089957273422)); }
+template <typename T> auto linear_to_db(T linear) -> T { return log(linear) * T(8.6858896380650365530225783783321); }
 
 template <class T>
 constexpr inline T linear_to_speed(T linear)
