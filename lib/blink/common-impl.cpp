@@ -55,6 +55,19 @@ auto empty(const blink_HostFns& host) -> blink_EnvIdx {
 	return host.add_env(host.usr);
 }
 
+auto filter_frequency(const blink_HostFns& host, float default_value) -> blink_EnvIdx {
+	const auto idx = add::env::empty(host);
+	auto fns = blink_EnvFns{
+		.to_string = tweak::filter_frequency::to_string,
+	};
+	host.write_env_default_value(host.usr, idx, default_value);
+	host.write_env_default_max(host.usr, idx, 1.0f);
+	host.write_env_default_min(host.usr, idx, 0.0f);
+	host.write_env_fns(host.usr, idx, fns);
+	host.write_env_value_slider(host.usr, idx, add::slider::filter_frequency(host, default_value));
+	return idx;
+}
+
 auto percentage_bipolar(const blink_HostFns& host) -> blink_EnvIdx {
 	const auto idx = add::env::empty(host);
 	host.write_env_default_max(host.usr, idx, 1.0f);
