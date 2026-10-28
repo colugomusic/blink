@@ -132,8 +132,10 @@ auto slider(const Plugin& plugin, blink_ParamIdx param_idx, blink_SliderRealIdx 
 auto strings(const Plugin& plugin, blink_ParamIdx option_idx, StringVec strings) -> void;
 auto env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
 auto clamp_range(const Plugin& plugin, blink_ParamIdx param_idx, blink_Range range) -> void;
-auto offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
-auto override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto env_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto env_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto slider_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto slider_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
 auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> void;
 
 } // blink::write::param

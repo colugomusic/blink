@@ -172,12 +172,20 @@ auto clamp_range(const Plugin& plugin, blink_ParamIdx param_idx, blink_Range ran
 	plugin.host.write_param_env_clamp_range(plugin.host.usr, plugin.index, param_idx, range);
 }
 
-auto offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+auto env_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
 	plugin.host.write_param_env_offset_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }
 
-auto override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+auto env_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
 	plugin.host.write_param_env_override_env(plugin.host.usr, plugin.index, param_idx, env_idx);
+}
+
+auto slider_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+	plugin.host.write_param_slider_real_offset_env(plugin.host.usr, plugin.index, param_idx, env_idx);
+}
+
+auto slider_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void {
+	plugin.host.write_param_slider_real_override_env(plugin.host.usr, plugin.index, param_idx, env_idx);
 }
 
 auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> void {
