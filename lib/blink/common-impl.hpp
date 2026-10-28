@@ -49,6 +49,7 @@ auto percentage(const blink_HostFns& host) -> blink_SliderRealIdx {
 namespace blink::add::env {
 
 [[nodiscard]] auto empty(const blink_HostFns& host) -> blink_EnvIdx;
+[[nodiscard]] auto filter_frequency(const blink_HostFns& host, float default_value) -> blink_EnvIdx;
 [[nodiscard]] auto percentage_bipolar(const blink_HostFns& host) -> blink_EnvIdx;
 
 template <int Min, int Max, int Resolution, int EditPrecision> [[nodiscard]] inline
