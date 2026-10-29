@@ -279,6 +279,10 @@ auto apply_offset_fn(Host* host, ParamEnvIdx param_env_idx, blink_ApplyOffsetFn 
 	host->param_env.set(param_env_idx.value, ApplyOffsetFn{fn});
 }
 
+auto apply_offset_fn(Host* host, ParamSliderRealIdx param_sld_idx, blink_ApplyOffsetFn fn) -> void {
+	host->param_slider_real.set(param_sld_idx.value, ApplyOffsetFn{fn});
+}
+
 auto clamp_range(Host* host, ParamEnvIdx param_env_idx, ClampRange value) -> void {
 	host->param_env.set(param_env_idx.value, value);
 }
@@ -1753,6 +1757,11 @@ auto init(Host* host) -> void {
 	host->fns.write_param_short_name = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_StaticString name) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
 		write::short_name(host_ptr(usr), param_global_idx, name);
+	};
+	host->fns.write_param_slider_real_apply_offset_fn = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) {
+		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));
+		const auto param_slider_idx = ParamSliderRealIdx{read::type_idx(*host_ptr(usr), param_global_idx)};
+		write::apply_offset_fn(host_ptr(usr), param_slider_idx, fn);
 	};
 	host->fns.write_param_slider_real_offset_env = [](void* usr, blink_PluginIdx plugin_idx, blink_ParamIdx param_idx, blink_EnvIdx env_idx) {
 		const auto param_global_idx = read::local_to_global(*host_ptr(usr), plugin_idx, as_local_idx(param_idx));

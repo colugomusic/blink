@@ -218,6 +218,7 @@ auto add_flags(Host* host, ParamGlobalIdx param_idx, int flags) -> void;
 auto add_string(Host* host, ParamOptionIdx option_idx, blink_TempString string) -> void;
 auto add_subparam(Host* host, ParamGlobalIdx param_idx, ParamGlobalIdx subparam_idx) -> void;
 auto apply_offset_fn(Host* host, ParamEnvIdx param_env_idx, blink_ApplyOffsetFn fn) -> void;
+auto apply_offset_fn(Host* host, ParamSliderRealIdx param_sld_idx, blink_ApplyOffsetFn fn) -> void;
 auto clamp_range(Host* host, ParamEnvIdx param_env_idx, ClampRange value) -> void;
 auto clamp_range(Host* host, ParamSliderRealIdx param_sld_idx, ClampRange value) -> void;
 auto default_max(Host* host, blink_EnvIdx env_idx, DefaultMax<float> value) -> void;

@@ -120,22 +120,23 @@ auto tweaker(const Plugin& plugin, blink_SliderRealIdx sld_idx, blink_TweakerRea
 namespace blink::write::param {
 
 auto add_flags(const Plugin& plugin, blink_ParamIdx param_idx, int flags) -> void;
-auto apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void;
-auto manip_delegate(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) -> void;
 auto add_subparam(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx subparam_idx) -> void;
-auto group(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString group_name) -> void;
-auto long_desc(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString long_desc) -> void;
-auto option_default_value(const Plugin& plugin, blink_ParamIdx option_idx, int64_t value) -> void;
-auto name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void;
-auto short_name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void;
-auto slider(const Plugin& plugin, blink_ParamIdx param_idx, blink_SliderRealIdx sld_idx) -> void;
-auto strings(const Plugin& plugin, blink_ParamIdx option_idx, StringVec strings) -> void;
-auto env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
 auto clamp_range(const Plugin& plugin, blink_ParamIdx param_idx, blink_Range range) -> void;
+auto env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto env_apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void;
 auto env_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
 auto env_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto group(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString group_name) -> void;
+auto long_desc(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString long_desc) -> void;
+auto manip_delegate(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) -> void;
+auto name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void;
+auto option_default_value(const Plugin& plugin, blink_ParamIdx option_idx, int64_t value) -> void;
+auto short_name(const Plugin& plugin, blink_ParamIdx param_idx, blink_StaticString name) -> void;
+auto slider(const Plugin& plugin, blink_ParamIdx param_idx, blink_SliderRealIdx sld_idx) -> void;
+auto slider_apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void;
 auto slider_offset_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
 auto slider_override_env(const Plugin& plugin, blink_ParamIdx param_idx, blink_EnvIdx env_idx) -> void;
+auto strings(const Plugin& plugin, blink_ParamIdx option_idx, StringVec strings) -> void;
 auto uuid(const Plugin& plugin, blink_ParamIdx param_idx, blink_UUID uuid) -> void;
 
 } // blink::write::param

@@ -122,8 +122,12 @@ auto add_flags(const Plugin& plugin, blink_ParamIdx param_idx, int flags) -> voi
 	plugin.host.write_param_add_flags(plugin.host.usr, plugin.index, param_idx, flags);
 }
 
-auto apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void {
+auto env_apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void {
 	plugin.host.write_param_env_apply_offset_fn(plugin.host.usr, plugin.index, param_idx, fn);
+}
+
+auto slider_apply_offset_fn(const Plugin& plugin, blink_ParamIdx param_idx, blink_ApplyOffsetFn fn) -> void {
+	plugin.host.write_param_slider_real_apply_offset_fn(plugin.host.usr, plugin.index, param_idx, fn);
 }
 
 auto manip_delegate(const Plugin& plugin, blink_ParamIdx param_idx, blink_ParamIdx delegate_idx) -> void {
