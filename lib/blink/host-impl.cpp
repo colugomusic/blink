@@ -479,17 +479,11 @@ auto empty_real(Host* host) -> blink_SliderRealIdx {
 }
 
 auto amp(Host* host) -> blink_SliderRealIdx {
-	const auto idx = add::slider::empty_real(host);
-	write::tweaker(host, idx, {tweak::amp::tweaker()});
-	write::default_value(host, idx, {1.0f});
-	return idx;
+	return amp(host->fns);
 }
 
 auto amp_offset(Host* host, float default_value) -> blink_SliderRealIdx {
-	const auto idx = add::slider::empty_real(host);
-	write::tweaker(host, idx, {tweak::amp::tweaker()});
-	write::default_value(host, idx, {default_value});
-	return idx;
+	return amp_offset(host->fns, default_value);
 }
 
 auto delay_time(Host* host) -> blink_SliderRealIdx {
@@ -500,10 +494,7 @@ auto delay_time(Host* host) -> blink_SliderRealIdx {
 }
 
 auto filter_frequency(Host* host) -> blink_SliderRealIdx {
-	const auto idx = add::slider::empty_real(host);
-	write::default_value(host, idx, {tweak::filter_frequency::DEFAULT_VALUE});
-	write::tweaker(host, idx, {tweak::filter_frequency::tweaker()});
-	return idx;
+	return filter_frequency(host->fns, tweak::filter_frequency::DEFAULT_VALUE);
 }
 
 auto pan(Host* host) -> blink_SliderRealIdx {
@@ -561,22 +552,7 @@ auto amp(Host* host) -> blink_EnvIdx {
 }
 
 auto amp_offset(Host* host) -> blink_EnvIdx {
-	const auto idx = add::env::empty(host);
-	EnvFns fns;
-	fns.value.get_grid_line = [](int index, float* out) -> blink_Bool {
-		*out = math::convert::linear_to_speed(float(index));
-		return {true};
-	};
-	fns.value.stepify   = tweak::amp::stepify;
-	fns.value.to_string = tweak::amp::to_string;
-	write::default_max(host, idx, {2.0f});
-	write::default_min(host, idx, {0.0f});
-	write::default_value(host, idx, {1.0f});
-	write::fns(host, idx, fns);
-	write::max_slider(host, idx, {add::slider::amp_offset(host, 2.0f)});
-	write::min_slider(host, idx, {add::slider::amp_offset(host, 0.0f)});
-	write::value_slider(host, idx, {add::slider::amp(host)});
-	return idx;
+	return amp_offset(host->fns, 1.0f);
 }
 
 auto delay_time(Host* host) -> blink_EnvIdx {
@@ -600,15 +576,7 @@ auto feedback(Host* host) -> blink_EnvIdx {
 }
 
 auto filter_frequency(Host* host) -> blink_EnvIdx {
-	const auto idx = add::env::empty(host);
-	EnvFns fns;
-	fns.value.to_string = tweak::filter_frequency::to_string;
-	write::default_max(host, idx, {1.0f});
-	write::default_min(host, idx, {0.0f});
-	write::default_value(host, idx, {tweak::filter_frequency::DEFAULT_VALUE});
-	write::value_slider(host, idx, {add::slider::filter_frequency(host)});
-	write::fns(host, idx, fns);
-	return idx;
+	return blink::add::env::filter_frequency(host->fns, tweak::filter_frequency::DEFAULT_VALUE);
 }
 
 auto formant(Host* host) -> blink_EnvIdx {

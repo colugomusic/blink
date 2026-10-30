@@ -17,6 +17,8 @@ namespace blink::add::slider {
 
 [[nodiscard]] auto empty_int(const blink_HostFns& host) -> blink_SliderIntIdx;
 [[nodiscard]] auto empty_real(const blink_HostFns& host) -> blink_SliderRealIdx;
+[[nodiscard]] auto amp(const blink_HostFns& host) -> blink_SliderRealIdx;
+[[nodiscard]] auto amp_offset(const blink_HostFns& host, float default_value) -> blink_SliderRealIdx;
 [[nodiscard]] auto filter_frequency(const blink_HostFns& host, float default_value) -> blink_SliderRealIdx;
 [[nodiscard]] auto percentage_bipolar(const blink_HostFns& host) -> blink_SliderRealIdx;
 
@@ -49,6 +51,7 @@ auto percentage(const blink_HostFns& host) -> blink_SliderRealIdx {
 namespace blink::add::env {
 
 [[nodiscard]] auto empty(const blink_HostFns& host) -> blink_EnvIdx;
+[[nodiscard]] auto amp_offset(const blink_HostFns& host, float default_value) -> blink_EnvIdx;
 [[nodiscard]] auto filter_frequency(const blink_HostFns& host, float default_value) -> blink_EnvIdx;
 [[nodiscard]] auto percentage_bipolar(const blink_HostFns& host) -> blink_EnvIdx;
 
