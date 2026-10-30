@@ -485,6 +485,13 @@ auto amp(Host* host) -> blink_SliderRealIdx {
 	return idx;
 }
 
+auto amp_offset(Host* host, float default_value) -> blink_SliderRealIdx {
+	const auto idx = add::slider::empty_real(host);
+	write::tweaker(host, idx, {tweak::amp::tweaker()});
+	write::default_value(host, idx, {default_value});
+	return idx;
+}
+
 auto delay_time(Host* host) -> blink_SliderRealIdx {
 	const auto idx = add::slider::empty_real(host);
 	write::default_value(host, idx, {math::convert::delay_time_ms_to_linear(100.0f)});
@@ -549,6 +556,24 @@ auto amp(Host* host) -> blink_EnvIdx {
 	write::default_value(host, idx, {1.0f});
 	write::fns(host, idx, fns);
 	write::max_slider(host, idx, {add::slider::amp(host)});
+	write::value_slider(host, idx, {add::slider::amp(host)});
+	return idx;
+}
+
+auto amp_offset(Host* host) -> blink_EnvIdx {
+	const auto idx = add::env::empty(host);
+	EnvFns fns;
+	fns.value.get_grid_line = [](int index, float* out) -> blink_Bool {
+		*out = math::convert::linear_to_speed(float(index));
+		return {true};
+	};
+	fns.value.stepify   = tweak::amp::stepify;
+	fns.value.to_string = tweak::amp::to_string;
+	write::default_max(host, idx, {2.0f});
+	write::default_min(host, idx, {0.0f});
+	write::default_value(host, idx, {1.0f});
+	write::fns(host, idx, fns);
+	write::max_slider(host, idx, {add::slider::amp_offset(host, 2.0f)});
 	write::value_slider(host, idx, {add::slider::amp(host)});
 	return idx;
 }
