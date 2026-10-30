@@ -574,6 +574,7 @@ auto amp_offset(Host* host) -> blink_EnvIdx {
 	write::default_value(host, idx, {1.0f});
 	write::fns(host, idx, fns);
 	write::max_slider(host, idx, {add::slider::amp_offset(host, 2.0f)});
+	write::min_slider(host, idx, {add::slider::amp_offset(host, 0.0f)});
 	write::value_slider(host, idx, {add::slider::amp(host)});
 	return idx;
 }
