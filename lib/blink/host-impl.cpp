@@ -777,7 +777,7 @@ auto amp(Host* host, blink_PluginIdx plugin_idx) -> ParamLocalIdx {
 	write::add_flags(host, param.global_idx, flags);
 	write::apply_offset_fn(host, param_env_idx, apply_offset_fn);
 	write::env(host, param_env_idx, add::env::amp(host));
-	write::offset_env(host, param_env_idx, {add::env::amp(host)});
+	write::offset_env(host, param_env_idx, {add::env::amp_offset(host)});
 	write::override_env(host, param_env_idx, {add::env::amp(host)});
 	return param.local_idx;
 }
