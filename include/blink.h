@@ -241,6 +241,9 @@ typedef struct {
 	// perspective this just means warp data will be passed in to process().
 	// It is up to the plugin to interpret this data.
 	blink_Bool enable_warp_markers; 
+	// True if Blockhead should show the spectral analysis of the baked block
+	// by default instead of the audio waveform.
+	blink_Bool spectral;
 } blink_PluginInfo;
 
 typedef blink_Bool (*blink_GetGridLine)(int index, float* out);
