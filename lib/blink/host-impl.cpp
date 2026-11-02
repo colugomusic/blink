@@ -1384,7 +1384,6 @@ auto terminate(const Host& host, blink_PluginIdx plugin_idx) -> blink_Error {
 	return plugin.terminate();
 }
 
-[[nodiscard]] static
 auto get_plugins_of_type(const Host& host, PluginType type) -> std::vector<blink_PluginIdx> {
 	std::vector<blink_PluginIdx> out;
 	size_t index = 0;
